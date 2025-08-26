@@ -729,7 +729,7 @@ class NativeTensorRTInferenceEngine:
         """Destructor to ensure cleanup"""
         try:
             self.cleanup()
-    except Exception:
+        except Exception:
             pass  # Ignore errors during destruction
 
 

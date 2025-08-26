@@ -126,7 +126,7 @@ class SimpleNucleoidImplementation:
             # Simple evaluation (be careful in production!)
             result = eval(expression)
             return result
-    except Exception:
+        except Exception:
             return None
     
     def _evaluate_boolean(self, statement):
@@ -142,7 +142,7 @@ class SimpleNucleoidImplementation:
             # Evaluate the boolean expression
             result = eval(statement)
             return result
-    except Exception:
+        except Exception:
             return False
     
     def run(self, statement):

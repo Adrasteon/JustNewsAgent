@@ -260,7 +260,7 @@ class NewsReaderV2Engine:
         """Proper cleanup when engine is destroyed"""
         try:
             self.cleanup_memory()
-    except Exception:
+        except Exception:
             pass  # Ignore errors during cleanup
     
     def _setup_device(self) -> torch.device:
