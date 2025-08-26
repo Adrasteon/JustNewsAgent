@@ -1,0 +1,1177 @@
+[
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--distilbert-base-uncased/snapshots/12040accade4e8a0f71eabdb258fecc2e7e948be/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en tags: - exbert license: apache-2.0 datasets: - bookcorpus - wikipedia --- # DistilBERT base model (uncased) This model is a distilled version of the [BERT base model](https://huggingface.co/bert-base-uncased). It was introduced in [this paper](https://arxiv.org/abs/1910.01108). The code for the distillation process can be found [here](https://github.com/huggingface/transformers/tr"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--distilbert-base-uncased/snapshots/12040accade4e8a0f71eabdb258fecc2e7e948be/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--facebook--bart-large-cnn/snapshots/37f520fa929c961707657b28798b30c003dd100b/README.md",
+    "status": "CUR",
+    "snippet": "--- language: - en pipeline_tag: summarization license: mit thumbnail: https://huggingface.co/front/thumbnails/facebook.png datasets: - cnn_dailymail model-index: - name: facebook/bart-large-cnn results: - task: type: summarization name: Summarization dataset: name: cnn_dailymail type: cnn_dailymail config: 3.0.0 split: train metrics: - name: ROUGE-1 type: rouge value: 42.9486 verified: true - nam"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--facebook--bart-large-cnn/snapshots/37f520fa929c961707657b28798b30c003dd100b/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--google--flan-t5-base/snapshots/7bcac572ce56db69c1ea7c8af255c5d7c9672fc2/README.md",
+    "status": "CUR",
+    "snippet": "--- language: - en - fr - ro - de - multilingual tags: - text2text-generation widget: - text: \"Translate to German: My name is Arthur\" example_title: \"Translation\" - text: \"Please answer to the following question. Who is going to be the next Ballon d'or?\" example_title: \"Question Answering\" - text: \"Q: Can Geoffrey Hinton have a conversation with George Washington? Give the rationale before answer"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--microsoft--DialoGPT (deprecated)-medium/snapshots/7b40bb0f92c45fefa957d088000d8648e5c7fa33/README.md",
+    "status": "CUR",
+    "snippet": "--- thumbnail: https://huggingface.co/front/thumbnails/dialogpt.png tags: - conversational license: mit --- ## A State-of-the-Art Large-scale Pretrained Response generation model (DialoGPT (deprecated)) DialoGPT (deprecated) is a SOTA large-scale pretrained dialogue response generation model for multiturn conversations. The [human evaluation results](https://github.com/dreasysnail/Dialogpt_dev#human-evaluation) indicate th"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--microsoft--DialoGPT (deprecated)-medium/snapshots/7b40bb0f92c45fefa957d088000d8648e5c7fa33/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en tags: - exbert license: mit datasets: - bookcorpus - wikipedia --- # RoBERTa base model Pretrained model on English language using a masked language modeling (MLM) objective. It was introduced in [this paper](https://arxiv.org/abs/1907.11692) and first released in [this repository](https://github.com/pytorch/fairseq/tree/master/examples/roberta). This model is case-sensitive: it m"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/dict.txt",
+    "status": "CUR",
+    "snippet": "13 850314647 262 800385005 11 800251374 284 432911125 290 394899794 286 386139013 257 357878752 287 311196488 12 215156821 329 155236946 326 154060431 319 147178919 318 142591644 447 130810923 338 116498242 351 114784681 383 108664122 373 100357189 366 93880741 379 93284459 340 88803471 355 85749070 531 85009762 247 82642284 307 77095226 82 76381845 416 73380803 422 71911149 389 68628918 423 67243"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--roberta-base/snapshots/e2da8e2f811d1448a5b465c236feacd80ffbac7b/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.cache/transformers/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.github/ISSUE_TEMPLATE/p0_hardening.md",
+    "status": "CUR",
+    "snippet": "--- name: P0 Hardening \u2014 Reliability & Safety about: Track P0 tasks to harden MCP Bus, health contracts, and observability labels: [P0, reliability, MCP, observability] assignees: [] --- ## Summary Hardening tasks for production reliability and safety. Derived from System_Assessment_2025-08-09. ## Tasks - [ ] MCP Bus resilience - [ ] Add request timeouts for `/call` (client + server) - [ ] Impleme"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.github/ISSUE_TEMPLATE/p1_performance_scalability.md",
+    "status": "CUR",
+    "snippet": "--- name: P1 Performance & Scalability \u2014 GPU, TensorRT, Pipeline about: Track P1 tasks to improve throughput, latency, GPU efficiency, and scaling labels: [P1, performance, scalability, GPU, TensorRT] assignees: [] --- ## Summary Performance and scalability improvements across GPU execution, TensorRT governance, throughput pipeline, caching/deduplication, and vector search. Derived from System_Ass"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.github/copilot-instructions.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4 - GitHub Copilot Instructions ## Project Overview JustNews V4 is a production-ready multi-agent news analysis system featuring GPU-accelerated processing, continuous learning, and distributed architecture. The system processes news content through specialized AI agents that communicate via MCP (Model Context Protocol) for collaborative analysis, fact-checking, and synthesis. **Curren"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/.pytest_cache/README.md",
+    "status": "CUR",
+    "snippet": "# pytest cache directory # This directory contains data from the pytest's cache plugin, which provides the `--lf` and `--ff` options, as well as the `cache` fixture. **Do not** commit this to version control. See [the docs](https://docs.pytest.org/en/stable/how-to/cache.html) for more information."
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/CHANGELOG.md",
+    "status": "CUR",
+    "snippet": "# Changelog All notable changes to this project will be documented in this file. ## [V2.19.0] - 2025-08-13 - **\ud83d\udea8 MAJOR BREAKTHROUGH: GPU CRASH ROOT CAUSE RESOLVED** ### \ud83c\udfc6 **Critical Discovery & Resolution** - **\u2705 Root Cause Identified**: PC crashes were **NOT GPU memory exhaustion** but incorrect model configuration - **\u2705 Quantization Fix**: Replaced `torch_dtype=torch.int8` with proper `BitsAndBy"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/README.md",
+    "status": "CUR",
+    "snippet": "# JustNewsAgentic V4 \ud83e\udd16 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/) [![CUDA](https://img.shields.io/badge/CUDA-12.1+-green.svg)](https://developer.nvidia.com/cuda-toolkit) [![TensorRT](https://img.shields.io/badge/TensorRT-Produc"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/TESTING.md",
+    "status": "CUR",
+    "snippet": "# Testing guide This guide explains how to set up a development environment and run tests locally for the JustNewsAgentic project. ## 1) Create the development environment (recommended) Using conda (preferred): ```bash # Create the conda environment and install core dev deps conda env create -f environment-dev.yml # Activate the new environment conda activate justnews-dev # Install additional dev "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/NATIVE_AGENT_README.md",
+    "status": "CUR",
+    "snippet": "# Native TensorRT Analyst Agent - Quick Start Guide ## \ud83c\udfc6 **Production Status: OPERATIONAL** The JustNews V4 Analyst Agent now features **native TensorRT implementation** with validated performance: - **Combined Throughput**: **406.9 articles/sec** (2.69x improvement) - **Memory Efficiency**: 2.3GB GPU utilization (65% reduction) - **System Stability**: Zero crashes, zero warnings - **Production Re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/NATIVE_TENSORRT_README.md",
+    "status": "CUR",
+    "snippet": "# Native TensorRT Analyst Agent - Production Ready ## \ud83c\udfc6 **Production Status: VALIDATED & DEPLOYED** The JustNews V4 Analyst Agent now features **native TensorRT implementation** with production-validated performance achieving **2.69x improvement** over baseline HuggingFace transformers. ### **Production Performance Results** - **Combined Throughput**: **406.9 articles/sec** (2.69x improvement) - *"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/requirements.txt",
+    "status": "CUR",
+    "snippet": "fastapi>=0.100.0 transformers>=4.30.0,<5.0.0 uvicorn[standard]>=0.22.0 torch>=2.0.0 spacy>=3.6.0,<4.0.0 numpy>=1.24.0,<2.0.0 scipy>=1.10.0,<2.0.0 pydantic>=2.0.0,<3.0.0 requests>=2.31.0"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/requirements_analyst.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi transformers>=4.36.0 uvicorn torch torchvision accelerate requests pydantic safetensors sentencepiece protobuf"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/requirements_v4.txt",
+    "status": "CUR",
+    "snippet": "# V4 RTX-Enhanced Requirements for Analyst Agent # Includes NVIDIA RTX AI Toolkit and TensorRT-LLM dependencies # Core FastAPI and Web Framework fastapi>=0.104.1 uvicorn[standard]>=0.24.0 pydantic>=2.5.0 # HTTP and Networking requests>=2.31.0 httpx>=0.25.2 # Machine Learning Core torch>=2.1.0 transformers>=4.36.0 tokenizers>=0.15.0 # NVIDIA RTX AI Toolkit (Phase 1 - Preparation) # Note: AIM SDK re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/analyst/requirements_v4_simple.txt",
+    "status": "CUR",
+    "snippet": "# V4 RTX-Enhanced Requirements for Analyst Agent - Simplified Working Version # Focus on proven PyTorch GPU acceleration that already exceeds V4 performance targets # Core FastAPI and Web Framework fastapi>=0.104.1 uvicorn[standard]>=0.24.0 pydantic>=2.5.0 # HTTP and Networking requests>=2.31.0 httpx>=0.25.2 # Machine Learning Core (already installed in previous layer) # torch>=2.1.0 # Installed w"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/chief_editor/requirements.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi requests uvicorn pydantic"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/common/models/all-MiniLM-L6-v2/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/common/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/common/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/common/models/all-MiniLM-L6-v2/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/critic/requirements.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi>=0.100.0 transformers>=4.30.0 torch>=2.0.0 uvicorn[standard]>=0.22.0 pydantic>=2.0.0 requests>=2.31.0 numpy>=1.24.0 scipy>=1.10.0"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/dashboard/requirements.txt",
+    "status": "CUR",
+    "snippet": "fastapi requests uvicorn"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/fact_checker/requirements.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi transformers torch requests uvicorn pydantic sentence-transformers scikit-learn numpy"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/memory/requirements.txt",
+    "status": "CUR",
+    "snippet": "fastapi psycopg2-binary uvicorn requests sentence-transformers"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/IMPLEMENTATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/LIFESPAN_MIGRATION.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/README.md",
+    "status": "CUR",
+    "snippet": "# NewsReader Agent - Production-Validated Configuration ## \ud83d\udea8 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025** **MAJOR BREAKTHROUGH**: All PC crashes resolved through proper configuration identification and correction. ### **Root Cause Analysis** The crashes were **NOT caused by GPU memory exhaustion** but by: 1. **Incorrect quantization method**: Using `torch_dtype=torch.int8` instead o"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/documentation/IMPLEMENTATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# LLaVA NewsReader Agent Implementation Summary ## \u2705 Completed Implementation ### 1. Environment Migration - **Removed** separate `newsreader-env/` virtual environment - **Migrated** to `rapids-25.06` environment for consistency with main JustNews V4 project - **Verified** all dependencies are available in rapids environment ### 2. Model Replacement - **Replaced** Qwen-VL (9.6GB+) with LLaVA-v1.6-"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/documentation/INT8_QUANTIZATION_RATIONALE.md",
+    "status": "CUR",
+    "snippet": "# Why INT8 Quantization Should Be Implemented Immediately ## You're Absolutely Right! Here's Why: ### \ud83c\udfaf **Immediate Benefits of INT8 Quantization** #### **1. Eliminates Complex Architecture** ``` \u274c COMPLEX: On-demand loading with dynamic memory management \u2705 SIMPLE: Always-loaded quantized model with predictable memory usage ``` #### **2. Memory Math is Clear** ``` Current System State: \u251c\u2500\u2500 All Age"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/documentation/LIFESPAN_MIGRATION.md",
+    "status": "CUR",
+    "snippet": "## FastAPI Lifespan Migration Summary ### Changes Made #### 1. Core Agent (`llava_newsreader_agent.py`) **Before (Deprecated)**: ```python @app.on_event(\"startup\") async def startup_event(): global newsreader_agent newsreader_agent = LlavaNewsReaderAgent() ``` **After (Modern Lifespan)**: ```python from contextlib import asynccontextmanager @asynccontextmanager async def lifespan(app: FastAPI): # "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/model_cache/models--openai--clip-vit-large-patch14/snapshots/32bd64288804d66eefd0ccbe215aa642df71cc41/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 i n t h a n r e a r e r th e</w> in g</w> o u o n s t o r e n o n</w> a l a t e r</w> i t i n</w> t o</w> r o i s</w> l e i c a t</w> an d</w> e d</w> o f</w> c h o r</w> e s</w> i l e l s t</w> a c o m a m l o a n</w> a y</w> s h r i l i t i f or</w> n e \u00f0 \u0141 r a h a d e o l v e</w> s i u r a l</w> s e ' s</w> u n d i b e l a w h o o d ay</w> e n</w> m a n o l e</w> t o ou r</w> i r "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/newsreader/requirements.txt",
+    "status": "CUR",
+    "snippet": "# NewsReader V2 Agent Requirements # Multi-Modal Content Processing Service # Core Framework fastapi>=0.100.0 uvicorn>=0.23.0 pydantic>=2.0.0 # V2 Multi-Modal AI Models torch>=2.0.0 transformers>=4.35.0 sentence-transformers>=2.2.0 accelerate>=0.26.0 # Computer Vision & OCR detectron2>=0.6.0 pillow>=8.0.0 opencv-python>=4.8.0 ## easyocr and layoutparser are deprecated and not required for NewsRead"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md",
+    "status": "CUR",
+    "snippet": "# Contributor Covenant Code of Conduct ## Our Pledge We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, r"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/CONTRIBUTING.md",
+    "status": "CUR",
+    "snippet": "# Contributing Thanks to declarative programming, we have a brand-new approach to data and logic. As we are still discovering what we can do with this powerful programming model, please join us with any types of contribution! ## Declarative Runtime Environment Nucleoid is a declarative runtime environment that applies declarative programming at the runtime as rerendering JavaScript statements and "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/README.md",
+    "status": "CUR",
+    "snippet": "<h1 align=\"center\">Nucleoid</h1> <p align=\"center\"> Neuro-Symbolic AI with Knowledge Graph <br/> Reasoning Engine </p> <p align=\"center\"> <a href=\"https://www.apache.org/licenses/LICENSE-2.0\"><img src=\"https://img.shields.io/badge/Apache-2.0-yellow?style=for-the-badge&logo=apache\" alt=\"License\" /></a> <a href=\"https://www.npmjs.com/package/nucleoidai\"><img src=\"https://img.shields.io/badge/NPM-red"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/arc/README.md",
+    "status": "CUR",
+    "snippet": "# nuc-arc ## ARC Benchmark The ARC benchmark provides a dataset and evaluation benchmark designed to test the reasoning abilities of AI models. The Abstraction and Reasoning Corpus (ARC) benchmark, introduced by Fran\u00e7ois Chollet, tests an AI's ability to demonstrate general intelligence rather than task-specific performance. Unlike traditional benchmarks that focus on training models on large, fix"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/arc.md",
+    "status": "CUR",
+    "snippet": "# ARC ## Problem Structure input_matrix: A rectangular, 2D array in JSON format. It contains numbers (1-9) representing objects, with 0 as empty space. output_matrix: The result after applying declarative logic to the input_matrix, also a rectangular, 2D JSON array. input_matrix and output_matrix are representations of the problem's initial and final states. ## Object Definitions Numbers from 1-9 "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/nucleoid.md",
+    "status": "CUR",
+    "snippet": "# Nucleoid Nucleoid extends JavaScript syntax for declarative (logic) programming. Nucleoid has two modes; declarative and imperative. Imperative mode of Nucleoid is same as JavaScript. nuc is programming language of Nucleoid. It is recommended to use geometry glossary for variable names. Variables name follows Python naming conventions. ## Contextuality Nucleoid is a contextual. So, once class or"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/preload_rules.txt",
+    "status": "CUR",
+    "snippet": "# Reasoning Agent Preload Rules # This file contains rules and facts that are loaded on startup # Format: RULE:<rule> or FACT:<json_fact> # Source credibility rules RULE:if source_type == 'government' then credibility = 0.9 RULE:if source_type == 'academic' then credibility = 0.8 RULE:if source_type == 'news_agency' then credibility = 0.7 RULE:if source_type == 'mainstream_media' then credibility "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/reasoning/requirements.txt",
+    "status": "CUR",
+    "snippet": "fastapi>=0.104.0 uvicorn>=0.24.0 pydantic>=2.0.0 networkx>=3.0 requests>=2.31.0"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/scout/README.md",
+    "status": "CUR",
+    "snippet": "# Scout Agent V2 - Next-Generation AI-First Content Analysis System ## \ud83c\udfaf **Agent Overview** The Scout Agent V2 represents a **complete AI-first architecture overhaul**, featuring **5 specialized AI models** for comprehensive content analysis. This next-generation system achieves production-ready performance with zero warnings and robust GPU acceleration, moving beyond heuristic approaches to pure "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/scout/requirements.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi requests uvicorn pydantic # Advanced Deep Crawling with Crawl4AI crawl4ai>=0.7.0 # GPU-Accelerated Scout Intelligence Dependencies torch>=2.0.0 transformers>=4.35.0 accelerate>=0.21.0 bitsandbytes>=0.41.0 sentencepiece>=0.1.97 protobuf>=3.20.0 # Optional: Flash Attention for performance (requires compatible GPU) # flash-attn>=2.0.0"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/agents/synthesizer/requirements.txt",
+    "status": "CUR",
+    "snippet": "# Synthesizer Agent Dependencies - For conda justnews-production environment # Note: Docker deployment is obsolete - use conda environment instead setuptools>=65.0.0 wheel fastapi transformers>=4.30.0 torch>=2.0.0 sentence-transformers>=2.2.2 scikit-learn>=1.3.0 bertopic>=0.17.0 # Advanced topic modeling with UMAP umap-learn>=0.5.9 # Dimensionality reduction (required by BERTopic) numpy>=1.24.0,<2"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/complete_pipeline_test_report.md",
+    "status": "CUR",
+    "snippet": "# JustNews V2 Complete Pipeline Test Report **Date:** August 13, 2025 **Test Duration:** Full system validation cycle **Branch:** fix-v2-stable-rollback ## Executive Summary \u2705 **MAJOR SUCCESS:** Complete system crash resolution achieved with optimized memory usage and functional multi-agent pipeline. Memory Agent and core pipeline components operational, with Synthesizer requiring minor module fix"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/apps/linkdin/README.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI Prospect\u2011Wizard \u2013 step\u2011by\u2011step guide A three\u2011stage demo that goes from **LinkedIn scraping** \u279c **LLM reasoning** \u279c **graph visualisation**. ``` prospect\u2011wizard/ \u251c\u2500 c4ai_discover.py # Stage 1 \u2013 scrape companies + people \u251c\u2500 c4ai_insights.py # Stage 2 \u2013 embeddings, org\u2011charts, scores \u251c\u2500 graph_view_template.html # Stage 3 \u2013 graph viewer (static HTML) \u2514\u2500 data/ # output lands here (*.jsonl / "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/codebase/browser.md",
+    "status": "CUR",
+    "snippet": "### browser_manager.py | Function | What it does | |---|---| | `ManagedBrowser.build_browser_flags` | Returns baseline Chromium CLI flags, disables GPU and sandbox, plugs locale, timezone, stealth tweaks, and any extras from `BrowserConfig`. | | `ManagedBrowser.__init__` | Stores config and logger, creates temp dir, preps internal state. | | `ManagedBrowser.start` | Spawns or connects to the Chrom"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/codebase/cli.md",
+    "status": "CUR",
+    "snippet": "### `cli.py` command surface | Command | Inputs / flags | What it does | |---|---|---| | **profiles** | *(none)* | Opens the interactive profile manager, lets you list, create, delete saved browser profiles that live in `~/.crawl4ai/profiles`. | | **browser status** | \u2013 | Prints whether the always-on *builtin* browser is running, shows its CDP URL, PID, start time. | | **browser stop** | \u2013 | Kills"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/deprecated/docker-deployment.md",
+    "status": "CUR",
+    "snippet": "# \ud83d\udc33 Using Docker (Legacy) Crawl4AI is available as Docker images for easy deployment. You can either pull directly from Docker Hub (recommended) or build from the repository. --- <details> <summary>\ud83d\udc33 <strong>Option 1: Docker Hub (Recommended)</strong></summary> Choose the appropriate image based on your platform and needs: ### For AMD64 (Regular Linux/Windows): ```bash # Basic version (recommended"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/examples/README_BUILTIN_BROWSER.md",
+    "status": "CUR",
+    "snippet": "# Builtin Browser in Crawl4AI This document explains the builtin browser feature in Crawl4AI and how to use it effectively. ## What is the Builtin Browser? The builtin browser is a persistent Chrome instance that Crawl4AI manages for you. It runs in the background and can be used by multiple crawling operations, eliminating the need to start and stop browsers for each crawl. Benefits include: - **"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/examples/chainlit.md",
+    "status": "CUR",
+    "snippet": "# Welcome to Crawl4AI! \ud83d\ude80\ud83e\udd16 Hi there, Developer! \ud83d\udc4b Here is an example of a research pipeline, where you can share a URL in your conversation with any LLM, and then the context of crawled pages will be used as the context."
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/examples/full_page_screenshot_and_pdf_export.md",
+    "status": "CUR",
+    "snippet": "# Capturing Full-Page Screenshots and PDFs from Massive Webpages with Crawl4AI When dealing with very long web pages, traditional full-page screenshots can be slow or fail entirely. For large pages (like extensive Wikipedia articles), generating a single massive screenshot often leads to delays, memory issues, or style differences. **The New Approach:** We\u2019ve introduced a new feature that effortle"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/examples/storage_state_tutorial.md",
+    "status": "CUR",
+    "snippet": "### Using `storage_state` to Pre-Load Cookies and LocalStorage Crawl4ai\u2019s `AsyncWebCrawler` lets you preserve and reuse session data, including cookies and localStorage, across multiple runs. By providing a `storage_state`, you can start your crawls already \u201clogged in\u201d or with any other necessary session data\u2014no need to repeat the login flow every time. #### What is `storage_state`? `storage_state"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/examples/tutorial_dynamic_clicks.md",
+    "status": "CUR",
+    "snippet": "# Tutorial: Clicking Buttons to Load More Content with Crawl4AI ## Introduction When scraping dynamic websites, it\u2019s common to encounter \u201cLoad More\u201d or \u201cNext\u201d buttons that must be clicked to reveal new content. Crawl4AI provides a straightforward way to handle these situations using JavaScript execution and waiting conditions. In this tutorial, we\u2019ll cover two approaches: 1. **Step-by-step (Sessio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/advanced-features.md",
+    "status": "CUR",
+    "snippet": "# Overview of Some Important Advanced Features (Proxy, PDF, Screenshot, SSL, Headers, & Storage State) Crawl4AI offers multiple power-user features that go beyond simple crawling. This tutorial covers: 1. **Proxy Usage** 2. **Capturing PDFs & Screenshots** 3. **Handling SSL Certificates** 4. **Custom Headers** 5. **Session Persistence & Local Storage** 6. **Robots.txt Compliance** > **Prerequisite"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/crawl-dispatcher.md",
+    "status": "CUR",
+    "snippet": "# Crawl Dispatcher We\u2019re excited to announce a **Crawl Dispatcher** module that can handle **thousands** of crawling tasks simultaneously. By efficiently managing system resources (memory, CPU, network), this dispatcher ensures high-performance data extraction at scale. It also provides **real-time monitoring** of each crawler\u2019s status, memory usage, and overall progress. Stay tuned\u2014this feature i"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/file-downloading.md",
+    "status": "CUR",
+    "snippet": "# Download Handling in Crawl4AI This guide explains how to use Crawl4AI to handle file downloads during crawling. You'll learn how to trigger downloads, specify download locations, and access downloaded files. ## Enabling Downloads To enable downloads, set the `accept_downloads` parameter in the `BrowserConfig` object and pass it to the crawler. ```python from crawl4ai.async_configs import Browser"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/hooks-auth.md",
+    "status": "CUR",
+    "snippet": "# Hooks & Auth in AsyncWebCrawler Crawl4AI\u2019s **hooks** let you customize the crawler at specific points in the pipeline: 1. **`on_browser_created`** \u2013 After browser creation. 2. **`on_page_context_created`** \u2013 After a new context & page are created. 3. **`before_goto`** \u2013 Just before navigating to a page. 4. **`after_goto`** \u2013 Right after navigation completes. 5. **`on_user_agent_updated`** \u2013 When"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/identity-based-crawling.md",
+    "status": "CUR",
+    "snippet": "# Preserve Your Identity with Crawl4AI Crawl4AI empowers you to navigate and interact with the web using your **authentic digital identity**, ensuring you\u2019re recognized as a human and not mistaken for a bot. This tutorial covers: 1. **Managed Browsers** \u2013 The recommended approach for persistent profiles and identity-based crawling. 2. **Magic Mode** \u2013 A simplified fallback solution for quick autom"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/lazy-loading.md",
+    "status": "CUR",
+    "snippet": "## Handling Lazy-Loaded Images Many websites now load images **lazily** as you scroll. If you need to ensure they appear in your final crawl (and in `result.media`), consider: 1. **`wait_for_images=True`** \u2013 Wait for images to fully load. 2. **`scan_full_page`** \u2013 Force the crawler to scroll the entire page, triggering lazy loads. 3. **`scroll_delay`** \u2013 Add small delays between scroll steps. **No"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/multi-url-crawling.md",
+    "status": "CUR",
+    "snippet": "# Advanced Multi-URL Crawling with Dispatchers > **Heads Up**: Crawl4AI supports advanced dispatchers for **parallel** or **throttled** crawling, providing dynamic rate limiting and memory usage checks. The built-in `arun_many()` function uses these dispatchers to handle concurrency efficiently. ## 1. Introduction When crawling many URLs: - **Basic**: Use `arun()` in a loop (simple but less effici"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/network-console-capture.md",
+    "status": "CUR",
+    "snippet": "# Network Requests & Console Message Capturing Crawl4AI can capture all network requests and browser console messages during a crawl, which is invaluable for debugging, security analysis, or understanding page behavior. ## Configuration To enable network and console capturing, use these configuration options: ```python from crawl4ai import AsyncWebCrawler, CrawlerRunConfig # Enable both network re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/proxy-security.md",
+    "status": "CUR",
+    "snippet": "# Proxy ## Basic Proxy Setup Simple proxy configuration with `BrowserConfig`: ```python from crawl4ai.async_configs import BrowserConfig # Using proxy URL browser_config = BrowserConfig(proxy=\"http://proxy.example.com:8080\") async with AsyncWebCrawler(config=browser_config) as crawler: result = await crawler.arun(url=\"https://example.com\") # Using SOCKS proxy browser_config = BrowserConfig(proxy=\""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/session-management.md",
+    "status": "CUR",
+    "snippet": "# Session Management Session management in Crawl4AI is a powerful feature that allows you to maintain state across multiple requests, making it particularly suitable for handling complex multi-step crawling tasks. It enables you to reuse the same browser tab (or page object) across sequential actions and crawls, which is beneficial for: - **Performing JavaScript actions before and after crawling.*"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/advanced/ssl-certificate.md",
+    "status": "CUR",
+    "snippet": "# `SSLCertificate` Reference The **`SSLCertificate`** class encapsulates an SSL certificate\u2019s data and allows exporting it in various formats (PEM, DER, JSON, or text). It\u2019s used within **Crawl4AI** whenever you set **`fetch_ssl_certificate=True`** in your **`CrawlerRunConfig`**. ## 1. Overview **Location**: `crawl4ai/ssl_certificate.py` ```python class SSLCertificate: \"\"\" Represents an SSL certif"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/arun.md",
+    "status": "CUR",
+    "snippet": "# `arun()` Parameter Guide (New Approach) In Crawl4AI\u2019s **latest** configuration model, nearly all parameters that once went directly to `arun()` are now part of **`CrawlerRunConfig`**. When calling `arun()`, you provide: ```python await crawler.arun( url=\"https://example.com\", config=my_run_config ) ``` Below is an organized look at the parameters that can go inside `CrawlerRunConfig`, divided by"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/arun_many.md",
+    "status": "CUR",
+    "snippet": "# `arun_many(...)` Reference > **Note**: This function is very similar to [`arun()`](./arun.md) but focused on **concurrent** or **batch** crawling. If you\u2019re unfamiliar with `arun()` usage, please read that doc first, then review this for differences. ## Function Signature ```python async def arun_many( urls: Union[List[str], List[Any]], config: Optional[CrawlerRunConfig] = None, dispatcher: Opti"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/async-webcrawler.md",
+    "status": "CUR",
+    "snippet": "# AsyncWebCrawler The **`AsyncWebCrawler`** is the core class for asynchronous web crawling in Crawl4AI. You typically create it **once**, optionally customize it with a **`BrowserConfig`** (e.g., headless, user agent), then **run** multiple **`arun()`** calls with different **`CrawlerRunConfig`** objects. **Recommended usage**: 1. **Create** a `BrowserConfig` for global browser settings. 2. **Ins"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/crawl-result.md",
+    "status": "CUR",
+    "snippet": "# `CrawlResult` Reference The **`CrawlResult`** class encapsulates everything returned after a single crawl operation. It provides the **raw or processed content**, details on links and media, plus optional metadata (like screenshots, PDFs, or extracted JSON). **Location**: `crawl4ai/crawler/models.py` (for reference) ```python class CrawlResult(BaseModel): url: str html: str success: bool cleaned"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/parameters.md",
+    "status": "CUR",
+    "snippet": "# 1. **BrowserConfig** \u2013 Controlling the Browser `BrowserConfig` focuses on **how** the browser is launched and behaves. This includes headless mode, proxies, user agents, and other environment tweaks. ```python from crawl4ai import AsyncWebCrawler, BrowserConfig browser_cfg = BrowserConfig( browser_type=\"chromium\", headless=True, viewport_width=1280, viewport_height=720, proxy=\"http://user:pass@p"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/api/strategies.md",
+    "status": "CUR",
+    "snippet": "# Extraction & Chunking Strategies API This documentation covers the API reference for extraction and chunking strategies in Crawl4AI. ## Extraction Strategies All extraction strategies inherit from the base `ExtractionStrategy` class and implement two key methods: - `extract(url: str, html: str) -> List[Dict[str, Any]]` - `run(url: str, sections: List[str]) -> List[Dict[str, Any]]` ### LLMExtract"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/basic/installation.md",
+    "status": "CUR",
+    "snippet": "# Installation \ud83d\udcbb Crawl4AI offers flexible installation options to suit various use cases. You can install it as a Python package, use it with Docker, or run it as a local server. ## Option 1: Python Package Installation (Recommended) Crawl4AI is now available on PyPI, making installation easier than ever. Choose the option that best fits your needs: ### Basic Installation For basic web crawling an"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/articles/dockerize_hooks.md",
+    "status": "CUR",
+    "snippet": "## Introducing Event Streams and Interactive Hooks in Crawl4AI ![event-driven-crawl](https://res.cloudinary.com/kidocode/image/upload/t_400x400/v1734344008/15bb8bbb-83ac-43ac-962d-3feb3e0c3bbf_2_tjmr4n.webp) In the near future, I\u2019m planning to enhance Crawl4AI\u2019s capabilities by introducing an event stream mechanism that will give clients deeper, real-time insights into the crawling process. Today,"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/index.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI Blog Welcome to the Crawl4AI blog! Here you'll find detailed release notes, technical insights, and updates about the project. Whether you're looking for the latest improvements or want to dive deep into web crawling techniques, this is the place. ## Latest Release Here\u2019s the blog index entry for **v0.6.0**, written to match the exact tone and structure of your previous entries: --- ###"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/0.4.0.md",
+    "status": "CUR",
+    "snippet": "# Release Summary for Version 0.4.0 (December 1, 2024) ## Overview The 0.4.0 release introduces significant improvements to content filtering, multi-threaded environment handling, user-agent generation, and test coverage. Key highlights include the introduction of the PruningContentFilter, designed to automatically identify and extract the most valuable parts of an HTML document, as well as enhanc"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/0.4.1.md",
+    "status": "CUR",
+    "snippet": "# Release Summary for Version 0.4.1 (December 8, 2024): Major Efficiency Boosts with New Features! _This post was generated with the help of ChatGPT, take everything with a grain of salt. \ud83e\uddc2_ Hi everyone, I just finished putting together version 0.4.1 of Crawl4AI, and there are a few changes in here that I think you\u2019ll find really helpful. I\u2019ll explain what\u2019s new, why it matters, and exactly how yo"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/0.4.2.md",
+    "status": "CUR",
+    "snippet": "## \ud83d\ude80 Crawl4AI 0.4.2 Update: Smarter Crawling Just Got Easier (Dec 12, 2024) ### Hey Developers, I\u2019m excited to share Crawl4AI 0.4.2\u2014a major upgrade that makes crawling smarter, faster, and a whole lot more intuitive. I\u2019ve packed in a bunch of new features to simplify your workflows and improve your experience. Let\u2019s cut to the chase! --- ### \ud83d\udd27 **Configurable Browser and Crawler Behavior** You\u2019ve a"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/0.5.0.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI v0.5.0 Release Notes **Release Theme: Power, Flexibility, and Scalability** Crawl4AI v0.5.0 is a major release focused on significantly enhancing the library's power, flexibility, and scalability. Key improvements include a new **deep crawling** system, a **memory-adaptive dispatcher** for handling large-scale crawls, **multiple crawling strategies** (including a fast HTTP-only crawler)"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/0.6.0.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI v0.6.0 Release Notes We're excited to announce the release of **Crawl4AI v0.6.0**, our biggest and most feature-rich update yet. This version introduces major architectural upgrades, brand-new capabilities for geo-aware crawling, high-efficiency scraping, and real-time streaming support for scalable deployments. --- ## Highlights ### 1. **World-Aware Crawlers** Crawl as if you\u2019re anywhe"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/blog/releases/v0.4.3b1.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI 0.4.3: Major Performance Boost & LLM Integration We're excited to announce Crawl4AI 0.4.3, focusing on three key areas: Speed & Efficiency, LLM Integration, and Core Platform Improvements. This release significantly improves crawling performance while adding powerful new LLM-powered features. ## \u26a1 Speed & Efficiency Improvements ### 1. Memory-Adaptive Dispatcher System The new dispatche"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/ask-ai.md",
+    "status": "CUR",
+    "snippet": "<div class=\"ask-ai-container\"> <iframe id=\"ask-ai-frame\" src=\"../../ask_ai/index.html\" width=\"100%\" style=\"border:none; display: block;\" title=\"Crawl4AI Assistant\"></iframe> </div> <script> // Iframe height adjustment function resizeAskAiIframe() { const iframe = document.getElementById('ask-ai-frame'); if (iframe) { const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPro"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/browser-crawler-config.md",
+    "status": "CUR",
+    "snippet": "# Browser, Crawler & LLM Configuration (Quick Overview) Crawl4AI's flexibility stems from two key classes: 1. **`BrowserConfig`** \u2013 Dictates **how** the browser is launched and behaves (e.g., headless or visible, proxy, user agent). 2. **`CrawlerRunConfig`** \u2013 Dictates **how** each **crawl** operates (e.g., caching, extraction, timeouts, JavaScript code to run, etc.). 3. **`LLMConfig`** - Dictates"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/cache-modes.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI Cache System and Migration Guide ## Overview Starting from version 0.5.0, Crawl4AI introduces a new caching system that replaces the old boolean flags with a more intuitive `CacheMode` enum. This change simplifies cache control and makes the behavior more predictable. ## Old vs New Approach ### Old Way (Deprecated) The old system used multiple boolean flags: - `bypass_cache`: Skip cache"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/cli.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI CLI Guide ## Table of Contents - [Installation](#installation) - [Basic Usage](#basic-usage) - [Configuration](#configuration) - [Browser Configuration](#browser-configuration) - [Crawler Configuration](#crawler-configuration) - [Extraction Configuration](#extraction-configuration) - [Content Filtering](#content-filtering) - [Advanced Features](#advanced-features) - [LLM Q&A](#llm-qa) -"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/content-selection.md",
+    "status": "CUR",
+    "snippet": "# Content Selection Crawl4AI provides multiple ways to **select**, **filter**, and **refine** the content from your crawls. Whether you need to target a specific CSS region, exclude entire tags, filter out external links, or remove certain domains and images, **`CrawlerRunConfig`** offers a wide range of parameters. Below, we show how to configure these parameters and combine them for precise cont"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/crawler-result.md",
+    "status": "CUR",
+    "snippet": "# Crawl Result and Output When you call `arun()` on a page, Crawl4AI returns a **`CrawlResult`** object containing everything you might need\u2014raw HTML, a cleaned version, optional screenshots or PDFs, structured extraction results, and more. This document explains those fields and how they map to different output types. --- ## 1. The `CrawlResult` Model Below is the core schema. Each field captures"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/deep-crawling.md",
+    "status": "CUR",
+    "snippet": "# Deep Crawling One of Crawl4AI's most powerful features is its ability to perform **configurable deep crawling** that can explore websites beyond a single page. With fine-tuned control over crawl depth, domain boundaries, and content filtering, Crawl4AI gives you the tools to extract precisely the content you need. In this tutorial, you'll learn: 1. How to set up a **Basic Deep Crawler** with BFS"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/docker-deployment.md",
+    "status": "CUR",
+    "snippet": "# Crawl4AI Docker Guide \ud83d\udc33 ## Table of Contents - [Prerequisites](#prerequisites) - [Installation](#installation) - [Option 1: Using Pre-built Docker Hub Images (Recommended)](#option-1-using-pre-built-docker-hub-images-recommended) - [Option 2: Using Docker Compose](#option-2-using-docker-compose) - [Option 3: Manual Local Build & Run](#option-3-manual-local-build--run) - [Dockerfile Parameters](#"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/examples.md",
+    "status": "CUR",
+    "snippet": "# Code Examples This page provides a comprehensive list of example scripts that demonstrate various features and capabilities of Crawl4AI. Each example is designed to showcase specific functionality, making it easier for you to understand how to implement these features in your own projects. ## Getting Started Examples | Example | Description | Link | |---------|-------------|------| | Hello World"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/fit-markdown.md",
+    "status": "CUR",
+    "snippet": "# Fit Markdown with Pruning & BM25 **Fit Markdown** is a specialized **filtered** version of your page\u2019s markdown, focusing on the most relevant content. By default, Crawl4AI converts the entire HTML into a broad **raw_markdown**. With fit markdown, we apply a **content filter** algorithm (e.g., **Pruning** or **BM25**) to remove or rank low-value sections\u2014such as repetitive sidebars, shallow text"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/installation.md",
+    "status": "CUR",
+    "snippet": "# Installation & Setup (2023 Edition) ## 1. Basic Installation ```bash pip install crawl4ai ``` This installs the **core** Crawl4AI library along with essential dependencies. **No** advanced features (like transformers or PyTorch) are included yet. ## 2. Initial Setup & Diagnostics ### 2.1 Run the Setup Command After installing, call: ```bash crawl4ai-setup ``` **What does it do?** - Installs or u"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/link-media.md",
+    "status": "CUR",
+    "snippet": "# Link & Media In this tutorial, you\u2019ll learn how to: 1. Extract links (internal, external) from crawled pages 2. Filter or exclude specific domains (e.g., social media or custom domains) 3. Access and ma### 3.2 Excluding Images #### Excluding External Images If you're dealing with heavy pages or want to skip third-party images (advertisements, for example), you can turn on: ```python crawler_cfg "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/local-files.md",
+    "status": "CUR",
+    "snippet": "# Prefix-Based Input Handling in Crawl4AI This guide will walk you through using the Crawl4AI library to crawl web pages, local HTML files, and raw HTML strings. We'll demonstrate these capabilities using a Wikipedia page as an example. ## Crawling a Web URL To crawl a live web page, provide the URL starting with `http://` or `https://`, using a `CrawlerRunConfig` object: ```python import asyncio "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/markdown-generation.md",
+    "status": "CUR",
+    "snippet": "# Markdown Generation Basics One of Crawl4AI\u2019s core features is generating **clean, structured markdown** from web pages. Originally built to solve the problem of extracting only the \u201cactual\u201d content and discarding boilerplate or noise, Crawl4AI\u2019s markdown system remains one of its biggest draws for AI workflows. In this tutorial, you\u2019ll learn: 1. How to configure the **Default Markdown Generator*"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/page-interaction.md",
+    "status": "CUR",
+    "snippet": "# Page Interaction Crawl4AI provides powerful features for interacting with **dynamic** webpages, handling JavaScript execution, waiting for conditions, and managing multi-step flows. By combining **js_code**, **wait_for**, and certain **CrawlerRunConfig** parameters, you can: 1. Click \u201cLoad More\u201d buttons 2. Fill forms and submit them 3. Wait for elements or data to appear 4. Reuse sessions across"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/quickstart.md",
+    "status": "CUR",
+    "snippet": "# Getting Started with Crawl4AI Welcome to **Crawl4AI**, an open-source LLM-friendly Web Crawler & Scraper. In this tutorial, you\u2019ll: 1. Run your **first crawl** using minimal configuration. 2. Generate **Markdown** output (and learn how it\u2019s influenced by content filters). 3. Experiment with a simple **CSS-based extraction** strategy. 4. See a glimpse of **LLM-based extraction** (including open-s"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/core/simple-crawling.md",
+    "status": "CUR",
+    "snippet": "# Simple Crawling This guide covers the basics of web crawling with Crawl4AI. You'll learn how to set up a crawler, make your first request, and understand the response. ## Basic Usage Set up a simple crawl using `BrowserConfig` and `CrawlerRunConfig`: ```python import asyncio from crawl4ai import AsyncWebCrawler from crawl4ai.async_configs import BrowserConfig, CrawlerRunConfig async def main(): "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/extraction/chunking.md",
+    "status": "CUR",
+    "snippet": "# Chunking Strategies Chunking strategies are critical for dividing large texts into manageable parts, enabling effective content processing and extraction. These strategies are foundational in cosine similarity-based extraction techniques, which allow users to retrieve only the most relevant chunks of content for a given query. Additionally, they facilitate direct integration into RAG (Retrieval-"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/extraction/clustring-strategies.md",
+    "status": "CUR",
+    "snippet": "# Cosine Strategy The Cosine Strategy in Crawl4AI uses similarity-based clustering to identify and extract relevant content sections from web pages. This strategy is particularly useful when you need to find and extract content based on semantic similarity rather than structural patterns. ## How It Works The Cosine Strategy: 1. Breaks down page content into meaningful chunks 2. Converts text into "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/extraction/llm-strategies.md",
+    "status": "CUR",
+    "snippet": "# Extracting JSON (LLM) In some cases, you need to extract **complex or unstructured** information from a webpage that a simple CSS/XPath schema cannot easily parse. Or you want **AI**-driven insights, classification, or summarization. For these scenarios, Crawl4AI provides an **LLM-based extraction strategy** that: 1. Works with **any** large language model supported by [LiteLLM](https://github.c"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/extraction/no-llm-strategies.md",
+    "status": "CUR",
+    "snippet": "# Extracting JSON (No LLM) One of Crawl4AI's **most powerful** features is extracting **structured JSON** from websites **without** relying on large language models. Crawl4AI offers several strategies for LLM-free extraction: 1. **Schema-based extraction** with CSS or XPath selectors via `JsonCssExtractionStrategy` and `JsonXPathExtractionStrategy` 2. **Regular expression extraction** with `RegexE"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/md_v2/index.md",
+    "status": "CUR",
+    "snippet": "# \ud83d\ude80\ud83e\udd16 Crawl4AI: Open-Source LLM-Friendly Web Crawler & Scraper <div class = \"badges\" align=\"center\"> <p> <a href=\"https://trendshift.io/repositories/11716\" target=\"_blank\"> <img src=\"https://trendshift.io/api/badge/repositories/11716\" alt=\"unclecode%2Fcrawl4ai | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/> </a> </p> <p> <a href=\"https://github.com/unclecode/crawl4ai/sta"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/crawl4ai_docs/tutorials/coming_soon.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/deploy/systemd/DEPLOYMENT.md",
+    "status": "CUR",
+    "snippet": "# JustNews native deployment (systemd) This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using systemd units and simple per-service environment files. ## What you get - Unit template: `justnews@.service` (instanced units like `justnews@mcp_bus.service`) - Global env template: `deploy/systemd/env/global.env` - Per-service env templates in `deploy/systemd/env/*.env` - Minimal,"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/deploy/systemd/README.md",
+    "status": "CUR",
+    "snippet": "# Systemd scaffold for JustNews This folder contains a native deployment scaffold: - `units/justnews@.service`: instanced unit template (use `justnews@<name>`) - `env/global.env`: global environment variables - `env/*.env`: per-service environment variables - `DEPLOYMENT.md`: step-by-step usage ## Instances Create services by enabling instances: - MCP Bus: `justnews@mcp_bus` - Chief Editor: `justn"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/deploy/systemd/env/README.md",
+    "status": "CUR",
+    "snippet": "This folder contains example per-instance environment files for the `justnews@.service` systemd template. Required variables for each instance (store under `/etc/justnews/<instance>.env` in production): - `JUSTNEWS_PYTHON` (required): Absolute path to the Python interpreter inside the target conda environment. Example: `/home/adra/miniconda3/envs/justnews-v2-prod/bin/python`. - `CONDA_ENV` (option"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/deploy/systemd/examples/README.md",
+    "status": "CUR",
+    "snippet": "# Examples for systemd native deployment Files in this directory are examples and helpers to install the JustNews systemd units. 1. Copy env files to /etc/justnews/ sudo mkdir -p /etc/justnews sudo cp deploy/systemd/env/*.env /etc/justnews/ 2. Install unit template sudo cp deploy/systemd/units/justnews@.service /etc/systemd/system/justnews@.service sudo systemctl daemon-reload 3. Install the wrapp"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/AIM_SDK_Application.md",
+    "status": "CUR",
+    "snippet": "# NVIDIA AIM SDK Early Access Application # Required for RTX AI Toolkit V4 implementation ## Application Details: - **URL**: https://developer.nvidia.com/aim-sdk - **Project**: JustNews V4 - RTX-Enhanced News Analysis System - **Use Case**: Professional local LLM inference with TensorRT-LLM optimization - **Hardware**: RTX 3090 (24GB VRAM, Ampere SM86 architecture) ## Technical Requirements: - **P"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Plan.md",
+    "status": "CUR",
+    "snippet": "# JustNews: Project & Development Plan This document provides a comprehensive project plan for building the JustNews system as outlined in the `JustNews_Proposal_V2.md`. It details the recommended technology stack, architecture, and a file-by-file breakdown of the project structure, adhering to principles of modularity, robustness, and industry best practices. ## 1. Guiding Principles & Best Pract"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Plan_V3.md",
+    "status": "CUR",
+    "snippet": "## ML & Feedback Loop Implementation (2025-07-20) The following improvements have been implemented as of July 2025: - **Synthesizer Agent**: Uses sentence-transformers for clustering, LLM for neutralization/aggregation, and logs feedback for continual learning. - **Critic Agent**: Uses LLM for critique, logs all feedback and editorial outcomes for retraining and adaptation. - **Memory Agent**: Pro"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Plan_V4.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4: RTX-Enhanced Migration and Implementation Plan ## Reasoning Agent (Nucleoid) Integration ### Purpose and Role The Reasoning Agent provides symbolic logic, fact validation, contradiction detection, and explainability for news analysis. It is built on the Nucleoid neuro-symbolic AI framework and is fully integrated into the MCP bus architecture. The agent enables: - Fact ingestion and"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Proposal.md",
+    "status": "CUR",
+    "snippet": "# JustNews: A Proposal for a Self-Improving, De-Biased News Aggregation System ## 1. Overview This document outlines a conceptual architecture for an advanced, multi-phase system named \"JustNews.\" The system is designed to autonomously crawl the web for news, validate the content, analyze it for bias and sentiment, synthesize a neutral \"source of truth\" for each news story, and publish the results"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Proposal_V2.md",
+    "status": "CUR",
+    "snippet": "# JustNews: A Proposal for a Self-Improving, De-Biased News Aggregation System - V2 ## 1. Overview This document outlines a conceptual architecture for an advanced, multi-phase system named \"JustNews.\" The system is designed to autonomously crawl the web for news, validate the content, analyze it for bias and sentiment, synthesize a neutral \"source of truth\" for each news story, and publish the re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Proposal_V3.md",
+    "status": "CUR",
+    "snippet": "# JustNews V3: An Agentic, MCP-First News Analysis Ecosystem ## 1. Executive Summary This proposal (V3) reframes the JustNews system from a linear pipeline of microservices into a dynamic, collaborative ecosystem of specialized AI agents. The central architectural principle is the **Model Context Protocol (MCP)**, which allows these agents to communicate, delegate tasks, and access data sources as"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/JustNews_Proposal_V4.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4: Hybrid Architecture Proposal ## Executive Summary JustNews V4 introduces a revolutionary **Native GPU-Accelerated Architecture** that eliminates Docker dependencies and leverages specialized models for each function throughout the system. This approach provides immediate operational capability with Ubuntu native deployment while building toward complete AI independence through conti"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/NVIDIA_RAPIDS_SDK_Analysis.md",
+    "status": "CUR",
+    "snippet": "# NVIDIA RAPIDS and SDK Manager Analysis for JustNews V4 ## Executive Summary After researching NVIDIA RAPIDS and the NVIDIA Developer SDK Manager, I've identified **significant potential benefits** for JustNews V4 that could complement our RTX AI Toolkit integration. Here's my assessment: ## NVIDIA RAPIDS: \u2b50\u2b50\u2b50\u2b50\u2b50 **HIGHLY RECOMMENDED** ### What is NVIDIA RAPIDS? NVIDIA RAPIDS is an **open-source s"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/docs/New_Blueprint_Agents.md",
+    "status": "CUR",
+    "snippet": "## **A Blueprint for an Autonomous, Ethical, Open-Source AI News Reporter Agent** ## **Executive Summary** The proliferation of misinformation and the increasing sophistication of AI-generated content necessitate a new paradigm for news reporting. This report outlines a comprehensive blueprint for an AI News Reporter Agent meticulously committed to factual accuracy, eliminating bias, and maintaini"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/gpu_memory_analysis.md",
+    "status": "CUR",
+    "snippet": "# GPU Memory Analysis - All JustNews Agents ## Current Problematic Configuration ### NewsReader V2 (CURRENT - PROBLEMATIC) - **Model**: `llava-hf/llava-1.5-7b-hf` (7 billion parameters) - **Current Memory Usage**: 7.6GB GPU (observed via nvidia-smi) - **Configuration**: INT8 quantization with crash-safe mode (8GB limit) - **Status**: \u26a0\ufe0f **CAUSING SYSTEM CRASHES** - Too much memory usage ## Agent-b"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/kiss_architecture_redesign.md",
+    "status": "CUR",
+    "snippet": "````python \"\"\" KISS ARCHITECTURE REDESIGN - JustNews V4 Simplified Maximum Nucleoid utilization with minimal complexity \"\"\" ## **PROPOSED SIMPLIFIED ARCHITECTURE** \ud83c\udfaf ### **3-AGENT ARCHITECTURE** (Down from 8 agents) #### **1. CONTENT AGENT** (Combines Scout + Memory) ```python class ContentAgent: \"\"\"Simple web crawling and content extraction\"\"\" FUNCTIONS = [ \"crawl_websites\", # Crawl4AI for conten"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/DEVELOPMENT_CONTEXT.md",
+    "status": "CUR",
+    "snippet": "# JustNews Agentic - Development Context **Last Updated**: August 13, 2025 **Branch**: `fix-v2-stable-rollback` **Status**: Production-Validated GPU Configuration ## \ud83d\udea8 **MAJOR BREAKTHROUGH - GPU Crash Investigation Resolved** ### Critical Discovery Summary (August 13, 2025) After extensive crash investigation involving multiple system crashes and PC resets, we have **definitively identified and re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/HOUSEKEEPING_COMPLETE_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# \ud83c\udf89 HOUSEKEEPING COMPLETE - Ready for Manual Push ## \u2705 **WORKSPACE CLEANUP SUCCESSFULLY COMPLETED** ### **\ud83e\uddf9 Cleanup Actions Performed:** - \u2705 **Junk files removed**: `=2.6`, `=2.6.0`, test files, temporary artifacts - \u2705 **Python cache cleaned**: All `__pycache__/` directories removed - \u2705 **Log files archived**: Moved to `archive_obsolete_files/log_files_20250808/` - \u2705 **Documentation organized**: A"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/README.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4 Documentation Index This directory contains organized documentation for the JustNews V4 project. Files are categorized for easy navigation and reference. ## \ud83d\udcc1 Documentation Structure ### `/production_status/` **Production readiness reports and deployment status:** - `PRODUCTION_DEPLOYMENT_STATUS.md` - Current operational status and metrics - `PRODUCTION_SUCCESS_SUMMARY.md` - Final ac"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/TECHNICAL_ARCHITECTURE.md",
+    "status": "CUR",
+    "snippet": "# JustNewsAgentic V4 - T### \ud83e\udd16 **Agent Production Status Overview** ### \u2705 **Production-Ready Agents (V3/V2 Engines)** - **\ud83d\udd0d Scout V2**: 5-model intelligence engine with LLaMA-3-8B GPU acceleration - **\u2705 Fact Checker V2**: 5-model verification system with comprehensive credibility assessment - **\ud83d\udcdd Synthesizer V3**: **4-model production stack** (BERTopic, BART, FLAN-T5, SentenceTransformers) - **\ud83e\udde0 Re"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/WORKSPACE_CLEANUP_SUMMARY_20250808.md",
+    "status": "CUR",
+    "snippet": "# Workspace Cleanup Summary - August 8, 2025 ## Housekeeping Actions Completed \u2705 ### \ud83e\uddf9 **Files Removed (Clutter Cleanup)** - `=2.6`, `=2.6.0` - Unknown artifacts - `test_*.py` files - Development test files - `nohup.out` - Process output file - `page_v2.png` - Temporary screenshot - `dashboard_gui_error.log` - Error log - All `__pycache__/` directories - Python cache ### \ud83d\udcc1 **Files Organized** - **"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/BALANCER_AGENT_INTEGRATION_GUIDE.md",
+    "status": "CUR",
+    "snippet": "# Balancer Agent V1 - Integration & Debugging Guide ## Overview The Balancer Agent is a production-grade component of the JustNews V4 system, designed to neutralize, balance, and synthesize news articles using multi-agent collaboration. It leverages GPU-accelerated models and is fully integrated with the MCP bus for distributed, robust operation. --- ## Architecture & Workflow ### 1. MCP Bus Integ"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/BALANCER_AGENT_V1.md",
+    "status": "CUR",
+    "snippet": "# Balancer Agent V1 Documentation ## Overview The Balancer Agent is a production-ready component of the JustNews V4 system, designed to neutralize news articles, integrate counter-balancing statements, and ensure objective reporting. It leverages existing JustNews models for sentiment, bias, fact-checking, summarization, and semantic embeddings, and introduces a quote extraction model for enhanced"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/EMBEDDING_HELPER.md",
+    "status": "CUR",
+    "snippet": "Embedding Helper (agents/common/embedding.py) Purpose ------- Centralize downloading, caching, and instantiation of sentence-transformers embedding models so multiple agents (processes) avoid race conditions and repeated heavy in-process loads. The helper uses process-local caching and atomic file operations so concurrent agents can safely ensure a model exists on disk and then load a shared in-pr"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/HF_MODEL_CACHING.md",
+    "status": "CUR",
+    "snippet": "# Hugging Face model caching and pre-download for Memory Agent This document explains how to avoid Hugging Face rate limits (HTTP 429) and how to pre-download/cache SentenceTransformer models used by the Memory agent. Why --- The Memory agent uses `sentence-transformers` (default model `all-MiniLM-L6-v2`) and downloads model files from Hugging Face on first use. In production runs this can hit rat"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/MODEL_USAGE.md",
+    "status": "CUR",
+    "snippet": "Model Usage, Caching and GPU Guidelines ====================================== This document describes model usage patterns, caching, and GPU allocation conventions used across the JustNewsAgentic repository. It complements `EMBEDDING_HELPER.md` and provides a concise reference for developers and operators. 1. Model caching and per-agent directories ---------------------------------------- - Each "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md",
+    "status": "CUR",
+    "snippet": "# NewsReader V2 Vision-Language Model Fallback Logic ## Overview The NewsReader V2 agent now implements robust fallback logic for vision-language model initialization. If the primary LLaVA model fails to load, the agent automatically attempts to load BLIP-2 as a fallback. This ensures reliable screenshot-based article extraction even if the preferred model is unavailable or fails due to resource c"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md",
+    "status": "CUR",
+    "snippet": "# Reasoning Agent Complete Implementation Documentation ## Overview The JustNews V4 Reasoning Agent provides enterprise-grade symbolic reasoning capabilities powered by the complete Nucleoid Python implementation from the official GitHub repository. This agent serves as the logical foundation for fact validation, contradiction detection, and explainable reasoning within the news analysis pipeline."
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md",
+    "status": "CUR",
+    "snippet": "# Next-Generation AI-First Scout Agent V2 Documentation *Last Updated: August 7, 2025* ## \ud83d\ude80 System Overview The Next-Generation Scout Agent V2 represents a complete AI-first architecture overhaul, featuring **5 specialized AI models** for comprehensive content analysis. This system achieves production-ready performance with zero warnings and robust GPU acceleration. ### \ud83c\udfaf Key Achievements - **\u2705 AI"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md",
+    "status": "CUR",
+    "snippet": "# Scout Agent - Enhanced Deep Crawl Documentation **JustNews V4 Scout Agent with Native Crawl4AI Integration** *Last Updated: July 29, 2025* *Status: \u2705 Production Ready - Integration Testing Completed Successfully* --- ## \ud83c\udf10 Overview The Scout Agent has been enhanced with native Crawl4AI integration featuring BestFirstCrawlingStrategy for advanced web crawling capabilities. This implementation comb"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "# Scout \u2192 Memory Pipeline Success Summary **Date**: January 29, 2025 **Milestone**: Core JustNews V4 pipeline operational with native deployment ## \ud83d\ude80 **Achievement Summary** ### Scout Agent Content Extraction \u2705 PRODUCTION READY - **Method**: Enhanced `cleaned_html` extraction with intelligent article filtering - **Performance**: **1,591 words** extracted from BBC article (9,612 characters) - **Qua"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/agent_documentation/The_Definitive_User_Guide.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/ARCHITECTURAL_CHANGES_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/ARCHITECTURAL_REVIEW_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/COMPLETE_V2_UPGRADE_ASSESSMENT.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/COPILOT_INSTRUCTIONS_UPDATE_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# GitHub Copilot Instructions Update Summary - August 2, 2025 ## \ud83c\udfaf **Key Updates Made to `.github/copilot-instructions.md`** ### \ud83d\udcc1 **Documentation Organization (NEW)** - **Mandatory Structure**: All .md files (except README.md and CHANGELOG.md) must go in `markdown_docs/` subdirectories - **Categorized Organization**: - `production_status/` - Deployment reports and achievements - `agent_documentat"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/CORRECTED_SCOUT_ANALYSIS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/CURRENT_DEVELOPMENT_STATUS.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4 - Current Development Status Summary **Last Updated**: July 29, 2025 **Status**: \u2705 Enhanced Scout Agent Integration Complete + Native TensorRT Production Ready --- ## \ud83c\udfc6 Major Achievements ### 1. Enhanced Scout Agent Integration (COMPLETED \u2705) **Date**: July 29, 2025 **Achievement**: Native Crawl4AI integration with BestFirstCrawlingStrategy successfully deployed **Key Features Deploye"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/DOCKER_DEPRECATION_NOTICE.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/FACT_CHECKER_FIXES_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "## Fact Checker V2 Engine - Meta Tensor & spaCy Issues RESOLVED ### \ud83c\udfaf **Issues Fixed Successfully** #### \u274c **Original Problems**: 1. **Meta Tensor Error**: \"Cannot copy out of meta tensor; no data! Please use torch.nn.Module.to_empty() instead\" 2. **Missing spaCy**: \"No module named 'spacy'\" for claim extraction model #### \u2705 **Solutions Implemented**: ### 1. **spaCy Installation & Setup** ```bash "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md",
+    "status": "CUR",
+    "snippet": "# GPU Crash Investigation - Final Report **Investigation Period**: August 13, 2025 **Status**: \u2705 **RESOLVED - Production Validated** **Impact**: Complete elimination of PC crashes during NewsReader processing ## Executive Summary A comprehensive investigation into recurring PC crashes during GPU-intensive NewsReader operations has **successfully identified and resolved** the root cause. The invest"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/HOUSEKEEPING_COMPLETE_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/IMMEDIATE_OVERLAP_ELIMINATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/LOCAL_MODEL_TRAINING_PLAN.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/META_TENSOR_RESOLUTION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "## Meta Tensor Issue Resolution - PRODUCTION STATUS UPDATE ### \ud83c\udfaf **Issue Analysis: System-Wide Meta Tensor Problem** #### \u274c **Root Cause Identified**: The meta tensor issue affects **multiple agents system-wide**: - **Fact Checker V2**: Models 1, 2 \u2705 Fixed | Model 3 \u26a0\ufe0f Partial | Model 4 \u2705 Fixed - **Scout V2**: All GPU models affected (news classifier, quality assessor, sentiment analyzer, bias det"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/NEURAL_VS_RULES_STRATEGIC_ANALYSIS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "## NewsReader V2 Training Integration - SUCCESS SUMMARY ### \ud83c\udfaf **Integration Completed Successfully** The NewsReader V2 agent has been successfully integrated into the JustNewsAgentic training system! --- ### \u2705 **Integration Components Added** #### 1. Training Buffer Integration - **Location**: `training_system/core/training_coordinator.py` line 101 - **Addition**: `'newsreader': deque(maxlen=max_b"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/NEXT_STEPS_2025-08-10_1436.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/Needed-for-live-run.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/OCR_REDUNDANCY_ANALYSIS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/ONLINE_LEARNING_ARCHITECTURE.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/ONLINE_TRAINING_INTEGRATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/PRODUCTION_DEPLOYMENT_GUIDE.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/PRODUCTION_VALIDATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/README_BOOTSTRAP_MODELS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/README_LIVE_SMOKE.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "# Synthesizer V2 Dependencies & Training Integration - SUCCESS REPORT **Date**: August 9, 2025 **Status**: \u2705 **COMPLETE SUCCESS** **Task**: Fix Synthesizer dependencies and integrate with training system --- ## \ud83c\udfaf **Mission Accomplished** ### **1. Dependencies Resolution** \u2705 **COMPLETE** #### **Fixed Missing Dependencies:** - \u2705 **SentencePiece**: Required cmake installation \u2192 Successfully built and"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/SYSTEM_ARCHITECTURE_ASSESSMENT.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/SYSTEM_V2_UPGRADE_PLAN.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/System_Assessment_2025-08-09.md",
+    "status": "CUR",
+    "snippet": "# System Assessment and Improvement Plan \u2014 2025-08-09 This document captures a focused assessment of the JustNewsAgentic V4 system and proposes prioritized, actionable improvements for reliability, performance, security, and operations. It synthesizes current context from `README.md` and `.github/copilot-instructions.md`. ## Checklist - Validate strengths and current state - Identify gaps across a"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/TRAINING_SYSTEM_ORGANIZATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/The_Definitive_User_Guide.md",
+    "status": "CUR",
+    "snippet": "<!-- THE DEFINITIVE USER GUIDE: JustNews Agentic System (V4) This guide is a living document, integrating and expanding upon all major documentation, agent guides, production reports, and technical references in the workspace as of August 5, 2025. --> # The Definitive User Guide: JustNews Agentic System (V4) --- ## Table of Contents 1. [Introduction & System Overview](#introduction--system-overvie"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/Using-The-GPU-Correctly.md",
+    "status": "CUR",
+    "snippet": "# Using The GPU Correctly - Complete Configuration Guide **Date**: August 13, 2025 **Status**: Production-Validated Configuration **GPU**: NVIDIA GeForce RTX 3090 (24GB) **System**: JustNews V2 with LLaVA Integration ## Overview This document provides a complete breakdown of the functional GPU setup for JustNews V2, based on extensive crash investigation and successful resolution. The configuratio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/V2_COMPLETE_ECOSYSTEM_ACTION_PLAN.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/WORKSPACE_CLEANUP_SUMMARY_20250808.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/WORKSPACE_ORGANIZATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4 Workspace Organization Summary ## Date: August 5, 2025 ### \u2705 **COMPLETE WORKSPACE ORGANIZATION ACCOMPLISHED** ## \ud83d\udcc2 **Final Workspace Structure** ### **Root Directory (Production Files Only)** - `README.md` - Complete system documentation with 10-agent architecture - `CHANGELOG.md` - V4.13.0 release with NewsReader + Scout integration - `environment.yml` - Complete Rapids-25.06 conda "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/action_plan.md",
+    "status": "CUR",
+    "snippet": "# Action Plan: JustNews V4 RTX-Accelerated Development **Current Status**: Enhanced Scout Agent + TensorRT-LLM Integration Complete - Ready for Multi-Agent GPU Expansion This action plan outlines the next phases for JustNews V4 development now that both the RTX AI Toolkit foundation and Enhanced Scout Agent integration are operational. --- ## \u2705 Phase 0: RTX Foundation (COMPLETED - July 26, 2025) #"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/agent_assessment_2025-08-18.md",
+    "status": "CUR",
+    "snippet": "# Agent Assessment \u2014 2025-08-18 This document summarizes an inspection of the `agents/` directory and how each agent maps to the JustNews V4 plan (docs/JustNews_Plan_V4.md). Date: 2025-08-18 --- ## Summary I inspected representative `main.py` entrypoints for the following agents: `scout`, `analyst`, `fact_checker`, `synthesizer`, `chief_editor`, `critic`, `memory`, `newsreader`, `reasoning`, and `"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/analysis_nucleoid_potential.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/architectural_review_findings.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/bbc_crawler_duplicates_complete_resolution.md",
+    "status": "CUR",
+    "snippet": "# BBC Crawler Duplicates - Complete Resolution \u2705 ## \ud83c\udfaf **Duplicate Resolution Summary** Successfully identified and archived **two duplicate BBC crawler files** from the root directory that were already properly integrated into the Scout Agent production crawler system. ### **Files Archived**: 1. \u274c `production_bbc_crawler.py` \u2192 `duplicate_production_bbc_crawler.py` 2. \u274c `ultra_fast_bbc_crawler.py` "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/enhanced_reasoning_architecture.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/entrypoints_assessment_2025-08-18.md",
+    "status": "CUR",
+    "snippet": "# Entrypoints and Orchestration Flows \u2014 2025-08-18 This document lists entry points into the JustNewsAgentic system that accept a URL or \"news topic as text\" and maps minimal orchestration flows to gather, analyze, assess, and synthesize news content. Date: 2025-08-18 --- ## Entrypoints (by intent) These are the endpoints (agent + route) found in the repository that accept either a URL or a text/t"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/kiss_architecture_redesign.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/mcp_bus_architecture_cleanup.md",
+    "status": "CUR",
+    "snippet": "# MCP Bus Architecture Cleanup - August 2, 2025 ## \ud83c\udfaf Issue Identified Found **two `mcp_bus` folders** in the JustNews V4 project: 1. `/mcp_bus/` (root level) - **ACTIVE** 2. `/agents/mcp_bus/` (agents folder) - **LEGACY** ## \ud83d\udd0d Investigation Results ### Active MCP Bus: `/mcp_bus/` \u2705 - **Docker Integration**: Referenced in `docker-compose.yml` - **Production Usage**: Has activity logs (`mcp_bus.log`"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/optimal_agent_separation.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/practical_newsreader_solution_organization.md",
+    "status": "CUR",
+    "snippet": "# Practical NewsReader Solution - File Organization Complete \u2705 ## \ud83c\udfaf File Relocation Summary ### **Issue Identified** - **File**: `practical_newsreader_solution.py` located in project root - **Problem**: Wrong location, port conflict, architectural misplacement ### **Resolution Applied** ```bash # Moved to correct location mv practical_newsreader_solution.py agents/newsreader/main_options/practical"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/production_bbc_crawler_duplicate_resolution.md",
+    "status": "CUR",
+    "snippet": "# Production BBC Crawler - Duplicate Resolution Complete \u2705 ## \ud83c\udfaf Issue Identified & Resolved ### **Problem**: Duplicate Production BBC Crawler - **Root location**: `production_bbc_crawler.py` (duplicate, broken imports) - **Correct location**: `agents/scout/production_crawlers/sites/bbc_ai_crawler.py` (active, integrated) ### **Resolution Applied** ```bash # Archived duplicate file mv production_bb"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/scout_production_crawler_integration_complete.md",
+    "status": "CUR",
+    "snippet": "# Scout Agent Production Crawler Integration - COMPLETED \u2705 ## \ud83c\udfaf Integration Summary Successfully integrated ultra-fast production crawlers into the Scout Agent architecture, transforming it from a deep-crawling specialist into a dual-mode content discovery powerhouse. ## \ud83c\udfd7\ufe0f Architecture Enhancement ### Before Integration - Scout Agent: Crawl4AI deep crawling only - Ultra-fast crawler: Standalone s"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/development_reports/system_startup_scripts_restored.md",
+    "status": "CUR",
+    "snippet": "# System Startup Scripts - Restored and Enhanced \u2705 ## \ud83c\udfaf **Script Recovery & Enhancement** Found and restored the missing system startup scripts from archives, then enhanced them for the complete JustNews V4 multi-agent architecture. ### **Scripts Restored**: - \u2705 `start_services_daemon.sh` - Complete multi-agent system startup - \u2705 `stop_services.sh` - Graceful shutdown with cleanup ### **Original L"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/optimization_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md",
+    "status": "CUR",
+    "snippet": "# NewsReader V2 Optimization Complete - Component Redundancy Analysis ## Executive Summary \u2705 **MAJOR SUCCESS**: NewsReader V2 has been successfully streamlined from a bloated 4-component system to an efficient **LLaVA-first architecture**. **Original Architecture**: LLaVA + CLIP + OCR + Layout Parser + Screenshot System **Optimized Architecture**: **LLaVA + Screenshot System** (60% component reduc"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/optimization_reports/OCR_REDUNDANCY_ANALYSIS.md",
+    "status": "CUR",
+    "snippet": "# OCR Redundancy Analysis - NewsReader V2 Engine ## Executive Summary **Recommendation**: \ud83d\udfe1 **OCR is LIKELY REDUNDANT** but low-risk to maintain Based on code analysis, OCR (EasyOCR) provides minimal additional value beyond LLaVA's text extraction capabilities in the current NewsReader V2 architecture. ## Current Implementation Analysis ### Primary Content Extraction (LLaVA) ```python # Main conte"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/DEPLOYMENT_SUCCESS_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# \ud83c\udf89 JustNews V4 Memory Optimization - DEPLOYMENT SUCCESS ## \ud83c\udfc6 Mission Accomplished - Memory Crisis Resolved! **Date**: July 29, 2025 **Status**: \u2705 **PRODUCTION DEPLOYMENT SUCCESSFUL** **Impact**: Memory buffer crisis completely resolved --- ## \ud83d\udcca Deployment Results Summary ### **Memory Impact Achievement** | Metric | Before | After | Improvement | |--------|--------|-------|-------------| | **Total"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/FACT_CHECKER_FIXES_SUCCESS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/MEMORY_OPTIMIZATION_SUCCESS_SUMMARY.md",
+    "status": "CUR",
+    "snippet": "# JustNews V4 Memory Optimization - Mission Accomplished ## \ud83c\udfaf Problem Resolution Summary ### **Original Challenge**: Insufficient Memory Buffer - **RTX 3090 Available**: 22GB VRAM - **System Requirements**: 23.3GB (exceeding capacity by 1.3GB) - **Buffer Status**: -1.3GB \u274c CRITICAL - **Production Risk**: System unstable, out-of-memory failures ### **Solution Implemented**: Strategic Phase 1 Optimi"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/META_TENSOR_RESOLUTION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/SYNTHESIZER_V3_PRODUCTION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "# Synthesizer V3 Production Success Summary **Date**: August 9, 2025 **Status**: \u2705 PRODUCTION READY **Version**: V4.16.0 ## \ud83c\udfc6 Production Achievement Summary The **Synthesizer V3 Production Engine** has successfully achieved full production readiness with complete training system integration. All development objectives have been met with comprehensive testing validation. ### \u2705 Production Validation"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/SYSTEM_OVERLAP_ANALYSIS.md",
+    "status": "CUR",
+    "snippet": "# JustNewsAgentic System Assessment Summary ## Complete Overlap Analysis and Standardization Plan **Assessment Date**: 7th August 2025 **System Version**: V4 Hybrid Architecture **Lead Assessment**: Scout V2 Production Standard --- ## \ud83c\udfaf Executive Summary After comprehensive analysis of the entire JustNewsAgentic system, **significant overlaps and architectural inconsistencies** have been identifie"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/USER_INSIGHT_VALIDATION_SUCCESS.md",
+    "status": "CUR",
+    "snippet": "# \ud83c\udfaf **USER INSIGHT VALIDATION: COMPLETE SUCCESS** ## **\u2705 Key Achievement: Your INT8 Quantization Approach Works!** ### **Breakthrough Results:** - **LLaVA-1.5-7B loaded successfully** with INT8 quantization - **Memory usage: 6.8GB** (down from original 15GB+ LLaVA-v1.6-mistral) - **Model loads in 16 seconds** (predictable, one-time cost) - **55% memory reduction achieved** (6.8GB vs target 3.5GB) "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/markdown_docs/production_status/WORKSPACE_ORGANIZATION_SUMMARY.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/mcp_bus/requirements.txt",
+    "status": "CUR",
+    "snippet": "setuptools>=65.0.0 wheel fastapi uvicorn requests pydantic"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/model_cache/models--llava-hf--llava-onevision-qwen2-0.5b-ov-hf/snapshots/74dd0bf867a4cda7950c17663794267c60cf4b40/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 \u0120 \u0120\u0120 \u0120\u0120 i n \u0120 t \u0120\u0120\u0120\u0120 \u0120\u0120\u0120\u0120 e r \u0120\u0120 \u0120 o n \u0120 a r e a t s t e n o r \u0120t h \u010a \u010a \u0120 c l e \u0120 s i t a n a r a l \u0120th e ; \u010a \u0120 p \u0120 f o u \u0120 = i s \u0120\u0120\u0120\u0120 \u0120\u0120\u0120 in g e s \u0120 w i on e d i c \u0120 b \u0120 d e t \u0120 m \u0120 o \u0109 \u0109 r o a s e l c t n d \u0120 in \u0120 h en t i d \u0120 n a m \u0120\u0120\u0120\u0120\u0120\u0120\u0120\u0120 \u0120\u0120\u0120 \u0120t o \u0120 re - - \u0120 { \u0120o f o m ) ;\u010a i m \u010d \u010a \u0120 ( i l / / \u0120a nd u r s e \u0120 l e x \u0120 S a d \u0120 \" c h u t i f * * \u0120 } e m o l \u0120\u0120\u0120\u0120\u0120\u0120\u0120\u0120 \u0120\u0120\u0120\u0120\u0120\u0120\u0120\u0120 t h "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/model_cache/models--openai--clip-vit-large-patch14/snapshots/32bd64288804d66eefd0ccbe215aa642df71cc41/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 i n t h a n r e a r e r th e</w> in g</w> o u o n s t o r e n o n</w> a l a t e r</w> i t i n</w> t o</w> r o i s</w> l e i c a t</w> an d</w> e d</w> o f</w> c h o r</w> e s</w> i l e l s t</w> a c o m a m l o a n</w> a y</w> s h r i l i t i f or</w> n e \u00f0 \u0141 r a h a d e o l v e</w> s i u r a l</w> s e ' s</w> u n d i b e l a w h o o d ay</w> e n</w> m a n o l e</w> t o ou r</w> i r "
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/chief_editor_v2/models--bert-base-uncased/snapshots/86b5e0934494bd15c9632b12f734a8a67f723594/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/chief_editor_v2/models--distilbert-base-uncased/snapshots/12040accade4e8a0f71eabdb258fecc2e7e948be/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/critic_v2/models--bert-base-uncased/snapshots/86b5e0934494bd15c9632b12f734a8a67f723594/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/critic_v2/models--distilbert-base-uncased/snapshots/12040accade4e8a0f71eabdb258fecc2e7e948be/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/critic_v2/models--microsoft--deberta-base/snapshots/0d1b43ccf21b5acd9f4e5f7b077fa698f05cf195/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/memory_v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/memory_v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v2/models--facebook--bart-large-cnn/snapshots/37f520fa929c961707657b28798b30c003dd100b/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v2/models--microsoft--DialoGPT (deprecated)-medium/snapshots/7b40bb0f92c45fefa957d088000d8648e5c7fa33/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/all-MiniLM-L6-v2/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/all-MiniLM-L6-v2/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/models--facebook--bart-large-cnn/snapshots/37f520fa929c961707657b28798b30c003dd100b/merges.txt",
+    "status": "CUR",
+    "snippet": "#version: 0.2 \u0120 t \u0120 a h e i n r e o n \u0120t he e r \u0120 s a t \u0120 w \u0120 o e n \u0120 c i t i s a n o r e s \u0120 b e d \u0120 f in g \u0120 p o u \u0120a n a l a r \u0120t o \u0120 m \u0120o f \u0120 in \u0120 d \u0120 h \u0120an d i c a s l e \u0120t h i on o m l l en t \u0120 n \u0120 l s t \u0120 re v e \u0120 e r o l y \u0120b e \u0120 g \u0120 T c t \u0120 S i d o t \u0120 I u t e t \u0120 A \u0120 is \u0120 on i m a m o w a y a d s e \u0120th at \u0120 C i g \u0120f or a c \u0120 y v er u r \u0120 u l d \u0120s t \u0120 M ' s \u0120 he \u0120 it at ion it h i r c e \u0120"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md",
+    "status": "CUR",
+    "snippet": "--- language: en license: apache-2.0 library_name: sentence-transformers tags: - sentence-transformers - feature-extraction - sentence-similarity - transformers datasets: - s2orc - flax-sentence-embeddings/stackexchange_xml - ms_marco - gooaq - yahoo_answers_topics - code_search_net - search_qa - eli5 - snli - multi_nli - wikihow - natural_questions - trivia_qa - embedding-data/sentence-compressio"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/models/synthesizer_v3/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/vocab.txt",
+    "status": "CUR",
+    "snippet": "[PAD] [unused0] [unused1] [unused2] [unused3] [unused4] [unused5] [unused6] [unused7] [unused8] [unused9] [unused10] [unused11] [unused12] [unused13] [unused14] [unused15] [unused16] [unused17] [unused18] [unused19] [unused20] [unused21] [unused22] [unused23] [unused24] [unused25] [unused26] [unused27] [unused28] [unused29] [unused30] [unused31] [unused32] [unused33] [unused34] [unused35] [unused3"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/requirements-dev.txt",
+    "status": "CUR",
+    "snippet": "# Development and testing requirements pytest>=7.4.3 pytest-asyncio>=0.21.1 pytest-mock>=3.11.0 pytest-cov>=4.1.0 ruff>=0.19.1 isort>=5.12.0 black>=24.4.0 responses>=0.23.1 aioresponses>=0.9.0 testcontainers>=3.9.0 docker>=6.1.3 tox>=4.8.0 nox>=2024.1.0 coverage>=7.4.0 requests-mock>=1.11.0 moto>=4.3.0 # Optional: AWS mocking # Optional GPU/more heavy testing tools (only for e2e runners) # torch #"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/requirements.txt",
+    "status": "CUR",
+    "snippet": "# JustNewsAgentic Production Requirements # Using compatible version ranges to avoid conflicts # Core framework fastapi>=0.100.0 uvicorn[standard]>=0.22.0 pydantic>=2.0.0,<3.0.0 requests>=2.31.0 # ML and NLP - compatible versions torch>=2.0.0 transformers>=4.30.0,<5.0.0 sentence-transformers>=2.2.2 # spaCy with English model spacy>=3.6.0,<4.0.0 # Data processing - avoid conflicts numpy>=1.24.0,<2."
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/requirements_scout_v2.txt",
+    "status": "CUR",
+    "snippet": "# Next-Generation AI-First Scout Agent Requirements # Production-ready dependencies with version ranges for stability # Core AI/ML Framework torch>=2.1.0,<2.5.0 # PyTorch GPU support transformers>=4.40.0,<4.60.0 # HuggingFace models # Specialized Models # - google-bert/bert-base-uncased (news classification + quality assessment) # - cardiffnlp/twitter-roberta-base-sentiment-latest (sentiment analy"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/ruff_report_agents.txt",
+    "status": "CUR",
+    "snippet": "agents/analyst/hybrid_tools_v4.py:658:21: E722 Do not use bare `except` | 656 | score = score / 10.0 # Assume they meant 0.X 657 | score = max(0.0, min(1.0, score)) 658 | except: | ^^^^^^ E722 659 | score = 0.5 # Default to neutral 660 | else: | agents/analyst/hybrid_tools_v4.py:744:21: E722 Do not use bare `except` | 742 | score = score / 10.0 # Assume they meant 0.X 743 | score = max(0.0, min(1."
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/scripts/README_BOOTSTRAP_MODELS.md",
+    "status": "CUR",
+    "snippet": ""
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/scripts/README_MIRROR.md",
+    "status": "CUR",
+    "snippet": "Mirror per-agent models to large volume ===================================== This folder contains a small utility to migrate `agents/<agent>/models` folders to a shared, large-volume target directory and then create symlinks back to the agents. It is intentionally conservative and idempotent. Usage ----- Preview (no changes): ```bash # If you omit --target, the script will use the DATA_DRIVE_TARG"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/tests/requirements.txt",
+    "status": "CUR",
+    "snippet": "requests pytest"
+  },
+  {
+    "path": "/home/adra/JustNewsAgentic/training_system/README.md",
+    "status": "CUR",
+    "snippet": "# JustNews Online Training System ## \"Training On The Fly\" - Continuous Model Improvement ### \ud83c\udfaf Overview The JustNews Online Training System enables continuous model improvement across all V2 agents using real-time news data processing. The system provides: - **Active Learning**: Intelligent selection of valuable training examples - **Incremental Updates**: Catastrophic forgetting prevention with "
+  }
+]

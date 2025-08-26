@@ -1,0 +1,28 @@
+[Unit]
+Description=JustNews Service (%i)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+# Global and per-instance environment files (optional but recommended)
+EnvironmentFile=-/etc/justnews/global.env
+EnvironmentFile=-/etc/justnews/%i.env
+# Run as the deploy user by default (override in /etc/justnews/<instance>.env if needed)
+User=adra
+Group=adra
+# Use an absolute working directory (systemd requires absolute paths)
+WorkingDirectory=/home/adra/JustNewsAgentic
+# Start from a shell to allow cd into repo and use env var expansion safely
+ExecStartPre=/bin/bash -c '[ "${REQUIRE_BUS:-1}" = "0" ] || /usr/local/bin/wait_for_mcp.sh'
+ExecStart=/usr/local/bin/justnews-start-agent.sh %i
+Restart=on-failure
+RestartSec=3
+# Uncomment to restrict core dumps and add basic security hardening
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=full
+# ProtectHome=yes
+
+[Install]
+WantedBy=multi-user.target

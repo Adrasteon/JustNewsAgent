@@ -1,0 +1,56 @@
+name: CI - Manual (tests)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-activate-base: false
+          mamba-version: '1.6.0'
+      - name: Create environment
+        run: |
+          mamba env create -f environment.yml -n justnews-upgrade-test
+          mamba activate justnews-upgrade-test
+      - name: Run tests (non-integration)
+        run: |
+          pytest -q -m "not integration"
+name: CI - Pytest (conda)
+
+# NOTE: This workflow has been switched to manual dispatch only while testing
+# and dependency-upgrade work is paused. Use the 'Run workflow' button in
+# the Actions tab to execute it on-demand.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    name: Run tests (conda environment)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda and create environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: 3.11
+          auto-update-conda: true
+          activate-environment: justnews-pinned
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Activate environment and run pytest (unit-only)
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-pinned
+          # Upgrade pip/tools just in case and ensure pytest is available
+          pip install -U pip setuptools wheel
+          pip install pytest
+          # Run collection-only unit tests (integration tests are gated by marker/environment)
+          pytest -q -k "not integration" --maxfail=1

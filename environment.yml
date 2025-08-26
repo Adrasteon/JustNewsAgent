@@ -1,0 +1,43 @@
+name: justnews-upgrade-test
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - mamba
+  - gcc_linux-64
+  - gxx_linux-64
+  - cudatoolkit=11.8  # adjust or remove depending on GPU availability
+  - pip:
+    - -r requirements-pinned.txt
+name: justnews-pinned
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy=1.26.4
+  - scipy=1.16.1
+  - pandas=2.3.2
+  - scikit-learn=1.7.1
+  - libblas
+  - pip:
+    - -r requirements-pinned.txt
+
+# Notes:
+# - This environment file installs core binary packages with conda (via conda-forge)
+#   and delegates the rest of the Python-only packages to pip using the pinned
+#   `requirements-pinned.txt` file. That keeps conda in control of compiled
+#   libraries while still reproducing the exact Python package set used during
+#   validation.
+# - For GPU users who need a CUDA-enabled PyTorch build, prefer installing
+#   PyTorch via the official instructions at https://pytorch.org/get-started/locally
+#   rather than relying on the pip wheel in the pinned requirements. Example
+#   (uncomment and adapt for your hardware):
+#
+#   dependencies:
+#     - pytorch=2.8.0
+#     - cudatoolkit=12.8
+#
+#   or use the `pytorch` channel and the specific cuda build recommended by PyTorch.

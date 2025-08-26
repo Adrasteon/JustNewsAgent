@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation Hub
+    url: https://github.com/Adrasteon/JustNewsAgentic/tree/main/markdown_docs
+    about: Browse architecture, agent guides, and technical reports
