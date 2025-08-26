@@ -113,47 +113,73 @@ Respond with JSON format:
                 bnb_4bit_quant_type="nf4"
             )
             
-            # Load tokenizer with fallback
+            # Load tokenizer with ModelStore-aware loader and fallback
             try:
-                self.tokenizer = AutoTokenizer.from_pretrained(
+                from agents.common.model_loader import load_transformers_model
+                model_obj, tokenizer_obj = load_transformers_model(
                     self.model_path,
-                    trust_remote_code=True,
-                    padding_side="left",
-                    local_files_only=use_offline
+                    agent='scout',
+                    cache_dir=None,
+                    model_class=None,
+                    tokenizer_class=AutoTokenizer,
                 )
+                self.tokenizer = tokenizer_obj
             except Exception as e:
-                logger.warning(f"Failed to load {self.model_path}, trying GPT-2 fallback: {e}")
-                self.model_path = "gpt2"
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    self.model_path,
-                    trust_remote_code=True,
-                    padding_side="left",
-                    local_files_only=use_offline
-                )
+                logger.warning(f"Failed to load tokenizer via ModelStore/loader: {e}; trying HF fallback")
+                try:
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        self.model_path,
+                        trust_remote_code=True,
+                        padding_side="left",
+                        local_files_only=use_offline
+                    )
+                except Exception as e2:
+                    logger.warning(f"Failed to load {self.model_path}, trying GPT-2 fallback: {e2}")
+                    self.model_path = "gpt2"
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        self.model_path,
+                        trust_remote_code=True,
+                        padding_side="left",
+                        local_files_only=use_offline
+                    )
             
             if self.tokenizer.pad_token is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token
             
             # Load model with GPU optimization
-            if self.device == "cuda":
+                # Load model using ModelStore-aware loader with explicit class when possible
                 try:
-                    self.model = AutoModelForCausalLM.from_pretrained(
+                    from agents.common.model_loader import load_transformers_model
+                    model_obj, tokenizer_obj = load_transformers_model(
                         self.model_path,
-                        quantization_config=quantization_config if not use_offline else None,
-                        device_map="auto",
-                        torch_dtype=torch.float16,
-                        trust_remote_code=True,
-                        local_files_only=use_offline
+                        agent='scout',
+                        cache_dir=None,
+                        model_class=AutoModelForCausalLM,
+                        tokenizer_class=AutoTokenizer,
                     )
+                    self.model = model_obj
                 except Exception as e:
-                    logger.warning(f"GPU loading failed, trying CPU: {e}")
-                    self.device = "cpu"
-                    self.model = AutoModelForCausalLM.from_pretrained(
-                        self.model_path,
-                        torch_dtype=torch.float32,
-                        trust_remote_code=True,
-                        local_files_only=use_offline
-                    )
+                    logger.warning(f"Failed to load model via ModelStore/loader: {e}; trying HF fallback")
+                    try:
+                        if self.device == "cuda":
+                            self.model = AutoModelForCausalLM.from_pretrained(
+                                self.model_path,
+                                quantization_config=quantization_config if not use_offline else None,
+                                device_map="auto",
+                                torch_dtype=torch.float16,
+                                trust_remote_code=True,
+                                local_files_only=use_offline
+                            )
+                        else:
+                            self.model = AutoModelForCausalLM.from_pretrained(
+                                self.model_path,
+                                torch_dtype=torch.float32,
+                                trust_remote_code=True,
+                                local_files_only=use_offline
+                            )
+                    except Exception as e2:
+                        logger.error(f"❌ Failed to initialize model after fallbacks: {e2}")
+                        self.model = None
                 
                 # Create pipeline for batch processing
                 self.classification_pipeline = pipeline(
