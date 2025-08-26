@@ -27,7 +27,7 @@ from pathlib import Path
 
 # Core ML Libraries
 try:
-    from transformers import (
+    from transformers import (  # noqa: F401
         AutoModel, AutoTokenizer, AutoModelForSequenceClassification,
         BertModel, BertTokenizer, BertForSequenceClassification,
         RobertaModel, RobertaTokenizer, RobertaForSequenceClassification,
@@ -41,16 +41,16 @@ except ImportError:
     logging.warning("transformers not available - falling back to basic processing")
 
 try:
-    from sentence_transformers import SentenceTransformer
+    from sentence_transformers import SentenceTransformer  # noqa: F401
     SENTENCE_TRANSFORMERS_AVAILABLE = True
 except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
     logging.warning("sentence-transformers not available")
 
 try:
-    from sklearn.metrics.pairwise import cosine_similarity
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics import classification_report
+    from sklearn.metrics.pairwise import cosine_similarity  # noqa: F401
+    from sklearn.feature_extraction.text import TfidfVectorizer  # noqa: F401
+    from sklearn.metrics import classification_report  # noqa: F401
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
@@ -182,18 +182,25 @@ class CriticV2Engine:
                 logger.warning("Transformers not available - skipping BERT")
                 return
 
-            # Load a BERT-based sequence classification model for quality assessment
-            self.models['bert'] = BertForSequenceClassification.from_pretrained(
-                self.config.bert_model,
-                cache_dir=self.config.cache_dir,
-                num_labels=2,
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, tokenizer = load_transformers_model(self.config.bert_model, agent='critic', cache_dir=self.config.cache_dir)
+                # Try to convert to sequence classification if needed; assume returned model is appropriate
+                self.models['bert'] = model.to(self.device)
+                self.tokenizers['bert'] = tokenizer
+            except Exception:
+                # Fallback to original explicit from_pretrained path
+                self.models['bert'] = BertForSequenceClassification.from_pretrained(
+                    self.config.bert_model,
+                    cache_dir=self.config.cache_dir,
+                    num_labels=2,
+                    torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                ).to(self.device)
 
-            self.tokenizers['bert'] = BertTokenizer.from_pretrained(
-                self.config.bert_model,
-                cache_dir=self.config.cache_dir
-            )
+                self.tokenizers['bert'] = BertTokenizer.from_pretrained(
+                    self.config.bert_model,
+                    cache_dir=self.config.cache_dir
+                )
 
             # Create a simple pipeline for quality scoring
             self.pipelines['bert_quality'] = pipeline(
@@ -228,25 +235,38 @@ class CriticV2Engine:
                 )
             except Exception:
                 # Fallback to base RoBERTa
-                self.models['roberta'] = RobertaForSequenceClassification.from_pretrained(
-                    self.config.roberta_model,
-                    cache_dir=self.config.cache_dir,
-                    num_labels=3,  # Biased, neutral, counter-biased
-                    torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-                ).to(self.device)
-                
-                self.tokenizers['roberta'] = RobertaTokenizer.from_pretrained(
-                    self.config.roberta_model,
-                    cache_dir=self.config.cache_dir
-                )
-                
-                self.pipelines['roberta_bias'] = pipeline(
-                    "text-classification",
-                    model=self.models['roberta'],
-                    tokenizer=self.tokenizers['roberta'],
-                    device=0 if self.device.type == 'cuda' else -1,
-                    top_k=None
-                )
+                try:
+                    from agents.common.model_loader import load_transformers_model
+                    model, tokenizer = load_transformers_model(self.config.roberta_model, agent='critic', cache_dir=self.config.cache_dir)
+                    self.models['roberta'] = model.to(self.device)
+                    self.tokenizers['roberta'] = tokenizer
+                    self.pipelines['roberta_bias'] = pipeline(
+                        "text-classification",
+                        model=self.models['roberta'],
+                        tokenizer=self.tokenizers['roberta'],
+                        device=0 if self.device.type == 'cuda' else -1,
+                        top_k=None
+                    )
+                except Exception:
+                    self.models['roberta'] = RobertaForSequenceClassification.from_pretrained(
+                        self.config.roberta_model,
+                        cache_dir=self.config.cache_dir,
+                        num_labels=3,  # Biased, neutral, counter-biased
+                        torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                    ).to(self.device)
+
+                    self.tokenizers['roberta'] = RobertaTokenizer.from_pretrained(
+                        self.config.roberta_model,
+                        cache_dir=self.config.cache_dir
+                    )
+
+                    self.pipelines['roberta_bias'] = pipeline(
+                        "text-classification",
+                        model=self.models['roberta'],
+                        tokenizer=self.tokenizers['roberta'],
+                        device=0 if self.device.type == 'cuda' else -1,
+                        top_k=None
+                    )
             
             logger.info("✅ RoBERTa bias detection model loaded successfully")
             
@@ -340,19 +360,42 @@ class CriticV2Engine:
             except Exception:
                 try:
                     from agents.common.embedding import ensure_agent_model_exists, get_shared_embedding_model
-                    model_dir = ensure_agent_model_exists(self.config.embedding_model, agent_cache)
-                    self.models['embeddings'] = get_shared_embedding_model(self.config.embedding_model, cache_folder=agent_cache, device=self.device)
+                    _model_dir = ensure_agent_model_exists(self.config.embedding_model, agent_cache)
+                    self.models['embeddings'] = get_shared_embedding_model(
+                        self.config.embedding_model,
+                        cache_folder=agent_cache,
+                        device=self.device,
+                    )
                 except Exception:
                     try:
                         from agents.common.embedding import get_shared_embedding_model
-                        self.models['embeddings'] = get_shared_embedding_model(self.config.embedding_model, cache_folder=agent_cache, device=self.device)
+                        self.models['embeddings'] = get_shared_embedding_model(
+                            self.config.embedding_model,
+                            cache_folder=agent_cache,
+                            device=self.device,
+                        )
                     except Exception:
                         # Last resort: leave as None and allow higher-level fallbacks
                         self.models['embeddings'] = None
 
             # Attempt to move to GPU where supported
             try:
-                if self.device.type == 'cuda' and hasattr(self.models['embeddings'], 'to'):
+                # Try to use centralized loader for sentence transformers
+                from agents.common.model_loader import load_sentence_transformer
+                self.models['embeddings'] = load_sentence_transformer(self.config.embedding_model, agent='critic', cache_folder=agent_cache)
+            except Exception:
+                try:
+                    from agents.common.embedding import get_shared_embedding_model
+                    self.models['embeddings'] = get_shared_embedding_model(
+                        self.config.embedding_model,
+                        cache_folder=agent_cache,
+                        device=self.device
+                    )
+                except Exception:
+                    self.models['embeddings'] = None
+
+            try:
+                if self.device.type == 'cuda' and hasattr(self.models.get('embeddings'), 'to'):
                     self.models['embeddings'] = self.models['embeddings'].to(self.device)
             except Exception:
                 logger.debug("Unable to move critic embedding model to CUDA device; continuing on CPU")

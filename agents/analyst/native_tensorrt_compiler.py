@@ -164,15 +164,26 @@ class NativeTensorRTCompiler:
         try:
             logger.info(f"📄 Converting {model_name} to ONNX format")
             
-            # Load model and tokenizer
-            if task_type == "sentiment":
-                tokenizer = AutoTokenizer.from_pretrained(model_name)
-                model = AutoModelForSequenceClassification.from_pretrained(model_name)
-            elif task_type == "bias":
-                tokenizer = AutoTokenizer.from_pretrained(model_name)
-                model = AutoModelForSequenceClassification.from_pretrained(model_name)
-            else:
-                raise ValueError(f"Unsupported task type: {task_type}")
+            # Load model and tokenizer (prefer ModelStore via model_loader)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, tokenizer = load_transformers_model(
+                    model_name,
+                    agent='analyst',
+                    cache_dir=None,
+                    model_class=AutoModelForSequenceClassification,
+                    tokenizer_class=AutoTokenizer,
+                )
+            except Exception:
+                # Fallback to direct HF loads when ModelStore or loader not available
+                if task_type == "sentiment":
+                    tokenizer = AutoTokenizer.from_pretrained(model_name)
+                    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+                elif task_type == "bias":
+                    tokenizer = AutoTokenizer.from_pretrained(model_name)
+                    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+                else:
+                    raise ValueError(f"Unsupported task type: {task_type}")
             
             model.eval()
             
@@ -280,7 +291,7 @@ class NativeTensorRTCompiler:
             
             # Get actual input shapes from the ONNX model
             input0 = network.get_input(0)  # input_ids
-            input1 = network.get_input(1)  # attention_mask
+            _input1 = network.get_input(1)  # attention_mask (unused placeholder)
             
             # Determine sequence length from the ONNX model
             actual_seq_len = input0.shape[1]

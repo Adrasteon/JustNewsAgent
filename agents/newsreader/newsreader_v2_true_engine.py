@@ -43,8 +43,8 @@ try:
     from transformers import (
         LlavaOnevisionProcessor,  # Updated for OneVision model
         LlavaOnevisionForConditionalGeneration,  # Updated for OneVision model
-        CLIPModel,
-        CLIPProcessor,
+    CLIPModel,  # noqa: F401
+    CLIPProcessor,  # noqa: F401
         BitsAndBytesConfig  # Add quantization support
     )
     LLAVA_AVAILABLE = True
@@ -141,13 +141,7 @@ class NewsReaderV2Engine:
     - V2 standards compliance (5+ models, zero warnings)
     """
     
-    def __enter__(self):
-        """Context manager entry"""
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit - ensure GPU memory cleanup"""
-        self.cleanup_gpu_memory()
+    # -- Context manager methods provided below (richer implementation). Removed earlier duplicate simple pair.
     
     def cleanup_gpu_memory(self):
         """AGGRESSIVE GPU memory cleanup to prevent crashes"""

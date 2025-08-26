@@ -130,8 +130,7 @@ def test_online_training_system():
         try:
             from agents.fact_checker.tools import (
                 get_online_training_status as get_fact_checker_status,
-                correct_fact_verification,
-                force_fact_checker_update
+                correct_fact_verification
             )
             
             fact_status = get_fact_checker_status()

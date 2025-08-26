@@ -3,6 +3,13 @@ Enhanced Reasoning Agent - News Domain Rules Implementation
 Leveraging full Nucleoid potential for advanced news validation logic
 """
 
+# Import the NucleoidEngine wrapper from the reasoning agent implementation
+try:
+    from agents.reasoning.main import NucleoidEngine  # type: ignore
+except Exception:
+    # Fallback: the reasoning agent package may not be available at import time
+    NucleoidEngine = None  # type: ignore
+
 # NEWS CREDIBILITY RULES
 NEWS_DOMAIN_RULES = [
     # Source credibility based on track record

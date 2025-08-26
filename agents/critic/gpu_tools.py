@@ -32,7 +32,7 @@ import uuid
 # GPU and ML imports (graceful fallback if not available)
 try:
     import torch
-    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+    from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline  # noqa: F401
     GPU_AVAILABLE = torch.cuda.is_available()
 except ImportError as e:
     print(f"⚠️ GPU/ML libraries not available: {e}")
@@ -41,7 +41,7 @@ except ImportError as e:
 
 # Multi-Agent GPU Manager integration
 try:
-    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager  # noqa: F401
     GPU_MANAGER_AVAILABLE = True
 except ImportError:
     print("⚠️ GPU Manager not available - using standalone mode")

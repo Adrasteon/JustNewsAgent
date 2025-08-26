@@ -32,9 +32,9 @@ from pathlib import Path
 
 # Core ML Libraries
 try:
-    from transformers import (
+    from transformers import (  # noqa: F401
         BertModel, BertTokenizer, BertForSequenceClassification,
-        pipeline, AutoConfig
+        pipeline, AutoConfig  # noqa: F401
     )
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -42,7 +42,7 @@ except ImportError:
     logging.warning("transformers not available - using basic text processing")
 
 try:
-    from sentence_transformers import SentenceTransformer
+    from sentence_transformers import SentenceTransformer  # noqa: F401
     SENTENCE_TRANSFORMERS_AVAILABLE = True
 except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
@@ -51,7 +51,7 @@ except ImportError:
 # Vector Database Libraries
 try:
     import chromadb
-    from chromadb.config import Settings
+    from chromadb.config import Settings  # noqa: F401
     CHROMADB_AVAILABLE = True
 except ImportError:
     CHROMADB_AVAILABLE = False
@@ -65,16 +65,16 @@ except ImportError:
     logging.warning("FAISS not available - using basic similarity search")
 
 try:
-    from sklearn.cluster import KMeans
-    from sklearn.metrics.pairwise import cosine_similarity
+    from sklearn.cluster import KMeans  # noqa: F401
+    from sklearn.metrics.pairwise import cosine_similarity  # noqa: F401
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
     logging.warning("sklearn not available")
 
 try:
-    import psycopg2
-    from psycopg2.extras import RealDictCursor
+    import psycopg2  # noqa: F401
+    from psycopg2.extras import RealDictCursor  # noqa: F401
     POSTGRESQL_AVAILABLE = True
 except ImportError:
     POSTGRESQL_AVAILABLE = False

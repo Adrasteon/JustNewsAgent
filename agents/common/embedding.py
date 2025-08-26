@@ -96,16 +96,56 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
     # Ensure local model files exist under the agent cache when cache_folder is provided.
     # This guarantees agents write to their own ./agents/<agent>/models dirs.
     logger.info("Loading shared embedding model: %s (cache=%s) device=%s", model_name, cache_folder, device_key)
-    if cache_folder:
-        # If ensure_agent_model_exists is available, use it to guarantee a local model dir
+    model = None
+
+    # If an external canonical model store is configured, prefer loading the
+    # agent's current model from the model store. This allows trainers to
+    # publish versioned models and agents to load the canonical per-agent copy.
+    model_store_root = os.environ.get("MODEL_STORE_ROOT")
+    if model_store_root:
         try:
-            model_dir = ensure_agent_model_exists(model_name, cache_folder)
-            model = SentenceTransformer(str(model_dir))
+            # local import to avoid adding dependency at module import time
+            from agents.common.model_store import ModelStore
+
+            # attempt to detect caller agent from earlier logic
+            caller_agent = None
+            try:
+                stack = inspect.stack()
+                for fr in stack:
+                    fname = str(fr.filename)
+                    parts = fname.split(os.path.sep)
+                    if 'agents' in parts:
+                        idx = parts.index('agents')
+                        if idx + 1 < len(parts):
+                            caller_agent = parts[idx + 1]
+                            break
+            except Exception:
+                caller_agent = None
+
+            if caller_agent:
+                ms = ModelStore(Path(model_store_root))
+                cur = ms.get_current(caller_agent)
+                if cur and cur.exists():
+                    try:
+                        model = SentenceTransformer(str(cur))
+                        logger.info("Loaded embedding model from ModelStore %s for agent %s", cur, caller_agent)
+                    except Exception:
+                        # fallthrough to other loading strategies
+                        model = None
         except Exception:
-            # Fallback: let SentenceTransformer handle download into cache_folder
-            model = SentenceTransformer(model_name, cache_folder=cache_folder)
-    else:
-        model = SentenceTransformer(model_name)
+            logger.debug("ModelStore not available or failed to load; falling back to local cache/download")
+
+    if model is None:
+        if cache_folder:
+            # If ensure_agent_model_exists is available, use it to guarantee a local model dir
+            try:
+                model_dir = ensure_agent_model_exists(model_name, cache_folder)
+                model = SentenceTransformer(str(model_dir))
+            except Exception:
+                # Fallback: let SentenceTransformer handle download into cache_folder
+                model = SentenceTransformer(model_name, cache_folder=cache_folder)
+        else:
+            model = SentenceTransformer(model_name)
 
     # Try to move to requested device if possible
     try:

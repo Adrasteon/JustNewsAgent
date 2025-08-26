@@ -979,7 +979,7 @@ if __name__ == "__main__":
 
 # V4 RTX Integration Module
 try:
-    from .rtx_manager import get_rtx_manager, query_rtx_model
+    from .rtx_manager import query_rtx_model
     RTX_AVAILABLE = True
     logger.info("✅ V4 RTX Manager integration available")
 except ImportError as e:
@@ -1031,7 +1031,8 @@ def query_hybrid_model_enhanced(prompt: str, max_tokens: int = 50, temperature: 
     
     # Check if we're in an async context
     try:
-        loop = asyncio.get_running_loop()
+        # Ensure we detect a running loop; assignment not required
+        asyncio.get_running_loop()
         # We're in an async context, create a task for V4
         task = asyncio.create_task(query_hybrid_model_v4(prompt, max_tokens, temperature))
         # This is a workaround - in production we should make calling functions async

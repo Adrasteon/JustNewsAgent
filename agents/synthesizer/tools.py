@@ -57,6 +57,7 @@ except ImportError:
 # PHASE 1 OPTIMIZATIONS APPLIED
 MODEL_NAME = "distilgpt2"
 MODEL_PATH = os.environ.get("MODEL_PATH", "./models/distilgpt2")
+SYNTHESIZER_MODEL_CACHE = os.environ.get("SYNTHESIZER_MODEL_CACHE")
 EMBEDDING_MODEL = os.environ.get("SENTENCE_TRANSFORMER_MODEL", "all-MiniLM-L6-v2")  # Lightweight embeddings
 OPTIMIZED_MAX_LENGTH = 1024  # Reduced from 2048 (clustering tasks don't need full context)
 OPTIMIZED_BATCH_SIZE = 4     # Memory-efficient for embeddings processing
@@ -153,14 +154,49 @@ def get_dialog_model():
     """Load optimized DialoGPT (deprecated)-medium model with memory-efficient configuration."""
     if AutoModelForCausalLM is None or AutoTokenizer is None:
         raise ImportError("transformers library is not installed.")
-    if not os.path.exists(MODEL_PATH) or not os.listdir(MODEL_PATH):
-        logger.info(f"Downloading {MODEL_NAME} to {MODEL_PATH}...")
-        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
+    # Resolution order:
+    # 1. SYNTHESIZER_MODEL_CACHE env var (per-agent explicit cache)
+    # 2. MODEL_STORE_ROOT ModelStore current symlink for 'synthesizer'
+    # 3. MODEL_PATH (default local path)
+
+    candidate_path = None
+    # 1) explicit per-agent cache
+    if SYNTHESIZER_MODEL_CACHE:
+        candidate_path = SYNTHESIZER_MODEL_CACHE
+
+    # 2) central ModelStore current for synthesizer
+    if candidate_path is None:
+        model_store_root = os.environ.get('MODEL_STORE_ROOT')
+        if model_store_root:
+            try:
+                from agents.common.model_store import ModelStore
+                ms = ModelStore(Path(model_store_root))
+                cur = ms.get_current('synthesizer')
+                if cur and cur.exists():
+                    candidate_path = str(cur)
+            except Exception as e:
+                logger.warning(f"ModelStore access failed for synthesizer: {e}")
+
+    # 3) fall back to configured MODEL_PATH
+    if candidate_path is None:
+        candidate_path = MODEL_PATH
+
+    # Ensure directory exists for downloads
+    try:
+        os.makedirs(candidate_path, exist_ok=True)
+    except Exception:
+        # If we cannot create the candidate path, fall back to MODEL_PATH
+        candidate_path = MODEL_PATH
+
+    # If candidate path is empty, download into it; otherwise load from local cache
+    if not os.path.exists(candidate_path) or not os.listdir(candidate_path):
+        logger.info(f"Downloading {MODEL_NAME} to {candidate_path}...")
+        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=candidate_path)
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=candidate_path)
     else:
-        logger.info(f"Loading {MODEL_NAME} from local cache {MODEL_PATH}...")
-        model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+        logger.info(f"Loading {MODEL_NAME} from local cache {candidate_path}...")
+        model = AutoModelForCausalLM.from_pretrained(candidate_path)
+        tokenizer = AutoTokenizer.from_pretrained(candidate_path)
     return model, tokenizer
 
 def get_embedding_model():
@@ -173,6 +209,24 @@ def get_embedding_model():
         # Prefer the shared helper when available
         from agents.common.embedding import get_shared_embedding_model
         agent_cache = os.environ.get('SYNTHESIZER_MODEL_CACHE') or str(Path('./agents/synthesizer/models').resolve())
+
+        # If a central ModelStore is configured, prefer loading the synthesizer's
+        # current model from the ModelStore (explicit check). This makes the
+        # Synthesizer behavior explicit rather than relying on stack inspection.
+        model_store_root = os.environ.get('MODEL_STORE_ROOT')
+        if model_store_root:
+            try:
+                from agents.common.model_store import ModelStore
+                ms = ModelStore(Path(model_store_root))
+                cur = ms.get_current('synthesizer')
+                if cur and cur.exists():
+                    # Pass the local path to the shared helper; it will construct
+                    # a SentenceTransformer from the directory.
+                    return get_shared_embedding_model(str(cur), cache_folder=str(cur))
+            except Exception:
+                # If ModelStore is unavailable or fails, fall back to agent cache
+                pass
+
         return get_shared_embedding_model(EMBEDDING_MODEL, cache_folder=agent_cache)
     except Exception:
         if SentenceTransformer is None:
@@ -190,23 +244,8 @@ def get_embedding_model():
             from agents.common.embedding import get_shared_embedding_model
             return get_shared_embedding_model(EMBEDDING_MODEL, cache_folder=agent_cache)
 
-    def get_llama_model():
-        """Compatibility shim for tests that expect get_llama_model to exist.
-
-        Returns a pair (model, tokenizer) or (None, None) when not available.
-        Tests typically monkeypatch this, so a simple shim prevents AttributeError
-        during collection.
-        """
-        return (None, None)
-
-    def get_mistral_model():
-        """Compatibility shim for tests that expect get_mistral_model to exist.
-
-        Returns a pair (model, tokenizer) or (None, None) when not available.
-        Tests typically monkeypatch this, so a simple shim prevents AttributeError
-        during collection.
-        """
-        return (None, None)
+    # Note: compatibility shims for tests are defined at module level below so
+    # they can be monkeypatched during pytest collection.
 def log_feedback(event: str, details: dict):
     """Log feedback for continual learning and retraining."""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:

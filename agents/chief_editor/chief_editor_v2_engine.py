@@ -11,7 +11,7 @@ from enum import Enum
 
 # Core ML Libraries
 try:
-    from transformers import (
+    from transformers import (  # noqa: F401
         AutoModel, AutoTokenizer, AutoModelForSequenceClassification,
         BertModel, BertTokenizer, BertForSequenceClassification,
         DistilBertModel, DistilBertTokenizer, DistilBertForSequenceClassification,
@@ -25,7 +25,7 @@ except ImportError:
     logging.warning("transformers not available - falling back to basic processing")
 
 try:
-    from sentence_transformers import SentenceTransformer
+    from sentence_transformers import SentenceTransformer  # noqa: F401
     SENTENCE_TRANSFORMERS_AVAILABLE = True
 except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
@@ -33,8 +33,8 @@ except ImportError:
 from pathlib import Path
 
 try:
-    from sklearn.metrics.pairwise import cosine_similarity
-    from sklearn.cluster import KMeans
+    from sklearn.metrics.pairwise import cosine_similarity  # noqa: F401
+    from sklearn.cluster import KMeans  # noqa: F401
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False

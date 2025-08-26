@@ -32,12 +32,12 @@ logger = logging.getLogger("newsreader.v2_engine")
 
 # Model availability checks
 try:
-    from transformers import (
+    from transformers import (  # noqa: F401
         pipeline, 
         AutoModelForCausalLM, 
         AutoTokenizer,
-        CLIPModel,
-        CLIPProcessor
+        CLIPModel,  # noqa: F401
+        CLIPProcessor  # noqa: F401
     )
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -188,20 +188,51 @@ class NewsReaderV2Engine:
             if not TRANSFORMERS_AVAILABLE:
                 logger.warning("Transformers not available - skipping LLaVA")
                 return
-            
-            # Load LLaVA model and processor
-            self.models['llava'] = AutoModelForCausalLM.from_pretrained(
-                self.config.llava_model,
-                cache_dir=self.config.cache_dir,
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32,
-                low_cpu_mem_usage=True,
-                trust_remote_code=True
-            ).to(self.device)
-            
-            self.processors['llava'] = AutoTokenizer.from_pretrained(
-                self.config.llava_model,
-                cache_dir=self.config.cache_dir
-            )
+            # Prefer canonical ModelStore when available via common loader
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model_cls = None
+                tokenizer_cls = None
+                try:
+                    # prefer causal LM class when available
+                    from transformers import AutoModelForCausalLM, AutoTokenizer
+                    model_cls = AutoModelForCausalLM
+                    tokenizer_cls = AutoTokenizer
+                except Exception:
+                    model_cls = None
+                    tokenizer_cls = None
+
+                model, tokenizer = load_transformers_model(
+                    self.config.llava_model,
+                    agent='newsreader',
+                    cache_dir=self.config.cache_dir,
+                    model_class=model_cls,
+                    tokenizer_class=tokenizer_cls,
+                )
+                # move to device if model supports .to()
+                try:
+                    model = model.to(self.device)
+                except Exception:
+                    pass
+
+                self.models['llava'] = model
+                self.processors['llava'] = tokenizer
+
+            except Exception as e:
+                logger.warning("ModelStore loader failed for LLaVA: %s - falling back to from_pretrained", e)
+                # Load LLaVA model and processor directly
+                self.models['llava'] = AutoModelForCausalLM.from_pretrained(
+                    self.config.llava_model,
+                    cache_dir=self.config.cache_dir,
+                    torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32,
+                    low_cpu_mem_usage=True,
+                    trust_remote_code=True
+                ).to(self.device)
+
+                self.processors['llava'] = AutoTokenizer.from_pretrained(
+                    self.config.llava_model,
+                    cache_dir=self.config.cache_dir
+                )
             
             logger.info("✅ LLaVA primary model loaded successfully")
             
@@ -219,11 +250,28 @@ class NewsReaderV2Engine:
             # For V2 compliance, we'll use a configurable fallback model for LLaVA-Next.
             # DialoGPT (deprecated) is deprecated; use NEWSREADER_FALLBACK_CONVERSATIONAL env var to override.
             fallback_model = os.environ.get("NEWSREADER_FALLBACK_CONVERSATIONAL", "distilgpt2")
-            self.models['llava_next'] = AutoModelForCausalLM.from_pretrained(
-                fallback_model,
-                cache_dir=self.config.cache_dir,
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, tokenizer = load_transformers_model(
+                    fallback_model,
+                    agent='newsreader',
+                    cache_dir=self.config.cache_dir,
+                    model_class=None,
+                    tokenizer_class=None,
+                )
+                try:
+                    model = model.to(self.device)
+                except Exception:
+                    pass
+                self.models['llava_next'] = model
+                # tokenizer may not be used for this fallback but keep available
+                self.processors['llava_next'] = tokenizer
+            except Exception:
+                self.models['llava_next'] = AutoModelForCausalLM.from_pretrained(
+                    fallback_model,
+                    cache_dir=self.config.cache_dir,
+                    torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                ).to(self.device)
             
             logger.info("✅ LLaVA-Next variant loaded successfully (model=%s)", fallback_model)
             
@@ -237,16 +285,33 @@ class NewsReaderV2Engine:
             if not TRANSFORMERS_AVAILABLE:
                 logger.warning("Transformers not available - skipping CLIP")
                 return
-            
-            self.models['clip'] = CLIPModel.from_pretrained(
-                self.config.clip_model,
-                cache_dir=self.config.cache_dir
-            ).to(self.device)
-            
-            self.processors['clip'] = CLIPProcessor.from_pretrained(
-                self.config.clip_model,
-                cache_dir=self.config.cache_dir
-            )
+            try:
+                from agents.common.model_loader import load_transformers_model
+                from transformers import CLIPModel, CLIPProcessor
+
+                model, processor = load_transformers_model(
+                    self.config.clip_model,
+                    agent='newsreader',
+                    cache_dir=self.config.cache_dir,
+                    model_class=CLIPModel,
+                    tokenizer_class=CLIPProcessor,
+                )
+                try:
+                    model = model.to(self.device)
+                except Exception:
+                    pass
+                self.models['clip'] = model
+                self.processors['clip'] = processor
+            except Exception:
+                self.models['clip'] = CLIPModel.from_pretrained(
+                    self.config.clip_model,
+                    cache_dir=self.config.cache_dir
+                ).to(self.device)
+
+                self.processors['clip'] = CLIPProcessor.from_pretrained(
+                    self.config.clip_model,
+                    cache_dir=self.config.cache_dir
+                )
             
             logger.info("✅ CLIP vision model loaded successfully")
             
