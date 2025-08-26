@@ -4,7 +4,7 @@
 # JustNewsAgent
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![CUDA](https://img.shields.io/badge/CUDA-12.1+-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![TensorRT](https://img.shields.io/badge/TensorRT-Production-orange.svg)](https://developer.nvidia.com/tensorrt)
 
@@ -69,7 +69,7 @@ Quick start
 Prerequisites
 -------------
 - Linux (Ubuntu recommended)
-- Python 3.12+
+- Python 3.11
 - Optional: NVIDIA GPU with CUDA 12.1+ for acceleration (RTX 3090/4090 recommended)
 - Conda or virtualenv for environment management
 
@@ -86,7 +86,7 @@ cd JustNewsAgent
 2. Create and activate a Python environment
 
 ```bash
-conda create -n justnews python=3.12 -y
+conda create -n justnews python=3.11 -y
 conda activate justnews
 pip install -r tests/requirements.txt
 ```
