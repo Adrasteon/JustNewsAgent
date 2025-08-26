@@ -1,3 +1,4 @@
+### DEPRECATED: Dockerfiles are deprecated for core deployments. Prefer native Ubuntu deployment. See markdown_docs/development_reports/DEPRECATE_DOCKER.md
 # Dockerfile for Critic Agent
 FROM python:3.11-slim
 

@@ -1,4 +1,5 @@
 
+### DEPRECATED: Dockerfiles are deprecated for core deployments. Prefer native Ubuntu deployment. See markdown_docs/development_reports/DEPRECATE_DOCKER.md
 # Dockerfile for Fact-Checker Agent
 FROM python:3.11-slim
 

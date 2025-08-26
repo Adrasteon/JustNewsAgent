@@ -10,6 +10,11 @@
 
 AI-powered news analysis system using a distributed multi-agent architecture, GPU acceleration, and continuous learning.
 
+DEPRECATION NOTICE
+------------------
+
+This project is deprecating the use of Docker for core agent deployments. Native (Ubuntu) deployment is now the recommended and supported path for production and development workflows due to performance and GPU passthrough requirements. Docker artifacts remain in the repository for reference and historical purposes, but they are no longer the primary supported deployment method. See `markdown_docs/development_reports/DEPRECATE_DOCKER.md` for migration guidance and rationale.
+
 Overview
 --------
 
