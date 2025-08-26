@@ -15,7 +15,6 @@ Features:
 import asyncio
 import json
 import logging
-from pathlib import Path
 from typing import List, Dict, Optional
 import time
 from datetime import datetime
@@ -24,10 +23,9 @@ from datetime import datetime
 import sys
 sys.path.append('/home/adra/JustNewsAgentic')
 from production_newsreader_fixed import ProductionNewsReader
-from playwright.async_api import async_playwright, Page, Browser
+from playwright.async_api import async_playwright
 from PIL import Image
 import io
-import base64
 
 # Configure logging
 logging.basicConfig(
@@ -133,7 +131,7 @@ class ProductionBBCNewsReaderCrawler:
                                     # Avoid duplicate and non-article URLs
                                     if not any(skip in href for skip in ['video', 'live', 'sport', 'topics', 'regions']):
                                         urls.add(href)
-                        except Exception as e:
+                        except Exception:
                             # Skip individual link processing errors
                             continue
                 except Exception as e:
@@ -175,7 +173,7 @@ class ProductionBBCNewsReaderCrawler:
                 if await cookie_button.count() > 0:
                     await cookie_button.first.click()
                     await asyncio.sleep(1)
-            except:
+            except Exception:
                 pass  # Cookie handling is optional
             
             # Capture screenshot

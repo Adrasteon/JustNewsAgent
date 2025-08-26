@@ -229,7 +229,7 @@ class ComprehensivePipelineTest:
             try:
                 response = requests.get(url, timeout=5)
                 health_status[agent] = response.status_code == 200
-            except:
+            except Exception:
                 health_status[agent] = False
                 
         return health_status
@@ -315,7 +315,7 @@ class ComprehensivePipelineTest:
                 "articles_per_second": statistics["articles_per_second"]
             })
             
-            logger.info(f"🎉 Comprehensive test complete!")
+            logger.info("🎉 Comprehensive test complete!")
             logger.info(f"📊 Statistics: {statistics}")
             
             return final_results
@@ -358,7 +358,7 @@ async def main():
     print(f"📄 Detailed results saved to: {output_file}")
     
     if "error" not in results:
-        print(f"\n🎉 Test completed successfully!")
+        print("\n🎉 Test completed successfully!")
         print(f"📊 Processed {results['statistics']['total_processed']} articles")
         print(f"✅ Success rate: {results['success_rate']:.1f}%")
         print(f"⚡ Performance: {results['articles_per_second']:.2f} articles/second")

@@ -226,7 +226,7 @@ class CriticV2Engine:
                     device=0 if self.device.type == 'cuda' else -1,
                     top_k=None
                 )
-            except:
+            except Exception:
                 # Fallback to base RoBERTa
                 self.models['roberta'] = RobertaForSequenceClassification.from_pretrained(
                     self.config.roberta_model,

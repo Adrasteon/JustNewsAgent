@@ -4,7 +4,6 @@ Clear functional boundaries leveraging each agent's strengths
 """
 
 ## **FACT CHECKER** - Neural Pattern Recognition & Assessment
-from typing import Any, Dict
 from agents.common.schemas import NeuralAssessment, PipelineResult
 
 try:

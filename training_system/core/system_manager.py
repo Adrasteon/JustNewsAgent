@@ -16,19 +16,13 @@ Features:
 - Training status dashboard and admin controls
 """
 
-import os
 import logging
-import asyncio
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from dataclasses import asdict
 
 # Import the core training coordinator
 from .training_coordinator import (
-    OnTheFlyTrainingCoordinator, 
-    TrainingExample, 
-    ModelPerformance,
-    initialize_online_training,
     get_training_coordinator,
     add_training_feedback,
     add_user_correction,

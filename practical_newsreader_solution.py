@@ -8,11 +8,10 @@ than complex dynamic loading. This implements a practical approach.
 Key Insight: Use smaller, quantizable models instead of forcing large models to fit.
 """
 
-import os
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import torch
 from transformers import (
     LlavaProcessor, 

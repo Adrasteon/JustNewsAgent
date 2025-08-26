@@ -22,8 +22,7 @@ import signal
 import sys
 import gc
 import atexit
-from typing import List, Any, Optional
-import weakref
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

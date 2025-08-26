@@ -281,7 +281,7 @@ class RTXManager:
             # Simple fallback decoding
             try:
                 return ''.join([chr(int(token)) for token in outputs[0] if 32 <= int(token) <= 126])
-            except:
+            except Exception:
                 return "Error: Could not decode response"
     
     async def _query_docker_model(self, prompt: str, max_tokens: int, temperature: float) -> Optional[str]:

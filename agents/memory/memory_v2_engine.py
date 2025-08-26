@@ -276,7 +276,7 @@ class MemoryV2Engine:
                     top_k=None  # Updated: Use top_k=None for consistency
                 )
                 logger.info("✅ BERT fallback model loaded successfully")
-            except:
+            except Exception:
                 logger.warning("❌ BERT model loading failed - using basic classification")
                 self.models['bert'] = None
     
@@ -338,7 +338,7 @@ class MemoryV2Engine:
                     name="memory_v2_collection"
                 )
                 logger.info("✅ Connected to existing ChromaDB collection")
-            except:
+            except Exception:
                 self.chroma_collection = self.chroma_client.create_collection(
                     name="memory_v2_collection",
                     metadata={"hnsw:space": "cosine"}
@@ -992,7 +992,7 @@ class MemoryV2Engine:
                     chroma_count = self.chroma_collection.count()
                     stats["chromadb_items"] = chroma_count
                     stats["storage_backends"].append("ChromaDB")
-                except:
+                except Exception:
                     pass
             
             # FAISS stats

@@ -602,7 +602,7 @@ def score_bias(text: str) -> float:
                         if score > 1.0:
                             score = score / 10.0  # Assume they meant 0.X
                         score = max(0.0, min(1.0, score))
-                    except:
+                    except Exception:
                         score = 0.5  # Default to neutral
                 else:
                     score = 0.5  # Default to neutral if no valid score found
@@ -677,7 +677,7 @@ def score_sentiment(text: str) -> float:
                         if score > 1.0:
                             score = score / 10.0  # Assume they meant 0.X
                         score = max(0.0, min(1.0, score))
-                    except:
+                    except Exception:
                         score = 0.5  # Default to neutral
                 else:
                     score = 0.5  # Default to neutral if no valid score found

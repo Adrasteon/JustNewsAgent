@@ -18,7 +18,6 @@ import signal
 import threading
 import time
 import logging
-from typing import Callable
 
 from fastapi import FastAPI, Request, HTTPException
 
