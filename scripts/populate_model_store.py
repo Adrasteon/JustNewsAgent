@@ -69,6 +69,16 @@ def populate():
         agent_dir = MODEL_STORE_ROOT / agent
         version_dir = agent_dir / VERSION_NAME
         ensure_dir(version_dir)
+        # If the version directory already contains files, assume it's populated and skip downloads
+        if any(version_dir.iterdir()):
+            print(f"Version directory {version_dir} already populated; skipping downloads for {agent}")
+            # Ensure current symlink points to this version
+            current = agent_dir / "current"
+            if current.exists() or current.is_symlink():
+                current.unlink()
+            current.symlink_to(version_dir)
+            print(f"Ensured current symlink for {agent}: {current} -> {version_dir}")
+            continue
         for m in models:
             # Normalize HF ids (sentence-transformers may include path)
             try:
@@ -98,12 +108,20 @@ def populate():
     agents_dir = ROOT / "agents"
     for sub in agents_dir.iterdir():
         models_dir = sub / "models"
-        if models_dir.exists():
-            if models_dir.is_dir():
-                shutil.rmtree(models_dir)
-                print(f"Removed {models_dir}")
-            else:
-                models_dir.unlink()
+        if models_dir.exists() or models_dir.is_symlink():
+            # If it's a symlink, unlink it. If it's a directory, remove it.
+            try:
+                if models_dir.is_symlink():
+                    models_dir.unlink()
+                    print(f"Unlinked symlink {models_dir}")
+                elif models_dir.is_dir():
+                    shutil.rmtree(models_dir)
+                    print(f"Removed {models_dir}")
+                else:
+                    models_dir.unlink()
+                    print(f"Removed file {models_dir}")
+            except Exception as e:
+                print(f"Failed to remove {models_dir}: {e}")
 
 
 if __name__ == '__main__':
