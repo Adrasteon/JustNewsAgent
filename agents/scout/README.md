@@ -217,7 +217,7 @@ result = response.json()
 ### **Architecture Ready For**
 - **CNN, Reuters, Guardian, NYT** - Implementation framework ready
 
-## � **Performance Metrics - Latest Results**
+## Performance Metrics - Latest Results
 
 ### **Production Crawling Achievement**
 - **Ultra-Fast Mode**: 3.77 articles/second (production validated)
@@ -264,7 +264,7 @@ result = response.json()
 - **Performance Scaling**: Adaptive concurrent processing
 - **Real-time Metrics**: Live performance and success rate monitoring
 
-## � **Usage Examples - Latest Implementation**
+## Usage Examples - Latest Implementation
 
 ### **Ultra-Fast Production Crawling**
 ```python

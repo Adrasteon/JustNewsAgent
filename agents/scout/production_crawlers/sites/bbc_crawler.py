@@ -377,7 +377,7 @@ class UltraFastBBCCrawler:
         logger.info(f"📊 {len(results)} articles in {total_time:.1f}s")
         logger.info(f"⚡ Rate: {len(results) / total_time:.2f} articles/second")
         logger.info(f"✅ Success Rate: {len(results) / len(urls) * 100:.1f}%")
-        logger.info(f"� Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
+        logger.info(f"Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
         
         return summary
 

@@ -92,7 +92,7 @@ class RTXManager:
             # Initialize model runner if engine exists
             engine_path = Path(self.engine_config['engine_dir'])
             if engine_path.exists() and any(engine_path.glob('*.engine')):
-                logger.info(f"� Loading TensorRT engine from {engine_path}")
+                logger.info(f"Loading TensorRT engine from {engine_path}")
                 self.tensorrt_engine = ModelRunner.from_dir(
                     engine_dir=str(engine_path),
                     lora_dir=None,  # Will be set during LoRA loading
