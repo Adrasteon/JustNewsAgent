@@ -12,6 +12,35 @@ from pathlib import Path
 import inspect
 import warnings
 
+
+def _detect_caller_agent() -> Optional[str]:
+    """Return the agent folder name (e.g. 'memory', 'synthesizer') by
+    inspecting the stack. Skip internal common modules (agents/common).
+    """
+    try:
+        stack = inspect.stack()
+        # Prefer frames that reference agents/<agent>/ where <agent> != 'common'
+        for fr in stack:
+            fname = str(fr.filename)
+            parts = fname.split(os.path.sep)
+            if 'agents' in parts:
+                idx = parts.index('agents')
+                if idx + 1 < len(parts):
+                    candidate = parts[idx + 1]
+                    if candidate and candidate != 'common':
+                        return candidate
+        # Fallback: return any agent-like folder if present
+        for fr in stack:
+            fname = str(fr.filename)
+            parts = fname.split(os.path.sep)
+            if 'agents' in parts:
+                idx = parts.index('agents')
+                if idx + 1 < len(parts):
+                    return parts[idx + 1]
+    except Exception:
+        return None
+    return None
+
 logger = logging.getLogger(__name__)
 
 _MODEL_CACHE = {}
@@ -102,38 +131,70 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
     # agent's current model from the model store. This allows trainers to
     # publish versioned models and agents to load the canonical per-agent copy.
     model_store_root = os.environ.get("MODEL_STORE_ROOT")
+    # Respect STRICT_MODEL_STORE when set to '1','true' or 'yes' (case-insensitive)
+    strict_store = str(os.environ.get("STRICT_MODEL_STORE", "0")).lower() in ("1", "true", "yes")
     if model_store_root:
         try:
             # local import to avoid adding dependency at module import time
             from agents.common.model_store import ModelStore
 
-            # attempt to detect caller agent from earlier logic
-            caller_agent = None
-            try:
-                stack = inspect.stack()
-                for fr in stack:
-                    fname = str(fr.filename)
-                    parts = fname.split(os.path.sep)
-                    if 'agents' in parts:
-                        idx = parts.index('agents')
-                        if idx + 1 < len(parts):
-                            caller_agent = parts[idx + 1]
-                            break
-            except Exception:
-                caller_agent = None
+            # attempt to detect caller agent from stack (skip agents/common)
+            caller_agent = _detect_caller_agent()
 
             if caller_agent:
                 ms = ModelStore(Path(model_store_root))
                 cur = ms.get_current(caller_agent)
                 if cur and cur.exists():
+                    # ModelStore returns the version directory (e.g. .../memory/v1) which
+                    # may contain one or more model subfolders (for example when the
+                    # HF snapshot format is used). Try to locate a sensible model
+                    # directory inside `cur` that SentenceTransformer can load.
                     try:
-                        model = SentenceTransformer(str(cur))
-                        logger.info("Loaded embedding model from ModelStore %s for agent %s", cur, caller_agent)
+                        candidate = None
+                        # Common naming pattern used by the populate script:
+                        # models--<library>--<model-id>
+                        normalized = model_name.replace('/', '--')
+                        expected_dir = cur / f"models--{normalized}"
+                        if expected_dir.exists():
+                            # Prefer an explicit snapshot folder if present
+                            snaps = list(expected_dir.glob('snapshots/*'))
+                            if snaps:
+                                candidate = snaps[0]
+                            else:
+                                candidate = expected_dir
+
+                        # If not found, try to discover any directory under `cur`
+                        # that contains model artifacts (modules.json, config.json,
+                        # pytorch_model.bin or model.safetensors). We search recursively
+                        # but stop at the first sensible candidate.
+                        if candidate is None:
+                            for p in cur.rglob('*'):
+                                if p.is_file() and p.name in ('modules.json', 'config.json', 'pytorch_model.bin', 'model.safetensors'):
+                                    candidate = p.parent
+                                    break
+
+                        if candidate is not None and candidate.exists():
+                            try:
+                                model = SentenceTransformer(str(candidate))
+                                logger.info("Loaded embedding model from ModelStore %s for agent %s (using %s)", cur, caller_agent, candidate)
+                            except Exception as e:
+                                logger.debug("Failed to load SentenceTransformer from ModelStore candidate %s: %s", candidate, e)
+                                model = None
+                        else:
+                            logger.debug("No suitable model directory found inside ModelStore path %s for agent %s", cur, caller_agent)
+                            model = None
                     except Exception:
-                        # fallthrough to other loading strategies
+                        logger.debug("ModelStore branch failed; falling back to local cache/download")
                         model = None
         except Exception:
             logger.debug("ModelStore not available or failed to load; falling back to local cache/download")
+
+    # If strict enforcement is requested, and we attempted to use the ModelStore
+    # but did not obtain a model, fail fast rather than falling back to downloads.
+    if strict_store and model is None:
+        # Attempt to include agent name if available for better diagnostics
+        agent_name = caller_agent if ('caller_agent' in locals() and caller_agent) else 'unknown'
+        raise RuntimeError(f"STRICT_MODEL_STORE is enabled but no model available in ModelStore for agent {agent_name}")
 
     if model is None:
         if cache_folder:

@@ -131,8 +131,18 @@ done
 
 # Pre-flight: check ports 8000..8011 and attempt graceful shutdown if occupied
 
-# Ensure MODEL_STORE_ROOT and per-agent caches point to the central data directory
-DEFAULT_BASE_MODELS_DIR="/media/adra/Data/justnews"
+# Ensure MODEL_STORE_ROOT and per-agent caches point to the central data directory.
+# Be resilient to the mountpoint case (Data vs data) or missing external drive after reboots.
+if [ -d "/media/adra/Data" ]; then
+  DEFAULT_BASE_MODELS_DIR="/media/adra/Data/justnews"
+elif [ -d "/media/adra/data" ]; then
+  DEFAULT_BASE_MODELS_DIR="/media/adra/data/justnews"
+else
+  # Fallback to a directory inside the user's home to avoid failures on systems
+  # where the external data volume is not mounted. Operators can override via
+  # the BASE_MODEL_DIR/MODEL_STORE_ROOT env vars before invoking the script.
+  DEFAULT_BASE_MODELS_DIR="${HOME}/.local/share/justnews"
+fi
 export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-$DEFAULT_BASE_MODELS_DIR/model_store}"
 export BASE_MODEL_DIR="${BASE_MODEL_DIR:-$DEFAULT_BASE_MODELS_DIR/agents}"
 

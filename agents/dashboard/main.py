@@ -73,6 +73,13 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for dashboard")
 
+# Register reload endpoint if available
+try:
+    from agents.common.reload import register_reload_endpoint
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for dashboard")
+
 class ToolCall(BaseModel):
     args: list
     kwargs: dict

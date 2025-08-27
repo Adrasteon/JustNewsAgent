@@ -23,5 +23,5 @@
     "if (scout_quality_score < 0.5) then skip_detailed_analysis = true",
     "if (multiple_agents_disagree == true) then require_chief_editor_review = true"
   ],
-  "timestamp": "2025-08-26T15:46:18.781096"
+  "timestamp": "2025-08-27T10:17:33.347702"
 }

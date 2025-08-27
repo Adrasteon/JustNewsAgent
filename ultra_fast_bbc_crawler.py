@@ -18,6 +18,8 @@ import time
 import re
 from datetime import datetime
 from playwright.async_api import async_playwright
+import psycopg2
+from scripts.db_dedupe import ensure_table, register_url
 from typing import List, Dict, Optional
 import logging
 
@@ -303,7 +305,27 @@ class UltraFastBBCCrawler:
         # Process ultra-fast
         results = await self.process_ultra_fast_batch(urls)
         
-        # Save results
+        # Save results (apply DB-side dedupe gate)
+        try:
+            conn = psycopg2.connect(dbname='justnews', user='justnews_user', password='password123', host='localhost')
+            ensure_table(conn)
+        except Exception:
+            conn = None
+
+        filtered_results = []
+        for r in results:
+            url = r.get('url')
+            if not url:
+                continue
+            keep = True
+            try:
+                if conn:
+                    keep = register_url(conn, url)
+            except Exception:
+                keep = True
+            if keep:
+                filtered_results.append(r)
+
         total_time = time.time() - start_time
         output_file = f"ultra_fast_bbc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         
@@ -311,12 +333,12 @@ class UltraFastBBCCrawler:
             "ultra_fast_crawl": True,
             "target_articles": target_articles,
             "urls_processed": len(urls),
-            "successful_articles": len(results),
+            "successful_articles": len(filtered_results),
             "total_time_seconds": total_time,
-            "articles_per_second": len(results) / total_time if total_time > 0 else 0,
-            "projected_daily_capacity": (len(results) / total_time) * 86400 if total_time > 0 else 0,
+            "articles_per_second": len(filtered_results) / total_time if total_time > 0 else 0,
+            "projected_daily_capacity": (len(filtered_results) / total_time) * 86400 if total_time > 0 else 0,
             "timestamp": datetime.now().isoformat(),
-            "results": results
+            "results": filtered_results
         }
         
         with open(output_file, 'w', encoding='utf-8') as f:
