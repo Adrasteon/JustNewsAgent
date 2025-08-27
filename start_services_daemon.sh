@@ -140,6 +140,13 @@ export BASE_MODEL_DIR="${BASE_MODEL_DIR:-$DEFAULT_BASE_MODELS_DIR/agents}"
 # Set STRICT_MODEL_STORE=0 to allow fallbacks for development/testing.
 export STRICT_MODEL_STORE="${STRICT_MODEL_STORE:-1}"
 
+# PostgreSQL defaults used by agents/tests when not explicitly provided elsewhere.
+# These can be overridden in the environment for CI or developer machines.
+export POSTGRES_HOST="${POSTGRES_HOST:-localhost}"
+export POSTGRES_DB="${POSTGRES_DB:-justnews}"
+export POSTGRES_USER="${POSTGRES_USER:-justnews_user}"
+export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password123}"
+
 # Per-agent cache envs (only set if not already set)
 export SYNTHESIZER_MODEL_CACHE="${SYNTHESIZER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/synthesizer/models}"
 export MEMORY_MODEL_CACHE="${MEMORY_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/memory/models}"
