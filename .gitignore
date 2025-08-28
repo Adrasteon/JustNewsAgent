@@ -120,6 +120,9 @@ test_*_pipeline*.py
 *.swo
 *~
 
+# Editor workspace state (avoid committing)
+workspaceState.state.json
+
 # OS Files
 .DS_Store
 .DS_Store?
