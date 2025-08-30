@@ -171,6 +171,9 @@ crawl4ai_best_practice.py
 deep_content_analysis.py
 *_intelligence_test.py
 
+# Allow committing the TensorRT stub test used for CI checks
+!tests/test_tensorrt_stub.py
+
 # Database Files and Vector Stores
 *.db
 *_vectordb/
