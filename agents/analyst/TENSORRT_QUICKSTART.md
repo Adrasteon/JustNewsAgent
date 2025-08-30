@@ -8,6 +8,7 @@ Purpose
 
 Files
 - `scripts/compile_tensorrt_stub.py` — safe stub that either calls the real compiler (if available) or creates marker engine files to emulate a successful build.
+ - `tools/build_engine/build_engine.py` — host-native scaffold to run the native compiler when available or create marker engines.
 
 Quick checks
 1. Check-only (no changes):
