@@ -20,6 +20,8 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
 import logging
+import hashlib
+from urllib.parse import urlparse
 
 # Import NewsReader from Scout agent directory
 from practical_newsreader_solution import PracticalNewsReader
@@ -147,10 +149,36 @@ class ProductionBBCCrawler:
                     except Exception:
                         continue
             
+            # Try to find canonical link and paywall markers
+            canonical = None
+            paywall_flag = False
+            try:
+                canonical = await page.evaluate("() => { const c=document.querySelector('link[rel=\\'canonical\\']'); return c?c.href:null }")
+            except Exception:
+                canonical = None
+
+            try:
+                paywall_selectors = ['.paywall', '.subscription-required', '.member-only', '[data-paywall]']
+                for sel in paywall_selectors:
+                    try:
+                        if await page.locator(sel).count() > 0:
+                            paywall_flag = True
+                            break
+                    except Exception:
+                        continue
+                if not paywall_flag:
+                    kw = ['subscribe', 'subscription', 'member', 'sign in', 'log in', 'paywall']
+                    if any(k in (title + ' ' + content_text).lower() for k in kw):
+                        paywall_flag = True
+            except Exception:
+                paywall_flag = False
+
             return {
                 "title": title,
                 "content": content_text.strip()[:1000],  # Limit for efficiency
-                "method": "dom_extraction"
+                "method": "dom_extraction",
+                "canonical": canonical,
+                "paywall_flag": paywall_flag
             }
             
         except Exception as e:
@@ -203,14 +231,24 @@ class ProductionBBCCrawler:
                         # Fallback to simple text analysis instead of image analysis for speed
                         analysis = f"Article: {content_data['title']}\nContent: {content_data['content'][:300]}"
                         
+                        url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
+                        domain = urlparse(url).netloc
+                        canonical = content_data.get('canonical')
+                        paywall_flag = content_data.get('paywall_flag', False)
+
                         return {
                             "url": url,
+                            "url_hash": url_hash,
+                            "domain": domain,
+                            "canonical": canonical,
                             "title": content_data["title"],
                             "content": content_data["content"],
                             "analysis": analysis,
                             "extraction_method": content_data["method"],
                             "timestamp": datetime.now().isoformat(),
-                            "status": "success"
+                            "status": "success",
+                            "paywall_flag": paywall_flag,
+                            "confidence": 0.8
                         }
                     except Exception as e:
                         logger.warning(f"Analysis failed for {url}: {e}")
