@@ -24,6 +24,7 @@ from agents.memory.tools import (
     log_training_example,
     save_article,
     vector_search_articles,
+    vector_search_articles_local,
 )
 
 # Configure logging
@@ -217,6 +218,25 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for memory")
 
+# Register reload endpoint and handler for runtime reloads (embedding etc.)
+try:
+    from agents.common.reload import register_reload_endpoint, register_reload_handler
+
+    def _reload_embedding_model():
+        """Reload the embedding model from ModelStore / cache and return a small status."""
+        global embedding_model
+        try:
+            embedding_model = get_embedding_model()
+            return {"reloaded": True}
+        except Exception as e:
+            # preserve previous model on failure
+            return {"reloaded": False, "error": str(e)}
+
+    register_reload_handler('embedding_model', _reload_embedding_model)
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for memory")
+
 @app.get("/health")
 def health():
     """Health check endpoint."""
@@ -281,12 +301,14 @@ def vector_search_articles_endpoint(request: dict):
             else:
                 search_data = request["kwargs"]
         else:
-            # Direct call format  
+            # Direct call format
             search_data = request
-        
+
         # Create VectorSearch object from the data
         search = VectorSearch(**search_data)
-        return vector_search_articles(search.query, search.top_k)
+        # Use local in-process search implementation to avoid making HTTP
+        # requests to ourselves which can cause recursive blocking behavior.
+        return vector_search_articles_local(search.query, search.top_k)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error searching articles: {str(e)}")
 

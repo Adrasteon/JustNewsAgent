@@ -8,9 +8,6 @@ Output: /tmp/required_files.txt (one path per line, repository-relative)
 from __future__ import annotations
 
 import ast
-import os
-import re
-import sys
 from pathlib import Path
 from typing import Set, List
 

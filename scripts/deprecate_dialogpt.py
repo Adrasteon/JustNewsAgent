@@ -34,9 +34,9 @@ EXCLUDE_DIRS = {'.git', '.cache', 'model_cache', 'models', 'archive_obsolete_fil
 
 # patterns to replace: tuple(pattern, replacement_fn, description)
 MODEL_LITERALS = [
-    ros.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
-    ros.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
-    ros.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
+    os.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
+    os.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
+    os.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
 ]
 
 def find_files(root: Path) -> List[Path]:
@@ -110,7 +110,7 @@ def process_python_file(path: Path, apply: bool) -> Tuple[bool, List[str]]:
                 path.write_text(newtext, encoding='utf-8')
             else:
                 # write new file directly, but first create .bak.timestamp
-                ts_bak = path.with_suffix(path.suffix + f'.bak2')
+                ts_bak = path.with_suffix(path.suffix + '.bak2')
                 path.rename(ts_bak)
                 path.write_text(newtext, encoding='utf-8')
         return True, notes

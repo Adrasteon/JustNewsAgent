@@ -164,12 +164,12 @@ class UltraFastBBCCrawler:
                 # Try main content areas with short timeout
                 content_elem = await page.locator('main, [role="main"], .story-body').first.text_content(timeout=2000)
                 content = content_elem[:800] if content_elem else ""
-            except:
+            except Exception:
                 # Fallback to paragraphs
                 try:
                     paragraphs = await page.locator('p').all_text_contents(timeout=1000)
                     content = " ".join(paragraphs[:3])  # First 3 paragraphs only
-                except:
+                except Exception:
                     content = ""
             
             return {
@@ -377,7 +377,7 @@ class UltraFastBBCCrawler:
         logger.info(f"📊 {len(results)} articles in {total_time:.1f}s")
         logger.info(f"⚡ Rate: {len(results) / total_time:.2f} articles/second")
         logger.info(f"✅ Success Rate: {len(results) / len(urls) * 100:.1f}%")
-        logger.info(f"� Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
+        logger.info(f"Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
         
         return summary
 

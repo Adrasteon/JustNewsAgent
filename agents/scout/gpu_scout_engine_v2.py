@@ -173,19 +173,35 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 
-                self.models["news_classifier"] = AutoModelForSequenceClassification.from_pretrained(
-                    news_config["model_name"],
-                    num_labels=news_config["num_labels"],
-                    torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                    trust_remote_code=True,
-                    use_auth_token=False
-                ).to(self.device)
-                
-                self.tokenizers["news_classifier"] = AutoTokenizer.from_pretrained(
-                    news_config["model_name"],
-                    trust_remote_code=True,
-                    use_fast=True  # Use fast tokenizer to avoid deprecation
-                )
+                try:
+                    from agents.common.model_loader import load_transformers_model
+                    model, tokenizer = load_transformers_model(
+                        news_config["model_name"],
+                        agent='scout',
+                        cache_dir=None,
+                        model_class=AutoModelForSequenceClassification,
+                        tokenizer_class=AutoTokenizer,
+                    )
+                    try:
+                        model = model.to(self.device)
+                    except Exception:
+                        pass
+                    self.models["news_classifier"] = model
+                    self.tokenizers["news_classifier"] = tokenizer
+                except Exception:
+                    self.models["news_classifier"] = AutoModelForSequenceClassification.from_pretrained(
+                        news_config["model_name"],
+                        num_labels=news_config["num_labels"],
+                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                        trust_remote_code=True,
+                        use_auth_token=False
+                    ).to(self.device)
+
+                    self.tokenizers["news_classifier"] = AutoTokenizer.from_pretrained(
+                        news_config["model_name"],
+                        trust_remote_code=True,
+                        use_fast=True  # Use fast tokenizer to avoid deprecation
+                    )
                 
                 self.pipelines["news_classifier"] = pipeline(
                     "text-classification",
@@ -213,19 +229,35 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 
-                self.models["quality_assessor"] = AutoModelForSequenceClassification.from_pretrained(
-                    quality_config["model_name"],
-                    num_labels=quality_config["num_labels"],
-                    torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                    ignore_mismatched_sizes=True,  # Allow different number of labels
-                    trust_remote_code=True
-                ).to(self.device)
-                
-                self.tokenizers["quality_assessor"] = AutoTokenizer.from_pretrained(
-                    quality_config["model_name"],
-                    trust_remote_code=True,
-                    use_fast=True
-                )
+                try:
+                    from agents.common.model_loader import load_transformers_model
+                    model, tokenizer = load_transformers_model(
+                        quality_config["model_name"],
+                        agent='scout',
+                        cache_dir=None,
+                        model_class=AutoModelForSequenceClassification,
+                        tokenizer_class=AutoTokenizer,
+                    )
+                    try:
+                        model = model.to(self.device)
+                    except Exception:
+                        pass
+                    self.models["quality_assessor"] = model
+                    self.tokenizers["quality_assessor"] = tokenizer
+                except Exception:
+                    self.models["quality_assessor"] = AutoModelForSequenceClassification.from_pretrained(
+                        quality_config["model_name"],
+                        num_labels=quality_config["num_labels"],
+                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                        ignore_mismatched_sizes=True,  # Allow different number of labels
+                        trust_remote_code=True
+                    ).to(self.device)
+
+                    self.tokenizers["quality_assessor"] = AutoTokenizer.from_pretrained(
+                        quality_config["model_name"],
+                        trust_remote_code=True,
+                        use_fast=True
+                    )
                 
                 self.pipelines["quality_assessor"] = pipeline(
                     "text-classification",
@@ -282,30 +314,55 @@ class NextGenGPUScoutEngine:
             
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
-                self.models["bias_detector"] = AutoModelForSequenceClassification.from_pretrained(
-                    bias_config["model_name"],
-                    num_labels=bias_config["num_labels"],
-                    torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                    trust_remote_code=True
-                ).to(self.device)
-                
-                self.tokenizers["bias_detector"] = AutoTokenizer.from_pretrained(
-                    bias_config["model_name"],
-                    trust_remote_code=True,
-                    use_fast=True
-                )
-                
-                self.pipelines["bias_detector"] = pipeline(
-                    "text-classification",
-                    model=self.models["bias_detector"],
-                    tokenizer=self.tokenizers["bias_detector"],
-                    device=0 if self.device.startswith("cuda") else -1,
-                    top_k=None,  # Updated API
-                    batch_size=1,
-                    truncation=True,
-                    max_length=512
-                )
+                try:
+                    from agents.common.model_loader import load_transformers_model
+                    model, tokenizer = load_transformers_model(
+                        bias_config["model_name"],
+                        agent='scout',
+                        cache_dir=None,
+                        model_class=AutoModelForSequenceClassification,
+                        tokenizer_class=AutoTokenizer,
+                    )
+                    try:
+                        model = model.to(self.device)
+                    except Exception:
+                        pass
+                    self.models["bias_detector"] = model
+                    self.tokenizers["bias_detector"] = tokenizer
+                    self.pipelines["bias_detector"] = pipeline(
+                        "text-classification",
+                        model=self.models["bias_detector"],
+                        tokenizer=self.tokenizers["bias_detector"],
+                        device=0 if self.device.startswith("cuda") else -1,
+                        top_k=None,
+                        batch_size=1,
+                        truncation=True,
+                        max_length=512
+                    )
+                except Exception:
+                    self.models["bias_detector"] = AutoModelForSequenceClassification.from_pretrained(
+                        bias_config["model_name"],
+                        num_labels=bias_config["num_labels"],
+                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                        trust_remote_code=True
+                    ).to(self.device)
+
+                    self.tokenizers["bias_detector"] = AutoTokenizer.from_pretrained(
+                        bias_config["model_name"],
+                        trust_remote_code=True,
+                        use_fast=True
+                    )
+
+                    self.pipelines["bias_detector"] = pipeline(
+                        "text-classification",
+                        model=self.models["bias_detector"],
+                        tokenizer=self.tokenizers["bias_detector"],
+                        device=0 if self.device.startswith("cuda") else -1,
+                        top_k=None,
+                        batch_size=1,
+                        truncation=True,
+                        max_length=512
+                    )
             
             logger.info("✅ Bias Detection Model loaded successfully")
             
@@ -322,18 +379,34 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 
-                self.models["visual_analyzer"] = LlavaNextForConditionalGeneration.from_pretrained(
-                    visual_config["model_name"],
-                    torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                    low_cpu_mem_usage=True,
-                    trust_remote_code=True
-                ).to(self.device)
-                
-                self.tokenizers["visual_analyzer"] = LlavaNextProcessor.from_pretrained(
-                    visual_config["model_name"],
-                    trust_remote_code=True,
-                    use_fast=True  # Use fast processor to avoid warnings
-                )
+                try:
+                    from agents.common.model_loader import load_transformers_model
+                    model, processor = load_transformers_model(
+                        visual_config["model_name"],
+                        agent='scout',
+                        cache_dir=None,
+                        model_class=LlavaNextForConditionalGeneration,
+                        tokenizer_class=LlavaNextProcessor,
+                    )
+                    try:
+                        model = model.to(self.device)
+                    except Exception:
+                        pass
+                    self.models["visual_analyzer"] = model
+                    self.tokenizers["visual_analyzer"] = processor
+                except Exception:
+                    self.models["visual_analyzer"] = LlavaNextForConditionalGeneration.from_pretrained(
+                        visual_config["model_name"],
+                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                        low_cpu_mem_usage=True,
+                        trust_remote_code=True
+                    ).to(self.device)
+
+                    self.tokenizers["visual_analyzer"] = LlavaNextProcessor.from_pretrained(
+                        visual_config["model_name"],
+                        trust_remote_code=True,
+                        use_fast=True  # Use fast processor to avoid warnings
+                    )
             
             logger.info("✅ Visual Analysis Model (LLaVA) loaded successfully")
             

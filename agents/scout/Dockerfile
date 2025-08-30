@@ -1,4 +1,5 @@
 
+### DEPRECATED: Dockerfiles are deprecated for core deployments. Prefer native Ubuntu deployment. See markdown_docs/development_reports/DEPRECATE_DOCKER.md
 FROM nvidia/cuda:12.1-devel-ubuntu22.04
 
 # Set environment variables

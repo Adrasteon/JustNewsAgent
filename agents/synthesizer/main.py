@@ -68,6 +68,13 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for synthesizer")
 
+# Register reload endpoint if available
+try:
+    from agents.common.reload import register_reload_endpoint
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for synthesizer")
+
 class ToolCall(BaseModel):
     args: list
     kwargs: dict
@@ -96,9 +103,10 @@ def log_feedback(call: ToolCall):
 @app.post("/aggregate_cluster")
 def aggregate_cluster_endpoint(call: ToolCall):
     try:
-        from tools import aggregate_cluster
+        # Use relative import to resolve the agent-local tools module
+        from .tools import aggregate_cluster as _aggregate_cluster
         logger.info(f"Calling aggregate_cluster with args: {call.args} and kwargs: {call.kwargs}")
-        return aggregate_cluster(*call.args, **call.kwargs)
+        return _aggregate_cluster(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in aggregate_cluster: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -106,9 +114,10 @@ def aggregate_cluster_endpoint(call: ToolCall):
 @app.post("/cluster_articles")
 def cluster_articles_endpoint(call: ToolCall):
     try:
-        from tools import cluster_articles
+        # Use relative import to resolve the agent-local tools module
+        from .tools import cluster_articles as _cluster_articles
         logger.info(f"Calling cluster_articles with args: {call.args} and kwargs: {call.kwargs}")
-        return cluster_articles(*call.args, **call.kwargs)
+        return _cluster_articles(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in cluster_articles: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -116,9 +125,10 @@ def cluster_articles_endpoint(call: ToolCall):
 @app.post("/neutralize_text")
 def neutralize_text_endpoint(call: ToolCall):
     try:
-        from tools import neutralize_text
+        # Use relative import to resolve the agent-local tools module
+        from .tools import neutralize_text as _neutralize_text
         logger.info(f"Calling neutralize_text with args: {call.args} and kwargs: {call.kwargs}")
-        return neutralize_text(*call.args, **call.kwargs)
+        return _neutralize_text(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in neutralize_text: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -128,7 +138,7 @@ def neutralize_text_endpoint(call: ToolCall):
 def synthesize_news_articles_gpu_endpoint(call: ToolCall):
     """GPU-accelerated news article synthesis endpoint"""
     try:
-        from gpu_tools import synthesize_news_articles_gpu
+        from .gpu_tools import synthesize_news_articles_gpu
         logger.info(f"Calling GPU synthesize with {len(call.args[0]) if call.args else 0} articles")
         result = synthesize_news_articles_gpu(*call.args, **call.kwargs)
         
@@ -142,12 +152,13 @@ def synthesize_news_articles_gpu_endpoint(call: ToolCall):
         logger.error(f"❌ GPU synthesis error: {e}")
         # Graceful fallback to CPU implementation
         try:
-            from tools import cluster_articles, aggregate_cluster
+            # Use relative import to resolve the agent-local tools module
+            from .tools import cluster_articles as _cluster_articles, aggregate_cluster as _aggregate_cluster
             logger.info("🔄 Falling back to CPU synthesis")
             # Simple fallback implementation
             articles = call.args[0] if call.args else []
-            clusters = cluster_articles(articles)
-            synthesis = aggregate_cluster(clusters)
+            clusters = _cluster_articles(articles)
+            synthesis = _aggregate_cluster(clusters)
             return {
                 "success": True,
                 "themes": [{"theme_name": "General News", "articles": articles}],
@@ -162,7 +173,7 @@ def synthesize_news_articles_gpu_endpoint(call: ToolCall):
 def get_synthesizer_performance_endpoint(call: ToolCall):
     """Get synthesizer performance statistics"""
     try:
-        from gpu_tools import get_synthesizer_performance
+        from .gpu_tools import get_synthesizer_performance
         logger.info("Retrieving synthesizer performance stats")
         return get_synthesizer_performance(*call.args, **call.kwargs)
     except Exception as e:

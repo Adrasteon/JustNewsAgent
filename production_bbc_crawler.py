@@ -15,7 +15,6 @@ Features:
 import asyncio
 import json
 import logging
-from pathlib import Path
 from typing import List, Dict, Optional
 import time
 from datetime import datetime
@@ -24,10 +23,11 @@ from datetime import datetime
 import sys
 sys.path.append('/home/adra/JustNewsAgentic')
 from production_newsreader_fixed import ProductionNewsReader
-from playwright.async_api import async_playwright, Page, Browser
+import psycopg2
+from scripts.db_dedupe import ensure_table, register_url
+from playwright.async_api import async_playwright
 from PIL import Image
 import io
-import base64
 
 # Configure logging
 logging.basicConfig(
@@ -133,7 +133,7 @@ class ProductionBBCNewsReaderCrawler:
                                     # Avoid duplicate and non-article URLs
                                     if not any(skip in href for skip in ['video', 'live', 'sport', 'topics', 'regions']):
                                         urls.add(href)
-                        except Exception as e:
+                        except Exception:
                             # Skip individual link processing errors
                             continue
                 except Exception as e:
@@ -175,7 +175,7 @@ class ProductionBBCNewsReaderCrawler:
                 if await cookie_button.count() > 0:
                     await cookie_button.first.click()
                     await asyncio.sleep(1)
-            except:
+            except Exception:
                 pass  # Cookie handling is optional
             
             # Capture screenshot
@@ -287,15 +287,32 @@ class ProductionBBCNewsReaderCrawler:
                 return {"error": "No URLs found", "results": []}
             
             logger.info(f"📝 Processing {len(urls)} BBC England articles...")
-            
+
+            # Ensure dedupe table exists (DB-side gate)
+            try:
+                conn = psycopg2.connect(dbname='justnews', user='justnews_user', password='password123', host='localhost')
+                ensure_table(conn)
+            except Exception:
+                conn = None
+
             # Process articles with production pipeline
             for i, url in enumerate(urls, 1):
                 logger.info(f"📰 [{i}/{len(urls)}] Processing article...")
-                
+
+                # register URL; if it already exists we skip saving result
+                should_save = True
+                try:
+                    if conn:
+                        inserted = register_url(conn, url)
+                        should_save = bool(inserted)
+                except Exception:
+                    # on error, fall back to saving
+                    should_save = True
+
                 result = await self.process_article(url)
-                if result:
+                if result and should_save:
                     self.results.append(result)
-                
+
                 # Brief pause between requests
                 await asyncio.sleep(1)
             
@@ -303,6 +320,10 @@ class ProductionBBCNewsReaderCrawler:
             end_time = time.time()
             duration = round(end_time - start_time, 2)
             
+            # Close DB conn if used
+            if conn:
+                conn.close()
+
             # Get final NewsReader metrics
             final_metrics = await self.newsreader.get_performance_metrics()
             

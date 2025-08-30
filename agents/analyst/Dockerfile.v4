@@ -1,6 +1,7 @@
 # V4 RTX-Enhanced Dockerfile for Analyst Agent
 # Includes TensorRT-LLM and NVIDIA RTX AI Toolkit dependencies
 
+### DEPRECATED: Dockerfiles are deprecated for core deployments. Prefer native Ubuntu deployment. See markdown_docs/development_reports/DEPRECATE_DOCKER.md
 FROM nvidia/cuda:12.9.1-devel-ubuntu20.04
 
 # Set environment variables

@@ -13,6 +13,16 @@ systemd units and simple per-service environment files.
 - Create `/etc/justnews/` for environment files (root-owned)
 - Optionally create `/var/log/justnews/` for centralized logging
 
+### Model store (optional but recommended)
+- If you use centralized per-agent model copies (recommended for live training), create a model store directory on a shared filesystem, for example `/opt/justnews/models`.
+- Ensure trainers (writers) and agents (readers) have correct unix permissions. Example (run as root):
+
+	mkdir -p /opt/justnews/models
+	chgrp -R justnews /opt/justnews/models
+	chmod -R g+rwX /opt/justnews/models
+
+Set `MODEL_STORE_ROOT=/opt/justnews/models` in `/etc/justnews/global.env` (see example in `deploy/systemd/examples/justnews.env.example`).
+
 ## Install environment files
 - Copy `deploy/systemd/env/global.env` to `/etc/justnews/global.env`
 - Copy the per-service `*.env` files to `/etc/justnews/`

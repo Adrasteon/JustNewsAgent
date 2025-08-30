@@ -120,6 +120,9 @@ test_*_pipeline*.py
 *.swo
 *~
 
+# Editor workspace state (avoid committing)
+workspaceState.state.json
+
 # OS Files
 .DS_Store
 .DS_Store?
@@ -139,6 +142,9 @@ crawl4ai_docs/
 # Archive folder for obsolete files
 archive_obsolete_files/*
 !archive_obsolete_files/development_session_aug_2/
+
+# Ignore archived backups created by maintenance
+archive_obsolete_files/backup_*/
 
 # Documentation Organization (Only essential .md files in root)
 # All other .md files should be in markdown_docs/ subdirectories

@@ -73,16 +73,29 @@ class PracticalNewsReader:
             # Use correct LLaVA processor/model combination
             model_id = "llava-hf/llava-1.5-7b-hf"
             
-            # Use fast processor and correct model classes
-            self.processor = LlavaProcessor.from_pretrained(model_id, use_fast=True)
-            self.model = LlavaForConditionalGeneration.from_pretrained(
-                model_id,
-                quantization_config=quantization_config,
-                device_map="auto",
-                torch_dtype=torch.float16,
-                trust_remote_code=True,
-                low_cpu_mem_usage=True
-            )
+            # Prefer ModelStore when available via common loader
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, processor = load_transformers_model(
+                    model_id,
+                    agent='scout',
+                    cache_dir=None,
+                    model_class=LlavaForConditionalGeneration,
+                    tokenizer_class=LlavaProcessor,
+                )
+                self.processor = processor
+                self.model = model
+            except Exception:
+                # Fallback to direct HF loading
+                self.processor = LlavaProcessor.from_pretrained(model_id, use_fast=True)
+                self.model = LlavaForConditionalGeneration.from_pretrained(
+                    model_id,
+                    quantization_config=quantization_config,
+                    device_map="auto",
+                    torch_dtype=torch.float16,
+                    trust_remote_code=True,
+                    low_cpu_mem_usage=True
+                )
             
             memory_usage = self.get_memory_usage()
             logger.info(f"✅ LLaVA-1.5 loaded with {memory_usage.get('allocated_gb', 0):.1f}GB GPU memory")
@@ -106,13 +119,25 @@ class PracticalNewsReader:
             # Much smaller model that's easier to quantize
             model_id = "Salesforce/blip2-opt-2.7b"
             
-            self.processor = Blip2Processor.from_pretrained(model_id)
-            self.model = Blip2ForConditionalGeneration.from_pretrained(
-                model_id,
-                quantization_config=quantization_config,
-                device_map="auto",
-                torch_dtype=torch.float16,
-            )
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, processor = load_transformers_model(
+                    model_id,
+                    agent='scout',
+                    cache_dir=None,
+                    model_class=Blip2ForConditionalGeneration,
+                    tokenizer_class=Blip2Processor,
+                )
+                self.processor = processor
+                self.model = model
+            except Exception:
+                self.processor = Blip2Processor.from_pretrained(model_id)
+                self.model = Blip2ForConditionalGeneration.from_pretrained(
+                    model_id,
+                    quantization_config=quantization_config,
+                    device_map="auto",
+                    torch_dtype=torch.float16,
+                )
             
             memory_usage = self.get_memory_usage()
             logger.info(f"✅ BLIP-2 loaded with {memory_usage.get('allocated_gb', 0):.1f}GB GPU memory")
@@ -137,14 +162,26 @@ class PracticalNewsReader:
             # Use smaller BLIP-2 model
             model_id = "Salesforce/blip2-opt-2.7b"
             
-            self.processor = Blip2Processor.from_pretrained(model_id)
-            self.model = Blip2ForConditionalGeneration.from_pretrained(
-                model_id,
-                quantization_config=quantization_config,
-                device_map="auto",
-                torch_dtype=torch.float16,
-                low_cpu_mem_usage=True
-            )
+            try:
+                from agents.common.model_loader import load_transformers_model
+                model, processor = load_transformers_model(
+                    model_id,
+                    agent='scout',
+                    cache_dir=None,
+                    model_class=Blip2ForConditionalGeneration,
+                    tokenizer_class=Blip2Processor,
+                )
+                self.processor = processor
+                self.model = model
+            except Exception:
+                self.processor = Blip2Processor.from_pretrained(model_id)
+                self.model = Blip2ForConditionalGeneration.from_pretrained(
+                    model_id,
+                    quantization_config=quantization_config,
+                    device_map="auto",
+                    torch_dtype=torch.float16,
+                    low_cpu_mem_usage=True
+                )
             
             memory_usage = self.get_memory_usage()
             logger.info(f"✅ BLIP-2 quantized loaded with {memory_usage.get('allocated_gb', 0):.1f}GB GPU memory")

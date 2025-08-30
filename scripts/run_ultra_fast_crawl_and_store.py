@@ -28,7 +28,6 @@ async def run_and_store():
 
     articles = result.get('articles', [])
     saved = 0
-    import time
 
     def post_with_retries(url, json_payload, timeout=15, max_attempts=3):
         attempt = 0

@@ -167,17 +167,48 @@ class NativeTensorRTInferenceEngine:
         try:
             from transformers import AutoTokenizer
             
-            # Load sentiment tokenizer (RoBERTa)
-            if 'sentiment' in self.engines:
-                self.tokenizers['sentiment'] = AutoTokenizer.from_pretrained(
-                    'cardiffnlp/twitter-roberta-base-sentiment-latest'
-                )
-            
-            # Load bias tokenizer (BERT)
-            if 'bias' in self.engines:
-                self.tokenizers['bias'] = AutoTokenizer.from_pretrained(
-                    'unitary/toxic-bert'
-                )
+            # Load sentiment tokenizer (RoBERTa) and bias tokenizer (BERT)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                if 'sentiment' in self.engines:
+                    try:
+                        _, tokenizer = load_transformers_model(
+                            'cardiffnlp/twitter-roberta-base-sentiment-latest',
+                            agent='analyst',
+                            cache_dir=None,
+                            model_class=None,
+                            tokenizer_class=AutoTokenizer,
+                        )
+                        self.tokenizers['sentiment'] = tokenizer
+                    except Exception:
+                        self.tokenizers['sentiment'] = AutoTokenizer.from_pretrained(
+                            'cardiffnlp/twitter-roberta-base-sentiment-latest'
+                        )
+
+                if 'bias' in self.engines:
+                    try:
+                        _, tokenizer = load_transformers_model(
+                            'unitary/toxic-bert',
+                            agent='analyst',
+                            cache_dir=None,
+                            model_class=None,
+                            tokenizer_class=AutoTokenizer,
+                        )
+                        self.tokenizers['bias'] = tokenizer
+                    except Exception:
+                        self.tokenizers['bias'] = AutoTokenizer.from_pretrained(
+                            'unitary/toxic-bert'
+                        )
+            except Exception:
+                # If model_loader import fails entirely, fallback to direct HF loads
+                if 'sentiment' in self.engines:
+                    self.tokenizers['sentiment'] = AutoTokenizer.from_pretrained(
+                        'cardiffnlp/twitter-roberta-base-sentiment-latest'
+                    )
+                if 'bias' in self.engines:
+                    self.tokenizers['bias'] = AutoTokenizer.from_pretrained(
+                        'unitary/toxic-bert'
+                    )
                 
         except Exception as e:
             logger.error(f"❌ Failed to load tokenizers: {e}")
@@ -186,8 +217,8 @@ class NativeTensorRTInferenceEngine:
         """Initialize all compiled TensorRT engines"""
         try:
             import tensorrt as trt
-            import pycuda.driver as cuda
-            import pycuda.autoinit
+            import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
+            import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
             
             # Create TensorRT runtime
             self.trt_logger = trt.Logger(trt.Logger.WARNING)
@@ -404,7 +435,7 @@ class NativeTensorRTInferenceEngine:
         try:
             import pycuda.driver as cuda
             
-            engine = self.engines[task]
+            _engine = self.engines[task]
             context = self.contexts[task]
             tokenizer = self.tokenizers[task]
             metadata = self.engine_metadata[task]
@@ -487,7 +518,7 @@ class NativeTensorRTInferenceEngine:
             if batch_size == 0:
                 return []
             
-            engine = self.engines[task]
+            _engine = self.engines[task]
             context = self.contexts[task]
             tokenizer = self.tokenizers[task]
             metadata = self.engine_metadata[task]
@@ -729,7 +760,7 @@ class NativeTensorRTInferenceEngine:
         """Destructor to ensure cleanup"""
         try:
             self.cleanup()
-        except:
+        except Exception:
             pass  # Ignore errors during destruction
 
 

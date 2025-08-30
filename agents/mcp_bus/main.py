@@ -25,6 +25,13 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for mcp_bus")
 
+# Register reload endpoint if available
+try:
+    from agents.common.reload import register_reload_endpoint
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for mcp_bus")
+
 agents = {}
 cb_state = {}
 CB_FAIL_THRESHOLD = 3

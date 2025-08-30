@@ -55,6 +55,13 @@ if HAS_FASTAPI:
         # No logger variable in this module's top-level scope before structlog resolution; safe no-op
         pass
 
+    # Register reload endpoint if available
+    try:
+        from agents.common.reload import register_reload_endpoint
+        register_reload_endpoint(app)
+    except Exception:
+        pass
+
 
     class _ToolCallModel(BaseModel):
         args: list = []

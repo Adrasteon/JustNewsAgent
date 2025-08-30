@@ -13,8 +13,7 @@ logger = logging.getLogger("scout.tools")
 # Online Training Integration
 try:
     from training_system import (
-        initialize_online_training, get_training_coordinator,
-        add_training_feedback
+        initialize_online_training
     )
     ONLINE_TRAINING_AVAILABLE = True
     
@@ -28,7 +27,7 @@ except ImportError:
 
 # Import Crawl4AI components for advanced deep crawling
 try:
-    from crawl4ai import (
+    from crawl4ai import (  # noqa: F401
         AsyncWebCrawler, BestFirstCrawlingStrategy,
         FilterChain, ContentTypeFilter, DomainFilter,
         CompositeScorer, KeywordRelevanceScorer, PathDepthScorer
@@ -375,70 +374,7 @@ def intelligent_batch_analysis(*args, **kwargs):
         log_feedback("batch_analysis_error", {"urls_count": len(urls), "error": str(e)})
         return {"error": str(e)}
 
-# Legacy functions for backward compatibility
-def discover_sources(*args, **kwargs):
-    """
-    Legacy wrapper - redirects to intelligent_source_discovery
-    """
-    return intelligent_source_discovery(*args, **kwargs)
-
-def crawl_url(*args, **kwargs):
-    """
-    Legacy wrapper - redirects to intelligent_content_crawl  
-    """
-    return intelligent_content_crawl(*args, **kwargs)
-
-def deep_crawl_site(*args, **kwargs):
-    """
-    Perform a deep crawl on a specific website for given keywords. 
-    Enhanced with Scout intelligence when available.
-    """
-    logger.info(f"[ScoutAgent] Deep crawling site with args: {args}, kwargs: {kwargs}")
-    
-    try:
-        # Basic deep crawl via crawl4ai
-        response = requests.post(
-            "http://localhost:32768/deep_crawl_site", 
-            json={"args": args, "kwargs": kwargs}
-        )
-        response.raise_for_status()
-        crawl_results = response.json()
-        
-        # Enhance with Scout intelligence if available
-        if intelligence_available and scout_engine and crawl_results:
-            enhanced_results = []
-            
-            for result in crawl_results[:10]:  # Limit for performance
-                url = result.get("url", "")
-                content = result.get("content", "")
-                
-                if content:
-                    try:
-                        analysis = scout_engine.comprehensive_content_analysis(content, url)
-                        result["scout_analysis"] = analysis
-                        result["scout_score"] = analysis.get("scout_score", 0.0)
-                        enhanced_results.append(result)
-                    except Exception as e:
-                        logger.warning(f"⚠️ Enhancement failed for {url}: {e}")
-                        enhanced_results.append(result)  # Keep original
-                else:
-                    enhanced_results.append(result)
-            
-            log_feedback("deep_crawl_site_enhanced", {
-                "args": args, 
-                "results_count": len(enhanced_results),
-                "intelligence_applied": intelligence_available
-            })
-            
-            return enhanced_results
-        else:
-            log_feedback("deep_crawl_site_basic", {"args": args, "results_count": len(crawl_results)})
-            return crawl_results
-            
-    except Exception as e:
-        logger.error(f"An error occurred during deep crawl: {e}")
-        log_feedback("deep_crawl_site_error", {"args": args, "error": str(e)})
-        return []
+# Legacy wrappers removed; newer implementations exist earlier in this module.
 
 async def enhanced_deep_crawl_site(*args, **kwargs):
     """

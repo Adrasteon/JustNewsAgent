@@ -10,6 +10,7 @@ import logging
 import time
 import os
 import sys
+import numpy as np
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 
@@ -77,11 +78,11 @@ class TensorRTAnalyst:
                 self.native_engine = None
             
             # Import TensorRT-LLM components for framework mode
-            import tensorrt_llm
-            from tensorrt_llm import logger as trt_logger
-            from tensorrt_llm.builder import Builder
-            from tensorrt_llm.network import net_guard
-            import tensorrt as trt
+            import tensorrt_llm  # noqa: F401
+            from tensorrt_llm import logger as trt_logger  # noqa: F401
+            from tensorrt_llm.builder import Builder  # noqa: F401
+            from tensorrt_llm.network import net_guard  # noqa: F401
+            import tensorrt as trt  # noqa: F401
             
             logger.info(f"✅ TensorRT-LLM available: {tensorrt_llm.__version__}")
             
@@ -96,11 +97,11 @@ class TensorRTAnalyst:
                 pass
                 
             try:
-                from tensorrt_llm.models.bert import BERTForSequenceClassification
+                from tensorrt_llm.models.bert import BERTForSequenceClassification  # noqa: F401
                 available_features.append("BERT Models")
             except ImportError:
                 try:
-                    from tensorrt_llm.models import BertForSequenceClassification
+                    from tensorrt_llm.models import BertForSequenceClassification  # noqa: F401
                     available_features.append("BERT Models (alt)")
                 except ImportError:
                     pass

@@ -6,7 +6,7 @@ Helper functions and tools for the online training system
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 import pandas as pd
 
 logger = logging.getLogger(__name__)

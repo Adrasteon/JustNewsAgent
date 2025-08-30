@@ -28,15 +28,22 @@ def get_llama_model():
     """Load optimized DialoGPT (deprecated)-medium model for orchestration tasks."""
     if AutoModelForCausalLM is None or AutoTokenizer is None:
         raise ImportError("transformers library is not installed.")
-    if not os.path.exists(MODEL_PATH) or not os.listdir(MODEL_PATH):
-        print(f"Downloading {MODEL_NAME} to {MODEL_PATH}...")
-        model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
-    else:
-        print(f"Loading {MODEL_NAME} from local cache {MODEL_PATH}...")
-        model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-    return model, tokenizer
+
+    try:
+        from agents.common.model_loader import load_transformers_model
+        model, tokenizer = load_transformers_model(MODEL_NAME, agent='chief_editor', cache_dir=MODEL_PATH)
+        return model, tokenizer
+    except Exception:
+        # Fallback to original behavior
+        if not os.path.exists(MODEL_PATH) or not os.listdir(MODEL_PATH):
+            print(f"Downloading {MODEL_NAME} to {MODEL_PATH}...")
+            model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
+            tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
+        else:
+            print(f"Loading {MODEL_NAME} from local cache {MODEL_PATH}...")
+            model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
+            tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
+        return model, tokenizer
 
 def log_feedback(event: str, details: dict):
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:

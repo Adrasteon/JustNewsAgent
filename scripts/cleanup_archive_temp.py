@@ -3,7 +3,6 @@
 This script is idempotent and logs to /tmp/archive_cleanup.log. It only removes a conservative
 set of files so it won't touch other repo data.
 """
-import os
 from pathlib import Path
 
 log = Path('/tmp/archive_cleanup.log')

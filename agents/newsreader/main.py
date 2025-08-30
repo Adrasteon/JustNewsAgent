@@ -92,6 +92,13 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for newsreader")
 
+# Register reload endpoint if available
+try:
+    from agents.common.reload import register_reload_endpoint
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for newsreader")
+
 class ToolCall(BaseModel):
     args: List[Any]
     kwargs: Dict[str, Any]

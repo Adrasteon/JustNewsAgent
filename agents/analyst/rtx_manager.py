@@ -77,7 +77,7 @@ class RTXManager:
             logger.info(f"✅ TensorRT-LLM available: {tensorrt_llm.__version__}")
             
             # Configure TensorRT-LLM runtime
-            from tensorrt_llm.runtime import ModelRunner, GenerationSession
+            from tensorrt_llm.runtime import ModelRunner, GenerationSession  # noqa: F401
             
             # Engine configuration from RTX AI Toolkit workflow
             self.engine_config = {
@@ -92,7 +92,7 @@ class RTXManager:
             # Initialize model runner if engine exists
             engine_path = Path(self.engine_config['engine_dir'])
             if engine_path.exists() and any(engine_path.glob('*.engine')):
-                logger.info(f"� Loading TensorRT engine from {engine_path}")
+                logger.info(f"Loading TensorRT engine from {engine_path}")
                 self.tensorrt_engine = ModelRunner.from_dir(
                     engine_dir=str(engine_path),
                     lora_dir=None,  # Will be set during LoRA loading
@@ -197,8 +197,8 @@ class RTXManager:
         try:
             # Import TensorRT-LLM components (with error handling for development)
             try:
-                from tensorrt_llm.runtime import ModelRunner
-                from tensorrt_llm import Mapping
+                from tensorrt_llm.runtime import ModelRunner  # noqa: F401
+                from tensorrt_llm import Mapping  # noqa: F401
             except ImportError:
                 logger.warning("TensorRT-LLM not installed, falling back to Docker")
                 return None
@@ -254,7 +254,17 @@ class RTXManager:
                 # Fallback to a default lightweight tokenizer (DialoGPT (deprecated) deprecated)
                 tokenizer_path = os.environ.get('DEFAULT_TOKENIZER_PATH', 'distilgpt2')
             
-            tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                _, tokenizer = load_transformers_model(
+                    tokenizer_path,
+                    agent='analyst',
+                    cache_dir=None,
+                    model_class=None,
+                    tokenizer_class=AutoTokenizer,
+                )
+            except Exception:
+                tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
             input_ids = tokenizer.encode(prompt, return_tensors='pt')
             return input_ids
             
@@ -272,7 +282,17 @@ class RTXManager:
             if not Path(tokenizer_path).exists():
                 tokenizer_path = os.environ.get('DEFAULT_TOKENIZER_PATH', 'distilgpt2')
             
-            tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+            try:
+                from agents.common.model_loader import load_transformers_model
+                _, tokenizer = load_transformers_model(
+                    tokenizer_path,
+                    agent='analyst',
+                    cache_dir=None,
+                    model_class=None,
+                    tokenizer_class=AutoTokenizer,
+                )
+            except Exception:
+                tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
             response = tokenizer.decode(outputs[0], skip_special_tokens=True)
             return response
             
@@ -281,7 +301,7 @@ class RTXManager:
             # Simple fallback decoding
             try:
                 return ''.join([chr(int(token)) for token in outputs[0] if 32 <= int(token) <= 126])
-            except:
+            except Exception:
                 return "Error: Could not decode response"
     
     async def _query_docker_model(self, prompt: str, max_tokens: int, temperature: float) -> Optional[str]:

@@ -10,7 +10,7 @@ Dependencies: git, networkx, fastapi, pydantic, uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
-from agents.common.schemas import NeuralAssessment, ReasoningInput, PipelineResult
+from agents.common.schemas import NeuralAssessment, ReasoningInput
 from contextlib import asynccontextmanager
 import asyncio
 import os
@@ -102,7 +102,7 @@ class SimpleNucleoidImplementation:
                         result = self._evaluate_expression(right_side)
                         if result is not None:
                             return result
-                    except:
+                    except Exception:
                         pass
             
             return {"success": False, "message": f"Unknown variable: {statement}"}
@@ -111,7 +111,7 @@ class SimpleNucleoidImplementation:
         if any(op in statement for op in ["==", "!=", ">", "<", ">=", "<="]):
             try:
                 return self._evaluate_boolean(statement)
-            except:
+            except Exception:
                 return {"success": False, "message": "Could not evaluate boolean expression"}
         
         return {"success": False, "message": "Unknown statement type"}
@@ -126,7 +126,7 @@ class SimpleNucleoidImplementation:
             # Simple evaluation (be careful in production!)
             result = eval(expression)
             return result
-        except:
+        except Exception:
             return None
     
     def _evaluate_boolean(self, statement):
@@ -142,7 +142,7 @@ class SimpleNucleoidImplementation:
             # Evaluate the boolean expression
             result = eval(statement)
             return result
-        except:
+        except Exception:
             return False
     
     def run(self, statement):
@@ -266,6 +266,12 @@ try:
 except Exception:
     logger.debug("shutdown endpoint not registered for reasoning")
 
+# Register reload endpoint if available
+try:
+    from agents.common.reload import register_reload_endpoint
+    register_reload_endpoint(app)
+except Exception:
+    logger.debug("reload endpoint not registered for reasoning")
 # --- Nucleoid GitHub Integration ---
 class NucleoidEngine:
     """Wrapper for Nucleoid GitHub Python implementation."""
@@ -472,7 +478,7 @@ class NucleoidEngine:
                                 "statement2": stmt2,
                                 "conflict": "boolean_contradiction"
                             })
-                    except:
+                    except Exception:
                         pass  # Skip if can't parse
             
             return {
