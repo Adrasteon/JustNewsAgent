@@ -39,15 +39,12 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
 # Set transformers logging to ERROR to reduce noise
 transformers_logging.set_verbosity_error()
 
-# GPU cleanup integration
+# Production GPU Manager integration
 try:
-    import sys
-    sys.path.insert(0, '/home/adra/JustNewsAgentic')
-    from training_system.utils.gpu_cleanup import GPUModelManager
-    gpu_manager = GPUModelManager()
-    GPU_CLEANUP_AVAILABLE = True
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
-    GPU_CLEANUP_AVAILABLE = False
+    PRODUCTION_GPU_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -146,17 +143,28 @@ class NextGenGPUScoutEngine:
         # Initialize tokenizer storage
         self.tokenizers = {}
         
-        # Initialize training data for continuous learning
-        if self.enable_training:
-            self.training_data = {
-                "news_classification": {"texts": [], "labels": []},
-                "quality_assessment": {"texts": [], "labels": []},
-                "sentiment_analysis": {"texts": [], "labels": []},
-                "bias_detection": {"texts": [], "labels": []}
-            }
-            logger.info("📚 Training data structures initialized")
+        # Initialize GPU allocation for scout agent
+        self.gpu_allocated = False
+        self.gpu_device = None
+        self.gpu_memory_gb = 4.0  # Scout needs ~4GB for models
+
+        if PRODUCTION_GPU_AVAILABLE and self.device.startswith("cuda"):
+            try:
+                # Request GPU allocation through production manager
+                allocation = request_agent_gpu('scout', self.gpu_memory_gb)
+                if isinstance(allocation, dict) and allocation.get('status') == 'allocated':
+                    self.gpu_allocated = True
+                    self.gpu_device = allocation.get('gpu_device', 0)
+                    self.gpu_memory_gb = allocation.get('allocated_memory_gb', self.gpu_memory_gb)
+                    logger.info(f"✅ Scout GPU allocated: {self.gpu_memory_gb}GB on device {self.gpu_device}")
+                else:
+                    logger.warning(f"⚠️ Scout GPU allocation failed: {allocation}")
+                    self.device = 'cpu'
+            except Exception as e:
+                logger.warning(f"⚠️ Scout GPU allocation error: {e}")
+                self.device = 'cpu'
         else:
-            self.training_data = {}
+            logger.info("📋 Production GPU manager not available, using direct GPU access")
         
         # Initialize specialized models
         logger.info(f"🚀 Initializing Next-Gen GPU Scout Engine on {self.device}")
@@ -414,17 +422,23 @@ class NextGenGPUScoutEngine:
             logger.warning(f"⚠️ Visual Analysis Model not available: {e}")
             self.models["visual_analyzer"] = None
         
-        # Register all loaded GPU models with cleanup manager
-        if GPU_CLEANUP_AVAILABLE and self.device.startswith("cuda"):
-            for model_name, model in self.models.items():
-                if model is not None:
-                    gpu_manager.register_model(f"scout_v2_{model_name}", model)
-            
-            for pipeline_name, pipeline_obj in self.pipelines.items():
-                if pipeline_obj is not None:
-                    gpu_manager.register_model(f"scout_v2_pipeline_{pipeline_name}", pipeline_obj)
-            
-            logger.info("🧹 GPU models registered with cleanup manager")
+        # Register models with production GPU manager
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                gpu_mgr = get_gpu_manager()
+                for model_name, model in self.models.items():
+                    if model is not None:
+                        gpu_mgr.register_model(f"scout_v2_{model_name}", model)
+
+                for pipeline_name, pipeline_obj in self.pipelines.items():
+                    if pipeline_obj is not None:
+                        gpu_mgr.register_model(f"scout_v2_pipeline_{pipeline_name}", pipeline_obj)
+
+                logger.info("🧹 Scout models registered with production GPU manager")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
+        elif self.device.startswith("cuda"):
+            logger.info("📋 Production GPU manager not available, models not registered")
     
     def classify_news_content(self, text: str, url: str = "", use_ensemble: bool = True) -> Dict[str, Any]:
         """
@@ -1266,20 +1280,28 @@ class NextGenGPUScoutEngine:
     
     def cleanup(self):
         """Clean up GPU memory and resources"""
+        # Release GPU allocation
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                release_agent_gpu('scout')
+                logger.info("✅ Scout GPU allocation released")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to release Scout GPU allocation: {e}")
+
         if self.device.startswith("cuda"):
             torch.cuda.empty_cache()
             logger.info("🧹 GPU memory cleaned up")
-        
+
         # Clear model references
         for model_name in list(self.models.keys()):
             del self.models[model_name]
         self.models.clear()
-        
+
         for tokenizer_name in list(self.tokenizers.keys()):
             del self.tokenizers[tokenizer_name]
         self.tokenizers.clear()
-        
-        logger.info("🧹 Model cleanup completed")
+
+        logger.info("🧹 Scout model cleanup completed")
     
     def __enter__(self):
         return self

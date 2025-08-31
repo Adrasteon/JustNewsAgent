@@ -4,13 +4,14 @@ Provides a process-local cached SentenceTransformer instance to avoid repeated
 model downloads / loads and reduce GPU memory churn. Callers should prefer
 this helper when they need a SentenceTransformer instance.
 """
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 import logging
 import os
 import threading
 from pathlib import Path
 import inspect
 import warnings
+import time
 
 
 def _detect_caller_agent() -> Optional[str]:
@@ -46,6 +47,142 @@ logger = logging.getLogger(__name__)
 _MODEL_CACHE = {}
 _MODEL_CACHE_LOCKS = {}
 _SUPPRESSION_LOGGED = False
+
+# GPU Manager Integration
+_gpu_manager = None
+_model_memory_tracking: Dict[str, Dict[str, Any]] = {}
+_memory_tracking_lock = threading.Lock()
+
+# Smart Pre-loading Configuration
+_PRELOAD_MODELS = os.environ.get("EMBEDDING_PRELOAD_MODELS", "all-MiniLM-L6-v2").split(",")
+_PRELOAD_ENABLED = os.environ.get("EMBEDDING_PRELOAD_ENABLED", "false").lower() == "true"
+_PRELOAD_THREAD: Optional[threading.Thread] = None
+_PRELOAD_COMPLETED = False
+
+def _get_gpu_manager():
+    """Lazy load GPU manager to avoid circular imports"""
+    global _gpu_manager
+    if _gpu_manager is None:
+        try:
+            from agents.common.gpu_manager_production import get_gpu_manager
+            _gpu_manager = get_gpu_manager()
+        except ImportError:
+            # Fallback to legacy GPU manager if production version not available
+            try:
+                from agents.common.gpu_manager import get_gpu_manager
+                _gpu_manager = get_gpu_manager()
+            except ImportError:
+                logger.debug("GPU manager not available, running in CPU-only mode")
+                _gpu_manager = None
+    return _gpu_manager
+
+def _track_model_memory_usage(model_name: str, device_key: str, model_size_mb: float, agent_name: Optional[str] = None):
+    """Track memory usage for loaded models"""
+    with _memory_tracking_lock:
+        key = f"{model_name}_{device_key}"
+        _model_memory_tracking[key] = {
+            'model_name': model_name,
+            'device': device_key,
+            'memory_mb': model_size_mb,
+            'agent': agent_name or 'unknown',
+            'loaded_at': time.time(),
+            'access_count': 0
+        }
+        logger.debug(f"Tracked model memory: {model_name} ({model_size_mb:.1f}MB) on {device_key}")
+
+def _get_model_memory_usage(model_name: str, device_key: str) -> float:
+    """Get tracked memory usage for a model"""
+    with _memory_tracking_lock:
+        key = f"{model_name}_{device_key}"
+        if key in _model_memory_tracking:
+            _model_memory_tracking[key]['access_count'] += 1
+            return _model_memory_tracking[key]['memory_mb']
+    return 0.0
+
+def get_embedding_memory_stats() -> Dict[str, Any]:
+    """Get comprehensive memory usage statistics for all loaded embedding models"""
+    with _memory_tracking_lock:
+        total_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values())
+        gpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                        if 'cuda' in info['device'])
+        cpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                        if info['device'] == 'cpu' or info['device'] == 'auto')
+
+        return {
+            'total_models': len(_model_memory_tracking),
+            'total_memory_mb': total_memory,
+            'gpu_memory_mb': gpu_memory,
+            'cpu_memory_mb': cpu_memory,
+            'models_by_agent': _group_models_by_agent(),
+            'cache_hit_ratio': _calculate_cache_hit_ratio()
+        }
+
+def _group_models_by_agent() -> Dict[str, list]:
+    """Group loaded models by agent for analysis"""
+    agent_groups = {}
+    for info in _model_memory_tracking.values():
+        agent = info['agent']
+        if agent not in agent_groups:
+            agent_groups[agent] = []
+        agent_groups[agent].append({
+            'model': info['model_name'],
+            'memory_mb': info['memory_mb'],
+            'device': info['device']
+        })
+    return agent_groups
+
+def _calculate_cache_hit_ratio() -> float:
+    """Calculate cache hit ratio based on access patterns"""
+    total_accesses = sum(info['access_count'] for info in _model_memory_tracking.values())
+    if total_accesses == 0:
+        return 0.0
+    # Cache hits are when access_count > 1 (model was reused)
+    cache_hits = sum(max(0, info['access_count'] - 1) for info in _model_memory_tracking.values())
+    return cache_hits / total_accesses if total_accesses > 0 else 0.0
+
+def _estimate_model_memory_usage(model, device_key: str) -> float:
+    """Estimate memory usage of a loaded model"""
+    try:
+        import torch
+        if hasattr(model, '_modules') and device_key.startswith('cuda'):
+            # Try to get actual memory usage from PyTorch
+            if torch.cuda.is_available():
+                # Get memory before and after model operations to estimate
+                torch.cuda.synchronize()
+                initial_memory = torch.cuda.memory_allocated() / (1024 * 1024)  # MB
+
+                # Quick forward pass to ensure model is loaded
+                try:
+                    with torch.no_grad():
+                        # Use a small dummy input to trigger memory allocation
+                        dummy_input = torch.randn(1, 384).to(device_key)  # Common embedding dimension
+                        _ = model.encode(["test"])
+                except:
+                    pass
+
+                torch.cuda.synchronize()
+                final_memory = torch.cuda.memory_allocated() / (1024 * 1024)  # MB
+                estimated_memory = max(0, final_memory - initial_memory)
+
+                # If estimation seems too small, use a conservative default
+                if estimated_memory < 50:  # Less than 50MB seems suspicious
+                    estimated_memory = 200  # Conservative estimate for embedding models
+
+                return estimated_memory
+        elif device_key == 'cpu':
+            # Conservative CPU memory estimate
+            return 150  # MB
+    except Exception as e:
+        logger.debug(f"Failed to estimate model memory: {e}")
+
+    # Fallback estimates based on model name patterns
+    model_name_lower = str(model).lower()
+    if 'large' in model_name_lower or 'xl' in model_name_lower:
+        return 500  # Large models
+    elif 'base' in model_name_lower or 'medium' in model_name_lower:
+        return 300  # Base/medium models
+    else:
+        return 200  # Small models (default)
 
 def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folder: Optional[str] = None, device: Optional[object] = None):
     """Return a shared SentenceTransformer instance for this process.
@@ -124,7 +261,36 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
 
     # Ensure local model files exist under the agent cache when cache_folder is provided.
     # This guarantees agents write to their own ./agents/<agent>/models dirs.
-    logger.info("Loading shared embedding model: %s (cache=%s) device=%s", model_name, cache_folder, device_key)
+    caller_agent = _detect_caller_agent()
+    logger.info("Loading shared embedding model: %s (cache=%s) device=%s agent=%s",
+                model_name, cache_folder, device_key, caller_agent or 'unknown')
+
+    # Check GPU manager for allocation if using GPU
+    gpu_allocation = None
+    if device_key.startswith('cuda') and _get_gpu_manager() is not None:
+        try:
+            gpu_manager = _get_gpu_manager()
+            # Request GPU allocation for embedding model (typically smaller models)
+            allocation_result = gpu_manager.request_gpu_allocation(
+                agent_name=f"embedding_{caller_agent or 'unknown'}",
+                requested_memory_gb=1.0,  # Conservative estimate for embedding models
+                preferred_device=int(device_key.split(':')[1]) if ':' in device_key else None,
+                model_type="embedding"  # Specify model type for optimal batch sizing
+            )
+
+            if allocation_result['status'] == 'allocated':
+                gpu_allocation = allocation_result
+                logger.debug(f"GPU allocated for embedding model: {allocation_result}")
+            else:
+                logger.warning(f"GPU allocation failed for embedding model: {allocation_result}")
+                # Fall back to CPU
+                device = torch.device('cpu')
+                device_key = 'cpu'
+        except Exception as e:
+            logger.warning(f"GPU manager integration failed: {e}, falling back to CPU")
+            device = torch.device('cpu')
+            device_key = 'cpu'
+
     model = None
 
     # If an external canonical model store is configured, prefer loading the
@@ -231,6 +397,13 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
         # torch might not be available — ignore device
         pass
 
+    # Track memory usage after model is loaded
+    try:
+        model_memory_mb = _estimate_model_memory_usage(model, device_key)
+        _track_model_memory_usage(model_name, device_key, model_memory_mb, caller_agent)
+    except Exception as e:
+        logger.debug(f"Failed to track model memory usage: {e}")
+
     # Wrap the SentenceTransformer to suppress known FutureWarnings from upstream
     # This suppression is controlled by the EMBEDDING_SUPPRESS_WARNINGS env var
     # so we can disable it for testing or while upgrading dependencies.
@@ -242,8 +415,10 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
         are emitted from some torch/transformers internals. We only filter this
         specific FutureWarning during encode() to avoid hiding other useful warnings.
         """
-        def __init__(self, inner):
+        def __init__(self, inner, model_key: str, gpu_allocation=None):
             self._inner = inner
+            self._model_key = model_key
+            self._gpu_allocation = gpu_allocation
 
         def encode(self, *args, **kwargs):
             with warnings.catch_warnings():
@@ -254,13 +429,24 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
                 )
                 return self._inner.encode(*args, **kwargs)
 
+        def __del__(self):
+            """Cleanup GPU allocation when model wrapper is garbage collected"""
+            if self._gpu_allocation and _get_gpu_manager() is not None:
+                try:
+                    gpu_manager = _get_gpu_manager()
+                    agent_name = f"embedding_{self._gpu_allocation.get('agent_name', 'unknown')}"
+                    gpu_manager.release_gpu_allocation(agent_name)
+                    logger.debug(f"Released GPU allocation for embedding model: {self._model_key}")
+                except Exception as e:
+                    logger.debug(f"Failed to release GPU allocation during cleanup: {e}")
+
         def __getattr__(self, name):
             return getattr(self._inner, name)
 
     suppress = os.environ.get('EMBEDDING_SUPPRESS_WARNINGS', '1') != '0'
     global _SUPPRESSION_LOGGED
     if suppress:
-        wrapped = _SentenceTransformerWrapper(model)
+        wrapped = _SentenceTransformerWrapper(model, f"{model_name}_{device_key}", gpu_allocation)
         # Log once that we're suppressing an upstream FutureWarning so operators can track this
         if not _SUPPRESSION_LOGGED:
             logger.info("Embedding helper: suppressing known FutureWarning 'encoder_attention_mask' (EMBEDDING_SUPPRESS_WARNINGS=%s)",
@@ -271,6 +457,64 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
         wrapped = model
     _MODEL_CACHE[cache_key] = wrapped
     return wrapped
+
+def get_optimal_embedding_batch_size(model_name: str = "all-MiniLM-L6-v2", device: Optional[object] = None) -> int:
+    """Get optimal batch size for embedding operations based on available resources"""
+    try:
+        gpu_manager = _get_gpu_manager()
+        if gpu_manager is not None:
+            # Request a small GPU allocation to get batch size recommendation
+            allocation = gpu_manager.request_gpu_allocation(
+                agent_name="embedding_batch_size_check",
+                requested_memory_gb=1.0,
+                model_type="embedding"
+            )
+
+            if allocation['status'] == 'allocated':
+                batch_size = allocation['batch_size']
+                # Clean up the temporary allocation
+                gpu_manager.release_gpu_allocation("embedding_batch_size_check")
+                return batch_size
+    except Exception as e:
+        logger.debug(f"Failed to get optimal batch size from GPU manager: {e}")
+
+    # Fallback: conservative defaults based on device
+    if device is not None and str(device).startswith('cuda'):
+        return 16  # GPU default
+    else:
+        return 4   # CPU default
+
+def get_embedding_performance_config(model_name: str = "all-MiniLM-L6-v2", device: Optional[object] = None) -> Dict[str, Any]:
+    """Get performance configuration for embedding operations"""
+    batch_size = get_optimal_embedding_batch_size(model_name, device)
+
+    config = {
+        'batch_size': batch_size,
+        'device': str(device) if device is not None else 'auto',
+        'model_name': model_name,
+        'estimated_throughput': _estimate_embedding_throughput(batch_size, device)
+    }
+
+    return config
+
+def _estimate_embedding_throughput(batch_size: int, device: Optional[object]) -> float:
+    """Estimate embedding throughput based on batch size and device"""
+    try:
+        if device is not None and str(device).startswith('cuda'):
+            # GPU throughput estimates (embeddings/second)
+            if batch_size >= 32:
+                return 1000 * (batch_size / 16)  # Scale with batch size
+            elif batch_size >= 16:
+                return 800 * (batch_size / 16)
+            elif batch_size >= 8:
+                return 500 * (batch_size / 8)
+            else:
+                return 200 * batch_size
+        else:
+            # CPU throughput estimates
+            return 50 * batch_size  # Conservative CPU estimate
+    except Exception:
+        return 100  # Safe fallback
 
 def ensure_agent_model_exists(model_name: str, agent_cache_dir: str) -> str:
     """Ensure that a local copy of the model exists in agent_cache_dir.
@@ -375,3 +619,118 @@ def ensure_agent_model_exists(model_name: str, agent_cache_dir: str) -> str:
         except Exception:
             pass
         raise
+
+def cleanup_embedding_cache():
+    """Clean up all cached embedding models and release GPU allocations"""
+    global _MODEL_CACHE, _model_memory_tracking
+
+    logger.info("Cleaning up embedding model cache...")
+
+    # Clear memory tracking
+    with _memory_tracking_lock:
+        _model_memory_tracking.clear()
+
+    # Clear model cache (this will trigger __del__ methods for cleanup)
+    models_to_cleanup = list(_MODEL_CACHE.keys())
+    _MODEL_CACHE.clear()
+
+    # Force garbage collection to trigger cleanup
+    import gc
+    gc.collect()
+
+    logger.info(f"Cleaned up {len(models_to_cleanup)} cached embedding models")
+
+def get_embedding_cache_info() -> Dict[str, Any]:
+    """Get information about the current embedding cache state"""
+    with _memory_tracking_lock:
+        return {
+            'cached_models': len(_MODEL_CACHE),
+            'tracked_models': len(_model_memory_tracking),
+            'cache_keys': list(_MODEL_CACHE.keys()),
+            'memory_stats': get_embedding_memory_stats()
+        }
+
+def _preload_models_background():
+    """Background function to preload commonly used models"""
+    global _PRELOAD_COMPLETED
+
+    try:
+        logger.info(f"Starting background preloading of models: {_PRELOAD_MODELS}")
+
+        for model_name in _PRELOAD_MODELS:
+            model_name = model_name.strip()
+            if not model_name:
+                continue
+
+            try:
+                logger.info(f"Preloading model: {model_name}")
+                # Preload with CPU to avoid GPU contention during startup
+                model = get_shared_embedding_model(model_name, device="cpu")
+                logger.info(f"✅ Successfully preloaded: {model_name}")
+            except Exception as e:
+                logger.warning(f"Failed to preload model {model_name}: {e}")
+
+        logger.info("Background model preloading completed")
+        _PRELOAD_COMPLETED = True
+
+    except Exception as e:
+        logger.error(f"Background preloading failed: {e}")
+        _PRELOAD_COMPLETED = True  # Mark as completed even on failure
+
+def start_embedding_preloading():
+    """Start background preloading of commonly used embedding models"""
+    global _PRELOAD_THREAD, _PRELOAD_COMPLETED
+
+    if not _PRELOAD_ENABLED:
+        logger.debug("Embedding preloading is disabled")
+        return
+
+    if _PRELOAD_THREAD is not None and _PRELOAD_THREAD.is_alive():
+        logger.debug("Preloading already in progress")
+        return
+
+    if _PRELOAD_COMPLETED:
+        logger.debug("Preloading already completed")
+        return
+
+    logger.info("Starting embedding model preloading...")
+    _PRELOAD_THREAD = threading.Thread(
+        target=_preload_models_background,
+        name="embedding-preloader",
+        daemon=True
+    )
+    _PRELOAD_THREAD.start()
+
+def wait_for_preloading(timeout: float = 30.0) -> bool:
+    """Wait for preloading to complete with timeout"""
+    global _PRELOAD_THREAD, _PRELOAD_COMPLETED
+
+    if not _PRELOAD_ENABLED:
+        return True
+
+    if _PRELOAD_COMPLETED:
+        return True
+
+    if _PRELOAD_THREAD is None:
+        return False
+
+    logger.info(f"Waiting for model preloading to complete (timeout: {timeout}s)...")
+    _PRELOAD_THREAD.join(timeout=timeout)
+
+    if _PRELOAD_THREAD.is_alive():
+        logger.warning("Preloading did not complete within timeout")
+        return False
+
+    return _PRELOAD_COMPLETED
+
+def get_preloading_status() -> Dict[str, Any]:
+    """Get the current preloading status"""
+    global _PRELOAD_THREAD, _PRELOAD_COMPLETED
+
+    return {
+        'enabled': _PRELOAD_ENABLED,
+        'models': _PRELOAD_MODELS,
+        'completed': _PRELOAD_COMPLETED,
+        'in_progress': _PRELOAD_THREAD is not None and _PRELOAD_THREAD.is_alive(),
+        'thread_alive': _PRELOAD_THREAD.is_alive() if _PRELOAD_THREAD else False
+    }

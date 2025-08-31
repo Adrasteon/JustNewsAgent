@@ -1,6 +1,6 @@
 # GPU-Accelerated Fact-Checker Agent Tools
 # Based on proven GPUAcceleratedAnalyst pattern
-# Expected Performance: 5-10x improvement with DialoGPT (deprecated)-large (774M params)
+# Expected Performance: 5-10x improvement with GPT-2 Medium (355M params) - Modern replacement for deprecated DialoGPT
 
 import os
 import logging
@@ -19,9 +19,9 @@ except ImportError as e:
     AutoTokenizer = None
     pipeline = None
 
-# Configuration (DialoGPT (deprecated) deprecated)
+# Configuration - Modern GPT-2 Medium replacement for deprecated DialoGPT
 # Use FACT_CHECKER_MODEL_NAME to select a conversational model for verification tasks.
-MODEL_NAME = os.environ.get("FACT_CHECKER_MODEL_NAME", "distilgpt2")  # default to lightweight replacement
+MODEL_NAME = os.environ.get("FACT_CHECKER_MODEL_NAME", "gpt2-medium")  # Modern replacement for DialoGPT
 MODEL_PATH = os.environ.get("FACT_CHECKER_MODEL_PATH", "./models/" + MODEL_NAME.replace('/', '_'))
 FEEDBACK_LOG = os.environ.get("FACT_CHECKER_FEEDBACK_LOG", "./feedback_fact_checker.log")
 
@@ -31,7 +31,7 @@ logger = logging.getLogger("fact_checker.gpu_tools")
 
 class GPUAcceleratedFactChecker:
     """
-    GPU-accelerated fact checking using DialoGPT (deprecated)-large (774M parameters)
+    GPU-accelerated fact checking using GPT-2 Medium (355M parameters) - Modern replacement for deprecated DialoGPT
     
     Based on proven GPUAcceleratedAnalyst pattern:
     - Professional GPU memory management (4GB VRAM allocation)
@@ -67,10 +67,10 @@ class GPUAcceleratedFactChecker:
                 logger.info(f"✅ GPU Available: {gpu_name}")
                 logger.info(f"✅ GPU Memory: {gpu_memory:.1f} GB")
                 
-                # Load DialoGPT (deprecated)-large with GPU optimization
+                # Load GPT-2 Medium with GPU optimization (modern replacement for DialoGPT)
                 logger.info(f"Loading {MODEL_NAME} for GPU acceleration...")
                 
-                # Use text-generation pipeline for DialoGPT (deprecated) (similar to analyst pattern)
+                # Use text-generation pipeline for GPT-2 Medium (similar to analyst pattern)
                 self.fact_verification_pipeline = pipeline(
                     "text-generation",
                     model=MODEL_NAME,
@@ -182,7 +182,7 @@ class GPUAcceleratedFactChecker:
     
     def verify_claims_batch(self, claims: List[str], sources: List[str]) -> Dict[str, Any]:
         """
-        GPU-accelerated batch claim verification with DialoGPT (deprecated)-large
+        GPU-accelerated batch claim verification with GPT-2 Medium - Modern replacement for DialoGPT
         """
     # top-level timing is handled within specialized methods
         try:
@@ -220,7 +220,7 @@ class GPUAcceleratedFactChecker:
             batch_prompts.append(prompt)
         
         # Process in batches for optimal GPU utilization
-        batch_size = min(4, len(batch_prompts))  # Conservative batch size for 774M model
+        batch_size = min(8, len(batch_prompts))  # Larger batch size for 355M model (vs 774M DialoGPT)
         
         for i in range(0, len(batch_prompts), batch_size):
             batch = batch_prompts[i:i + batch_size]
@@ -256,7 +256,7 @@ class GPUAcceleratedFactChecker:
         
         return {
             "results": results,
-            "method": "gpu_dialogpt",
+            "method": "gpu_gpt2_medium",
             "processing_time": elapsed,
             "batch_size": batch_size,
             "claims_processed": len(claims)
@@ -267,7 +267,7 @@ class GPUAcceleratedFactChecker:
         start_time = datetime.now()
         
         if hasattr(self, 'cpu_pipeline'):
-            # Use CPU DialoGPT (deprecated) pipeline
+            # Use CPU GPT-2 Medium pipeline (modern replacement for DialoGPT)
             joined_sources = "\\n".join(sources[:2])  # Smaller batch for CPU
             results = {}
             

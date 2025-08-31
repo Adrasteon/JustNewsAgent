@@ -18,7 +18,7 @@ Performance Results:
 5. Professional GPU memory management to eliminate system crashes
 
 Architecture Phases:
-1. RTX-Optimized Bootstrap: TensorRT-LLM primary, Docker Model Runner fallback
+1. RTX-Optimized Bootstrap: TensorRT-LLM
 2. AI Workbench Evolution: Custom model training with RTX optimization
 3. Progressive Replacement: Domain-specialized RTX-native models
 
@@ -60,23 +60,41 @@ FEEDBACK_LOG = "feedback_analyst.log"
 PERFORMANCE_LOG = "performance_analyst.log"
 
 # Fallback to V3 imports for compatibility
+# Import transformers if available (optional); import torch separately so
+# lack of transformers does not prevent torch-based GPU detection.
 try:
     from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-    import torch
     HAS_TRANSFORMERS = True
-except ImportError as e:
+except Exception as e:
     logger.warning(f"Transformers not available for fallback: {e}")
     HAS_TRANSFORMERS = False
     AutoModelForCausalLM = None
     AutoTokenizer = None
-    torch = None
     pipeline = None
+
+# Import torch independently and track availability
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except Exception as e:
+    logger.warning(f"torch not available: {e}")
+    torch = None
+    TORCH_AVAILABLE = False
 
 # Global variables for model management
 _docker_model_available = None
 _fallback_model = None
 _fallback_tokenizer = None
 _performance_metrics = {}
+
+# TensorRT / PyCUDA detection (reflects `requirements_v4.txt`)
+try:
+    # Native engine stub will perform its own detection
+    from .native_tensorrt_engine import NATIVE_TENSORRT_AVAILABLE, NativeTensorRTInferenceEngine  # type: ignore
+    TENSORTT_AVAILABLE = bool(NATIVE_TENSORRT_AVAILABLE)
+except Exception:
+    TENSORTT_AVAILABLE = False
+    NativeTensorRTInferenceEngine = None
 
 # GPU Acceleration Integration (July 27, 2025)
 # ============================================
@@ -95,6 +113,10 @@ class GPUAcceleratedAnalyst:
     def __init__(self):
         self.gpu_available = False
         self.models_loaded = False
+        self.gpu_allocated = False
+        self.gpu_device = None
+        self.gpu_memory_gb = 2.0  # Analyst needs ~2GB for sentiment/bias models
+        
         self.performance_stats = {
             'total_requests': 0,
             'gpu_requests': 0,
@@ -104,16 +126,49 @@ class GPUAcceleratedAnalyst:
         }
         
         logger.info("🚀 Initializing OPERATIONAL GPU-Accelerated Analyst")
+        
+        # Initialize GPU allocation through production manager
+        self._initialize_gpu_allocation()
+        
+        # Initialize GPU models
         self._initialize_gpu_models()
+    
+    def _initialize_gpu_allocation(self):
+        """Initialize GPU allocation through production manager"""
+        try:
+            # Try to import production GPU manager
+            from agents.common.gpu_manager import request_agent_gpu
+            PRODUCTION_GPU_AVAILABLE = True
+        except ImportError:
+            PRODUCTION_GPU_AVAILABLE = False
+            
+        if PRODUCTION_GPU_AVAILABLE and TORCH_AVAILABLE and torch.cuda.is_available():
+            try:
+                # Request GPU allocation through production manager
+                allocation = request_agent_gpu('analyst', self.gpu_memory_gb)
+                if isinstance(allocation, dict) and allocation.get('status') == 'allocated':
+                    self.gpu_allocated = True
+                    self.gpu_device = allocation.get('gpu_device', 0)
+                    self.gpu_memory_gb = allocation.get('allocated_memory_gb', self.gpu_memory_gb)
+                    logger.info(f"✅ Analyst GPU allocated: {self.gpu_memory_gb}GB on device {self.gpu_device}")
+                else:
+                    logger.warning(f"⚠️ Analyst GPU allocation failed: {allocation}")
+                    self.gpu_device = 0  # Fallback to device 0
+            except Exception as e:
+                logger.warning(f"⚠️ Analyst GPU allocation error: {e}")
+                self.gpu_device = 0  # Fallback to device 0
+        else:
+            logger.info("📋 Production GPU manager not available, using direct GPU access")
+            self.gpu_device = 0 if (TORCH_AVAILABLE and torch.cuda.is_available()) else -1
     
     def _initialize_gpu_models(self):
         """Initialize GPU-accelerated models with professional memory management"""
         try:
-            if torch.cuda.is_available():
-                # Set CUDA device explicitly
-                torch.cuda.set_device(0)
-                gpu_name = torch.cuda.get_device_name(0)
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1024**3
+            if TORCH_AVAILABLE and torch.cuda.is_available() and self.gpu_device >= 0:
+                # Set CUDA device to allocated device
+                torch.cuda.set_device(self.gpu_device)
+                gpu_name = torch.cuda.get_device_name(self.gpu_device)
+                gpu_memory = torch.cuda.get_device_properties(self.gpu_device).total_memory / 1024**3
                 logger.info(f"✅ GPU Available: {gpu_name}")
                 logger.info(f"✅ GPU Memory: {gpu_memory:.1f} GB")
                 
@@ -125,14 +180,14 @@ class GPUAcceleratedAnalyst:
                     "sentiment-analysis",
                     model="cardiffnlp/twitter-roberta-base-sentiment-latest",
                     return_all_scores=True,
-                    device=0,  # Use GPU
+                    device=self.gpu_device,  # Use allocated device
                     torch_dtype=torch.float16  # Use FP16 for memory efficiency
                 )
                 
                 self.bias_detector = pipeline(
                     "text-classification",
                     model="unitary/toxic-bert",
-                    device=0,
+                    device=self.gpu_device,  # Use allocated device
                     torch_dtype=torch.float16  # Use FP16 for memory efficiency
                 )
                 
@@ -151,24 +206,48 @@ class GPUAcceleratedAnalyst:
             logger.info("📱 Will use hybrid fallback system")
     
     def score_sentiment_gpu(self, text: str) -> float:
-        """GPU-accelerated sentiment scoring with proven performance and device management"""
-        if not self.models_loaded or not torch.cuda.is_available():
+        """GPU-accelerated sentiment scoring with proven performance and device management
+
+        This method is instrumented to emit a structured GPU event for each call
+        (pilot instrumentation using `agents.common.gpu_metrics`).
+        """
+        # Start structured event (emit even if GPU is unavailable so we can
+        # observe attempts and fallback behavior).
+        try:
+            from agents.common.gpu_metrics import start_event, end_event
+        except Exception:
+            start_event = None
+            end_event = None
+
+        event_id = None
+        if start_event is not None:
+            event_id = start_event(agent='analyst', operation='score_sentiment_gpu', batch_size=1)
+
+        # If GPU models are not loaded or torch/CUDA is not available, emit an
+        # immediate failure/placeholder event and return None to indicate
+        # fallback.
+        if not self.models_loaded or not (TORCH_AVAILABLE and torch.cuda.is_available()):
+            if end_event is not None and event_id is not None:
+                try:
+                    end_event(event_id, success=False, error='gpu_or_models_unavailable')
+                except Exception:
+                    pass
             return None
-            
+
         start_time = time.time()
-        
+
         try:
             # Ensure we're on the correct CUDA device
-            torch.cuda.set_device(0)
-            
+            torch.cuda.set_device(self.gpu_device)
+
             # Clear any mixed device tensors
-            with torch.cuda.device(0):
+            with torch.cuda.device(self.gpu_device):
                 result = self.sentiment_analyzer(text)
-            
+
             # Convert to 0.0-1.0 scale (matching original format)
             if isinstance(result, list) and len(result) > 0:
                 scores = {item['label'].lower(): item['score'] for item in result[0]}
-                
+
                 if 'positive' in scores:
                     sentiment_score = scores['positive']
                 elif 'negative' in scores:
@@ -177,19 +256,32 @@ class GPUAcceleratedAnalyst:
                     sentiment_score = 0.5
             else:
                 sentiment_score = 0.5
-            
+
             processing_time = time.time() - start_time
             self.performance_stats['gpu_requests'] += 1
             self.performance_stats['total_time'] += processing_time
-            
-            logger.info(f"✅ GPU sentiment: {sentiment_score:.3f} ({processing_time:.3f}s)")
+
+            # End structured event with outcome
+            if end_event is not None and event_id is not None:
+                try:
+                    end_event(event_id, success=True, processing_time_s=processing_time, score=sentiment_score)
+                except Exception:
+                    pass
+
+            logger.info(f"\u2705 GPU sentiment: {sentiment_score:.3f} ({processing_time:.3f}s)")
             return sentiment_score
-            
+
         except Exception as e:
-            logger.error(f"❌ GPU sentiment failed: {e}")
+            logger.error(f"\u274c GPU sentiment failed: {e}")
             # Clear CUDA cache on error
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
+            # Emit failure event
+            if end_event is not None and event_id is not None:
+                try:
+                    end_event(event_id, success=False, error=str(e))
+                except Exception:
+                    pass
             return None
     
     def score_bias_gpu(self, text: str) -> float:
@@ -201,10 +293,10 @@ class GPUAcceleratedAnalyst:
         
         try:
             # Ensure we're on the correct CUDA device
-            torch.cuda.set_device(0)
+            torch.cuda.set_device(self.gpu_device)
             
             # Clear any mixed device tensors
-            with torch.cuda.device(0):
+            with torch.cuda.device(self.gpu_device):
                 result = self.bias_detector(text)
             
             # Convert toxicity result to bias scale
@@ -239,10 +331,10 @@ class GPUAcceleratedAnalyst:
         
         try:
             # Ensure we're on the correct CUDA device
-            torch.cuda.set_device(0)
+            torch.cuda.set_device(self.gpu_device)
             
             # Use HuggingFace pipeline's native batch processing with explicit device context
-            with torch.cuda.device(0):
+            with torch.cuda.device(self.gpu_device):
                 results = self.sentiment_analyzer(texts)
             
             sentiment_scores = []
@@ -287,10 +379,10 @@ class GPUAcceleratedAnalyst:
         
         try:
             # Ensure we're on the correct CUDA device
-            torch.cuda.set_device(0)
+            torch.cuda.set_device(self.gpu_device)
             
             # Use HuggingFace pipeline's native batch processing with explicit device context
-            with torch.cuda.device(0):
+            with torch.cuda.device(self.gpu_device):
                 results = self.bias_detector(texts)
             
             bias_scores = []
@@ -322,6 +414,8 @@ class GPUAcceleratedAnalyst:
                 torch.cuda.empty_cache()
             return [None] * len(texts)
 
+            return [None] * len(texts)
+
 # Global GPU analyst instance
 _gpu_analyst = None
 
@@ -331,6 +425,30 @@ def get_gpu_analyst():
     if _gpu_analyst is None:
         _gpu_analyst = GPUAcceleratedAnalyst()
     return _gpu_analyst
+
+def cleanup_gpu_analyst():
+    """Clean up GPU analyst and release GPU allocation"""
+    global _gpu_analyst
+    if _gpu_analyst is not None:
+        try:
+            # Release GPU allocation
+            if _gpu_analyst.gpu_allocated:
+                try:
+                    from agents.common.gpu_manager import release_agent_gpu
+                    release_agent_gpu('analyst')
+                    logger.info("✅ Analyst GPU allocation released")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to release Analyst GPU allocation: {e}")
+            
+            # Clear GPU cache
+            if TORCH_AVAILABLE and torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            
+            # Clear instance
+            _gpu_analyst = None
+            logger.info("🧹 GPU analyst cleaned up")
+        except Exception as e:
+            logger.error(f"Error during GPU analyst cleanup: {e}")
 
 class DockerModelClient:
     """Client for Docker Model Runner integration."""
@@ -915,6 +1033,25 @@ def get_system_status() -> Dict[str, Any]:
         },
         "performance_metrics": _performance_metrics
     }
+
+    # Add TensorRT availability flags to system status
+    status["tensorrt"] = {
+        "tensorrt_available": TENSORTT_AVAILABLE,
+        "engines_present": False,
+        "engines_dir": None
+    }
+
+    if TENSORTT_AVAILABLE and NativeTensorRTInferenceEngine is not None:
+        try:
+            # Attempt to discover engine files without instantiating full loader
+            import os
+            engines_dir = os.path.join(os.path.dirname(__file__), "tensorrt_engines")
+            engines = [f for f in os.listdir(engines_dir) if f.endswith('.engine')] if os.path.isdir(engines_dir) else []
+            status["tensorrt"]["engines_present"] = len(engines) > 0
+            status["tensorrt"]["engines_dir"] = engines_dir
+        except Exception:
+            # If discovery fails, leave defaults
+            pass
     
     return status
 

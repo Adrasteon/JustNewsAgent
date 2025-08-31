@@ -80,6 +80,13 @@ except ImportError:
     POSTGRESQL_AVAILABLE = False
     logging.warning("psycopg2 not available - using SQLite fallback")
 
+# GPU Manager imports
+try:
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu
+    GPU_MANAGER_AVAILABLE = True
+except ImportError:
+    GPU_MANAGER_AVAILABLE = False
+
 # Configuration
 FEEDBACK_LOG = os.environ.get("MEMORY_V2_FEEDBACK_LOG", "./feedback_memory_v2.log")
 MODEL_CACHE_DIR = os.environ.get("MEMORY_V2_CACHE", "./models/memory_v2")
@@ -192,7 +199,23 @@ class MemoryV2Engine:
     
     def __init__(self, config: Optional[MemoryV2Config] = None):
         self.config = config or MemoryV2Config()
-        self.device = torch.device(self.config.device)
+        
+        # GPU allocation
+        self.gpu_device = None
+        if GPU_MANAGER_AVAILABLE and torch.cuda.is_available():
+            try:
+                self.gpu_device = request_agent_gpu("memory_agent", memory_gb=2.0)
+                if self.gpu_device is not None:
+                    logger.info(f"✅ Memory agent allocated GPU device: {self.gpu_device}")
+                    self.device = torch.device(f"cuda:{self.gpu_device}")
+                else:
+                    logger.warning("❌ GPU allocation failed for memory agent, using CPU")
+                    self.device = torch.device("cpu")
+            except Exception as e:
+                logger.error(f"Error allocating GPU for memory agent: {e}")
+                self.device = torch.device("cpu")
+        else:
+            self.device = torch.device(self.config.device)
         
         # Model containers
         self.models = {}
@@ -259,7 +282,7 @@ class MemoryV2Engine:
             self.pipelines['bert_classifier'] = pipeline(
                 "text-classification",
                 model="nlptown/bert-base-multilingual-uncased-sentiment",  # Pre-trained classifier
-                device=0 if self.device.type == 'cuda' else -1,
+                device=self.gpu_device if self.gpu_device is not None else -1,
                 top_k=None  # Updated: Use top_k=None instead of deprecated return_all_scores=True
             )
             
@@ -272,7 +295,7 @@ class MemoryV2Engine:
                 self.pipelines['bert_classifier'] = pipeline(
                     "text-classification", 
                     model="cardiffnlp/twitter-roberta-base-sentiment-latest",
-                    device=0 if self.device.type == 'cuda' else -1,
+                    device=self.gpu_device if self.gpu_device is not None else -1,
                     top_k=None  # Updated: Use top_k=None for consistency
                 )
                 logger.info("✅ BERT fallback model loaded successfully")
@@ -1137,6 +1160,14 @@ class MemoryV2Engine:
             self.pipelines.clear()
             self.memory_cache.clear()
             self.embedding_cache.clear()
+            
+            # Release GPU allocation
+            if GPU_MANAGER_AVAILABLE and self.gpu_device is not None:
+                try:
+                    release_agent_gpu("memory_agent")
+                    logger.info("✅ Released GPU allocation for memory agent")
+                except Exception as e:
+                    logger.error(f"Error releasing GPU for memory agent: {e}")
             
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()

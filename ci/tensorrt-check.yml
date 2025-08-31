@@ -22,4 +22,4 @@ jobs:
       - name: Run marker build and targeted tests
         run: |
           python scripts/compile_tensorrt_stub.py --build-markers
-          pytest -q tests/test_tensorrt_stub.py
+          pytest -q tests/test_tensorrt_stub.py tests/test_tensorrt_calibration_stub.py

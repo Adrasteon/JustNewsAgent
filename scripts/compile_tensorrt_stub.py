@@ -45,6 +45,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--check-only', action='store_true', help='Only check environment capability')
     parser.add_argument('--build-markers', action='store_true', help='Create marker engine files (safe)')
+    parser.add_argument('--precision', default='fp16', choices=['fp32','fp16','int8'], help='Precision for marker files')
+    parser.add_argument('--calibrate', action='store_true', help='Record calibration requested for int8 markers')
+    parser.add_argument('--calib-data', type=str, help='Path to calibration dataset to record in metadata')
     args = parser.parse_args()
 
     if args.check_only:
@@ -58,9 +61,23 @@ def main():
         return
 
     if args.build_markers:
-        # Create marker engines for sentiment and bias
-        create_marker('native_sentiment_roberta.engine', 'sentiment', precision='fp16')
-        create_marker('native_bias_bert.engine', 'bias', precision='fp16')
+        # Create marker engines for sentiment and bias with requested precision
+        create_marker('native_sentiment_roberta.engine', 'sentiment', precision=args.precision)
+        create_marker('native_bias_bert.engine', 'bias', precision=args.precision)
+        # If int8 calibration requested, write calibration metadata
+        if args.precision == 'int8' and args.calibrate:
+            # Update the JSON metadata files to include calibration hints
+            for name in ('native_sentiment_roberta', 'native_bias_bert'):
+                meta_path = ENGINES_DIR / f"{name}.json"
+                try:
+                    with open(meta_path, 'r', encoding='utf-8') as f:
+                        meta = json.load(f)
+                except Exception:
+                    meta = {}
+                meta['calibrated'] = False
+                meta['calib_data'] = args.calib_data or None
+                with open(meta_path, 'w', encoding='utf-8') as f:
+                    json.dump(meta, f, indent=2)
         print('Marker engine creation complete.')
         return
 

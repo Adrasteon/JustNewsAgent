@@ -1,3 +1,81 @@
+"""Native TensorRT engine stub loader.
+
+This is a lightweight placeholder that detects whether TensorRT/PyCUDA
+and engine files are present. It does not implement full engine loading.
+
+When native TensorRT is available and engine files exist, replace this
+stub with a real loader that manages PyCUDA contexts, loads engines,
+binds tensors, and performs inference as described in
+`NATIVE_TENSORRT_README.md`.
+"""
+import os
+import logging
+
+logger = logging.getLogger("analyst.native_tensorrt_engine")
+
+# Detect runtime availability of TensorRT and PyCUDA
+try:
+    import tensorrt as trt  # type: ignore
+    import pycuda.driver as cuda  # type: ignore
+    import pycuda.autoinit  # type: ignore
+    _TRT_AVAILABLE = True
+except Exception as _err:
+    trt = None  # type: ignore
+    cuda = None  # type: ignore
+    _TRT_AVAILABLE = False
+    logger.info(f"TensorRT/PyCUDA detection: not available ({_err})")
+
+ENGINES_DIR = os.path.join(os.path.dirname(__file__), "tensorrt_engines")
+
+def _find_engine_files(engines_dir: str | None = None):
+    d = engines_dir or ENGINES_DIR
+    if not os.path.isdir(d):
+        return []
+    return [f for f in os.listdir(d) if f.endswith('.engine')]
+
+NATIVE_TENSORRT_AVAILABLE = _TRT_AVAILABLE and len(_find_engine_files()) > 0
+
+
+class NativeTensorRTInferenceEngine:
+    """Minimal stub for a Native TensorRT inference engine.
+
+    This class intentionally does not implement real TensorRT loading.
+    It provides a clear error and detection so callers can detect
+    availability and fail fast with actionable messages.
+    """
+
+    def __init__(self, engines_dir: str | None = None):
+        self.engines_dir = engines_dir or ENGINES_DIR
+        if not _TRT_AVAILABLE:
+            raise RuntimeError(
+                "TensorRT and/or PyCUDA are not installed. See agents/analyst/requirements_v4.txt"
+            )
+
+        engines = _find_engine_files(self.engines_dir)
+        if not engines:
+            raise FileNotFoundError(
+                f"No .engine files found in {self.engines_dir}. Place compiled TensorRT engines there."
+            )
+
+        logger.info(f"Found TensorRT engine files: {engines} (loader not implemented in stub)")
+
+    def __enter__(self):
+        # Real implementation should create and store CUDA context here
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Real implementation should cleanup CUDA context here
+        return False
+
+    def cleanup(self):
+        """Placeholder cleanup method for contexts and resources."""
+        logger.info("NativeTensorRTInferenceEngine.cleanup() called (stub)")
+
+    def score_sentiment(self, text: str) -> float:
+        raise NotImplementedError("Native TensorRT scoring is not implemented in this stub")
+
+    def score_sentiment_batch(self, texts: list[str]) -> list[float]:
+        raise NotImplementedError("Native TensorRT batch scoring is not implemented in this stub")
 #!/usr/bin/env python3
 """
 Native TensorRT Inference Engine for JustNews V4

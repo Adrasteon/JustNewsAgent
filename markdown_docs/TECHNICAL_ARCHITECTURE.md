@@ -1,12 +1,12 @@
 # JustNewsAgentic V4 - T### 🤖 **Agent Production Status Overview**
 
-### ✅ **Production-Ready Agents (V3/V2 Engines)**
-- **🔍 Scout V2**: 5-model intelligence engine with LLaMA-3-8B GPU acceleration
-- **✅ Fact Checker V2**: 5-model verification system with comprehensive credibility assessment  
-- **📝 Synthesizer V3**: **4-model production stack** (BERTopic, BART, FLAN-T5, SentenceTransformers)
+### ✅ **Production-Ready Agents (V3/V2 Engines) - ENHANCED WITH ADVANCED GPU FEATURES**
+- **🔍 Scout V2**: 5-model intelligence engine with LLaMA-3-8B GPU acceleration and advanced monitoring
+- **✅ Fact Checker V2**: 5-model verification system with GPT-2 Medium integration and comprehensive credibility assessment
+- **📝 Synthesizer V3**: **4-model production stack** (BERTopic, BART, FLAN-T5, SentenceTransformers) with learning-based optimization
 - **🧠 Reasoning**: Complete Nucleoid implementation with symbolic logic and AST parsing
-- **💾 Memory**: PostgreSQL integration with vector search and training data persistence
-- **🤖 NewsReader**: LLaVA-1.5-7B with **crash-resolved** INT8 quantization for visual content analysis
+- **💾 Memory**: PostgreSQL integration with vector search and training data persistence with optimized embeddings
+- **🤖 NewsReader**: LLaVA-1.5-7B with **crash-resolved** INT8 quantization for visual content analysis and performance tracking
 
 ### 🚨 **GPU Crash Investigation Resolution - August 13, 2025**
 
@@ -123,20 +123,20 @@ This document provides comprehensive technical details about the JustNewsAgentic
 
 ## Detailed Agent Specifications
 
-### Agent Memory Allocation (RTX 3090 Optimized)
+### Agent Memory Allocation (RTX 3090 Optimized with Advanced Features)
 
-| Agent | Model | Memory | Status | Performance |
-|-------|-------|---------|--------|-------------|
-| **Analyst** | RoBERTa + BERT (TensorRT) | 2.3GB | ✅ Production | 730+ articles/sec |
-| **Scout V2** | 5 AI Models (BERT + RoBERTa + LLaVA) | 8.0GB | ✅ AI-First Architecture | News + Quality + Sentiment + Bias + Visual |
-| **NewsReader** | LLaVA-1.5-7B (INT8) | 6.8GB | ✅ Production | Screenshot + Visual Analysis |
-| **Fact Checker** | DialoGPT (deprecated)-medium | 2.5GB | ⏳ TensorRT Ready | Scout-Optimized |
-| **Synthesizer** | DialoGPT (deprecated)-medium + Embeddings | 3.0GB | ⏳ TensorRT Ready | Content Synthesis |
-| **Critic** | DialoGPT (deprecated)-medium | 2.5GB | ⏳ TensorRT Ready | Quality Assessment |
-| **Chief Editor** | DialoGPT (deprecated)-medium | 2.0GB | ⏳ TensorRT Ready | Orchestration |
-| **Memory** | Vector Embeddings | 1.5GB | ⏳ TensorRT Ready | Semantic Search |
+| Agent | Model | Memory | Status | Key Features |
+|-------|-------|---------|--------|--------------|
+| **Analyst** | RoBERTa + BERT (TensorRT) | 4-6GB | ✅ Production + Learning | TensorRT acceleration, real-time metrics, performance profiling |
+| **Scout V2** | 5 AI Models (BERT + RoBERTa + LLaVA) | 4-6GB | ✅ AI-First + Enhanced | 5-model architecture, advanced monitoring, quality filtering |
+| **NewsReader** | LLaVA-1.5-7B (INT8) | 4-8GB | ✅ Production + Tracking | Multi-modal processing, performance tracking, crash-resolved |
+| **Fact Checker** | GPT-2 Medium (replaced deprecated DialoGPT) | 4GB | ✅ Production + Optimized | Modern model integration, advanced batch optimization |
+| **Synthesizer** | DialoGPT-medium + Embeddings | 6-8GB | ✅ Production + Learning | Learning-based batch optimization, performance profiling |
+| **Critic** | DialoGPT-medium | 4-5GB | ✅ Production + Tracking | Quality assessment, performance monitoring |
+| **Chief Editor** | DialoGPT-medium | 2GB | ✅ Production + Optimized | Orchestration optimization, resource management |
+| **Memory** | Vector Embeddings | 2-4GB | ✅ Production + Optimized | Optimized embeddings, advanced caching, semantic search |
 | **Reasoning** | Nucleoid (symbolic logic) | <1GB | ✅ Production | Fact validation, contradiction detection |
-| **Total System** | **Multi-Model Pipeline** | **29.6GB** | **RTX 3090 Optimized** | **Requires Optimization** |
+| **Total System** | **Multi-Model Pipeline** | **29.6GB** | **RTX 3090 Optimized** | **Advanced GPU Management** |
 
 ### Strategic Architecture Design
 

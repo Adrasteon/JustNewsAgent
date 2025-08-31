@@ -51,15 +51,12 @@ import numpy as np
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.*")
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers.*")
 
-# GPU cleanup integration
+# Production GPU Manager integration
 try:
-    import sys
-    sys.path.insert(0, '/home/adra/JustNewsAgentic')
-    from training_system.utils.gpu_cleanup import GPUModelManager
-    gpu_manager = GPUModelManager()
-    GPU_CLEANUP_AVAILABLE = True
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
-    GPU_CLEANUP_AVAILABLE = False
+    PRODUCTION_GPU_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -77,26 +74,47 @@ class FactCheckerV2Engine:
         self.pipelines = {}
         self.enable_training = enable_training
         
-        logger.info(f"🔥 Initializing Fact Checker V2 Engine on {self.device}")
-        
+        # Initialize GPU allocation for fact checker agent
+        self.gpu_allocated = False
+        self.gpu_device = None
+        self.gpu_memory_gb = 3.0  # Fact checker needs ~3GB for models
+
+        if PRODUCTION_GPU_AVAILABLE and self.device.type == "cuda":
+            try:
+                # Request GPU allocation through production manager
+                allocation = request_agent_gpu('fact_checker', self.gpu_memory_gb)
+                if isinstance(allocation, dict) and allocation.get('status') == 'allocated':
+                    self.gpu_allocated = True
+                    self.gpu_device = allocation.get('gpu_device', 0)
+                    self.gpu_memory_gb = allocation.get('allocated_memory_gb', self.gpu_memory_gb)
+                    logger.info(f"✅ Fact Checker GPU allocated: {self.gpu_memory_gb}GB on device {self.gpu_device}")
+                else:
+                    logger.warning(f"⚠️ Fact Checker GPU allocation failed: {allocation}")
+                    self.device = torch.device('cpu')
+            except Exception as e:
+                logger.warning(f"⚠️ Fact Checker GPU allocation error: {e}")
+                self.device = torch.device('cpu')
+        else:
+            logger.info("📋 Production GPU manager not available, using direct GPU access")
+
         # Load core fact-checking models (contradiction moved to Reasoning Agent)
         self._initialize_fact_verification_model()
         self._initialize_credibility_assessment_model()
         self._initialize_evidence_retrieval_model()
         self._initialize_claim_extraction_model()
-        
-        # Register models with GPU cleanup manager
-        if GPU_CLEANUP_AVAILABLE and self.device.type == "cuda":
-            for model_name, pipeline in self.pipelines.items():
-                if pipeline is not None:
-                    gpu_manager.register_model(f"fact_checker_v2_{model_name}", pipeline)
-        
-        # Validation and completion
-        successful_models = (
-            len([p for p in self.pipelines.values() if p is not None]) +
-            len([m for m in self.models.values() if m is not None])
-        )
-        logger.info(f"✅ Fact Checker V2 Engine ready with {successful_models} AI models")
+
+        # Register models with production GPU manager
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                gpu_mgr = get_gpu_manager()
+                for model_name, pipeline in self.pipelines.items():
+                    if pipeline is not None:
+                        gpu_mgr.register_model(f"fact_checker_v2_{model_name}", pipeline)
+                logger.info("🧹 Fact Checker models registered with production GPU manager")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
+        elif self.device.type == "cuda":
+            logger.info("📋 Production GPU manager not available, models not registered")
     
     def _initialize_fact_verification_model(self):
         """Model 1: DistilBERT-base for binary fact verification"""
@@ -492,6 +510,14 @@ class FactCheckerV2Engine:
     
     def cleanup(self):
         """Cleanup GPU memory and model resources"""
+        # Release GPU allocation
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                release_agent_gpu('fact_checker')
+                logger.info("✅ Fact Checker GPU allocation released")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to release Fact Checker GPU allocation: {e}")
+
         try:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()

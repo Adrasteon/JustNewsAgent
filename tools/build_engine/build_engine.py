@@ -45,6 +45,12 @@ def create_marker(engine_name: str, task: str, precision: str = "fp16"):
         'precision': precision,
         'created_at': time.strftime('%Y-%m-%d %H:%M:%S')
     }
+    # Optional calibration metadata placeholder
+    # If precision is int8 we record that calibration was requested; real calibration
+    # artifacts would be generated on GPU hosts.
+    if precision == 'int8':
+        metadata['calibrated'] = False
+        metadata['calib_data'] = None
     with open(metadata_path, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2)
 
@@ -58,6 +64,10 @@ def try_native_compile(args):
         from native_tensorrt_compiler import NativeTensorRTCompiler
 
         compiler = NativeTensorRTCompiler()
+        # Apply requested precision and calibration data to the compiler config
+        compiler.optimization_config['precision'] = args.precision
+        if args.calibrate:
+            compiler.optimization_config['calibration_data'] = args.calib_data
 
         if args.model:
             print(f"Starting native compilation for model: {args.model} precision={args.precision}")
@@ -87,6 +97,8 @@ def main():
     parser.add_argument('--build', action='store_true')
     parser.add_argument('--model', type=str, help='Model name or task (e.g., sentiment)')
     parser.add_argument('--precision', default='fp16', choices=['fp32','fp16','int8'])
+    parser.add_argument('--calibrate', action='store_true', help='Run INT8 calibration during build (requires --precision int8)')
+    parser.add_argument('--calib-data', type=str, help='Path to calibration dataset (JSONL or directory)')
     args = parser.parse_args()
 
     if args.check_only:
@@ -105,6 +117,10 @@ def main():
         return
 
     if args.build:
+        # If INT8 calibration requested but precision != int8, warn and continue
+        if args.calibrate and args.precision != 'int8':
+            print('Warning: --calibrate requested but --precision is not int8; proceeding with precision=', args.precision)
+
         ok = try_native_compile(args)
         if not ok:
             print('Native compilation failed or not available; creating marker engines instead')
