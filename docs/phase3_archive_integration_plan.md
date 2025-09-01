@@ -98,7 +98,7 @@ Input Sources → Phase 2 Crawlers → Canonical Processing → Hot Storage
 - **✅ JWT-Based Authentication**: Complete implementation with access tokens (30min) and refresh tokens (7 days)
 - **✅ Role-Based Access Control**: Three-tier system (ADMIN, RESEARCHER, VIEWER) with hierarchical permissions
 - **✅ Secure Database Separation**: Dedicated `justnews_auth` PostgreSQL database for complete security isolation
-- **✅ Production API Endpoints**: Full authentication API running on port 8022 with comprehensive user management
+- **✅ Production API Endpoints**: Full authentication API running on port 8021 with comprehensive user management
 - **✅ Security Standards**: PBKDF2 password hashing, account lockout (30min after 5 failed attempts), secure token refresh
 - **✅ Admin Functions**: User activation/deactivation, role management, and comprehensive user administration
 - **✅ Session Management**: Refresh token storage, validation, and secure session revocation

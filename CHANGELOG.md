@@ -9,7 +9,7 @@ All notable changes to this project will be documented in this file.
 - **✅ JWT-Based Authentication**: Implemented secure token-based authentication with refresh tokens and role-based access control
 - **✅ Role-Based Access Control**: ADMIN, RESEARCHER, VIEWER roles with proper permissions and hierarchical access
 - **✅ Comprehensive API Endpoints**: Registration, login, token refresh, user management, and password reset functionality
-- **✅ FastAPI Integration**: Complete authentication router integrated into main archive API (Port 8022)
+- **✅ FastAPI Integration**: Complete authentication router integrated into main archive API (Port 8021)
 - **✅ Production Environment**: Switched to correct `justnews-v2-prod` conda environment with all dependencies installed
 - **✅ Security Standards**: PBKDF2 password hashing, account lockout after failed attempts, secure token refresh mechanism
 - **✅ Database Transaction Fix**: Resolved critical transaction commit issue ensuring data persistence in separate database
@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
 
 ### 🎯 **Production Deployment Ready**
 - **✅ Environment Setup**: Production conda environment configured with all authentication dependencies
-- **✅ Service Integration**: Authentication API running on port 8022 with main archive API
+- **✅ Service Integration**: Authentication API running on port 8021 with main archive API
 - **✅ Database Setup**: Separate authentication database created with proper permissions and security
 - **✅ API Documentation**: Complete OpenAPI documentation for all authentication endpoints
 - **✅ Security Compliance**: Industry-standard security practices implemented throughout

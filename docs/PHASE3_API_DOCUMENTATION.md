@@ -677,7 +677,7 @@ The system supports the following entity types:
 
 ## Authentication ✅ **COMPLETED**
 
-The JustNews Agent now includes a complete JWT-based authentication system with role-based access control. The authentication API runs on port 8022 and provides comprehensive user management capabilities.
+The JustNews Agent now includes a complete JWT-based authentication system with role-based access control. The authentication API runs on port 8021 and provides comprehensive user management capabilities.
 
 ### Authentication Architecture
 
@@ -691,7 +691,7 @@ The JustNews Agent now includes a complete JWT-based authentication system with 
 
 #### Base URL
 ```
-http://localhost:8022/auth
+http://localhost:8021/auth
 ```
 
 #### User Registration
@@ -962,21 +962,21 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
 1. **Start the Authentication API:**
 ```bash
 cd /home/adra/JustNewsAgent
-conda run --name justnews-v2-prod uvicorn agents.archive.archive_api:app --reload --port 8022
+conda run --name justnews-v2-prod uvicorn agents.archive.archive_api:app --reload --port 8021
 ```
 
 2. **API Documentation:**
 ```bash
 # Interactive API docs
-curl http://localhost:8022/docs
+curl http://localhost:8021/docs
 
 # Health check
-curl http://localhost:8022/auth/health
+curl http://localhost:8021/auth/health
 ```
 
 3. **Create Admin User (First Time Setup):**
 ```bash
-curl -X POST http://localhost:8022/auth/register \
+curl -X POST http://localhost:8021/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@justnewsagent.com",
@@ -990,14 +990,14 @@ curl -X POST http://localhost:8022/auth/register \
 4. **Activate Admin Account:**
 ```bash
 # Login as admin first, then use the returned access token
-curl -X PUT http://localhost:8022/auth/users/1/activate \
+curl -X PUT http://localhost:8021/auth/users/1/activate \
   -H "Authorization: Bearer ADMIN_ACCESS_TOKEN"
 ```
 
 5. **Test Authentication:**
 ```bash
 # Login to get tokens
-curl -X POST http://localhost:8022/auth/login \
+curl -X POST http://localhost:8021/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "username_or_email": "admin",
