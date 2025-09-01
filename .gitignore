@@ -182,6 +182,10 @@ memory_v2.db
 memory_v2_vectordb/
 memory_v2_vectordb/
 
+# Knowledge Graph Storage (Generated data files)
+kg_storage/
+evidence/
+
 # Screenshots and Test Images
 bbc_screenshots/
 test_screenshots/

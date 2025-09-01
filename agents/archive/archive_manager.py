@@ -23,6 +23,9 @@ import hashlib
 # import boto3  # Commented out for now - will be added when S3 support is needed
 # from botocore.exceptions import ClientError
 
+# Phase 3 Knowledge Graph Integration
+from .knowledge_graph import KnowledgeGraphManager
+
 logger = logging.getLogger("phase3_archive")
 
 class ArchiveStorageManager:
@@ -109,7 +112,7 @@ class ArchiveStorageManager:
                 Body=json_data,
                 ContentType='application/json'
             )
-        except ClientError as e:
+        except Exception as e:  # Using generic Exception since boto3 is not imported
             logger.error(f"S3 storage failed: {e}")
             raise
 
@@ -216,7 +219,7 @@ class ArchiveManager:
     """
     High-level archive management for Phase 3
 
-    Coordinates storage, indexing, and retrieval operations
+    Coordinates storage, indexing, and retrieval operations with Knowledge Graph integration
     """
 
     def __init__(self, storage_config: Dict[str, Any] = None):
@@ -226,17 +229,21 @@ class ArchiveManager:
         self.storage_manager = ArchiveStorageManager(storage_type, config)
         self.metadata_index = ArchiveMetadataIndex()
 
-        logger.info("🏗️ Phase 3 Archive Manager initialized")
+        # Phase 3: Knowledge Graph Integration
+        kg_storage_path = self.storage_config.get("kg_storage_path", "./kg_storage")
+        self.kg_manager = KnowledgeGraphManager(kg_storage_path)
+
+        logger.info("🏗️ Phase 3 Archive Manager initialized with Knowledge Graph integration")
 
     async def archive_from_crawler(self, crawler_results: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Archive results from Phase 2 crawler
+        Archive results from Phase 2 crawler with Knowledge Graph integration
 
         Args:
             crawler_results: Results from multi-site crawler with canonical metadata
 
         Returns:
-            Archive summary
+            Archive summary with KG processing results
         """
         articles = crawler_results.get('articles', [])
 
@@ -254,27 +261,34 @@ class ArchiveManager:
             if i < len(articles):
                 await self.metadata_index.index_article(storage_key, articles[i])
 
-        # Add crawler context to summary
-        archive_summary.update({
+        # Phase 3: Process through Knowledge Graph
+        logger.info("🧠 Processing archived articles through Knowledge Graph...")
+        kg_summary = await self.kg_manager.process_archive_batch(archive_summary, self)
+
+        # Combine summaries
+        combined_summary = {
+            **archive_summary,
+            "knowledge_graph": kg_summary,
+            "phase3_integration": True,
             "source": "phase2_crawler",
             "crawler_sites": crawler_results.get('sites_crawled', 0),
             "crawler_articles": crawler_results.get('total_articles', 0),
             "archive_integration": True
-        })
+        }
 
-        logger.info("✅ Archive integration complete!")
-        return archive_summary
+        logger.info("✅ Phase 3 Archive + KG integration complete!")
+        return combined_summary
 
 async def demo_phase3_archive():
-    """Demonstrate Phase 3 archive capabilities"""
+    """Demonstrate Phase 3 archive capabilities with Knowledge Graph integration"""
 
     print("🚀 Phase 3 Comprehensive Archive Integration Demo")
     print("=" * 60)
 
-    # Initialize archive manager
+    # Initialize archive manager with KG integration
     archive_manager = ArchiveManager()
 
-    # Simulate Phase 2 crawler results
+    # Simulate Phase 2 crawler results with richer content for KG processing
     simulated_crawler_results = {
         "multi_site_crawl": True,
         "sites_crawled": 3,
@@ -286,8 +300,8 @@ async def demo_phase3_archive():
                 "url": "https://www.bbc.co.uk/news/sample-article-1",
                 "url_hash": "abc123",
                 "domain": "bbc.co.uk",
-                "title": "Sample BBC Article for Archive",
-                "content": "This is sample content demonstrating Phase 3 archive capabilities...",
+                "title": "Prime Minister Announces New Economic Policy",
+                "content": "Prime Minister David Cameron announced a new economic policy today in London. The policy aims to boost growth in the UK economy. Business leaders from major corporations like BP and Shell have expressed support for the initiative. The announcement was made during a press conference at 10 Downing Street.",
                 "extraction_method": "generic_dom",
                 "status": "success",
                 "crawl_mode": "generic_site",
@@ -302,8 +316,8 @@ async def demo_phase3_archive():
                 "url": "https://www.reuters.com/sample-article-2",
                 "url_hash": "def456",
                 "domain": "reuters.com",
-                "title": "Sample Reuters Article for Archive",
-                "content": "Another sample article showing archive integration...",
+                "title": "Tech Giant Microsoft Acquires AI Startup",
+                "content": "Microsoft Corporation announced today that it has acquired an AI startup based in San Francisco. The acquisition is valued at $2 billion. CEO Satya Nadella stated that this move strengthens Microsoft's position in artificial intelligence. The startup's technology will be integrated into Azure cloud services.",
                 "extraction_method": "generic_dom",
                 "status": "success",
                 "crawl_mode": "generic_site",
@@ -322,25 +336,38 @@ async def demo_phase3_archive():
     print(f"   Articles: {simulated_crawler_results['total_articles']}")
     print(f"   Processing rate: {simulated_crawler_results['articles_per_second']:.2f} articles/second")
 
-    # Archive the results
-    print("\n💾 Archiving crawler results...")
+    # Archive the results with KG processing
+    print("\n💾 Archiving crawler results with Knowledge Graph integration...")
     archive_summary = await archive_manager.archive_from_crawler(simulated_crawler_results)
 
-    print("\n✅ Archive Summary:")
+    print("\n✅ Phase 3 Archive + KG Summary:")
     print(json.dumps(archive_summary, indent=2, default=str))
 
-    print("\n🎉 Phase 3 Archive Integration Demo Complete!")
+    # Display Knowledge Graph statistics
+    if "knowledge_graph" in archive_summary:
+        kg_stats = archive_summary["knowledge_graph"].get("graph_statistics", {})
+        print("\n🧠 Knowledge Graph Statistics:")
+        print(f"   Total nodes: {kg_stats.get('total_nodes', 0)}")
+        print(f"   Total edges: {kg_stats.get('total_edges', 0)}")
+        print(f"   Node types: {kg_stats.get('node_types', {})}")
+        print(f"   Entity types: {kg_stats.get('entity_types', {})}")
+
+    print("\n🎉 Phase 3 Archive + Knowledge Graph Integration Demo Complete!")
     print("\n📈 Key Features Demonstrated:")
     print("   ✅ Archive storage infrastructure")
     print("   ✅ Batch archiving with performance metrics")
-    print("   ✅ Metadata indexing foundation")
+    print("   ✅ Knowledge Graph entity extraction")
+    print("   ✅ Temporal relationship tracking")
     print("   ✅ Integration with Phase 2 crawler results")
-    print("   ✅ Provenance tracking capabilities")
+    print("   ✅ Complete provenance tracking")
 
     print("\n🚀 Phase 3 Foundation Established!")
-    print("   Next: Knowledge Graph integration")
+    print("   ✅ Research-scale archiving capabilities")
+    print("   ✅ Knowledge graph with entity linking")
+    print("   ✅ Temporal analysis foundation")
     print("   Next: Researcher API development")
     print("   Next: Legal compliance framework")
+    print("   Next: Advanced KG features (disambiguation, clustering)")
 
 if __name__ == "__main__":
     asyncio.run(demo_phase3_archive())
