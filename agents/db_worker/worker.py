@@ -10,7 +10,6 @@ error message explaining the missing dependency.
 
 import os
 import logging
-import time
 from typing import Any, Dict, List
 import requests
 from fastapi import FastAPI, HTTPException
@@ -91,13 +90,12 @@ def handle_ingest(req: IngestRequest):
             chosen_source_id = None
             with conn:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    last_id = None
                     for sql, params in statements:
                         cur.execute(sql, params)
                         try:
                             row = cur.fetchone()
                             if row and 'id' in row:
-                                last_id = row['id']
+                                pass  # ID retrieved but not used in this context
                         except Exception:
                             # ignore fetch errors
                             pass

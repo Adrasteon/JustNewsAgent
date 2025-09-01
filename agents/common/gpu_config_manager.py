@@ -13,10 +13,9 @@ Features:
 import os
 import json
 import logging
-import hashlib
 import socket
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from pathlib import Path
 import yaml
 import threading
@@ -598,13 +597,10 @@ class GPUConfigManager:
         # Determine config type from filename
         if 'gpu_config' in backup_filename:
             target_file = self.main_config_file
-            config_attr = 'main_config'
         elif 'environment_config' in backup_filename:
             target_file = self.env_config_file
-            config_attr = 'env_config'
         elif 'model_config' in backup_filename:
             target_file = self.model_config_file
-            config_attr = 'model_config'
         else:
             raise ValueError(f"Cannot determine config type from backup filename: {backup_filename}")
 

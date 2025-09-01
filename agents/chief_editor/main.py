@@ -8,8 +8,6 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel
 import os
 import requests
-import json
-from datetime import datetime, timezone
 from agents.chief_editor.handler import handle_review_request
 
 # Configure logging

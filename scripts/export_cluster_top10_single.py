@@ -2,7 +2,8 @@
 """Export first N members of a cluster into a single markdown file with separators.
 Usage: python3 scripts/export_cluster_top10_single.py <cluster_id> [count] [outpath]
 """
-import csv, sys
+import csv
+import sys
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pathlib import Path

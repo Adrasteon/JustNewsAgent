@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
 import subprocess
 import threading
 import requests
+import json
 
 class DashboardGUI(QMainWindow):
     def __init__(self):
@@ -472,9 +473,7 @@ class DashboardGUI(QMainWindow):
         self.update_agent_status(name, self.agent_buttons[name][3])
 
     def create_gpu_monitoring_tab(self):
-        from PyQt5.QtWidgets import QTextEdit, QLabel, QHBoxLayout, QVBoxLayout, QGroupBox, QGridLayout
-        from PyQt5.QtCore import QTimer
-        import requests
+        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QGroupBox, QGridLayout
 
         tab = QWidget()
         layout = QVBoxLayout()
@@ -734,20 +733,8 @@ class DashboardGUI(QMainWindow):
             self.logger.info("Dashboard GUI closed. Monitor thread stopped.")
         super().closeEvent(event)
 
-    def create_analysis_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout()
-
-        # Example content for Analysis tab
-        layout.addWidget(QLabel("Tools for analyzing articles will be displayed here."))
-
-        tab.setLayout(layout)
-        return tab
-
     def create_settings_tab(self):
-        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QGroupBox, QComboBox, QSpinBox, QCheckBox, QGridLayout
-        import requests
-        import json
+        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QGroupBox, QComboBox, QSpinBox, QGridLayout
 
         tab = QWidget()
         layout = QVBoxLayout()
@@ -970,8 +957,6 @@ class DashboardGUI(QMainWindow):
 
     def create_analysis_tab(self):
         from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QGroupBox, QComboBox
-        from PyQt5.QtCore import QTimer
-        import requests
 
         tab = QWidget()
         layout = QVBoxLayout()

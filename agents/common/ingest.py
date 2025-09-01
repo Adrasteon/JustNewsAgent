@@ -111,9 +111,6 @@ def ingest_article(article_payload: Dict[str, Any], db_execute) -> Dict[str, Any
 
     canonical = canonical_selection_rule([candidate])
 
-    # Optionally update articles.source_id (left as a stub SQL for production)
-    update_sql = "-- UPDATE articles SET source_id = %s WHERE id = %s;"
-    update_params = (canonical.get('source_id'), article_id)
     # Do not execute update by default; leave to orchestrator or DB stored proc
 
     return {

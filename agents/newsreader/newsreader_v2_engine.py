@@ -590,7 +590,7 @@ if __name__ == "__main__":
         if model_name != 'total_models_loaded':
             print(f"   {model_name}: {'✅' if loaded else '❌'}")
     
-    print(f"\n⚙️ Configuration:")
+    print("\n⚙️ Configuration:")
     print(f"   Mode: {status['configuration']['default_mode']}")
     print(f"   GPU Acceleration: {status['configuration']['gpu_acceleration']}")
     print(f"   Min Confidence: {status['configuration']['min_confidence']}")

@@ -1,3 +1,17 @@
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from enum import Enum
+import torch
+import time
+from datetime import datetime
+import json
+from PIL import Image
+from playwright.async_api import async_playwright
+import os
+import logging
+import asyncio
+import warnings
+
 """
 NewsReader V2 Engine - TRUE Multi-Modal Vision Processing
 Architecture: LLaVA + Screenshot Processing (OCR & CLIP DISABLED - Testing Redundancy)
@@ -16,23 +30,9 @@ V2 Standards:
 - MCP bus integration for inter-agent communication
 """
 
-import os
-import logging
-import asyncio
-import warnings
-
 # Suppress transformers warnings about slow processors
 warnings.filterwarnings("ignore", message=".*use_fast.*slow processor.*")
 warnings.filterwarnings("ignore", message=".*slow image processor.*")
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
-from enum import Enum
-import torch
-import time
-from datetime import datetime
-import json
-from PIL import Image
-from playwright.async_api import async_playwright
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

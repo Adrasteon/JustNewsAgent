@@ -12,10 +12,12 @@ import argparse
 import os
 import re
 import sys
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import psycopg2
 import psycopg2.extras
+
+from scripts.db_config import get_db_conn
 
 
 def parse_markdown_table_rows(md: str) -> Iterable[Tuple[str, str, str]]:
@@ -59,9 +61,6 @@ def parse_markdown_table_rows(md: str) -> Iterable[Tuple[str, str, str]]:
 def domain_from_url(url: str) -> str:
     m = re.match(r"https?://([^/]+)", url)
     return m.group(1).lower() if m else url
-
-
-from scripts.db_config import get_db_conn
 
 
 UPSERT_SQL = """

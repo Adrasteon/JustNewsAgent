@@ -77,7 +77,6 @@ def ensure_import_os(lines: List[str]) -> List[str]:
 
 def process_python_file(path: Path, apply: bool) -> Tuple[bool, List[str]]:
     text = path.read_text(encoding='utf-8')
-    orig = text
     changed = False
     notes = []
     # Replace literal model ids inside quotes

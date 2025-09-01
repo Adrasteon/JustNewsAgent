@@ -10,7 +10,7 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 # Add project paths
 script_dir = Path(__file__).parent

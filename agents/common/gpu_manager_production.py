@@ -12,13 +12,11 @@ Features:
 - Atomic allocation operations
 """
 
-import os
-import json
 import logging
 import time
 import threading
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, Optional, Any
 from dataclasses import dataclass
 from contextlib import contextmanager
 import subprocess
@@ -392,7 +390,6 @@ class MultiAgentGPUManager:
             # Get GPU memory info for more accurate calculations
             if GPU_AVAILABLE and torch.cuda.is_available():
                 gpu_status = self.health_monitor.get_gpu_status(0)  # Use first GPU as reference
-                total_memory = gpu_status.total_memory_gb
                 free_memory = gpu_status.free_memory_gb
 
                 # Use available memory as constraint
@@ -476,7 +473,6 @@ class MultiAgentGPUManager:
             # Get GPU memory info for more accurate calculations
             if GPU_AVAILABLE and torch.cuda.is_available():
                 gpu_status = self.health_monitor.get_gpu_status(0)  # Use first GPU as reference
-                total_memory = gpu_status.total_memory_gb
                 free_memory = gpu_status.free_memory_gb
 
                 # Reserve some memory for overhead

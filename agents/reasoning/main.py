@@ -186,7 +186,6 @@ async def lifespan(app: FastAPI):
     mcp_bus_client = MCPBusClient()
     retries = int(os.environ.get("MCP_REGISTER_RETRIES", "3"))
     backoff = float(os.environ.get("MCP_REGISTER_BACKOFF", "2.0"))
-    registered = False
     for attempt in range(1, retries + 1):
         try:
             mcp_bus_client.register_agent(
@@ -195,7 +194,6 @@ async def lifespan(app: FastAPI):
                 tools=["validate_fact", "detect_contradiction", "symbolic_reasoning"]
             )
             logger.info("Registered tools with MCP Bus.")
-            registered = True
             break
         except Exception as e:
             logger.warning(f"MCP registration attempt {attempt} failed: {e}")
@@ -651,7 +649,6 @@ def pipeline_validate(payload: ReasoningInput) -> Dict[str, Any]:
         statements = _ingest_neural_assessment(assessment)
 
         # Temporarily add statements to the engine (do not persist them long-term)
-        added_ids = []
         for stmt in statements:
             try:
                 eng.add_fact({"statement": stmt})
@@ -1022,8 +1019,6 @@ def validate_claim(call: ToolCall):
             raise ValueError("Claim cannot be empty")
         
         # Add claim as temporary fact and check for contradictions
-        temp_fact = {"statement": claim, "type": "claim", "context": context}
-        
         # Get existing statements
         existing_statements = []
         for fact in eng.facts_store.values():

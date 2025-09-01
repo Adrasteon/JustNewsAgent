@@ -45,7 +45,7 @@ import os
 import json
 import subprocess
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 from typing import Optional, Dict, List, Tuple, Any
 
@@ -563,7 +563,7 @@ class DockerModelClient:
     def _log_performance(self, operation: str, elapsed_time: float, input_length: int, output_length: int):
         """Log performance metrics for analysis."""
         metrics = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "operation": operation,
             "model": self.model_name,
             "elapsed_time": elapsed_time,
@@ -662,13 +662,13 @@ def log_feedback(event: str, details: dict, include_source: Optional[str] = None
     """Enhanced feedback logging for V4 training pipeline."""
     enhanced_details = {
         **details,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "model_source": include_source,
         "version": "v4_hybrid"
     }
     
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{json.dumps(enhanced_details)}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{json.dumps(enhanced_details)}\n")
 
 def score_bias(text: str) -> float:
     """
@@ -1022,7 +1022,7 @@ def get_system_status() -> Dict[str, Any]:
     
     status = {
         "version": "v4_hybrid",
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "docker_model_runner": {
             "available": manager.docker_client.is_available,
             "model": manager.docker_client.model_name
@@ -1060,7 +1060,7 @@ def benchmark_performance(text_sample: str = "This is a test news article about 
     logger.info("Running V4 hybrid performance benchmarks...")
     
     results = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "sample_text": text_sample,
         "benchmarks": {}
     }

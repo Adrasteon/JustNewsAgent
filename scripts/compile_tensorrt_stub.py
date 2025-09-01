@@ -13,7 +13,6 @@ The marker files are text placeholders and do not require GPU or TensorRT.
 
 import argparse
 import json
-import os
 from pathlib import Path
 import time
 
@@ -56,7 +55,7 @@ def main():
             import torch  # noqa: F401
             print('TensorRT and CUDA appear to be available on this machine.')
             print('You can run the real compiler in agents/analyst/native_tensorrt_compiler.py')
-        except Exception as e:
+        except Exception:
             print('TensorRT/CUDA not available. Use --build-markers to create safe marker files.')
         return
 

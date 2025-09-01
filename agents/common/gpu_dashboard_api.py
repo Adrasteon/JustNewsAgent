@@ -9,14 +9,10 @@ Features:
 - Web dashboard interface
 """
 
-import os
-import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 # Import monitoring components

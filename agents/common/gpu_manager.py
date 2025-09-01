@@ -14,8 +14,7 @@ try:
     from agents.common.gpu_manager_production import (
         get_gpu_manager,
         request_agent_gpu as _request_agent_gpu,
-        release_agent_gpu as _release_agent_gpu,
-        MultiAgentGPUManager
+        release_agent_gpu as _release_agent_gpu
     )
     PRODUCTION_AVAILABLE = True
 except ImportError:

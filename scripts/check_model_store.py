@@ -11,7 +11,6 @@ Outputs a JSON report to stdout with keys:
 This script does not modify the filesystem.
 """
 import json
-import os
 import sys
 from pathlib import Path
 

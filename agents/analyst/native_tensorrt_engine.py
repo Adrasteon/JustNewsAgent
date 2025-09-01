@@ -1,81 +1,3 @@
-"""Native TensorRT engine stub loader.
-
-This is a lightweight placeholder that detects whether TensorRT/PyCUDA
-and engine files are present. It does not implement full engine loading.
-
-When native TensorRT is available and engine files exist, replace this
-stub with a real loader that manages PyCUDA contexts, loads engines,
-binds tensors, and performs inference as described in
-`NATIVE_TENSORRT_README.md`.
-"""
-import os
-import logging
-
-logger = logging.getLogger("analyst.native_tensorrt_engine")
-
-# Detect runtime availability of TensorRT and PyCUDA
-try:
-    import tensorrt as trt  # type: ignore
-    import pycuda.driver as cuda  # type: ignore
-    import pycuda.autoinit  # type: ignore
-    _TRT_AVAILABLE = True
-except Exception as _err:
-    trt = None  # type: ignore
-    cuda = None  # type: ignore
-    _TRT_AVAILABLE = False
-    logger.info(f"TensorRT/PyCUDA detection: not available ({_err})")
-
-ENGINES_DIR = os.path.join(os.path.dirname(__file__), "tensorrt_engines")
-
-def _find_engine_files(engines_dir: str | None = None):
-    d = engines_dir or ENGINES_DIR
-    if not os.path.isdir(d):
-        return []
-    return [f for f in os.listdir(d) if f.endswith('.engine')]
-
-NATIVE_TENSORRT_AVAILABLE = _TRT_AVAILABLE and len(_find_engine_files()) > 0
-
-
-class NativeTensorRTInferenceEngine:
-    """Minimal stub for a Native TensorRT inference engine.
-
-    This class intentionally does not implement real TensorRT loading.
-    It provides a clear error and detection so callers can detect
-    availability and fail fast with actionable messages.
-    """
-
-    def __init__(self, engines_dir: str | None = None):
-        self.engines_dir = engines_dir or ENGINES_DIR
-        if not _TRT_AVAILABLE:
-            raise RuntimeError(
-                "TensorRT and/or PyCUDA are not installed. See agents/analyst/requirements_v4.txt"
-            )
-
-        engines = _find_engine_files(self.engines_dir)
-        if not engines:
-            raise FileNotFoundError(
-                f"No .engine files found in {self.engines_dir}. Place compiled TensorRT engines there."
-            )
-
-        logger.info(f"Found TensorRT engine files: {engines} (loader not implemented in stub)")
-
-    def __enter__(self):
-        # Real implementation should create and store CUDA context here
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Real implementation should cleanup CUDA context here
-        return False
-
-    def cleanup(self):
-        """Placeholder cleanup method for contexts and resources."""
-        logger.info("NativeTensorRTInferenceEngine.cleanup() called (stub)")
-
-    def score_sentiment(self, text: str) -> float:
-        raise NotImplementedError("Native TensorRT scoring is not implemented in this stub")
-
-    def score_sentiment_batch(self, texts: list[str]) -> list[float]:
-        raise NotImplementedError("Native TensorRT batch scoring is not implemented in this stub")
 #!/usr/bin/env python3
 """
 Native TensorRT Inference Engine for JustNews V4
@@ -98,6 +20,18 @@ from typing import List, Optional, Dict, Any
 import json
 import os
 import sys
+
+# TensorRT and CUDA imports
+import tensorrt as trt
+import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
+import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
+
+# Transformers and model loading imports
+from transformers import AutoTokenizer
+from agents.common.model_loader import load_transformers_model
+
+# Fallback imports
+from hybrid_tools_v4 import GPUAcceleratedAnalyst
 
 # Add parent directory for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -136,8 +70,6 @@ class NativeTensorRTInferenceEngine:
     def _initialize_cuda(self):
         """Initialize CUDA context and stream with proper context management"""
         try:
-            import pycuda.driver as cuda
-            
             # Initialize CUDA explicitly (don't use autoinit)
             cuda.init()
             
@@ -181,7 +113,6 @@ class NativeTensorRTInferenceEngine:
     def _load_engines(self):
         """Load native TensorRT engines from disk"""
         try:
-            import tensorrt as trt
             
             # Load sentiment engine
             sentiment_engine_path = self.engines_dir / "native_sentiment_roberta.engine"
@@ -243,11 +174,8 @@ class NativeTensorRTInferenceEngine:
     def _load_tokenizers(self):
         """Load tokenizers for each task"""
         try:
-            from transformers import AutoTokenizer
-            
             # Load sentiment tokenizer (RoBERTa) and bias tokenizer (BERT)
             try:
-                from agents.common.model_loader import load_transformers_model
                 if 'sentiment' in self.engines:
                     try:
                         _, tokenizer = load_transformers_model(
@@ -287,17 +215,13 @@ class NativeTensorRTInferenceEngine:
                     self.tokenizers['bias'] = AutoTokenizer.from_pretrained(
                         'unitary/toxic-bert'
                     )
-                
+                    
         except Exception as e:
             logger.error(f"❌ Failed to load tokenizers: {e}")
     
     def _initialize_engines(self):
         """Initialize all compiled TensorRT engines"""
         try:
-            import tensorrt as trt
-            import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
-            import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
-            
             # Create TensorRT runtime
             self.trt_logger = trt.Logger(trt.Logger.WARNING)
             self.runtime = trt.Runtime(self.trt_logger)
@@ -356,7 +280,6 @@ class NativeTensorRTInferenceEngine:
             
             # Load tokenizer
             try:
-                from transformers import AutoTokenizer
                 tokenizer = AutoTokenizer.from_pretrained(model_name)
                 self.tokenizers[task] = tokenizer
             except Exception as e:
@@ -381,7 +304,6 @@ class NativeTensorRTInferenceEngine:
     def _initialize_fallback(self):
         """Initialize fallback system when native engines unavailable"""
         try:
-            from hybrid_tools_v4 import GPUAcceleratedAnalyst
             self.fallback_analyst = GPUAcceleratedAnalyst()
             logger.info("✅ Fallback GPU analyst ready")
         except Exception as e:
@@ -511,7 +433,6 @@ class NativeTensorRTInferenceEngine:
     def _run_native_inference(self, text: str, task: str) -> Optional[np.ndarray]:
         """Run single inference on native TensorRT engine"""
         try:
-            import pycuda.driver as cuda
             
             _engine = self.engines[task]
             context = self.contexts[task]
@@ -590,7 +511,6 @@ class NativeTensorRTInferenceEngine:
     def _run_native_batch_inference(self, texts: List[str], task: str) -> Optional[List[np.ndarray]]:
         """Run batch inference on native TensorRT engine"""
         try:
-            import pycuda.driver as cuda
             
             batch_size = len(texts)
             if batch_size == 0:
@@ -803,7 +723,6 @@ class NativeTensorRTInferenceEngine:
                 return
                 
             if hasattr(self, 'context_created') and self.context_created and hasattr(self, 'cuda_context'):
-                import pycuda.driver as cuda
                 # Only cleanup if we created the context and it's still current
                 if self.cuda_context is not None:
                     try:

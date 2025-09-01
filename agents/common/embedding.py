@@ -101,21 +101,22 @@ def _get_model_memory_usage(model_name: str, device_key: str) -> float:
 
 def get_embedding_memory_stats() -> Dict[str, Any]:
     """Get comprehensive memory usage statistics for all loaded embedding models"""
-    with _memory_tracking_lock:
-        total_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values())
-        gpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
-                        if 'cuda' in info['device'])
-        cpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
-                        if info['device'] == 'cpu' or info['device'] == 'auto')
+    # Note: This function is called from get_embedding_cache_info() which already holds the lock
+    # So we don't acquire the lock here to avoid deadlock
+    total_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values())
+    gpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                    if 'cuda' in info['device'])
+    cpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                    if info['device'] == 'cpu' or info['device'] == 'auto')
 
-        return {
-            'total_models': len(_model_memory_tracking),
-            'total_memory_mb': total_memory,
-            'gpu_memory_mb': gpu_memory,
-            'cpu_memory_mb': cpu_memory,
-            'models_by_agent': _group_models_by_agent(),
-            'cache_hit_ratio': _calculate_cache_hit_ratio()
-        }
+    return {
+        'total_models': len(_model_memory_tracking),
+        'total_memory_mb': total_memory,
+        'gpu_memory_mb': gpu_memory,
+        'cpu_memory_mb': cpu_memory,
+        'models_by_agent': _group_models_by_agent(),
+        'cache_hit_ratio': _calculate_cache_hit_ratio()
+    }
 
 def _group_models_by_agent() -> Dict[str, list]:
     """Group loaded models by agent for analysis"""
@@ -155,11 +156,9 @@ def _estimate_model_memory_usage(model, device_key: str) -> float:
                 try:
                     with torch.no_grad():
                         # Use a small dummy input to trigger memory allocation
-                        dummy_input = torch.randn(1, 384).to(device_key)  # Common embedding dimension
                         _ = model.encode(["test"])
-                except:
-                    pass
-
+                except RuntimeError as e:
+                    logger.warning(f"Failed to preload model {str(model)} on {device_key}: {e}")
                 torch.cuda.synchronize()
                 final_memory = torch.cuda.memory_allocated() / (1024 * 1024)  # MB
                 estimated_memory = max(0, final_memory - initial_memory)
@@ -642,12 +641,49 @@ def cleanup_embedding_cache():
 
 def get_embedding_cache_info() -> Dict[str, Any]:
     """Get information about the current embedding cache state"""
-    with _memory_tracking_lock:
+    try:
+        with _memory_tracking_lock:
+            # Get basic cache info first
+            cached_models = len(_MODEL_CACHE)
+            tracked_models = len(_model_memory_tracking)
+            cache_keys = list(_MODEL_CACHE.keys())
+
+            # Get memory stats without nested lock call
+            total_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values())
+            gpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                            if 'cuda' in info['device'])
+            cpu_memory = sum(info['memory_mb'] for info in _model_memory_tracking.values()
+                            if info['device'] == 'cpu' or info['device'] == 'auto')
+
+            memory_stats = {
+                'total_models': tracked_models,
+                'total_memory_mb': total_memory,
+                'gpu_memory_mb': gpu_memory,
+                'cpu_memory_mb': cpu_memory,
+                'models_by_agent': {},  # Skip complex grouping for now
+                'cache_hit_ratio': 0.0  # Skip calculation for now
+            }
+
+            return {
+                'cached_models': cached_models,
+                'tracked_models': tracked_models,
+                'cache_keys': cache_keys,
+                'memory_stats': memory_stats
+            }
+    except Exception as e:
+        logger.warning(f"Failed to get embedding cache info: {e}")
         return {
-            'cached_models': len(_MODEL_CACHE),
-            'tracked_models': len(_model_memory_tracking),
-            'cache_keys': list(_MODEL_CACHE.keys()),
-            'memory_stats': get_embedding_memory_stats()
+            'cached_models': 0,
+            'tracked_models': 0,
+            'cache_keys': [],
+            'memory_stats': {
+                'total_models': 0,
+                'total_memory_mb': 0,
+                'gpu_memory_mb': 0,
+                'cpu_memory_mb': 0,
+                'models_by_agent': {},
+                'cache_hit_ratio': 0.0
+            }
         }
 
 def _preload_models_background():
@@ -665,7 +701,7 @@ def _preload_models_background():
             try:
                 logger.info(f"Preloading model: {model_name}")
                 # Preload with CPU to avoid GPU contention during startup
-                model = get_shared_embedding_model(model_name, device="cpu")
+                _ = get_shared_embedding_model(model_name, device="cpu")
                 logger.info(f"✅ Successfully preloaded: {model_name}")
             except Exception as e:
                 logger.warning(f"Failed to preload model {model_name}: {e}")

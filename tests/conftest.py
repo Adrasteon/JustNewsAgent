@@ -10,7 +10,6 @@ import os
 import types
 import sys
 import logging
-from pathlib import Path
 
 import pytest
 
@@ -284,7 +283,6 @@ def mock_db_calls(monkeypatch):
     # Also ensure memory.tools functions that call requests receive DummyResponse
     # when using requests. Some helpers expect response.raise_for_status to exist.
     try:
-        import requests
 
         def mem_fake_get(url, *a, **kw):
             if '/agents' in url:

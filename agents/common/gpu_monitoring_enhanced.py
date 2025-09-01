@@ -11,13 +11,11 @@ Features:
 - Alert system for GPU issues
 """
 
-import os
-import json
 import logging
 import time
 import threading
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from collections import deque
 import subprocess
 import psutil

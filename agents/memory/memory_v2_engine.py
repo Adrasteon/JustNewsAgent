@@ -550,7 +550,6 @@ class MemoryV2Engine:
                 # Map classification results to ContentType
                 # This is a simplified mapping - in practice you'd train on labeled data
                 content_types = list(ContentType)
-                top_result = results[0] if isinstance(results, list) else results
                 predicted_idx = min(len(content_types) - 1, 0)  # Fallback to first type
                 return content_types[predicted_idx]
             
@@ -1094,7 +1093,6 @@ class MemoryV2Engine:
     def _fallback_embedding(self, content: str) -> np.ndarray:
         """Simple embedding fallback using TF-IDF style"""
         # This is a very basic fallback - in practice you'd want a better solution
-        words = content.lower().split()
         # Create a simple hash-based embedding
         embedding = np.random.RandomState(hash(content) % 2**32).rand(self.config.embedding_dim)
         return embedding / np.linalg.norm(embedding)

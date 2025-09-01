@@ -12,16 +12,16 @@ No external packages required; uses built-in http.server and urllib.
 import json
 import os
 import sys
-
-# Ensure repository root is on sys.path so imports like `agents.*` resolve
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import sqlite3
 import time
 from urllib.request import Request, urlopen
+
+# Ensure repository root is on sys.path so imports like `agents.*` resolve
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
 PORT = 8000
 

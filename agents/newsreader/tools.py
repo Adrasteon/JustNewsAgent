@@ -15,12 +15,12 @@ import asyncio
 from typing import Dict, List, Optional, Any, Union
 import json
 from datetime import datetime, timezone
+import torch
 
 # Modern datetime utility to replace deprecated utcnow()
 def utc_now() -> datetime:
     """Get current UTC datetime using timezone-aware approach"""
     return datetime.now(timezone.utc)
-import torch
 
 # Configure logging first
 logging.basicConfig(level=logging.INFO)

@@ -19,6 +19,8 @@ from typing import Dict, List, Any
 from datetime import datetime
 import torch
 import importlib
+from pathlib import Path
+import numpy as np
 
 # Lazy import helpers to avoid importing heavy ML libraries at module import time
 def _import_transformers_module():
@@ -44,8 +46,6 @@ def _import_sentence_transformer_class():
         logger = logging.getLogger(__name__)
         logger.warning(f"sentence_transformers not available at import time: {e}")
         return None
-from pathlib import Path
-import numpy as np
 
 # Production-ready warning suppression (silence when modules are present at runtime)
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.*")

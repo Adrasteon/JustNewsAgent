@@ -235,7 +235,7 @@ class GPUAcceleratedCritic:
             test_prompt = "Critique this news article: Sample article for testing GPU memory allocation."
             
             # Generate response to test memory
-            response = self.critique_pipeline(
+            _ = self.critique_pipeline(
                 test_prompt,
                 max_length=50,
                 num_return_sequences=1,

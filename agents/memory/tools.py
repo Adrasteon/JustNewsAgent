@@ -1,16 +1,10 @@
 from pathlib import Path
-"""
-Tools for the Memory Agent.
-"""
-
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import json
-
-import psycopg2
 import requests
-from psycopg2.extras import RealDictCursor
+
 try:
     import torch
 except Exception:
@@ -25,6 +19,13 @@ except Exception:
         from sentence_transformers import SentenceTransformer
     except Exception:
         SentenceTransformer = None
+
+# Import the new database connection utilities
+from agents.common.database import get_db_connection as get_pooled_connection, execute_query, execute_query_single
+
+"""
+Tools for the Memory Agent.
+"""
 
 # Environment variables
 FEEDBACK_LOG = os.environ.get("MEMORY_FEEDBACK_LOG", "./feedback_memory.log")
@@ -42,24 +43,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("memory.tools")
 
 def get_db_connection():
-    """Establishes a connection to the PostgreSQL database."""
+    """Establishes a connection to the PostgreSQL database using connection pooling."""
     try:
-        conn = psycopg2.connect(
-            host=POSTGRES_HOST,
-            database=POSTGRES_DB,
-            user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
-            connect_timeout=3,
-        )
-        return conn
-    except psycopg2.OperationalError as e:
+        # Use the new connection pooling system
+        return get_pooled_connection()
+    except Exception as e:
         logger.error(f"Could not connect to PostgreSQL database: {e}")
         return None
 
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file."""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def get_embedding_model():
     """Return a SentenceTransformer instance, using the shared helper when available."""
@@ -88,43 +83,37 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
         embedding_model: Optional pre-initialized SentenceTransformer instance.
             If not provided, a new model will be created via get_embedding_model().
     """
-    conn = get_db_connection()
-    if not conn:
-        return {"error": "Database connection failed"}
     try:
-        with conn.cursor() as cur:
-            # Use provided model if available to avoid re-loading model per-call
-            if embedding_model is None:
-                embedding_model = get_embedding_model()
-            # encode may return numpy array; convert later to list of floats
-            embedding = embedding_model.encode(content)
+        # Use provided model if available to avoid re-loading model per-call
+        if embedding_model is None:
+            embedding_model = get_embedding_model()
+        # encode may return numpy array; convert later to list of floats
+        embedding = embedding_model.encode(content)
 
-            # Ensure metadata is a JSON-serializable string for safe insertion
-            try:
-                metadata_payload = json.dumps(metadata) if metadata is not None else json.dumps({})
-            except Exception:
-                # Fallback: coerce to string
-                metadata_payload = json.dumps({"raw": str(metadata)})
+        # Ensure metadata is a JSON-serializable string for safe insertion
+        try:
+            metadata_payload = json.dumps(metadata) if metadata is not None else json.dumps({})
+        except Exception:
+            # Fallback: coerce to string
+            metadata_payload = json.dumps({"raw": str(metadata)})
 
-            # Get the next available ID (simple approach without sequence)
-            cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM articles")
-            next_id = cur.fetchone()[0]
+        # Get the next available ID (simple approach without sequence)
+        next_id_result = execute_query_single("SELECT COALESCE(MAX(id), 0) + 1 FROM articles")
+        next_id = next_id_result['coalesce'] if next_id_result else 1
 
-            # Insert with explicit ID - metadata as JSON string (Postgres will cast)
-            cur.execute(
-                "INSERT INTO articles (id, content, metadata, embedding) VALUES (%s, %s, %s::jsonb, %s)",
-                (next_id, content, metadata_payload, list(map(float, embedding))),
-            )
-            conn.commit()
-            log_feedback("save_article", {"status": "success", "article_id": next_id})
-            # Return both 'article_id' and legacy 'id' key for backward compatibility
-            return {"status": "success", "article_id": next_id, "id": next_id}
+        # Insert with explicit ID - metadata as JSON string (Postgres will cast)
+        execute_query(
+            "INSERT INTO articles (id, content, metadata, embedding) VALUES (%s, %s, %s::jsonb, %s)",
+            (next_id, content, metadata_payload, list(map(float, embedding))),
+            fetch=False
+        )
+
+        log_feedback("save_article", {"status": "success", "article_id": next_id})
+        # Return both 'article_id' and legacy 'id' key for backward compatibility
+        return {"status": "success", "article_id": next_id, "id": next_id}
     except Exception as e:
         logger.error(f"Error saving article: {e}")
-        conn.rollback()
         return {"error": str(e)}
-    finally:
-        conn.close()
 
 def get_article(article_id: int) -> dict:
     """Retrieves an article from the memory agent."""
@@ -168,14 +157,10 @@ def vector_search_articles_local(query: str, top_k: int = 5) -> list:
     embeddings and returns the top_k nearest articles by cosine similarity.
     """
     try:
-        conn = get_db_connection()
-        if not conn:
+        # Retrieve id, content, metadata and embedding from the DB using new connection pooling
+        rows = execute_query("SELECT id, content, metadata, embedding FROM articles WHERE embedding IS NOT NULL")
+        if not rows:
             return []
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            # Retrieve id, content, metadata and embedding from the DB
-            cur.execute("SELECT id, content, metadata, embedding FROM articles WHERE embedding IS NOT NULL")
-            rows = cur.fetchall()
-        conn.close()
     except Exception as e:
         logger.warning(f"vector_search_articles_local: DB query failed: {e}")
         return []
@@ -231,7 +216,7 @@ def vector_search_articles_local(query: str, top_k: int = 5) -> list:
                 "metadata": metas.get(aid),
             })
         return results
-    except Exception as e:
+    except Exception:
         logger.exception("vector_search_articles_local: error computing similarities")
         return []
 

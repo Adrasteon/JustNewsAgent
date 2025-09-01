@@ -12,6 +12,7 @@ This implements native TensorRT acceleration with validated performance:
 import logging
 from datetime import datetime
 from typing import Optional, List
+import atexit
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,7 +55,6 @@ def cleanup_tensorrt_engine():
             _global_engine = None
 
 # Register cleanup at module exit to prevent context stack errors
-import atexit
 atexit.register(cleanup_tensorrt_engine)
 
 # Feedback logging

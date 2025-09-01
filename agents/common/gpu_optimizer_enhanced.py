@@ -10,13 +10,12 @@ Features:
 - Real-time performance adaptation
 """
 
-import os
 import json
 import logging
 import time
 import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple, NamedTuple
+from datetime import datetime
+from typing import Dict, Optional, Any, NamedTuple
 from collections import defaultdict, deque
 import numpy as np
 from pathlib import Path
@@ -184,7 +183,6 @@ class EnhancedGPUOptimizer:
         Returns:
             Optimized allocation parameters
         """
-        profile_key = f"{agent_name}_{model_type}"
         profile = self._get_or_create_profile(agent_name, model_type)
 
         # Get optimal batch size from learning
@@ -250,7 +248,6 @@ class EnhancedGPUOptimizer:
         self.performance_history.append(record)
 
         # Add to profile
-        profile_key = f"{agent_name}_{model_type}"
         profile = self._get_or_create_profile(agent_name, model_type)
         profile.add_performance_record(record)
 
@@ -271,7 +268,6 @@ class EnhancedGPUOptimizer:
             # Get GPU memory info for more accurate calculations
             if GPU_AVAILABLE and torch.cuda.is_available():
                 gpu_status = self._get_gpu_status()
-                total_memory = gpu_status.get('total_memory_gb', 24.0)
                 free_memory = gpu_status.get('free_memory_gb', 16.0)
 
                 # Use available memory as constraint
@@ -355,7 +351,6 @@ class EnhancedGPUOptimizer:
 
         # Calculate confidence based on sample size and consistency
         sample_size = len(matching_records)
-        total_records = len(profile.performance_history)
 
         # Base confidence on sample size (more samples = higher confidence)
         size_confidence = min(1.0, sample_size / 10.0)  # Max confidence at 10 samples
@@ -413,7 +408,6 @@ class EnhancedGPUOptimizer:
                     self.performance_history.append(record)
 
                     # Restore profile data
-                    profile_key = f"{record.agent_name}_{record.model_type}"
                     profile = self._get_or_create_profile(record.agent_name, record.model_type)
                     profile.add_performance_record(record)
 

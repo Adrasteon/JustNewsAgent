@@ -1,0 +1,208 @@
+[
+  {
+    "category": "Main Documentation",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/README.md",
+        "title": "Main Project Documentation",
+        "description": "Complete system overview, installation, usage, and deployment guide with RTX3090 GPU support",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/CHANGELOG.md",
+        "title": "Version History & Changelog",
+        "description": "Detailed changelog including PyTorch 2.6.0+cu124 upgrade and GPU optimization achievements",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      }
+    ]
+  },
+  {
+    "category": "GPU Setup & Configuration",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/GPU_SETUP_README.md",
+        "title": "GPU Environment Setup Guide",
+        "description": "Complete guide for RTX3090 GPU environment with PyTorch 2.6.0+cu124, CUDA 12.4, and RAPIDS 25.04",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/validate_gpu_setup.py",
+        "title": "GPU Validation Script",
+        "description": "Automated validation of RTX3090 GPU environment and PyTorch 2.6.0+cu124 configuration",
+        "last_updated": "2025-08-31",
+        "status": "operational"
+      }
+    ]
+  },
+  {
+    "category": "Agent Documentation",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md",
+        "title": "Scout Agent V2 - AI-First Architecture",
+        "description": "Complete documentation for the 5-model AI-first Scout Agent with RTX3090 GPU acceleration",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md",
+        "title": "Scout Enhanced Deep Crawl",
+        "description": "Native Crawl4AI integration with BestFirstCrawlingStrategy and GPU-accelerated processing",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md",
+        "title": "Reasoning Agent - Nucleoid Integration",
+        "description": "Complete Nucleoid-based symbolic reasoning agent with GPU memory optimization",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/BALANCER_AGENT_V1.md",
+        "title": "Balancer Agent V1",
+        "description": "News neutralization and balancing agent with MCP integration and GPU acceleration",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      }
+    ]
+  },
+  {
+    "category": "Production Status",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/PRODUCTION_DEPLOYMENT_STATUS.md",
+        "title": "Production Deployment Status",
+        "description": "Current operational status with RTX3090 GPU utilization and PyTorch 2.6.0+cu124 deployment",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/DEPLOYMENT_SUCCESS_SUMMARY.md",
+        "title": "Memory Optimization Success",
+        "description": "Phase 1 memory optimization deployment results with RTX3090 GPU performance metrics",
+        "last_updated": "2025-08-31",
+        "status": "completed"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/SYNTHESIZER_V3_PRODUCTION_SUCCESS.md",
+        "title": "Synthesizer V3 Production Success",
+        "description": "4-model production stack validation and deployment with GPU acceleration",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      }
+    ]
+  },
+  {
+    "category": "Development Reports",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/CURRENT_DEVELOPMENT_STATUS.md",
+        "title": "Current Development Status",
+        "description": "Latest development achievements including RTX3090 GPU integration and PyTorch 2.6.0+cu124 upgrade",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md",
+        "title": "GPU Crash Investigation - Final Report",
+        "description": "Complete resolution of RTX3090 crash issues with PyTorch 2.6.0+cu124 solution",
+        "last_updated": "2025-08-31",
+        "status": "resolved"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/Using-The-GPU-Correctly.md",
+        "title": "Using The GPU Correctly",
+        "description": "Complete configuration guide for RTX3090 GPU operations with PyTorch 2.6.0+cu124",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md",
+        "title": "Training System Documentation",
+        "description": "Complete training system architecture with GPU-accelerated continuous learning",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      }
+    ]
+  },
+  {
+    "category": "Technical Architecture",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/TECHNICAL_ARCHITECTURE.md",
+        "title": "Technical Architecture Overview",
+        "description": "Complete system architecture with RTX3090 GPU allocation and PyTorch 2.6.0+cu124 integration",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/README.md",
+        "title": "Documentation Index",
+        "description": "Organized index of all project documentation with current status tracking",
+        "last_updated": "2025-08-31",
+        "status": "current"
+      }
+    ]
+  },
+  {
+    "category": "Optimization Reports",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/optimization_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md",
+        "title": "NewsReader V2 Optimization",
+        "description": "LLaVA-first architecture with 60% component reduction and RTX3090 GPU optimization",
+        "last_updated": "2025-08-31",
+        "status": "completed"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/optimization_reports/OCR_REDUNDANCY_ANALYSIS.md",
+        "title": "OCR Redundancy Analysis",
+        "description": "Analysis of OCR vs LLaVA text extraction capabilities with GPU performance comparison",
+        "last_updated": "2025-08-31",
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "category": "Training System",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/training_system/README.md",
+        "title": "Online Training System",
+        "description": "Continuous learning system with EWC-based model updates and GPU acceleration",
+        "last_updated": "2025-08-31",
+        "status": "operational"
+      }
+    ]
+  },
+  {
+    "category": "Dashboard & Monitoring",
+    "files": [
+      {
+        "path": "/home/adra/JustNewsAgent/agents/dashboard/main.py",
+        "title": "GPU Monitoring Dashboard - Main Agent",
+        "description": "FastAPI-based web dashboard with real-time GPU monitoring, historical data storage, and Chart.js visualizations",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/agents/dashboard/storage.py",
+        "title": "Dashboard Storage System",
+        "description": "SQLite-based historical data storage for GPU metrics, agent allocations, and performance trends",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/agents/dashboard/templates/dashboard.html",
+        "title": "Dashboard Web Interface",
+        "description": "Interactive web dashboard with Chart.js visualizations, real-time updates, and accessibility compliance",
+        "last_updated": "2025-08-31",
+        "status": "production_ready"
+      }
+    ]
+  }
+]

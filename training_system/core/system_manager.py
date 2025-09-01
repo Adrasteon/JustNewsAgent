@@ -17,7 +17,7 @@ Features:
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any
 from dataclasses import asdict
 
@@ -159,7 +159,7 @@ class SystemWideTrainingManager:
                 "priority": priority,
                 "explanation": explanation,
                 "immediate_update": priority >= 2,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             logger.info(f"📝 User correction submitted: {agent_name}/{task_type} "
@@ -187,7 +187,7 @@ class SystemWideTrainingManager:
                     "online_training_active": base_status.get("is_training", False),
                     "total_training_examples": base_status.get("total_examples", 0),
                     "agents_managed": len(self.agent_configs),
-                    "last_update": datetime.utcnow().isoformat()
+                    "last_update": datetime.now(timezone.utc).isoformat()
                 },
                 "agent_status": {},
                 "model_performance": base_status.get("recent_performance", []),
@@ -243,7 +243,7 @@ class SystemWideTrainingManager:
             result = {
                 "update_triggered": success,
                 "agent_name": agent_name,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "forced": True
             }
             
@@ -340,7 +340,7 @@ class SystemWideTrainingManager:
             # For now, return summary information
             
             export_summary = {
-                "export_timestamp": datetime.utcnow().isoformat(),
+                "export_timestamp": datetime.now(timezone.utc).isoformat(),
                 "filters": {
                     "agent_name": agent_name,
                     "task_type": task_type
@@ -356,7 +356,7 @@ class SystemWideTrainingManager:
         except Exception as e:
             logger.error(f"Failed to export training data: {e}")
             return {
-                "export_timestamp": datetime.utcnow().isoformat(),
+                "export_timestamp": datetime.now(timezone.utc).isoformat(),
                 "error": str(e)
             }
 

@@ -4,7 +4,7 @@
 import os
 import logging
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Import Synthesizer V2 Engine
@@ -53,6 +53,76 @@ try:
     import hdbscan
 except ImportError:
     hdbscan = None
+
+# Import GPU-accelerated functions
+try:
+    from agents.synthesizer.gpu_tools import synthesize_news_articles_gpu as _gpu_synthesize, get_synthesizer_performance as _gpu_performance
+    GPU_TOOLS_AVAILABLE = True
+except ImportError as e:
+    GPU_TOOLS_AVAILABLE = False
+    logging.error(f"❌ GPU tools not available: {e}")
+    _gpu_synthesize = None
+    _gpu_performance = None
+
+# ==================== GPU-ACCELERATED FUNCTIONS ====================
+
+def synthesize_news_articles_gpu(articles: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    GPU-accelerated news article synthesis with fallback to CPU
+    
+    Args:
+        articles: List of article dictionaries to synthesize
+    
+    Returns:
+        Dict with synthesis results
+    """
+    if not GPU_TOOLS_AVAILABLE or _gpu_synthesize is None:
+        logger.warning("⚠️ GPU tools not available, falling back to CPU synthesis")
+        # Fallback to V3 synthesis if available
+        if SYNTHESIZER_V3_AVAILABLE:
+            article_texts = [article.get('content', '') for article in articles if isinstance(article, dict)]
+            return synthesize_content_v3(article_texts)
+        else:
+            return {"error": "GPU tools not available", "method": "gpu_fallback_failed"}
+    
+    try:
+        return _gpu_synthesize(articles)
+    except Exception as e:
+        logger.error(f"❌ GPU synthesis failed: {e}")
+        # Fallback to CPU synthesis
+        if SYNTHESIZER_V3_AVAILABLE:
+            article_texts = [article.get('content', '') for article in articles if isinstance(article, dict)]
+            return synthesize_content_v3(article_texts)
+        else:
+            return {"error": str(e), "method": "gpu_failed_no_fallback"}
+
+def get_synthesizer_performance() -> Dict[str, Any]:
+    """
+    Get synthesizer performance statistics with fallback
+    
+    Returns:
+        Dict with performance statistics
+    """
+    if not GPU_TOOLS_AVAILABLE or _gpu_performance is None:
+        logger.warning("⚠️ GPU tools not available for performance stats")
+        return {
+            "gpu_available": False,
+            "method": "cpu_only",
+            "engines": get_synthesizer_status()
+        }
+    
+    try:
+        return _gpu_performance()
+    except Exception as e:
+        logger.error(f"❌ GPU performance stats failed: {e}")
+        return {
+            "error": str(e),
+            "gpu_available": False,
+            "method": "gpu_failed",
+            "engines": get_synthesizer_status()
+        }
+
+# ==================== END GPU-ACCELERATED FUNCTIONS ====================
 
 # PHASE 1 OPTIMIZATIONS APPLIED
 MODEL_NAME = "distilgpt2"
@@ -249,7 +319,7 @@ def get_embedding_model():
 def log_feedback(event: str, details: dict):
     """Log feedback for continual learning and retraining."""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def cluster_articles(article_texts: List[str], n_clusters: int = 2) -> List[List[int]]:
     """Cluster articles using optimized embedding configuration."""
@@ -356,7 +426,7 @@ def synthesize_content_v2(article_texts: List[str], synthesis_type: str = "aggre
         return {"content": aggregate_cluster(article_texts), "method": "legacy", "confidence": 0.5}
     
     try:
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         result = {"method": "synthesizer_v2", "synthesis_type": synthesis_type, "input_count": len(article_texts)}
         
         if synthesis_type == "aggregate":
@@ -403,7 +473,7 @@ def synthesize_content_v2(article_texts: List[str], synthesis_type: str = "aggre
             result["confidence"] = 0.7
         
         # Add performance metrics
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         result["processing_time"] = (end_time - start_time).total_seconds()
         result["timestamp"] = end_time.isoformat()
         
@@ -458,7 +528,7 @@ def cluster_and_synthesize_v2(article_texts: List[str], n_clusters: int = 2) -> 
         return {"error": "V2 engine not available"}
     
     try:
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         # Advanced clustering with V2 engine
         clustering_result = synthesizer_v2_engine.cluster_articles_advanced(article_texts)
@@ -481,7 +551,7 @@ def cluster_and_synthesize_v2(article_texts: List[str], n_clusters: int = 2) -> 
                 "confidence": cluster_synthesis["confidence"]
             })
         
-        end_time = datetime.utcnow()
+        end_time = datetime.now(timezone.utc)
         result = {
             "method": "synthesizer_v2_clustering",
             "total_articles": len(article_texts),
@@ -602,7 +672,7 @@ def synthesize_content_v3(article_texts: List[str], context: str = "news analysi
             "engine": "v3_production",
             "method": "cluster_and_synthesize_v3",
             "context": context,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "model_info": {
                 "bertopic": "clustering",
                 "bart": "summarization", 
@@ -745,7 +815,7 @@ def cluster_and_synthesize_v3(article_texts: List[str], max_clusters: int = 5, c
             "context": context,
             "max_clusters": max_clusters,
             "cluster_syntheses": cluster_syntheses,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "success": len(result.get("synthesis", "")) > 0
         })
         
@@ -826,7 +896,7 @@ def get_synthesizer_status() -> Dict[str, Any]:
         Dict with status of all available engines
     """
     status = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "v2_available": SYNTHESIZER_V2_AVAILABLE,
         "v3_available": SYNTHESIZER_V3_AVAILABLE,
         "training_available": ONLINE_TRAINING_AVAILABLE,

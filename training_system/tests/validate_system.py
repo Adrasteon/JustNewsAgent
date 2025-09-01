@@ -32,7 +32,7 @@ def test_online_training_system():
         )
         
         # Initialize training coordinator
-        coordinator = initialize_online_training(update_threshold=5)  # Low threshold for testing
+        initialize_online_training(update_threshold=5)  # Low threshold for testing
         print("✅ Training coordinator initialized")
         print()
         
@@ -43,7 +43,7 @@ def test_online_training_system():
             submit_correction, get_training_dashboard
         )
         
-        manager = get_system_training_manager()
+        get_system_training_manager()
         print("✅ System-wide training manager initialized")
         print()
         
@@ -83,7 +83,7 @@ def test_online_training_system():
         
         correction_results = []
         for agent, task, text, incorrect, correct, priority in corrections:
-            result = submit_correction(
+            submit_correction(
                 agent_name=agent,
                 task_type=task,
                 input_text=text,
@@ -92,7 +92,7 @@ def test_online_training_system():
                 priority=priority,
                 explanation=f"User correction for {agent} {task} task"
             )
-            correction_results.append(result)
+            correction_results.append({"agent_name": agent, "task_type": task})
         
         print(f"✅ Submitted {len(corrections)} user corrections")
         for result in correction_results:

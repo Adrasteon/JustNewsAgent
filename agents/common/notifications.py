@@ -4,7 +4,6 @@ Provides Slack webhook and SMTP email notification utilities. Both are
 best-effort: when no configuration present the functions are no-ops.
 """
 import os
-import json
 import smtplib
 from email.message import EmailMessage
 import requests

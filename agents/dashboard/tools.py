@@ -4,8 +4,7 @@ Tools for the Dashboard Agent.
 
 import logging
 import time
-import requests
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 logger = logging.getLogger("dashboard_tools")
 

@@ -5,13 +5,12 @@ import json
 import os
 import sys
 import time
+from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
+import requests
 # Ensure repository root is on sys.path so `agents` packages can be imported when running as a script
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
-
-from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
-import requests
 
 MCP_MEMORY_URL = os.environ.get("MEMORY_AGENT_URL", "http://localhost:8007/store_article")
 
@@ -32,14 +31,12 @@ async def run_and_store():
     def post_with_retries(url, json_payload, timeout=15, max_attempts=3):
         attempt = 0
         backoff = 1
-        last_exc = None
         while attempt < max_attempts:
             try:
                 r = requests.post(url, json=json_payload, timeout=timeout)
                 r.raise_for_status()
                 return r
-            except requests.exceptions.RequestException as e:
-                last_exc = e
+            except requests.exceptions.RequestException:
                 attempt += 1
                 if attempt >= max_attempts:
                     raise
@@ -74,8 +71,8 @@ async def run_and_store():
             article_id = resp.get('article_id')
             print(f"Stored article id: {article_id} status: {status}")
             saved += 1
-        except Exception as e:
-            print(f"Failed to store article after retries: {e}")
+        except Exception:
+            print("Failed to store article after retries")
 
     print(f"Saved {saved}/{len(articles)} articles")
 
