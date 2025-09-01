@@ -29,22 +29,26 @@ import requests
 from agents.common.ingest import build_source_upsert, build_article_source_map_insert
 from agents.common.evidence import snapshot_paywalled_page, enqueue_human_review
 
+# Import shared utilities
+from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ultra_fast_bbc")
 
 class UltraFastBBCCrawler:
     """Ultra-fast crawler optimized for 1000+ articles/day processing"""
-    
-    def __init__(self, concurrent_browsers: int = 3, batch_size: int = 20):
+
+    def __init__(self, concurrent_browsers: int = 3, batch_size: int = 20, requests_per_minute: int = 30, delay_between_requests: float = 1.0):
         self.concurrent_browsers = concurrent_browsers
         self.batch_size = batch_size
-        self.processed_articles = []
+        self.rate_limiter = RateLimiter(requests_per_minute, delay_between_requests)
+        self.robots_checker = RobotsChecker()
         self.news_keywords = {
-            'high_value': ['arrested', 'charged', 'court', 'police', 'sentenced', 'convicted', 
+            'high_value': ['arrested', 'charged', 'court', 'police', 'sentenced', 'convicted',
                           'investigation', 'crime', 'murder', 'theft', 'assault', 'fraud'],
             'medium_value': ['council', 'government', 'minister', 'mp', 'mayor', 'election',
                            'announced', 'confirmed', 'reports', 'statement', 'official'],
-            'location_indicators': ['england', 'uk', 'britain', 'london', 'manchester', 
+            'location_indicators': ['england', 'uk', 'britain', 'london', 'manchester',
                                   'birmingham', 'leeds', 'liverpool', 'bristol']
         }
     
@@ -162,6 +166,9 @@ class UltraFastBBCCrawler:
             # Inject modal dismissal script immediately
             await page.evaluate(self.fast_modal_dismissal_script())
             
+            # Also use shared modal dismisser
+            await ModalDismisser.dismiss_modals(page)
+            
             # Get title (fast)
             title = await page.title()
             
@@ -180,33 +187,7 @@ class UltraFastBBCCrawler:
                     content = ""
             
             # Attempt to quickly extract canonical link and paywall signals
-            canonical = None
-            paywall_flag = False
-            try:
-                canonical = await page.evaluate("() => { const c=document.querySelector('link[rel=\'canonical\']'); return c?c.href:null }")
-            except Exception:
-                canonical = None
-
-            try:
-                # Simple paywall heuristics: look for common paywall DOM markers or keywords
-                paywall_selectors = ['.paywall', '.subscription-required', '.article-paywall', '[data-paywall]']
-                for sel in paywall_selectors:
-                    try:
-                        count = await page.locator(sel).count()
-                        if count > 0:
-                            paywall_flag = True
-                            break
-                    except Exception:
-                        continue
-
-                # Keyword heuristics in title/content
-                if not paywall_flag:
-                    paywall_kw = ['subscribe', 'subscription', 'member', 'sign in', 'log in', 'paywall']
-                    textcheck = (title or '') + ' ' + (content or '')
-                    if any(k in textcheck.lower() for k in paywall_kw):
-                        paywall_flag = True
-            except Exception:
-                paywall_flag = False
+            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)
 
             extraction_metadata = {
                 'method': 'ultra_fast_dom',
@@ -235,6 +216,27 @@ class UltraFastBBCCrawler:
         start_time = time.time()
         
         try:
+            # Check robots.txt compliance first
+            if not self.robots_checker.check_robots_txt(url):
+                logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
+                return CanonicalMetadata.generate_metadata(
+                    url=url,
+                    title="Robots.txt Disallowed",
+                    content="Crawling not allowed by robots.txt",
+                    extraction_method="disallowed",
+                    status="disallowed",
+                    paywall_flag=False,
+                    confidence=0.0,
+                    publisher="BBC",
+                    crawl_mode="ultra_fast",
+                    news_score=0.0,
+                    error="robots_disallowed"
+                )
+            
+            # Apply rate limiting
+            domain = urlparse(url).netloc
+            await self.rate_limiter.wait_if_needed(domain)
+            
             # Fast context creation
             context = await browser.new_context(
                 viewport={'width': 1024, 'height': 768},
@@ -250,7 +252,7 @@ class UltraFastBBCCrawler:
             
             # Close immediately
             await context.close()
-
+            
             # Throttle per-article to reduce crawling speed: random sleep 1-3 seconds
             try:
                 delay = random.uniform(1.0, 3.0)
@@ -272,31 +274,36 @@ class UltraFastBBCCrawler:
                 canonical = content_data.get('canonical')
                 paywall_flag = content_data.get('paywall_flag', False)
 
-                return {
-                    "url": url,
-                    "url_hash": url_hash,
-                    "domain": domain,
-                    "canonical": canonical,
-                    "title": content_data["title"],
-                    "content": content_data["content"][:500],  # Truncate for efficiency
-                    "news_score": news_score,
-                    "confidence": news_score,
-                    "processing_time_seconds": processing_time,
-                    "timestamp": datetime.now().isoformat(),
-                    "status": "success",
-                    "paywall_flag": paywall_flag,
-                    "extraction_metadata": content_data.get('extraction_metadata', {})
-                }
+                return CanonicalMetadata.generate_metadata(
+                    url=url,
+                    title=content_data["title"],
+                    content=content_data["content"],
+                    extraction_method="ultra_fast_dom",
+                    status="success",
+                    paywall_flag=paywall_flag,
+                    confidence=news_score,
+                    publisher="BBC",
+                    crawl_mode="ultra_fast",
+                    news_score=news_score,
+                    canonical=canonical
+                )
             
             return None  # Filtered out
             
         except Exception as e:
-            return {
-                "url": url,
-                "error": str(e),
-                "processing_time_seconds": time.time() - start_time,
-                "status": "error"
-            }
+            return CanonicalMetadata.generate_metadata(
+                url=url,
+                title="Error",
+                content=f"Processing failed: {e}",
+                extraction_method="error",
+                status="error",
+                paywall_flag=False,
+                confidence=0.0,
+                publisher="BBC",
+                crawl_mode="ultra_fast",
+                news_score=0.0,
+                error=str(e)
+            )
     
     async def get_urls_ultra_fast(self, max_urls: int = 200) -> List[str]:
         """Get URLs as fast as possible"""

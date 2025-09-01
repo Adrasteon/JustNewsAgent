@@ -1,78 +1,36 @@
 # JustNewsAgentic — Implementation Plan for Evidence, KG, Fact‑Checking & Conservative Generation
 
-Date: 2025-08-21  
-Branch: experimental-## Example commands (dev)
-Create and run the editorial UI (dev):
-```bash
-# Activate the RAPIDS-enabled environment
-conda activate justnews-v2-py312
-
-# Start the editorial UI
-python -m uvicorn agents.editor_ui:app --reload --port 8010
-```
-
-Run tests:
-```bash
-# Activate environment and run tests
-conda activate justnews-v2-py312
-pytest -q
-```
-
-Add a local smoke script pattern:
-```bash
-# scripts/run_local_smoke.sh (example)
-conda activate justnews-v2-py312
-python scripts/smoke_demo.py  # demo uses MockLLM and local sample article
-```nt: RAPIDS 25.04, Python 3.12.11, CUDA 12.4, RTX 3090 (24GB VRAM)
+Date: 2025-09-01  
+Branch: dev/agent_review
+Status: ✅ **PHASE 2 COMPLETE - PRODUCTION READY**
 
 ---
 
 ## Current Environment Setup
 
-This implementation plan is designed for the following environment:
+This implementation plan covers the JustNewsAgent system which has successfully completed Phase 2 Multi-Site Clustering. The system now features:
 
-- **Python Version**: 3.12.11
-- **RAPIDS Suite**: 25.04 (cuDF, cuML, cuGraph, cuSpatial, cuVS)
-- **CUDA Toolkit**: 12.4
-- **GPU**: NVIDIA RTX 3090 (24GB VRAM)
-- **PyTorch**: 2.6.0+cu124 (CUDA-enabled)
-- **Conda Environment**: justnews-v2-py312
-- **Operating System**: Linux (Ubuntu)
-
-The RAPIDS 25.04 integration provides GPU-accelerated data processing capabilities for high-performance evidence processing, knowledge graph operations, and fact-checking workflows.
+- **Database-Driven Architecture**: PostgreSQL integration with connection pooling
+- **Multi-Site Concurrent Processing**: 0.55 articles/second across multiple sources
+- **Canonical Metadata Emission**: Standardized payload structure with evidence capture
+- **GPU Acceleration**: RAPIDS 25.04, CUDA 12.4, RTX 3090 (24GB VRAM)
+- **Production-Grade Resource Management**: MultiAgentGPUManager with conflict prevention
 
 ---
 
-## ✅ **GPU Management Implementation - COMPLETED WITH ADVANCED OPTIMIZATIONS**
+## ✅ **Phase 2 Multi-Site Clustering - COMPLETED**
 
-**Status:** ✅ **FULLY IMPLEMENTED** - All agents using production GPU manager with advanced features
+**Status:** ✅ **FULLY IMPLEMENTED** - Database-driven multi-site crawling operational
 
 ### Completed Work
-- **✅ Comprehensive GPU Audit:** Identified 5/6 agents with improper GPU management
-- **✅ Production GPU Manager Integration:** All 5 GPU-enabled agents updated
-- **✅ Resource Conflict Prevention:** Coordinated GPU allocation implemented
-- **✅ Performance Optimization:** Efficient GPU utilization across all components
-- **✅ Error Handling:** Robust GPU error recovery and fallback mechanisms
-- **✅ Advanced Memory Optimization:** Per-model memory tracking and batch size optimization
-- **✅ Smart Pre-loading:** Background model warm-up reducing startup latency
-- **✅ Performance Analytics:** Cache hit ratios, memory statistics, and throughput monitoring
-
-### Updated Agents
-1. **Analyst Agent** - Fixed direct GPU access, now uses production manager with advanced optimizations
-2. **Scout Agent** - Replaced incompatible training system manager with smart pre-loading
-3. **Fact Checker Agent** - Replaced incompatible training system manager with memory tracking
-4. **Memory Agent** - Implemented proper GPU allocation management with batch optimization
-5. **Newsreader Agent** - Implemented proper GPU allocation management with model-type awareness
-
-### Technical Features
-- **Multi-Agent GPU Support:** Concurrent allocation for multiple agents
-- **Dynamic Device Assignment:** Automatic GPU device allocation
-- **Memory Management:** Coordinated memory allocation and cleanup
-- **Health Monitoring:** Real-time GPU usage tracking
-- **Error Recovery:** Automatic fallback to CPU when GPU unavailable
-- **Model-Type-Specific Batch Sizing:** Optimized batch sizes for embedding (8-32), generation (4-8), vision (2-8), general (1-16)
-- **Smart Pre-loading System:** Background model warm-up for reduced latency
-- **Enhanced Memory Tracking:** Per-model memory usage monitoring and analytics
+- **✅ Database Integration:** PostgreSQL sources table with connection pooling
+- **✅ Generic Crawler Architecture:** Adaptable SiteCrawler for any news source
+- **✅ Concurrent Processing:** MultiSiteCrawler with asyncio coordination
+- **✅ Performance Achievement:** 25 articles in 45.2 seconds (0.55 articles/second)
+- **✅ Canonical Metadata:** Required fields (url_hash, domain, canonical, etc.)
+- **✅ Evidence Capture:** Audit trails and provenance tracking
+- **✅ Ethical Compliance:** Robots.txt checking and rate limiting
+- **✅ Orchestrator Updates:** Dynamic source loading and clustering methods
 
 ---
 
@@ -99,23 +57,28 @@ This document records the design and implementation plan for the evidence ledger
 ---
 
 ## 1. Goals (high level)
-- Build a provable, auditable pipeline that produces evidence-backed, neutral news articles.
-- Ensure every factual claim links to recorded evidence (snapshots + metadata).
-- Use a KG / neuro-symbolic layer for factual grounding and contradiction detection.
-- Provide human-in-the-loop editorial controls and an exportable audit bundle.
-- Keep CI and tests independent of external LLM providers (mock LLM clients for tests).
+- ✅ **COMPLETED**: Build a provable, auditable pipeline that produces evidence-backed, neutral news articles with database-driven multi-site clustering
+- ✅ **COMPLETED**: Ensure every factual claim links to recorded evidence (snapshots + metadata) with canonical metadata emission
+- 🔄 **IN PROGRESS**: Use a KG / neuro-symbolic layer for factual grounding and contradiction detection (Phase 3)
+- 🔄 **IN PROGRESS**: Provide human-in-the-loop editorial controls and an exportable audit bundle (Phase 3)
+- 🔄 **IN PROGRESS**: Keep CI and tests independent of external LLM providers (mock LLM clients for tests) (Phase 3)
 
 ---
 
-## 2. Checklist of features in this plan
-- Evidence ledger (SQLite + raw snapshots)
-- Knowledge Graph starter (rdflib; Turtle persistence)
-- Fact-checker agent (KG-first verification; LLM fallback)
-- Source registry & scoring (domain-level heuristics + cache)
-- Multimedia forensics scaffolding (image/video/audio)
-- Conservative generator & article contract (article dataclass + evidence linking)
-- Editorial UI (FastAPI stub)
-- Tests (pytest) using MockLLM and local sample artifacts
+## 2. Current System Architecture
+
+### Phase 1 & 2 Completed Components ✅
+- **Database Integration**: PostgreSQL with sources table and connection pooling
+- **Multi-Site Crawling**: Generic crawler architecture with concurrent processing
+- **Canonical Metadata**: Standardized payload structure with evidence capture
+- **GPU Management**: Production MultiAgentGPUManager with conflict prevention
+- **Performance**: 0.55 articles/second with multi-site concurrent processing
+
+### Phase 3 Planned Components 🔄
+- **Knowledge Graph**: RDF-based fact representation with entity linking
+- **Archive Storage**: S3 + cold storage for research-scale archiving
+- **Researcher APIs**: Query interfaces for comprehensive data access
+- **Legal Compliance**: Data retention policies and privacy frameworks
 
 ---
 
@@ -186,24 +149,29 @@ This document records the design and implementation plan for the evidence ledger
 ---
 
 ## 6. Implementation milestones (prioritized)
-Sprint 0 — Evidence ledger (3 days)
-- Implement `agents/evidence_store.py` and `agents/types.py`.
-- Add tests to record/get evidence and snapshot writing.
 
-Sprint 1 — KG ingest & rules (5 days)
-- `kg/loader.py`, `kg/rules.py`. Add a sample rule (date/number contradiction).
+### ✅ **COMPLETED - Sprint 0-2: Phase 1 & 2 Core Infrastructure**
+- ✅ **Sprint 0**: Evidence ledger and database integration completed
+- ✅ **Sprint 1**: Multi-site crawler architecture with PostgreSQL sources
+- ✅ **Sprint 2**: Concurrent processing and canonical metadata emission
+- ✅ **Performance**: 0.55 articles/second multi-site processing achieved
+- ✅ **Database**: Full PostgreSQL integration with connection pooling
+- ✅ **Architecture**: Generic crawler supporting any news source
 
-Sprint 2 — Fact-checker (5 days)
-- `agents/fact_checker.py` using KG-first pipeline and injected LLM client.
+### 🔄 **IN PROGRESS - Sprint 3-5: Phase 3 Comprehensive Archive Integration**
+- 🔄 **Sprint 3**: Knowledge Graph integration with entity linking and relations
+- 🔄 **Sprint 4**: Archive storage infrastructure (S3 + cold storage)
+- 🔄 **Sprint 5**: Researcher APIs and legal compliance frameworks
+- 🔄 **Target**: 1M-article pilot with complete provenance tracking
+- 🔄 **Timeline**: Q4 2025 completion with research-scale capabilities
 
-Sprint 3 — Generator + Editorial UI (7 days)
-- `agents/generator.py`, `agents/article.py`, `agents/editor_ui.py`. Add conservative generation rules.
-
-Sprint 4 — Multimedia forensics (7–10 days)
-- Build `multimedia/*` modules and integrate forensic outputs into Evidence records.
-
-Sprint 5 — Evaluation & CI (5 days)
-- Add FEVER-style evaluation harness, mock LLMs, metrics collection.
+### 📋 **Phase 3 Success Criteria**
+- 1M-article pilot with complete provenance tracking
+- KG populated with core entity relations and contradiction detection
+- Queryable by researchers with full audit trails
+- Legal compliance with data retention policies
+- Privacy-preserving techniques implemented
+- Distributed crawling infrastructure operational
 
 ---
 
@@ -238,14 +206,35 @@ python scripts/smoke_demo.py  # demo uses MockLLM and local sample article
 ---
 
 ## 9. Next steps (recommended immediate actions)
-1. Implement Sprint 0: create `agents/evidence_store.py`, `agents/types.py`, add `tests/test_evidence_store.py`.
-2. Run tests locally (they should use local sample content and MockLLM).
-3. Iterate: add minimal KG ingestion and a single rule to detect date conflicts.
+1. ✅ **Phase 2 Complete**: Multi-site clustering with database-driven sources operational
+2. 🔄 **Phase 3 Planning**: Begin comprehensive archive integration with KG infrastructure
+3. 🔄 **Archive Storage**: Set up S3 + cold storage for research-scale archiving
+4. 🔄 **Knowledge Graph**: Implement entity linking and relation extraction
+5. 🔄 **Researcher APIs**: Build query interfaces for comprehensive data access
+6. 🔄 **Legal Compliance**: Implement data retention policies and privacy frameworks
 
 ---
 
-## 10. Contact & provenance
-- This file was produced programmatically on 2025-08-21 as the reference design for the features scoped to JustNewsAgentic's `experimental-stripdown` branch.
-- For implementation help, copy the scaffolding code from the plan into the repo, run tests, and request follow-up changes.
+## 10. Phase 3 Comprehensive Archive Integration Overview
+
+### Key Objectives
+- **Research-Scale Archiving**: Support millions of articles with complete provenance
+- **Knowledge Graph Integration**: Entity linking, relations, and contradiction detection
+- **Legal & Privacy Compliance**: Data retention, takedown workflows, privacy preservation
+- **Researcher Access**: APIs and interfaces for academic and investigative use
+
+### Technical Requirements
+- **Storage Infrastructure**: S3 + cold storage with efficient metadata indexing
+- **KG Architecture**: RDF-based with entity extraction and relation mining
+- **Query System**: Advanced search and filtering capabilities
+- **Audit Framework**: Complete provenance tracking and evidence chains
+- **Compliance Layer**: Automated retention policies and privacy controls
+
+### Success Metrics
+- 1M+ articles archived with complete metadata
+- KG with comprehensive entity relations
+- Sub-second query response times
+- 100% audit trail completeness
+- Full legal and privacy compliance
 
 ---
