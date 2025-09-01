@@ -138,6 +138,7 @@ data/
 downloads/
 crawled_data/
 crawl4ai_docs/
+archive_storage/
 
 # Archive folder for obsolete files
 archive_obsolete_files/*
