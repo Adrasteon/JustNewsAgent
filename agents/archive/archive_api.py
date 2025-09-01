@@ -31,6 +31,7 @@ import uvicorn
 
 from agents.archive.knowledge_graph import TemporalKnowledgeGraph, KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
+from agents.common.auth_api import router as auth_router
 
 logger = logging.getLogger("phase3_api")
 
@@ -151,6 +152,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include authentication router
+app.include_router(auth_router)
 
 # Global instances (would be dependency injection in production)
 kg_manager = None
@@ -724,7 +728,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "archive_api:app",
         host="0.0.0.0",
-        port=8020,
+        port=8021,  # REST API port (different from GraphQL on 8020)
         reload=True,
         log_level="info"
     )

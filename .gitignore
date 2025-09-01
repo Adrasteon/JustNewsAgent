@@ -15,6 +15,7 @@ __pycache__/
 venv/
 ENV/
 env/
+.env.example
 
 # Docker
 docker-compose.override.yml

@@ -33,7 +33,7 @@ Both APIs provide access to:
 
 ### Base URL
 ```
-http://localhost:8000
+http://localhost:8021
 ```
 
 ### Endpoints
@@ -543,12 +543,12 @@ type SearchResultType {
 
 #### Get Recent Articles from BBC
 ```bash
-curl "http://localhost:8000/articles?domain=bbc.com&page=1&page_size=10&sort=published_date&order=desc"
+curl "http://localhost:8021/articles?domain=bbc.com&page=1&page_size=10&sort=published_date&order=desc"
 ```
 
 #### Search for Articles About AI
 ```bash
-curl -X POST http://localhost:8000/search \
+curl -X POST http://localhost:8021/search \
   -H "Content-Type: application/json" \
   -d '{
     "query": "artificial intelligence",
@@ -563,12 +563,12 @@ curl -X POST http://localhost:8000/search \
 
 #### Get All PERSON Entities
 ```bash
-curl "http://localhost:8000/entities?entity_type=PERSON&page=1&page_size=50&sort=mention_count&order=desc"
+curl "http://localhost:8021/entities?entity_type=PERSON&page=1&page_size=50&sort=mention_count&order=desc"
 ```
 
 #### Get Relationships for Microsoft
 ```bash
-curl "http://localhost:8000/relationships?source_entity=Microsoft&limit=20"
+curl "http://localhost:8021/relationships?source_entity=Microsoft&limit=20"
 ```
 
 ### GraphQL Examples
@@ -675,18 +675,339 @@ The system supports the following entity types:
 | PERCENT | Percentage values | "15%", "2.5 percent", "75.3%" |
 | QUANTITY | Quantities and measurements | "100 tons", "5 kilometers", "2 hours" |
 
-## Authentication
+## Authentication ✅ **COMPLETED**
 
-**Current Status:** Authentication is planned for Phase 3 Sprint 4-4 (Researcher Authentication).
+The JustNews Agent now includes a complete JWT-based authentication system with role-based access control. The authentication API runs on port 8022 and provides comprehensive user management capabilities.
 
-**Planned Features:**
-- JWT-based authentication
-- Role-based access control (Researcher, Admin, etc.)
-- API key management
-- Rate limiting per user/key
-- Audit logging for all API access
+### Authentication Architecture
 
-**Temporary Access:** All endpoints are currently open for development and testing.
+- **JWT-Based Authentication**: Secure token-based authentication with access tokens (30min) and refresh tokens (7 days)
+- **Role-Based Access Control**: Three-tier system (ADMIN, RESEARCHER, VIEWER) with hierarchical permissions
+- **Secure Database Separation**: Dedicated `justnews_auth` PostgreSQL database for complete security isolation
+- **Security Standards**: PBKDF2 password hashing, account lockout (30min after 5 failed attempts), secure token refresh
+- **Session Management**: Refresh token storage, validation, and secure session revocation
+
+### Authentication API Endpoints
+
+#### Base URL
+```
+http://localhost:8022/auth
+```
+
+#### User Registration
+```http
+POST /auth/register
+```
+
+**Request Body:**
+```json
+{
+  "email": "researcher@example.com",
+  "username": "researcher1",
+  "full_name": "Research User",
+  "password": "securepassword123",
+  "role": "researcher"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "User registered successfully. Please check your email for activation instructions.",
+  "user_id": 7,
+  "requires_activation": true
+}
+```
+
+#### User Login
+```http
+POST /auth/login
+```
+
+**Request Body:**
+```json
+{
+  "username_or_email": "researcher1",
+  "password": "securepassword123"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 1800,
+  "user": {
+    "user_id": 7,
+    "username": "researcher1",
+    "email": "researcher@example.com",
+    "full_name": "Research User",
+    "role": "researcher",
+    "last_login": "2025-09-01T18:30:00Z"
+  }
+}
+```
+
+#### Get Current User Info
+```http
+GET /auth/me
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "user_id": 7,
+  "email": "researcher@example.com",
+  "username": "researcher1",
+  "full_name": "Research User",
+  "role": "researcher",
+  "status": "active",
+  "created_at": "2025-09-01T17:45:00Z",
+  "last_login": "2025-09-01T18:30:00Z"
+}
+```
+
+#### Refresh Access Token
+```http
+POST /auth/refresh
+```
+
+**Request Body:**
+```json
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "expires_in": 1800
+}
+```
+
+#### Admin: List Users
+```http
+GET /auth/users
+Authorization: Bearer <admin_access_token>
+```
+
+**Query Parameters:**
+- `limit` (int, default: 100): Maximum number of users
+- `offset` (int, default: 0): Pagination offset
+
+**Response:**
+```json
+[
+  {
+    "user_id": 7,
+    "email": "researcher@example.com",
+    "username": "researcher1",
+    "full_name": "Research User",
+    "role": "researcher",
+    "status": "active",
+    "created_at": "2025-09-01T17:45:00Z",
+    "last_login": "2025-09-01T18:30:00Z"
+  }
+]
+```
+
+#### Admin: Activate User Account
+```http
+PUT /auth/users/{user_id}/activate
+Authorization: Bearer <admin_access_token>
+```
+
+**Response:**
+```json
+{
+  "message": "User account activated successfully"
+}
+```
+
+#### Admin: Deactivate User Account
+```http
+PUT /auth/users/{user_id}/deactivate
+Authorization: Bearer <admin_access_token>
+```
+
+**Response:**
+```json
+{
+  "message": "User account deactivated successfully"
+}
+```
+
+#### Password Reset Request
+```http
+POST /auth/password-reset
+```
+
+**Request Body:**
+```json
+{
+  "email": "researcher@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "If an account with this email exists, a password reset link has been sent."
+}
+```
+
+#### Password Reset Confirmation
+```http
+POST /auth/password-reset/confirm
+```
+
+**Request Body:**
+```json
+{
+  "token": "reset_token_here",
+  "new_password": "new_secure_password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Password reset successfully"
+}
+```
+
+### Authentication Integration
+
+#### Using Authentication with Archive APIs
+
+All archive API endpoints now support authentication. Include the access token in the Authorization header:
+
+```bash
+# Example: Get articles with authentication
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  "http://localhost:8021/articles?page=1&page_size=10"
+
+# Example: Search with authentication
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -X POST http://localhost:8021/search \
+  -H "Content-Type: application/json" \
+  -d '{"query": "climate change", "search_type": "both", "limit": 10}'
+```
+
+#### Role-Based Permissions
+
+| Role | Archive API Access | Admin Functions | Description |
+|------|-------------------|-----------------|-------------|
+| **VIEWER** | Read-only access to articles and entities | ❌ No admin access | Basic research access |
+| **RESEARCHER** | Full read access, search, and analytics | ❌ No admin access | Full research capabilities |
+| **ADMIN** | Full access to all endpoints | ✅ User management, activation, deactivation | System administration |
+
+### Authentication Error Handling
+
+#### Common Error Responses
+
+**Invalid Credentials:**
+```json
+{
+  "detail": "Invalid username or password"
+}
+```
+
+**Account Not Active:**
+```json
+{
+  "detail": "Account is not active"
+}
+```
+
+**Invalid Token:**
+```json
+{
+  "detail": "Invalid authentication credentials",
+  "headers": {"WWW-Authenticate": "Bearer"}
+}
+```
+
+**Insufficient Permissions:**
+```json
+{
+  "detail": "Admin access required"
+}
+```
+
+**Account Locked:**
+```json
+{
+  "detail": "Account is temporarily locked due to too many failed login attempts"
+}
+```
+
+### Security Features
+
+- **Password Security**: PBKDF2 hashing with salt and 100,000 iterations
+- **Account Protection**: Automatic lockout after 5 failed login attempts (30-minute cooldown)
+- **Token Security**: Short-lived access tokens (30 minutes) with secure refresh mechanism
+- **Session Management**: Secure refresh token storage and validation
+- **Audit Logging**: Complete logging of authentication events and API access
+- **Database Isolation**: Separate authentication database for security compliance
+
+### Getting Started with Authentication
+
+1. **Start the Authentication API:**
+```bash
+cd /home/adra/JustNewsAgent
+conda run --name justnews-v2-prod uvicorn agents.archive.archive_api:app --reload --port 8022
+```
+
+2. **API Documentation:**
+```bash
+# Interactive API docs
+curl http://localhost:8022/docs
+
+# Health check
+curl http://localhost:8022/auth/health
+```
+
+3. **Create Admin User (First Time Setup):**
+```bash
+curl -X POST http://localhost:8022/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@justnewsagent.com",
+    "username": "admin",
+    "full_name": "System Administrator",
+    "password": "secure_admin_password",
+    "role": "admin"
+  }'
+```
+
+4. **Activate Admin Account:**
+```bash
+# Login as admin first, then use the returned access token
+curl -X PUT http://localhost:8022/auth/users/1/activate \
+  -H "Authorization: Bearer ADMIN_ACCESS_TOKEN"
+```
+
+5. **Test Authentication:**
+```bash
+# Login to get tokens
+curl -X POST http://localhost:8022/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username_or_email": "admin",
+    "password": "secure_admin_password"
+  }'
+
+# Use access token with archive API
+curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  http://localhost:8021/articles
+```
 
 ## Error Handling
 
@@ -792,7 +1113,7 @@ PYTHONPATH=/home/adra/JustNewsAgent python agents/archive/archive_graphql.py
 1. **Health Checks**:
 ```bash
 # REST API
-curl http://localhost:8000/health
+curl http://localhost:8021/health
 
 # GraphQL API
 curl http://localhost:8020/health

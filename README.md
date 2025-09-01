@@ -9,7 +9,7 @@
 - **Configuration:** Centralized management with environment profiles and validation
 - **Monitoring:** Real-time dashboards with advanced metrics, alerts, and analytics
 - **Knowledge Graph:** 73 nodes, 108 relationships, 68 entities (23 PERSON, 43 GPE, 2 ORG)
-- **APIs:** RESTful Archive API (Port 8000) + GraphQL Query Interface (Port 8020)
+- **APIs:** RESTful Archive API (Port 8021) + GraphQL Query Interface (Port 8020)
 - **Documentation:** Comprehensive coverage with 200+ page implementation guide including knowledge graph documentation& Code Quality
 - **GPU Utilization:** Optimized across all agents (2-8GB per agent) with intelligent allocation
 - **Performance:** 50-120 articles/sec GPU, 5-12 articles/sec CPU fallback with seamless switching
@@ -44,7 +44,7 @@ AI-powered news analysis system using a distributed multi-agent architecture, GP
 - **✅ Relationship Strength Analysis**: Confidence scoring and multi-factor relationship analysis in KnowledgeGraphEdge
 - **✅ Entity Clustering**: Similarity algorithms and graph merging with confidence validation
 - **✅ Enhanced Entity Extraction**: Multi-language patterns (English, Spanish, French) with new entity types (MONEY, DATE, TIME, PERCENT, QUANTITY)
-- **✅ RESTful Archive API**: Complete REST API for archive access and knowledge graph querying (Port 8000)
+- **✅ RESTful Archive API**: Complete REST API for archive access and knowledge graph querying (Port 8021)
 - **✅ GraphQL Query Interface**: Advanced GraphQL API for complex queries and flexible data access (Port 8020)
 - **✅ Knowledge Graph Documentation**: Comprehensive documentation covering entity extraction, disambiguation, clustering, and relationship analysis
 - **🔄 Large-Scale Infrastructure**: Planning distributed crawling capabilities
@@ -55,33 +55,33 @@ AI-powered news analysis system using a distributed multi-agent architecture, GP
 
 ### 🚀 **New API Endpoints - Phase 3 Sprint 3-4**
 
-#### **RESTful Archive API (Port 8000)**
+#### **RESTful Archive API (Port 8021)**
 ```bash
 # Health check
-curl http://localhost:8000/health
+curl http://localhost:8021/health
 
 # List articles with filtering
-curl "http://localhost:8000/articles?page=1&page_size=10&domain=bbc.com"
+curl "http://localhost:8021/articles?page=1&page_size=10&domain=bbc.com"
 
 # Get specific article
-curl http://localhost:8000/articles/{article_id}
+curl http://localhost:8021/articles/{article_id}
 
 # List entities
-curl "http://localhost:8000/entities?page=1&page_size=20&entity_type=PERSON"
+curl "http://localhost:8021/entities?page=1&page_size=20&entity_type=PERSON"
 
 # Get entity details
-curl http://localhost:8000/entities/{entity_id}
+curl http://localhost:8021/entities/{entity_id}
 
 # Search across articles and entities
-curl -X POST http://localhost:8000/search \
+curl -X POST http://localhost:8021/search \
   -H "Content-Type: application/json" \
   -d '{"query": "Microsoft", "search_type": "both", "limit": 10}'
 
 # Get graph statistics
-curl http://localhost:8000/graph/statistics
+curl http://localhost:8021/graph/statistics
 
 # Query relationships
-curl "http://localhost:8000/relationships?source_entity=Microsoft&limit=20"
+curl "http://localhost:8021/relationships?source_entity=Microsoft&limit=20"
 ```
 
 #### **GraphQL Query Interface (Port 8020)**
@@ -421,8 +421,8 @@ curl -X POST http://localhost:8012/api/record-metric \
 # Start GPU monitoring dashboard
 python -m agents.common.gpu_dashboard_api
 
-# Access dashboard at http://localhost:8000
-curl http://localhost:8000/gpu/metrics
+# Access dashboard at http://localhost:8011
+curl http://localhost:8011/gpu/metrics
 ```
 
 **Performance Optimization:**

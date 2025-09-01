@@ -763,7 +763,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "archive_graphql:app",
         host="0.0.0.0",
-        port=8020,  # Different port from REST API
+        port=8020,  # GraphQL API port (REST API uses 8021)
         reload=True,
         log_level="info"
     )
