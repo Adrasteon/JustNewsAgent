@@ -59,7 +59,7 @@ else:
 def log_feedback(event: str, details: dict):
     """Universal feedback logging for Fact Checker operations"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(datetime.UTC).isoformat()
         f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
 
 def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
@@ -94,7 +94,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
                     "source_url": source_url,
                     "v2_analysis": True,
                     "models_used": ["distilbert", "roberta"],
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(datetime.UTC).isoformat()
                 }
                 
                 log_feedback("claim_verified_v2", {
@@ -139,7 +139,7 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
                 # Add metadata
                 result["article_metadata"] = metadata or {}
                 result["article_length"] = len(article_text)
-                result["processing_timestamp"] = datetime.utcnow().isoformat()
+                result["processing_timestamp"] = datetime.now(datetime.UTC).isoformat()
                 
                 log_feedback("comprehensive_fact_check_v2", {
                     "overall_score": result.get("overall_score", 0.5),

@@ -71,7 +71,7 @@ class NativeTensorRTCompiler:
 
         store = ModelStore(self.model_store_root)
         precision = os.environ.get('TENSORRT_PRECISION', 'unknown')
-        version = f"v{task_name}-{precision}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+        version = f"v{task_name}-{precision}-{datetime.now(datetime.UTC).strftime('%Y%m%d%H%M%S')}"
 
         artifact_paths = [('engine', engine_path), ('onnx', onnx_path), ('metadata', metadata_path)]
         if calibration_cache:

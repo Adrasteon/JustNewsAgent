@@ -151,15 +151,23 @@ def ensure_spacy_model_loaded():
         logger.warning(f"Could not load {SPACY_MODEL}: {e}")
         return None
 
-def log_feedback(event: str, details: Dict[str, Any]) -> None:
+def log_feedback(event_or_details, details=None) -> None:
     """
     Production-standard feedback logging with structured format.
     
     Args:
-        event: Event type identifier
-        details: Event details and metadata
+        event_or_details: Either event name (str) or details dict (for backward compatibility)
+        details: Event details and metadata (optional if first arg is details)
     """
     try:
+        # Handle backward compatibility - if first arg is dict, treat it as details
+        if isinstance(event_or_details, dict) and details is None:
+            event = "feedback"
+            details = event_or_details
+        else:
+            event = event_or_details
+            details = details or {}
+        
         timestamp = datetime.now(timezone.utc).isoformat()
         log_entry = {
             "timestamp": timestamp,
@@ -293,7 +301,7 @@ def _clean_entities(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
     return cleaned[:15]  # Limit to top 15 entities
 
-def identify_entities(text: str) -> List[Dict[str, Any]]:
+def identify_entities(text: str) -> Dict[str, Any]:
     """
     Advanced entity extraction using spaCy NER with transformer fallback.
     
@@ -301,10 +309,10 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
         text: Input text for entity extraction
         
     Returns:
-        List of entity dictionaries with type, text, start, end, confidence
+        Dictionary containing entity extraction results
     """
     if not text or not text.strip():
-        return []
+        return {"entities": [], "total_entities": 0, "method": "empty_input"}
         
     logger.info(f"🔍 Extracting entities from {len(text)} characters")
     
@@ -363,7 +371,12 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
             "entities": [e["text"] for e in entities[:5]]  # Log first 5
         })
         
-        return entities
+        return {
+            "entities": entities,
+            "total_entities": len(entities),
+            "method": processing_method,
+            "text_length": len(text)
+        }
         
     except Exception as e:
         logger.error(f"❌ Entity extraction failed: {e}")
@@ -372,7 +385,12 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
             "error": str(e),
             "method": processing_method
         })
-        return []
+        return {
+            "entities": [],
+            "total_entities": 0,
+            "method": "error",
+            "error": str(e)
+        }
 
 def analyze_text_statistics(text: str) -> Dict[str, Any]:
     """
@@ -385,7 +403,12 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
         Dictionary containing statistical metrics
     """
     if not text or not text.strip():
-        return {"error": "Empty text provided"}
+        return {
+            "word_count": 0,
+            "character_count": 0,
+            "sentence_count": 0,
+            "error": "Empty text provided"
+        }
         
     logger.info(f"📊 Analyzing text statistics for {len(text)} characters")
     
@@ -414,25 +437,18 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
         readability = _calculate_readability(text, word_count, sentence_count, word_lengths)
         
         result = {
-            "basic_metrics": {
-                "character_count": len(text),
-                "word_count": word_count,
-                "sentence_count": sentence_count,
-                "paragraph_count": paragraph_count,
-                "avg_word_length": round(avg_word_length, 2),
-                "avg_sentence_length": round(avg_sentence_length, 2)
-            },
-            "complexity_metrics": {
-                "complex_words": len(complex_words),
-                "complex_word_ratio": round(complex_word_ratio, 3),
-                "vocabulary_diversity": _calculate_vocabulary_diversity(words),
-                "readability_score": readability
-            },
-            "numerical_content": {
-                "numbers_found": len(numbers),
-                "numbers": numbers[:10],  # First 10 numbers
-                "numeric_density": round(len(numbers) / word_count * 100, 2) if word_count > 0 else 0
-            }
+            "word_count": word_count,
+            "character_count": len(text),
+            "sentence_count": sentence_count,
+            "paragraph_count": paragraph_count,
+            "avg_words_per_sentence": round(avg_sentence_length, 2),  # Changed from avg_sentence_length
+            "avg_word_length": round(avg_word_length, 2),
+            "complex_words": len(complex_words),
+            "complex_word_ratio": round(complex_word_ratio, 3),
+            "vocabulary_diversity": _calculate_vocabulary_diversity(words),
+            "readability_score": readability,
+            "numbers_found": len(numbers),
+            "numeric_density": round(len(numbers) / word_count * 100, 2) if word_count > 0 else 0
         }
         
         logger.info(f"✅ Statistical analysis complete: {word_count} words, readability {readability}")
@@ -448,7 +464,11 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Text statistics analysis failed: {e}")
         log_feedback("analyze_text_statistics_error", {"error": str(e)})
-        return {"error": str(e)}
+        return {
+            "word_count": 0,
+            "character_count": len(text),
+            "error": str(e)
+        }
 
 def extract_key_metrics(text: str, url: str = None) -> Dict[str, Any]:
     """
@@ -459,43 +479,43 @@ def extract_key_metrics(text: str, url: str = None) -> Dict[str, Any]:
         url (str, optional): Article URL for context
         
     Returns:
-        Dict containing extracted metrics including financial data, 
-        temporal references, and statistical information
+        Dict containing extracted metrics
     """
     try:
         logger.info(f"🔍 Extracting key metrics from text (length: {len(text)} chars)")
         
-        metrics = {
-            "financial_metrics": _extract_financial_metrics(text),
-            "temporal_references": _extract_temporal_references(text),
-            "statistical_references": _extract_statistical_references(text),
-            "geographic_metrics": _extract_geographic_metrics(text),
-            "numerical_data": _extract_numbers(text),
-            "extraction_metadata": {
-                "text_length": len(text),
-                "url": url,
-                "extraction_time": datetime.now().isoformat(),
-                "total_metrics_found": 0  # Will be calculated
-            }
+        # Extract all metrics
+        financial_metrics = _extract_financial_metrics(text)
+        temporal_references = _extract_temporal_references(text)
+        statistical_references = _extract_statistical_references(text)
+        geographic_metrics = _extract_geographic_metrics(text)
+        numerical_data = _extract_numbers(text)
+        
+        # Combine all metrics into a single list
+        all_metrics = []
+        all_metrics.extend(financial_metrics)
+        all_metrics.extend(temporal_references)
+        all_metrics.extend(statistical_references)
+        all_metrics.extend(geographic_metrics)
+        all_metrics.extend(numerical_data)
+        
+        result = {
+            "metrics": all_metrics,
+            "total_metrics": len(all_metrics),
+            "text_length": len(text),
+            "url": url
         }
         
-        # Calculate total metrics found
-        total_metrics = (
-            len(metrics["financial_metrics"]) +
-            len(metrics["temporal_references"]) +
-            len(metrics["statistical_references"]) +
-            len(metrics["geographic_metrics"]) +
-            len(metrics["numerical_data"])
-        )
-        
-        metrics["extraction_metadata"]["total_metrics_found"] = total_metrics
-        
-        logger.info(f"✅ Extracted {total_metrics} total metrics")
-        return metrics
+        logger.info(f"✅ Extracted {len(all_metrics)} total metrics")
+        return result
         
     except Exception as e:
         logger.error(f"❌ Error extracting key metrics: {e}")
-        return {"error": str(e)}
+        return {
+            "metrics": [],
+            "total_metrics": 0,
+            "error": str(e)
+        }
 
 def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str, Any]:
     """
@@ -506,8 +526,7 @@ def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str
         urls (List[str], optional): Corresponding URLs for context
         
     Returns:
-        Dict containing trend analysis including entity trends, 
-        topic evolution, and statistical patterns
+        Dict containing trend analysis
     """
     try:
         logger.info(f"📈 Analyzing content trends across {len(texts)} texts")
@@ -515,28 +534,63 @@ def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str
         # Filter out empty texts
         valid_texts = [text for text in texts if text and text.strip()]
         if not valid_texts:
-            return {"error": "No valid texts provided for trend analysis"}
-        
-        trends = {
-            "entity_trends": _analyze_entity_trends(valid_texts),
-            "topic_trends": _analyze_topic_trends(valid_texts),
-            "statistical_trends": _analyze_statistical_trends(valid_texts),
-            "temporal_patterns": _analyze_temporal_patterns(valid_texts),
-            "trend_metadata": {
-                "total_texts_analyzed": len(valid_texts),
-                "total_characters": sum(len(text) for text in valid_texts),
-                "average_text_length": sum(len(text.split()) for text in valid_texts) / len(valid_texts),
-                "urls_provided": bool(urls and len(urls) > 0),
-                "analysis_time": datetime.now().isoformat()
+            return {
+                "trends": [],
+                "topics": [],
+                "error": "No valid texts provided for trend analysis"
             }
+        
+        # Get trend analyses
+        entity_trends = _analyze_entity_trends(valid_texts)
+        topic_trends = _analyze_topic_trends(valid_texts)
+        
+        # Extract trends and topics from the analyses
+        trends = []
+        topics = []
+        
+        # Add entity trends
+        if "most_common_entities" in entity_trends:
+            for entity, count in entity_trends["most_common_entities"].items():
+                trends.append({
+                    "type": "entity",
+                    "value": entity,
+                    "frequency": count,
+                    "category": "named_entity"
+                })
+        
+        # Add topic trends
+        if "trending_topics" in topic_trends:
+            for topic, count in topic_trends["trending_topics"].items():
+                topics.append({
+                    "topic": topic,
+                    "frequency": count,
+                    "relevance_score": count / len(valid_texts)
+                })
+                trends.append({
+                    "type": "topic",
+                    "value": topic,
+                    "frequency": count,
+                    "category": "keyword"
+                })
+        
+        result = {
+            "trends": trends,
+            "topics": topics,
+            "total_texts": len(valid_texts),
+            "total_trends": len(trends),
+            "total_topics": len(topics)
         }
         
         logger.info(f"✅ Content trends analysis completed for {len(valid_texts)} texts")
-        return trends
+        return result
         
     except Exception as e:
         logger.error(f"❌ Error analyzing content trends: {e}")
-        return {"error": str(e)}
+        return {
+            "trends": [],
+            "topics": [],
+            "error": str(e)
+        }
 
 # =============================================================================
 # HELPER FUNCTIONS FOR SPECIALIZED ANALYSIS

@@ -62,7 +62,7 @@ FEEDBACK_LOG = "feedback_analyst_tensorrt.log"
 
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file with timestamp."""
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(datetime.UTC).isoformat()
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
         f.write(f"{timestamp}\t{event}\t{details}\n")
 
@@ -296,12 +296,12 @@ def analyze_articles_batch(texts: List[str]) -> List[dict]:
     Returns:
         List[dict]: Analysis results for each article
     """
-    start_time = datetime.utcnow()
+    start_time = datetime.now(datetime.UTC)
     
     sentiment_scores = score_sentiment_batch(texts)
     bias_scores = score_bias_batch(texts)
     
-    end_time = datetime.utcnow()
+    end_time = datetime.now(datetime.UTC)
     total_processing_time = (end_time - start_time).total_seconds()
     
     results = []

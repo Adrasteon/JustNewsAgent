@@ -25,6 +25,8 @@ import networkx as nx
 from difflib import SequenceMatcher
 import math
 
+from agents.archive.entity_linker import EntityLinkerManager
+
 logger = logging.getLogger("phase3_kg")
 
 class AdvancedEntityExtractor:
@@ -1413,7 +1415,9 @@ class KnowledgeGraphManager:
 
     def __init__(self, kg_storage_path: str = "./kg_storage"):
         self.kg = TemporalKnowledgeGraph(kg_storage_path)
-        logger.info("🎯 Phase 3 Knowledge Graph Manager initialized")
+        # Initialize entity linker for external knowledge base integration
+        self.entity_linker = EntityLinkerManager(self.kg, cache_dir=str(Path(kg_storage_path) / "entity_cache"))
+        logger.info("🎯 Phase 3 Knowledge Graph Manager initialized with entity linking")
 
     async def process_archive_batch(self, archive_summary: Dict[str, Any],
                                   archive_manager) -> Dict[str, Any]:
@@ -1476,6 +1480,57 @@ class KnowledgeGraphManager:
         logger.info(f"🏷️ Entities extracted: {total_entities}")
 
         return summary
+
+    async def enrich_entities_with_external_knowledge(self, limit: int = 100) -> Dict[str, Any]:
+        """
+        Enrich entities in the knowledge graph with external knowledge bases
+
+        Args:
+            limit: Maximum number of entities to enrich
+
+        Returns:
+            Enrichment summary with statistics
+        """
+        logger.info(f"🔗 Starting entity enrichment with external knowledge bases (limit: {limit})")
+
+        try:
+            enrichment_result = await self.entity_linker.enrich_knowledge_graph_entities(limit)
+
+            # Update graph statistics after enrichment
+            enrichment_result["updated_graph_statistics"] = self.kg.get_graph_statistics()
+
+            logger.info("✅ Entity enrichment with external knowledge bases complete!")
+            return enrichment_result
+
+        except Exception as e:
+            logger.error(f"Entity enrichment failed: {e}")
+            return {"error": str(e), "enrichment_failed": True}
+
+    async def get_entity_external_info(self, entity_name: str, entity_type: str = None) -> Dict[str, Any]:
+        """
+        Get external information for a specific entity
+
+        Args:
+            entity_name: Name of the entity to enrich
+            entity_type: Optional entity type
+
+        Returns:
+            External entity information from knowledge bases
+        """
+        try:
+            return await self.entity_linker.get_entity_external_info(entity_name, entity_type)
+        except Exception as e:
+            logger.error(f"Failed to get external info for {entity_name}: {e}")
+            return {"error": str(e)}
+
+    def get_entity_linking_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics about entity linking and enrichment
+
+        Returns:
+            Entity linking statistics
+        """
+        return self.entity_linker.get_enrichment_statistics()
 
 async def demo_phase3_kg():
     """Demonstrate Phase 3 knowledge graph capabilities"""

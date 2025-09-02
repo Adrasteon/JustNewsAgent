@@ -527,6 +527,12 @@ class NewsReaderV2Engine:
         if not self.is_llava_available():
             raise RuntimeError("LLaVA model not loaded - cannot analyze screenshots")
         
+        # Log memory usage before analysis
+        if self.device.type == 'cuda':
+            pre_allocated_mb = torch.cuda.memory_allocated() / 1e6
+            pre_reserved_mb = torch.cuda.memory_reserved() / 1e6
+            logger.info(f"🔍 Pre-LLaVA analysis GPU memory: {pre_allocated_mb:.1f}MB allocated, {pre_reserved_mb:.1f}MB reserved")
+        
         # Default news extraction prompt
         if not custom_prompt:
             custom_prompt = """
@@ -581,6 +587,12 @@ class NewsReaderV2Engine:
                 # Remove truncation for LLaVA - it handles sequence length internally
             ).to(self.device)
             
+            # Log memory after input processing
+            if self.device.type == 'cuda':
+                input_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                input_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"📊 Post-input processing GPU memory: {input_allocated_mb:.1f}MB allocated, {input_reserved_mb:.1f}MB reserved")
+            
             # Generate response with optimized parameters
             with torch.no_grad():
                 output = self.models['llava'].generate(
@@ -591,6 +603,12 @@ class NewsReaderV2Engine:
                     top_p=0.9,
                     pad_token_id=self.processors['llava'].tokenizer.eos_token_id
                 )
+            
+            # Log memory after generation
+            if self.device.type == 'cuda':
+                gen_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                gen_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"🤖 Post-generation GPU memory: {gen_allocated_mb:.1f}MB allocated, {gen_reserved_mb:.1f}MB reserved")
             
             # Decode response (only new tokens)
             generated_text = self.processors['llava'].decode(
@@ -604,6 +622,11 @@ class NewsReaderV2Engine:
             # Cleanup GPU memory after processing
             if self.device.type == 'cuda':
                 torch.cuda.empty_cache()
+                
+                # Log memory after cleanup
+                post_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                post_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"🧹 Post-cleanup GPU memory: {post_allocated_mb:.1f}MB allocated, {post_reserved_mb:.1f}MB reserved")
             
             return {
                 "success": True,
@@ -879,7 +902,7 @@ def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(datetime.UTC).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 

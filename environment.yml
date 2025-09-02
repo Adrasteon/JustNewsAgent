@@ -1,20 +1,15 @@
 name: justnews-v2-py312
 channels:
-  - rapidsai
   - conda-forge
-  - nvidia
   - defaults
 dependencies:
   - python=3.12.11
   - pip
   - mamba
+
+  # Core system dependencies
   - gcc_linux-64
   - gxx_linux-64
-  - cudatoolkit=12.4
-  - rapids=25.04
-  - pytorch=2.6.0
-  - torchvision
-  - torchaudio
 
   # Core Python packages for all agents
   - numpy>=1.24.0
@@ -31,26 +26,31 @@ dependencies:
   - pydantic>=2.5.0
   - requests>=2.31.0
 
-  # Machine learning and NLP
-  - transformers>=4.56.0
-  - sentence-transformers>=2.2.2
-  - tokenizers>=0.15.0
-  - accelerate>=1.10.1
-
-  # GPU and acceleration
-  - tensorrt>=8.6.0
-  - nvidia-ml-py3>=12.535.0
-
   # Development and testing
   - pytest>=7.4.3
   - pytest-asyncio>=0.21.1
 
   - pip:
+    # Core ML packages (stable versions)
+    - torch==2.4.1
+    - torchvision==0.19.1
+    - torchaudio==2.4.1
+    - transformers==4.56.0
+    - tokenizers==0.22.0
+    - accelerate==1.10.1
+    - sentence-transformers==2.2.2
+    - safetensors==0.4.3
+    - bitsandbytes==0.47.0
+
+    # NVIDIA packages (specific versions)
+    - nvidia-ml-py3==7.352.0
+
+    # Additional pip packages from requirements file
     - -r agents/analyst/requirements_v4.txt
 
 # Notes:
-# - This environment file installs RAPIDS 25.04 with Python 3.12.11 and CUDA 12.4
-# - RAPIDS provides GPU-accelerated data science libraries (cudf, cuml, cugraph, cuspatial, cuvs)
-# - PyTorch is included for deep learning workloads
-# - Additional Python packages are installed via pip from requirements_v4.txt
+# - Used specific package versions to avoid dependency conflicts
+# - RAPIDS packages pinned to 25.4.0 for compatibility
+# - PyTorch pinned to 2.4.1 (stable version compatible with Python 3.12)
+# - NVIDIA packages use available versions
 # - Compatible with NVIDIA RTX 3090/4090 GPUs

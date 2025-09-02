@@ -16,6 +16,8 @@ from typing import Dict, List, Optional, Any, Union
 import json
 from datetime import datetime, timezone
 import torch
+import threading
+import time
 
 # Modern datetime utility to replace deprecated utcnow()
 def utc_now() -> datetime:
@@ -53,61 +55,109 @@ except ImportError:
     def log_feedback(*args, **kwargs):
         pass
 
-# Global engine instance
+# Global engine instance and initialization lock
 _engine_instance: Optional[NewsReaderV2Engine] = None
+_engine_lock = threading.Lock()
+_engine_initializing = False
 
 def clear_engine():
-    """Clear the engine instance and free GPU memory"""
-    global _engine_instance
-    if _engine_instance is not None:
-        try:
-            # Cleanup GPU memory if engine has cleanup method
-            if hasattr(_engine_instance, 'cleanup_memory'):
-                _engine_instance.cleanup_memory()
-        except Exception as e:
-            logger.warning(f"Error during engine cleanup: {e}")
-        finally:
-            _engine_instance = None
+    """Clear the engine instance and free GPU memory with singleton safety"""
+    global _engine_instance, _engine_initializing
+    
+    with _engine_lock:
+        if _engine_instance is not None:
+            try:
+                # Cleanup GPU memory if engine has cleanup method
+                if hasattr(_engine_instance, 'cleanup_memory'):
+                    _engine_instance.cleanup_memory()
+            except Exception as e:
+                logger.warning(f"Error during engine cleanup: {e}")
+            finally:
+                _engine_instance = None
+                _engine_initializing = False
+                
+            # Force GPU memory cleanup
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
             
-        # Force GPU memory cleanup
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            torch.cuda.synchronize()
-        
-        logger.info("✅ Engine instance cleared and GPU memory freed")
+            logger.info("✅ Engine instance cleared and GPU memory freed")
+        else:
+            logger.debug("No engine instance to clear")
 
 def get_engine():
-    """Get or create NewsReader V2 engine instance with memory safety"""
-    global _engine_instance
+    """Get or create NewsReader V2 engine instance with singleton pattern and memory safety"""
+    global _engine_instance, _engine_initializing
     
-    # CRITICAL SAFETY: Check GPU memory before creating new instance
-    if _engine_instance is None and V2_ENGINE_AVAILABLE:
-        if torch.cuda.is_available():
-            allocated_gb = torch.cuda.memory_allocated() / 1e9
-            if allocated_gb > 15.0:  # If >15GB already allocated, don't create new engine
-                logger.error(f"❌ GPU memory safety check failed: {allocated_gb:.1f}GB already allocated")
-                logger.error("❌ Preventing engine creation to avoid system crash")
-                return None
+    # If engine already exists, return it
+    if _engine_instance is not None:
+        return _engine_instance
+    
+    # Use double-checked locking pattern to prevent multiple initializations
+    with _engine_lock:
+        # Check again after acquiring lock
+        if _engine_instance is not None:
+            return _engine_instance
         
-        try:
-            config = NewsReaderV2Config(
-                use_gpu_acceleration=torch.cuda.is_available(),
-                use_quantization=True,  # CRITICAL: Use quantization to save memory
-                quantization_type="int8",  # Use INT8 quantization
-                default_mode=ProcessingMode.COMPREHENSIVE
-            )
-            _engine_instance = NewsReaderV2Engine(config)
-            
-            # Verify the engine is properly initialized
-            if hasattr(_engine_instance, 'is_llava_available') and not _engine_instance.is_llava_available():
-                logger.warning("V2 Engine initialized but LLaVA model not available - will use fallbacks")
-            
-            logger.info("✅ NewsReader V2 engine initialized with quantization")
-        except Exception as e:
-            logger.error(f"Failed to initialize V2 engine: {e}")
-            _engine_instance = None
+        if _engine_initializing:
+            logger.warning("Engine initialization already in progress, waiting...")
+            # Wait for initialization to complete
+            while _engine_initializing:
+                time.sleep(0.1)
+            return _engine_instance
+        
+        _engine_initializing = True
     
-    return _engine_instance
+    try:
+        # CRITICAL SAFETY: Check GPU memory before creating new instance
+        if V2_ENGINE_AVAILABLE:
+            if torch.cuda.is_available():
+                allocated_gb = torch.cuda.memory_allocated() / 1e9
+                # More reasonable threshold: 80% of available memory or max per agent limit
+                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
+                safe_threshold = min(gpu_memory * 0.8, 20.0)  # 80% of GPU memory or 20GB max
+                
+                if allocated_gb > safe_threshold:
+                    logger.error(f"❌ GPU memory safety check failed: {allocated_gb:.1f}GB allocated, threshold: {safe_threshold:.1f}GB")
+                    logger.error("❌ Preventing engine creation to avoid system crash")
+                    return None
+            
+            # Log memory status before initialization
+            if torch.cuda.is_available():
+                allocated_mb = torch.cuda.memory_allocated() / 1e6
+                reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"🔍 Pre-initialization GPU memory: {allocated_mb:.1f}MB allocated, {reserved_mb:.1f}MB reserved")
+        
+        config = NewsReaderV2Config(
+            use_gpu_acceleration=torch.cuda.is_available(),
+            use_quantization=True,  # CRITICAL: Use quantization to save memory
+            quantization_type="int8",  # Use INT8 quantization
+            default_mode=ProcessingMode.COMPREHENSIVE
+        )
+        
+        logger.info("🔧 Initializing NewsReader V2 engine...")
+        _engine_instance = NewsReaderV2Engine(config)
+        
+        # Verify the engine is properly initialized
+        if hasattr(_engine_instance, 'is_llava_available') and not _engine_instance.is_llava_available():
+            logger.warning("V2 Engine initialized but LLaVA model not available - will use fallbacks")
+        
+        # Log memory status after initialization
+        if torch.cuda.is_available():
+            allocated_mb = torch.cuda.memory_allocated() / 1e6
+            reserved_mb = torch.cuda.memory_reserved() / 1e6
+            logger.info(f"✅ Post-initialization GPU memory: {allocated_mb:.1f}MB allocated, {reserved_mb:.1f}MB reserved")
+        
+        logger.info("✅ NewsReader V2 engine initialized with singleton pattern")
+        return _engine_instance
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize V2 engine: {e}")
+        _engine_instance = None
+        return None
+        
+    finally:
+        _engine_initializing = False
 
 async def process_article_content(
     content: Union[str, bytes, dict],
@@ -129,6 +179,15 @@ async def process_article_content(
     start_time = utc_now()
     
     try:
+        # Validate inputs
+        if not content or (isinstance(content, str) and not content.strip()):
+            raise ValueError("Content cannot be empty")
+        
+        # Validate processing mode
+        valid_modes = ["fast", "comprehensive", "precision"]
+        if processing_mode not in valid_modes:
+            raise ValueError(f"Invalid processing mode '{processing_mode}'. Valid modes: {valid_modes}")
+        
         engine = get_engine()
         
         # If V2 engine is available, use TRUE screenshot-based processing
@@ -694,6 +753,14 @@ async def extract_news_from_url(url: str, screenshot_path: Optional[str] = None)
     """
     
     try:
+        # Validate URL
+        if not url or not isinstance(url, str):
+            raise ValueError("URL must be a non-empty string")
+        
+        # Basic URL validation
+        if not url.startswith(('http://', 'https://')):
+            raise ValueError("URL must start with http:// or https://")
+        
         # Enhanced processing with TRUE V2 screenshot-based capabilities
         result = await process_article_content(
             content={"url": url, "screenshot_path": screenshot_path},
@@ -875,6 +942,7 @@ def health_check() -> Dict[str, Any]:
         return {
             "status": "healthy",
             "version": "v2.0",
+            "timestamp": utc_now().isoformat(),
             "components": component_status,
             "capabilities": [
                 "multi_modal_processing",
@@ -892,6 +960,7 @@ def health_check() -> Dict[str, Any]:
         return {
             "status": "error",
             "error": str(e),
+            "timestamp": utc_now().isoformat(),
             "fallback_available": True,
             "v2_compliance": False
         }

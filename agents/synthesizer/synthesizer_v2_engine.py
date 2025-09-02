@@ -334,7 +334,7 @@ class SynthesizerV2Engine:
         """Log feedback for model performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(datetime.UTC).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -683,7 +683,7 @@ class SynthesizerV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_synthesizer_v2_engine():
+def run_synthesizer_v2_engine_test():
     """Test Synthesizer V2 Engine with sample data"""
     try:
         print("🔧 Testing Synthesizer V2 Engine...")
@@ -740,4 +740,4 @@ def test_synthesizer_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_synthesizer_v2_engine()
+    run_synthesizer_v2_engine_test()

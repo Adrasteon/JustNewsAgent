@@ -410,7 +410,7 @@ class CriticV2Engine:
         """Log feedback for review performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(datetime.UTC).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -736,7 +736,7 @@ class CriticV2Engine:
                     "text_length": len(text),
                     "context_provided": bool(context),
                     "reference_count": len(reference_texts) if reference_texts else 0,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(datetime.UTC).isoformat()
                 }
             )
             
@@ -1022,7 +1022,7 @@ class CriticV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_critic_v2_engine():
+def run_critic_v2_engine_test():
     """Test Critic V2 Engine with sample content review"""
     try:
         print("🔧 Testing Critic V2 Engine...")
@@ -1100,4 +1100,4 @@ def test_critic_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_critic_v2_engine()
+    run_critic_v2_engine_test()

@@ -157,6 +157,7 @@ class UserStatus(str, Enum):
     INACTIVE = "inactive"
     SUSPENDED = "suspended"
     PENDING = "pending"
+    DELETED = "deleted"
 
 class User(BaseModel):
     """User model"""
@@ -236,9 +237,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """Create JWT access token"""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(datetime.UTC) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(datetime.UTC) + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
@@ -247,7 +248,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def create_refresh_token(data: dict) -> str:
     """Create JWT refresh token"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(datetime.UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire, "type": "refresh"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     return encoded_jwt
@@ -438,7 +439,7 @@ def deactivate_user(user_id: int) -> bool:
 def store_refresh_token(user_id: int, refresh_token: str) -> bool:
     """Store refresh token in database"""
     token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
-    expires_at = datetime.utcnow() + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_at = datetime.now(datetime.UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
 
     query = """
     INSERT INTO user_sessions (user_id, refresh_token_hash, expires_at)
@@ -487,7 +488,7 @@ def create_password_reset_token(user_id: int) -> str:
     """Create a password reset token"""
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode()).hexdigest()
-    expires_at = datetime.utcnow() + timedelta(hours=1)
+    expires_at = datetime.now(datetime.UTC) + timedelta(hours=1)
 
     query = """
     INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
@@ -547,3 +548,19 @@ def get_user_count() -> int:
     query = "SELECT COUNT(*) as count FROM users"
     result = auth_execute_query_single(query)
     return result.get('count', 0) if result else 0
+
+def update_user_anonymized(user_id: int, anonymized_email: str, anonymized_username: str) -> bool:
+    """Anonymize user data for GDPR compliance (Right to be Forgotten)"""
+    query = """
+    UPDATE users
+    SET email = %s,
+        username = %s,
+        full_name = 'Deleted User',
+        hashed_password = NULL,
+        salt = NULL,
+        status = %s,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = %s
+    """
+    auth_execute_query(query, (anonymized_email, anonymized_username, UserStatus.DELETED.value, user_id), fetch=False)
+    return True

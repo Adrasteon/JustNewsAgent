@@ -471,7 +471,7 @@ class FactCheckerV2Engine:
                 "source_credibility": credibility,
                 "contradictions": contradictions,
                 "entities": claims_result['entities'],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(datetime.UTC).isoformat(),
                 "models_used": ["distilbert", "roberta", "bert-large", "sentence-transformers", "spacy"]
             }
             

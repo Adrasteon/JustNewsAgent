@@ -678,7 +678,7 @@ class SynthesizerV3ProductionEngine:
         except Exception as e:
             logger.warning(f"Cleanup warning: {e}")
 
-def test_synthesizer_v3_production():
+def run_synthesizer_v3_production_test():
     """Test production engine with zero errors/warnings"""
     print("=== SYNTHESIZER V3 PRODUCTION TEST ===")
     
@@ -713,4 +713,4 @@ def test_synthesizer_v3_production():
     print("🎉 Production test completed successfully!")
 
 if __name__ == "__main__":
-    test_synthesizer_v3_production()
+    run_synthesizer_v3_production_test()

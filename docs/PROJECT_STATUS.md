@@ -9,7 +9,22 @@ JustNewsAgent is a comprehensive AI-powered news analysis and fact-checking syst
 
 ## ✅ **Completed Major Achievements**
 
-### 1. Phase 3 Sprint 1-2: Storage Infrastructure and Basic KG Setup ✅ **COMPLETED**
+### 1. Legal Compliance Framework - GDPR/CCPA COMPREHENSIVE IMPLEMENTATION ✅ **COMPLETED**
+**Status:** Enterprise-grade legal compliance with data minimization, consent management, and audit logging
+
+- **✅ Data Minimization System**: Automatic data collection validation and minimization with 6 data purposes
+- **✅ Consent Management**: Granular consent tracking with expiration, withdrawal, and audit logging (PostgreSQL)
+- **✅ Consent Validation Middleware**: FastAPI middleware for automatic consent validation before data processing
+- **✅ Data Retention Policies**: Automated data cleanup with configurable retention periods and compliance reporting
+- **✅ Right to be Forgotten**: Complete data deletion and anonymization system with audit trails
+- **✅ Data Export API**: User data export functionality with multiple formats (JSON, CSV, XML)
+- **✅ Audit Logging System**: Comprehensive compliance audit trails with GDPR article references
+- **✅ Compliance Dashboard**: Real-time monitoring and reporting dashboard with compliance metrics
+- **✅ Consent UI Components**: GDPR-compliant user interfaces for consent management (banner, modal, dashboard)
+- **✅ API Endpoints**: 20+ REST endpoints for compliance operations with comprehensive documentation
+- **✅ Production Ready**: Complete GDPR/CCPA compliance framework with enterprise-grade security
+
+### 2. Phase 3 Sprint 1-2: Storage Infrastructure and Basic KG Setup ✅ **COMPLETED**
 **Status:** Research-scale archiving with knowledge graph integration
 
 - **✅ Archive Storage Infrastructure:** Local/S3-compatible storage with provenance tracking
@@ -177,7 +192,7 @@ Input Sources → Scout Agent → Analyst Agent → Fact Checker → Memory Agen
 conda activate justnews-v2-py312
 
 # Start services
-python -m uvicorn agents.balancer.main:app --reload --port 8009
+python -m uvicorn agents.balancer.main:app --reload --port 8013
 
 # Run tests
 pytest -q
@@ -240,6 +255,20 @@ nvidia-smi
 ---
 
 ## 📋 **Change Log**
+
+### v3.1.0 - September 2, 2025 ✅ **LEGAL COMPLIANCE FRAMEWORK COMPLETE**
+- ✅ **Legal Compliance Framework**: Complete GDPR/CCPA implementation with enterprise-grade security
+- ✅ **Data Minimization System**: Automatic data collection validation with 6 data purposes
+- ✅ **Consent Management**: Granular consent tracking with PostgreSQL storage and audit logging
+- ✅ **Consent Validation Middleware**: FastAPI middleware for GDPR Article 6 compliance
+- ✅ **Data Retention Policies**: Automated cleanup with configurable retention periods
+- ✅ **Right to be Forgotten**: Complete data deletion and anonymization with audit trails
+- ✅ **Data Export API**: User data export in multiple formats (JSON, CSV, XML)
+- ✅ **Audit Logging System**: Comprehensive compliance audit trails with GDPR article references
+- ✅ **Compliance Dashboard**: Real-time monitoring and reporting with compliance metrics
+- ✅ **Consent UI Components**: GDPR-compliant banner, modal, and dashboard interfaces
+- ✅ **API Endpoints**: 20+ REST endpoints for compliance operations
+- ✅ **Production Deployment**: Complete framework integrated into main FastAPI application
 
 ### v3.0.0 - September 1, 2025 ✅ **PHASE 3 SPRINT 1-2 COMPLETE**
 - ✅ **Phase 3 Sprint 1-2:** Research-scale archiving with knowledge graph integration

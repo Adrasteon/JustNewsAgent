@@ -500,7 +500,7 @@ class NewsReaderV2Engine:
                 'models_cleaned': models_cleaned,
                 'processors_cleaned': processors_cleaned,
                 'gpu_released': gpu_released,
-                'cleanup_timestamp': datetime.utcnow().isoformat()
+                'cleanup_timestamp': datetime.now(datetime.UTC).isoformat()
             })
                 
             logger.info(f"✅ NewsReader V2 Engine cleanup completed - {models_cleaned} models, {processors_cleaned} processors cleaned")
@@ -541,14 +541,14 @@ class NewsReaderV2Engine:
                 'min_confidence': self.config.min_confidence_threshold,
                 'batch_size': self.config.batch_size
             },
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(datetime.UTC).isoformat()
         }
 
 def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(datetime.UTC).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 

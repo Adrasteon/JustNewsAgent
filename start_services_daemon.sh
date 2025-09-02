@@ -13,7 +13,7 @@ mkdir -p "$LOG_DIR"
 CONDA_ENV="justnews-v2-prod"
 
 # Default timeout for healthchecks (seconds)
-HEALTH_TIMEOUT=30
+HEALTH_TIMEOUT=10
 
 # Agent definitions: name|python_module:app|port
 # Keep this list in sync with agents/*/main.py and the dashboard mapping
@@ -27,7 +27,7 @@ AGENTS=(
   "critic|agents.critic.main:app|8006"
   "memory|agents.memory.main:app|8007"
   "reasoning|agents.reasoning.main:app|8008"
-  "balancer|agents.balancer.main:app|8009"
+  "balancer|agents.balancer.main:app|8013"
 )
 
 PIDS=()
@@ -105,11 +105,11 @@ free_port_force() {
 }
 
 # Parse optional args
-DETACH=false
+DETACH=true  # Default to detach mode - services stay running
 while [[ ${#} -gt 0 ]]; do
   case "$1" in
-    --detach)
-      DETACH=true
+    --no-detach)
+      DETACH=false
       shift
       ;;
     --health-timeout)
@@ -117,9 +117,9 @@ while [[ ${#} -gt 0 ]]; do
       shift 2
       ;;
     -h|--help)
-      echo "Usage: $0 [--detach] [--health-timeout N]"
-      echo "  --detach           Start agents and leave them running (do not kill on script exit)"
-      echo "  --health-timeout N Override default health timeout in seconds (default: ${HEALTH_TIMEOUT})"
+      echo "Usage: $0 [--no-detach] [--health-timeout N]"
+      echo "  --no-detach        Start agents and kill them when script exits (for testing)"
+      echo "  --health-timeout N Override default health timeout in seconds (default: 10)"
       exit 0
       ;;
     *)
@@ -179,8 +179,8 @@ for d in "$BASE_MODEL_DIR" "$SYNTHESIZER_MODEL_CACHE" "$MEMORY_MODEL_CACHE" "$CH
   fi
 done
 
-echo "Checking ports 8000..8011 for running agents..."
-for port in $(seq 8000 8011); do
+echo "Checking ports 8000..8013 for running agents..."
+for port in $(seq 8000 8013); do
   if is_port_in_use "$port"; then
     echo "Port $port is currently in use. Attempting graceful shutdown..."
     if attempt_shutdown_port "$port"; then
@@ -225,14 +225,20 @@ wait_for_health() {
   fi
 
   echo "Waiting for $name to become healthy at $url (timeout ${HEALTH_TIMEOUT}s)"
+  local attempts=0
   while [ $(date +%s) -le $deadline ]; do
+    attempts=$((attempts + 1))
     if curl -s --max-time 2 "$url" >/dev/null 2>&1; then
-      echo "$name is healthy"
+      echo "✅ $name is healthy (after ${attempts}s)"
       return 0
+    fi
+    # Show progress every 5 seconds for MCP Bus
+    if [ "$name" = "mcp_bus" ] && [ $((attempts % 5)) -eq 0 ]; then
+      echo "  ... still waiting for $name (${attempts}s elapsed)"
     fi
     sleep 1
   done
-  echo "WARNING: $name did not report healthy within ${HEALTH_TIMEOUT}s"
+  echo "⚠️ WARNING: $name did not report healthy within ${HEALTH_TIMEOUT}s (tried $attempts times)"
   return 1
 }
 
@@ -249,6 +255,9 @@ for entry in "${AGENTS[@]}"; do
 done
 
 echo "All agents started; performing health checks"
+echo "Waiting 3 seconds for services to initialize..."
+sleep 3
+
 ALL_OK=0
 for entry in "${AGENTS[@]}"; do
   IFS='|' read -r name module port <<< "$entry"
@@ -264,9 +273,10 @@ else
 fi
 
 if [ "$DETACH" = true ]; then
-  echo "Start script completed in --detach mode. Agents will keep running. Started PIDs: ${PIDS[*]}"
+  echo "Start script completed in detach mode. Agents will keep running. Started PIDs: ${PIDS[*]}"
+  echo "Use ./stop_services.sh to stop all agents when needed."
   # Do not kill agents; exit successfully
   exit 0
 else
-  echo "Start script completed. To stop all started agents, send SIGINT to this script or kill PIDs: ${PIDS[*]}"
+  echo "Start script completed in test mode. To stop all started agents, send SIGINT to this script or kill PIDs: ${PIDS[*]}"
 fi

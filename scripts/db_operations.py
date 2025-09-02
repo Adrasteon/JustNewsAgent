@@ -186,7 +186,7 @@ def show_database_schema():
     except Exception as e:
         print(f"❌ Error showing schema: {e}")
 
-def test_vector_search():
+def run_vector_search_test():
     """Test vector search functionality"""
     print("\n🧠 Vector Search Test:")
     print("-" * 25)
@@ -275,7 +275,7 @@ def main():
             elif choice == "5":
                 show_database_schema()
             elif choice == "6":
-                test_vector_search()
+                run_vector_search_test()
             elif choice == "7":
                 show_connection_pool_status()
             elif choice == "8":

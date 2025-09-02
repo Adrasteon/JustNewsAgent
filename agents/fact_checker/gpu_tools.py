@@ -341,7 +341,7 @@ def get_gpu_fact_checker():
 def log_feedback(event: str, details: dict):
     """Log feedback for continual learning"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\\t{event}\\t{details}\\n")
+        f.write(f"{datetime.now(datetime.UTC).isoformat()}\\t{event}\\t{details}\\n")
 
 def validate_is_news(content: str) -> bool:
     """

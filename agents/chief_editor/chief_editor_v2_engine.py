@@ -756,7 +756,7 @@ class ChiefEditorV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_chief_editor_v2_engine():
+def run_chief_editor_v2_engine_test():
     """Test Chief Editor V2 Engine with sample editorial decisions"""
     try:
         print("🔧 Testing Chief Editor V2 Engine...")
@@ -830,4 +830,4 @@ def test_chief_editor_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_chief_editor_v2_engine()
+    run_chief_editor_v2_engine_test()

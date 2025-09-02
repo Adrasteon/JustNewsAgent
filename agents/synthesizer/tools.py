@@ -106,18 +106,34 @@ def get_synthesizer_performance() -> Dict[str, Any]:
     if not GPU_TOOLS_AVAILABLE or _gpu_performance is None:
         logger.warning("⚠️ GPU tools not available for performance stats")
         return {
-            "gpu_available": False,
+            "total_syntheses": 0,
+            "average_processing_time": 0.0,
+            "gpu_utilization": 0.0,
+            "memory_usage": 0.0,
             "method": "cpu_only",
             "engines": get_synthesizer_status()
         }
     
     try:
-        return _gpu_performance()
+        result = _gpu_performance()
+        # Ensure expected keys are present
+        if "total_syntheses" not in result:
+            result["total_syntheses"] = 0
+        if "average_processing_time" not in result:
+            result["average_processing_time"] = 0.0
+        if "gpu_utilization" not in result:
+            result["gpu_utilization"] = 0.0
+        if "memory_usage" not in result:
+            result["memory_usage"] = 0.0
+        return result
     except Exception as e:
         logger.error(f"❌ GPU performance stats failed: {e}")
         return {
+            "total_syntheses": 0,
+            "average_processing_time": 0.0,
+            "gpu_utilization": 0.0,
+            "memory_usage": 0.0,
             "error": str(e),
-            "gpu_available": False,
             "method": "gpu_failed",
             "engines": get_synthesizer_status()
         }
@@ -321,22 +337,26 @@ def log_feedback(event: str, details: dict):
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
         f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
-def cluster_articles(article_texts: List[str], n_clusters: int = 2) -> List[List[int]]:
+def cluster_articles(article_texts: List[str], n_clusters: int = 2) -> Dict[str, Any]:
     """Cluster articles using optimized embedding configuration."""
     if not article_texts:
-        return []
+        return {"clusters": [], "cluster_labels": [], "n_clusters": 0, "articles_processed": 0}
+    
     model = get_embedding_model()
     embeddings = model.encode(article_texts)
     method = os.environ.get("SYNTHESIZER_CLUSTER_METHOD", "kmeans").lower()
     clusters = []
+    cluster_labels = []
+    
     try:
         if method == "bertopic":
             if BERTopic is None:
                 raise ImportError("BERTopic is not installed.")
             topic_model = BERTopic(verbose=False)
             topics, _ = topic_model.fit_transform(article_texts)
-            n_topics = max(topics) + 1 if topics else 0
-            clusters = [[] for _ in range(n_topics)]
+            n_clusters = max(topics) + 1 if topics else 0
+            clusters = [[] for _ in range(n_clusters)]
+            cluster_labels = ["topic_" + str(i) for i in range(n_clusters)]
             for idx, topic in enumerate(topics):
                 if topic >= 0:
                     clusters[topic].append(idx)
@@ -347,6 +367,7 @@ def cluster_articles(article_texts: List[str], n_clusters: int = 2) -> List[List
             labels = clusterer.fit_predict(embeddings)
             n_clusters = max(labels) + 1 if labels.size > 0 else 0
             clusters = [[] for _ in range(n_clusters)]
+            cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
             for idx, label in enumerate(labels):
                 if label >= 0:
                     clusters[label].append(idx)
@@ -358,17 +379,41 @@ def cluster_articles(article_texts: List[str], n_clusters: int = 2) -> List[List
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
             labels = kmeans.fit_predict(embeddings)
             clusters = [[] for _ in range(n_clusters)]
+            cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
             for idx, label in enumerate(labels):
                 clusters[label].append(idx)
+        
         log_feedback("cluster_articles", {"method": method, "n_clusters": len(clusters), "clusters": clusters})
-        return clusters
+        return {
+            "clusters": clusters,
+            "cluster_labels": cluster_labels,
+            "n_clusters": len(clusters),
+            "articles_processed": len(article_texts),
+            "method": method
+        }
     except Exception as e:
         logger.error(f"Error in cluster_articles: {e}")
         log_feedback("cluster_articles_error", {"error": str(e), "method": method})
-        return []
+        return {
+            "clusters": [[i for i in range(len(article_texts))]],  # Fallback: all in one cluster
+            "cluster_labels": ["fallback_cluster"],
+            "n_clusters": 1,
+            "articles_processed": len(article_texts),
+            "method": "fallback",
+            "error": str(e)
+        }
 
-def neutralize_text(text: str) -> str:
+def neutralize_text(text: str) -> Dict[str, Any]:
     """Use optimized model to neutralize text with reduced memory usage."""
+    if not text or not text.strip():
+        return {
+            "neutralized_text": "",
+            "original_text": text,
+            "bias_score": 0.0,
+            "processing_time": 0.0,
+            "method": "empty_input"
+        }
+    
     model, tokenizer = get_dialog_model()
     if pipeline is None:
         raise ImportError("transformers pipeline is not available.")
@@ -384,11 +429,33 @@ def neutralize_text(text: str) -> str:
     
     prompt = f"Neutralize the following text for bias and strong language: {text}"
     result = pipe(prompt, max_new_tokens=256)[0]["generated_text"]
+    
+    # Calculate a simple bias score based on word analysis
+    bias_indicators = ["amazing", "fantastic", "terrible", "worst", "best", "incredible", "absolutely"]
+    original_bias_score = sum(1 for word in text.lower().split() if word in bias_indicators) / max(len(text.split()), 1)
+    neutralized_bias_score = sum(1 for word in result.lower().split() if word in bias_indicators) / max(len(result.split()), 1)
+    
     log_feedback("neutralize_text", {"input": text, "output": result})
-    return result
+    return {
+        "neutralized_text": result,
+        "original_text": text,
+        "bias_score": neutralized_bias_score,
+        "original_bias_score": original_bias_score,
+        "processing_time": 0.0,  # Would need timing implementation
+        "method": "dialogpt_neutralization"
+    }
 
-def aggregate_cluster(article_texts: List[str]) -> str:
+def aggregate_cluster(article_texts: List[str]) -> Dict[str, Any]:
     """Use optimized model to summarize article clusters efficiently."""
+    if not article_texts:
+        return {
+            "summary": "",
+            "key_points": [],
+            "confidence": 0.0,
+            "articles_processed": 0,
+            "method": "empty_input"
+        }
+    
     model, tokenizer = get_dialog_model()
     if pipeline is None:
         raise ImportError("transformers pipeline is not available.")
@@ -405,8 +472,21 @@ def aggregate_cluster(article_texts: List[str]) -> str:
     joined = "\n".join(article_texts)
     prompt = f"Summarize the following articles into a neutral, concise summary: {joined}"
     result = pipe(prompt, max_new_tokens=512)[0]["generated_text"]
+    
+    # Extract key points (simple sentence splitting)
+    key_points = [point.strip() for point in result.split('.') if point.strip()][:5]  # Max 5 key points
+    
+    # Calculate confidence based on summary length and coherence
+    confidence = min(0.9, len(result.split()) / 100.0)  # Simple heuristic
+    
     log_feedback("aggregate_cluster", {"input": article_texts, "output": result})
-    return result
+    return {
+        "summary": result,
+        "key_points": key_points,
+        "confidence": confidence,
+        "articles_processed": len(article_texts),
+        "method": "dialogpt_aggregation"
+    }
 
 # ==================== SYNTHESIZER V2 TRAINING-INTEGRATED METHODS ====================
 

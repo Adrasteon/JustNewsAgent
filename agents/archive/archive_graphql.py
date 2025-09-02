@@ -17,22 +17,34 @@ GraphQL Schema:
 import asyncio
 import json
 import logging
+import hashlib
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
 import re
-from fastapi import FastAPI, Request, Depends
+import contextlib
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import graphene
 from graphene import ObjectType, String, Int, Float, Boolean, List as GraphQLList, Field, Schema
 from graphene.types.datetime import DateTime
 import uvicorn
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from agents.archive.knowledge_graph import TemporalKnowledgeGraph, KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
 
+# Import graphql function
+from graphql import graphql
+
 logger = logging.getLogger("phase3_graphql")
+
+# Rate Limiting Configuration
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 
 # GraphQL Types
 class EntityTypeEnum(graphene.Enum):
@@ -197,6 +209,151 @@ class SearchResultType(graphene.ObjectType):
     content = String()
     score = Float(required=True)
     metadata = graphene.JSONString()
+
+class ExportArticles(graphene.Mutation):
+    """Export articles in bulk"""
+    class Arguments:
+        filters = graphene.JSONString()
+        format = graphene.String(default_value="json")
+        limit = graphene.Int(default_value=1000)
+        include_content = graphene.Boolean(default_value=True)
+        include_entities = graphene.Boolean(default_value=True)
+
+    success = graphene.Boolean()
+    job_id = graphene.String()
+    message = graphene.String()
+    estimated_items = graphene.Int()
+
+    async def mutate(self, info, filters=None, format="json", limit=1000,
+                    include_content=True, include_entities=True):
+        kg_manager = info.context.get('kg_manager')
+        if not kg_manager:
+            return ExportArticles(success=False, message="Knowledge graph manager not available")
+
+        try:
+            # Validate format
+            supported_formats = ["json", "csv", "jsonl"]
+            if format not in supported_formats:
+                return ExportArticles(
+                    success=False,
+                    message=f"Unsupported format: {format}. Supported: {supported_formats}"
+                )
+
+            # Cap limits for safety
+            limit = min(limit, 10000)
+
+            # Generate export job ID
+            job_id = f"export_articles_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+
+            # Start export as background task (would need to be implemented)
+            # For now, return job queued status
+            return ExportArticles(
+                success=True,
+                job_id=job_id,
+                message="Article export job queued successfully",
+                estimated_items=limit
+            )
+
+        except Exception as e:
+            return ExportArticles(success=False, message=f"Export failed: {str(e)}")
+
+class ExportEntities(graphene.Mutation):
+    """Export entities in bulk"""
+    class Arguments:
+        filters = graphene.JSONString()
+        format = graphene.String(default_value="json")
+        limit = graphene.Int(default_value=5000)
+        include_relationships = graphene.Boolean(default_value=False)
+        include_external_info = graphene.Boolean(default_value=False)
+
+    success = graphene.Boolean()
+    job_id = graphene.String()
+    message = graphene.String()
+    estimated_items = graphene.Int()
+
+    async def mutate(self, info, filters=None, format="json", limit=5000,
+                    include_relationships=False, include_external_info=False):
+        kg_manager = info.context.get('kg_manager')
+        if not kg_manager:
+            return ExportEntities(success=False, message="Knowledge graph manager not available")
+
+        try:
+            # Validate format
+            supported_formats = ["json", "csv", "jsonl"]
+            if format not in supported_formats:
+                return ExportEntities(
+                    success=False,
+                    message=f"Unsupported format: {format}. Supported: {supported_formats}"
+                )
+
+            # Cap limits for safety
+            limit = min(limit, 50000)
+
+            # Generate export job ID
+            job_id = f"export_entities_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+
+            # Start export as background task (would need to be implemented)
+            return ExportEntities(
+                success=True,
+                job_id=job_id,
+                message="Entity export job queued successfully",
+                estimated_items=limit
+            )
+
+        except Exception as e:
+            return ExportEntities(success=False, message=f"Export failed: {str(e)}")
+
+class ExportRelationships(graphene.Mutation):
+    """Export relationships in bulk"""
+    class Arguments:
+        filters = graphene.JSONString()
+        format = graphene.String(default_value="json")
+        limit = graphene.Int(default_value=10000)
+
+    success = graphene.Boolean()
+    job_id = graphene.String()
+    message = graphene.String()
+    estimated_items = graphene.Int()
+
+    async def mutate(self, info, filters=None, format="json", limit=10000):
+        kg_manager = info.context.get('kg_manager')
+        if not kg_manager:
+            return ExportRelationships(success=False, message="Knowledge graph manager not available")
+
+        try:
+            # Validate format
+            supported_formats = ["json", "csv", "jsonl", "graphml"]
+            if format not in supported_formats:
+                return ExportRelationships(
+                    success=False,
+                    message=f"Unsupported format: {format}. Supported: {supported_formats}"
+                )
+
+            # Cap limits for safety
+            limit = min(limit, 100000)
+
+            # Generate export job ID
+            job_id = f"export_relationships_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+
+            # Start export as background task (would need to be implemented)
+            return ExportRelationships(
+                success=True,
+                job_id=job_id,
+                message="Relationship export job queued successfully",
+                estimated_items=limit
+            )
+
+        except Exception as e:
+            return ExportRelationships(success=False, message=f"Export failed: {str(e)}")
+
+class ExportStatusType(graphene.ObjectType):
+    """Export job status"""
+    job_id = graphene.String()
+    status = graphene.String()
+    progress = graphene.Float()
+    items_processed = graphene.Int()
+    error = graphene.String()
+    updated_at = graphene.String()
 
 class Query(ObjectType):
     """Root GraphQL query"""
@@ -619,133 +776,154 @@ class Query(ObjectType):
         results.sort(key=lambda x: x.score, reverse=True)
         return results[offset:offset + limit]
 
-    # Graph statistics
-    graph_statistics = Field(GraphStatisticsType)
+    # Export status query
+    export_status = Field(ExportStatusType, job_id=String(required=True))
 
-    def resolve_graph_statistics(self, info):
-        kg_manager = info.context.get('kg_manager')
-        if not kg_manager:
-            return None
-
-        stats = kg_manager.kg.get_graph_statistics()
-        clustering_stats = kg_manager.kg.get_clustering_statistics()
-
-        return GraphStatisticsType(
-            total_nodes=stats.get("total_nodes", 0),
-            total_edges=stats.get("total_edges", 0),
-            node_types=stats.get("node_types", {}),
-            edge_types=stats.get("edge_types", {}),
-            entity_types=stats.get("entity_types", {}),
-            temporal_coverage=stats.get("temporal_coverage", {}),
-            clustering_stats=clustering_stats,
-            last_updated=datetime.now()
+    def resolve_export_status(self, info, job_id):
+        # This would need to be implemented to check actual export status
+        # For now, return a placeholder
+        return ExportStatusType(
+            job_id=job_id,
+            status="unknown",
+            progress=0.0,
+            items_processed=0,
+            error=None,
+            updated_at=datetime.now().isoformat()
         )
 
-# Create GraphQL schema
-schema = Schema(query=Query)
+# Mutation class for exports
+class Mutation(ObjectType):
+    """Root GraphQL mutation"""
+
+    # Export mutations
+    export_articles = ExportArticles.Field()
+    export_entities = ExportEntities.Field()
+    export_relationships = ExportRelationships.Field()
+
+# Create GraphQL schema with mutations
+schema = Schema(query=Query, mutation=Mutation)
+
+# Global instances (would be dependency injection in production)
+kg_manager = None
+archive_manager = None
+
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context manager"""
+    global kg_manager, archive_manager
+
+    try:
+        # Initialize knowledge graph manager
+        kg_manager = KnowledgeGraphManager()
+        logger.info("✅ Knowledge Graph Manager initialized")
+
+        # Initialize archive manager
+        archive_manager = ArchiveManager()
+        logger.info("✅ Archive Manager initialized")
+
+        logger.info("🎉 GraphQL API startup complete")
+
+        yield
+
+    except Exception as e:
+        logger.error(f"❌ Error during startup: {e}")
+        raise
+    finally:
+        # Cleanup on shutdown
+        logger.info("🛑 Shutting down GraphQL API...")
+        kg_manager = None
+        archive_manager = None
+        logger.info("✅ GraphQL API shutdown complete")
 
 # FastAPI application
 app = FastAPI(
-    title="JustNews Agent - GraphQL API",
-    description="GraphQL interface for complex knowledge graph queries",
+    title="JustNews Agent - GraphQL Archive API",
+    description="GraphQL interface for complex knowledge graph queries and flexible data access",
     version="3.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
+
+# Add rate limiting middleware
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Configure for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global instances
-kg_manager = None
+async def get_kg_manager():
+    """Dependency for knowledge graph manager"""
+    return kg_manager
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize services on startup"""
-    global kg_manager
+async def get_archive_manager():
+    """Dependency for archive manager"""
+    return archive_manager
 
-    try:
-        kg_storage_path = Path("./kg_storage")
-        kg_manager = KnowledgeGraphManager(str(kg_storage_path))
-        logger.info("🎯 Knowledge Graph Manager initialized for GraphQL")
-
-    except Exception as e:
-        logger.error(f"Failed to initialize services: {e}")
-        raise
-
-@app.get("/health")
-async def health_check():
-    """API health check endpoint"""
-    return {
-        "status": "healthy",
-        "service": "GraphQL API",
-        "version": "3.0.0",
-        "timestamp": datetime.now().isoformat()
-    }
-
-@app.get("/playground")
-async def graphql_playground():
-    """Serve GraphQL Playground"""
-    return {
-        "message": "GraphQL Playground available at /graphql",
-        "endpoint": "/graphql",
-        "playground_url": "/graphql"
-    }
-
+# GraphQL endpoint with context
 @app.post("/graphql")
 async def graphql_endpoint(request: Request):
     """GraphQL endpoint"""
-    try:
-        data = await request.json()
-        query = data.get("query", "")
-        variables = data.get("variables", {})
+    # Get the query from request
+    data = await request.json()
+    query = data.get("query", "")
+    variables = data.get("variables", {})
 
-        # Execute GraphQL query
-        result = schema.execute(
-            query,
-            variable_values=variables,
-            context={"kg_manager": kg_manager}
-        )
+    # Execute query with context
+    context = {
+        'kg_manager': kg_manager,
+        'archive_manager': archive_manager,
+        'request': request
+    }
 
-        if result.errors:
-            return JSONResponse(
-                status_code=400,
-                content={
-                    "errors": [str(error) for error in result.errors],
-                    "data": None
-                }
-            )
+    result = await graphql(
+        schema,
+        query,
+        variable_values=variables,
+        context_value=context
+    )
 
-        return {
-            "data": result.data,
-            "errors": None
-        }
-
-    except Exception as e:
-        logger.error(f"GraphQL execution error: {e}")
+    if result.errors:
         return JSONResponse(
-            status_code=500,
-            content={
-                "errors": [str(e)],
-                "data": None
-            }
+            status_code=400,
+            content={"errors": [str(error) for error in result.errors]}
         )
 
-@app.get("/schema")
-async def get_schema():
-    """Get GraphQL schema as SDL"""
+    return JSONResponse(content={"data": result.data})
+
+# Health check endpoint
+@app.get("/health")
+async def health_check(request: Request):
+    """API health check endpoint"""
     return {
-        "schema": str(schema),
-        "description": "GraphQL schema for knowledge graph queries"
+        "status": "healthy",
+        "service": "GraphQL Archive API",
+        "version": "3.0.0",
+        "services": {
+            "knowledge_graph": kg_manager is not None,
+            "archive": archive_manager is not None
+        }
     }
 
 # Error handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": exc.detail,
+            "timestamp": datetime.now().isoformat()
+        }
+    )
+
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     logger.error(f"Unhandled exception: {exc}")

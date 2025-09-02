@@ -11,6 +11,7 @@ Features:
 
 import logging
 from datetime import datetime
+import contextlib
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
@@ -27,30 +28,30 @@ from .gpu_manager_production import get_gpu_manager
 
 logger = logging.getLogger("gpu_dashboard.api")
 
+@contextlib.asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context manager"""
+    try:
+        start_gpu_monitoring()
+        logger.info("🚀 GPU monitoring started via dashboard API")
+        yield
+    except Exception as e:
+        logger.error(f"Failed to start GPU monitoring: {e}")
+        raise
+    finally:
+        try:
+            stop_gpu_monitoring()
+            logger.info("🛑 GPU monitoring stopped via dashboard API")
+        except Exception as e:
+            logger.error(f"Failed to stop GPU monitoring: {e}")
+
 # Create FastAPI app
 app = FastAPI(
     title="JustNewsAgent GPU Monitoring Dashboard",
     description="Real-time GPU monitoring and performance analytics for JustNewsAgent",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
-
-@app.on_event("startup")
-async def startup_event():
-    """Start GPU monitoring on app startup"""
-    try:
-        start_gpu_monitoring()
-        logger.info("🚀 GPU monitoring started via dashboard API")
-    except Exception as e:
-        logger.error(f"Failed to start GPU monitoring: {e}")
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Stop GPU monitoring on app shutdown"""
-    try:
-        stop_gpu_monitoring()
-        logger.info("🛑 GPU monitoring stopped via dashboard API")
-    except Exception as e:
-        logger.error(f"Failed to stop GPU monitoring: {e}")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_dashboard_page():

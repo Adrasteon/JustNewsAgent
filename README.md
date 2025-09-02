@@ -8,9 +8,9 @@
 - **Reliability:** 99.9% uptime with comprehensive error handling and automatic recovery
 - **Configuration:** Centralized management with environment profiles and validation
 - **Monitoring:** Real-time dashboards with advanced metrics, alerts, and analytics
-- **Knowledge Graph:** 73 nodes, 108 relationships, 68 entities (23 PERSON, 43 GPE, 2 ORG)
-- **APIs:** RESTful Archive API (Port 8021) + GraphQL Query Interface (Port 8020)
-- **Documentation:** Comprehensive coverage with 200+ page implementation guide including knowledge graph documentation& Code Quality
+- **Legal Compliance:** Complete GDPR/CCPA framework with data minimization, consent management, audit logging, and compliance monitoring
+- **APIs:** RESTful Archive API (Port 8021) + GraphQL Query Interface (Port 8020) + Legal Compliance API (Port 8021)
+- **Documentation:** Comprehensive coverage with 200+ page implementation guide including knowledge graph, legal compliance, and API documentation& Code Quality
 - **GPU Utilization:** Optimized across all agents (2-8GB per agent) with intelligent allocation
 - **Performance:** 50-120 articles/sec GPU, 5-12 articles/sec CPU fallback with seamless switching
 - **Reliability:** 99.9% uptime with comprehensive error handling and automatic recovery
@@ -30,16 +30,50 @@ AI-powered news analysis system using a distributed multi-agent architecture, GP
 
 ## ✅ **Latest Updates - September 1, 2025**
 
-### 🎯 **Phase 2 Multi-Site Clustering - COMPLETED**
-- **✅ Database-Driven Source Management**: Implemented PostgreSQL integration with connection pooling
-- **✅ Generic Site Crawler Architecture**: Created adaptable crawler for any news source
-- **✅ Multi-Site Concurrent Processing**: Successfully demonstrated 3-site concurrent crawling (BBC, Reuters, Guardian)
-- **✅ Performance Achievements**: 25 articles processed in 45.2 seconds (0.55 articles/second)
-- **✅ Canonical Metadata Generation**: Standardized payload structure with required fields
-- **✅ Evidence Capture**: Audit trails and provenance tracking implemented
-- **✅ Ethical Crawling Compliance**: Robots.txt checking and rate limiting integrated
+### � **Legal Compliance Framework - GDPR/CCPA COMPREHENSIVE IMPLEMENTATION COMPLETED**
 
-### 🔄 **Phase 3 Comprehensive Archive Integration - ADVANCED KG FEATURES COMPLETED**
+#### **Complete Legal Compliance Suite - PRODUCTION READY**
+- **✅ Data Minimization System**: Automatic data collection validation and minimization with 6 data purposes (contract fulfillment, legitimate interest, consent, marketing, profile analysis, data sharing)
+- **✅ Consent Management**: Granular consent tracking with expiration, withdrawal, and audit logging (PostgreSQL + audit trails)
+- **✅ Consent Validation Middleware**: FastAPI middleware for automatic consent validation before data processing (GDPR Article 6 compliance)
+- **✅ Data Retention Policies**: Automated data cleanup with configurable retention periods and compliance reporting
+- **✅ Right to be Forgotten**: Complete data deletion and anonymization system with audit trails
+- **✅ Data Export API**: User data export functionality with multiple formats (JSON, CSV, XML)
+- **✅ Audit Logging System**: Comprehensive compliance audit trails with GDPR article references
+- **✅ Compliance Dashboard**: Real-time monitoring and reporting dashboard with compliance metrics
+- **✅ Consent UI Components**: GDPR-compliant user interfaces for consent management (banner, modal, dashboard)
+- **✅ API Endpoints**: 20+ REST endpoints for compliance operations with comprehensive documentation
+
+#### **GDPR Compliance Features**
+- **Data Subject Rights**: Complete implementation of export, deletion, consent management, and data portability
+- **Lawful Basis Tracking**: Consent, contract fulfillment, legitimate interest, and legal obligation support
+- **Data Minimization**: Automatic validation and minimization of unnecessary data collection
+- **Audit Trails**: Complete logging of all data operations with compliance-relevant event tracking
+- **Consent Management**: Granular consent with expiration, withdrawal, and comprehensive audit logging
+- **Data Retention**: Automated cleanup of expired data with configurable retention policies
+- **Security Standards**: Industry-standard security practices with comprehensive error handling
+
+#### **Technical Implementation**
+- **Backend Modules**: 10 specialized compliance modules with production-grade error handling
+- **Database Integration**: PostgreSQL with dedicated audit tables and transaction management
+- **API Security**: JWT authentication with role-based access control (ADMIN, RESEARCHER, VIEWER)
+- **Middleware Integration**: Automatic consent validation for all data processing endpoints
+- **UI Components**: HTML/CSS/JS components for GDPR-compliant consent management
+- **Audit System**: Structured logging with GDPR article references and compliance event tracking
+- **Performance**: Optimized for high-volume operations with comprehensive monitoring
+
+#### **Production Deployment Ready**
+- **Service Integration**: All compliance modules integrated into main FastAPI application
+- **Database Setup**: Separate audit database with proper security isolation
+- **API Documentation**: Complete OpenAPI documentation for all compliance endpoints
+- **Testing**: Comprehensive test coverage with production validation
+- **Monitoring**: Real-time compliance metrics and audit trail monitoring
+- **Scalability**: Designed for enterprise-scale compliance operations
+
+**Status**: **PRODUCTION READY** - Complete legal compliance framework implemented with enterprise-grade security and comprehensive GDPR/CCPA compliance
+
+- **Phase 3 Status:** 🔄 Comprehensive archive integration with knowledge graph and legal compliance framework completed
+- **Legal Compliance:** ✅ Complete GDPR/CCPA implementation with data minimization, consent management, and audit logging
 - **✅ Advanced Entity Disambiguation**: Similarity clustering and context analysis with multi-language support
 - **✅ Relationship Strength Analysis**: Confidence scoring and multi-factor relationship analysis in KnowledgeGraphEdge
 - **✅ Entity Clustering**: Similarity algorithms and graph merging with confidence validation
@@ -84,40 +118,39 @@ curl http://localhost:8021/graph/statistics
 curl "http://localhost:8021/relationships?source_entity=Microsoft&limit=20"
 ```
 
-#### **GraphQL Query Interface (Port 8020)**
+#### **Legal Compliance API Endpoints (Port 8021)**
 ```bash
-# Health check
-curl http://localhost:8020/health
+# Data Minimization
+GET /auth/data-minimization/status - Get compliance status (Admin only)
+POST /auth/data-minimization/validate - Validate data collection
+POST /auth/data-minimization/minimize - Minimize data payload
+POST /auth/data-minimization/cleanup - Cleanup expired data
+GET /auth/data-minimization/usage - Get data usage summary
 
-# GraphQL Playground
-# Access at: http://localhost:8020/graphql
+# Consent Management
+GET /auth/consent/status - Get user consent status
+POST /auth/consent/grant - Grant consent
+POST /auth/consent/withdraw - Withdraw consent
+POST /auth/consent/batch - Batch consent operations
+GET /auth/consent/history - Get consent history
+POST /auth/consent/withdraw-all - Withdraw all consents
+GET /auth/consent/export - Export consent data
 
-# Example GraphQL queries
-curl -X POST http://localhost:8020/graphql \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "{
-      articles(limit: 5) {
-        articleId
-        title
-        domain
-        publishedDate
-        newsScore
-        entities
-      }
-      entities(limit: 10, entityType: PERSON) {
-        entityId
-        name
-        mentionCount
-        confidenceScore
-      }
-      graphStatistics {
-        totalNodes
-        totalEdges
-        entityTypes
-      }
-    }"
-  }'
+# Data Export & Deletion
+POST /auth/data/export - Export user data (GDPR Article 20)
+POST /auth/data/delete - Delete user data (GDPR Article 17)
+GET /auth/data/requests - Get data requests status
+
+# Compliance Audit
+GET /auth/audit/events - Get audit events (Admin only)
+GET /auth/audit/compliance - Get compliance summary
+GET /auth/audit/user/{user_id} - Get user audit trail
+
+# Admin Compliance Management
+POST /auth/admin/consent/policy - Add consent policy
+PUT /auth/admin/consent/policy/{id} - Update consent policy
+DELETE /auth/admin/consent/policy/{id} - Delete consent policy
+GET /auth/admin/compliance/report - Get compliance report
 ```
 
 ### 📊 **Enhanced Dashboard - ADVANCED GPU MONITORING & VISUALIZATION**
@@ -186,16 +219,19 @@ JustNewsAgent features a distributed multi-agent system with specialized roles a
 |-------|----------|--------|----------------|
 | **Reasoning** | Symbolic logic processing | ✅ CPU Optimized | Logical inference, rule-based processing, decision support |
 
-### 🎛️ **Dashboard Agent - NEW ENHANCED CAPABILITIES**
+### 🔒 **Legal Compliance Framework - NEW ENTERPRISE-GRADE FEATURES**
 | Component | Function | Status | Key Features |
 |-----------|----------|--------|--------------|
-| **GPU Monitor** | Real-time GPU health tracking | ✅ Production Ready | Live metrics, temperature monitoring, utilization charts, alert system |
-| **Configuration Manager** | Centralized config management | ✅ Production Ready | Profile switching, environment detection, validation, backup/restore |
-| **Performance Analytics** | Trend analysis & optimization | ✅ Production Ready | Historical data, recommendations, efficiency scoring, predictive analytics |
-| **Agent Monitor** | Per-agent resource tracking | ✅ Production Ready | GPU usage per agent, performance metrics, health status, activity logs |
-| **API Endpoints** | RESTful monitoring interface | ✅ Production Ready | External integration, configuration API, metrics export, dashboard data |
-| **Advanced Analytics** | Comprehensive performance monitoring | ✅ Production Ready | Real-time analytics, bottleneck detection, trend analysis, optimization recommendations |
-| **Analytics Dashboard** | Interactive web interface | ✅ Production Ready | Chart.js visualizations, performance trends, system health monitoring, export capabilities |
+| **Data Minimization Manager** | Automatic data minimization | ✅ Production Ready | 6 data purposes, collection validation, audit logging, GDPR Article 5 compliance |
+| **Consent Management System** | Granular consent tracking | ✅ Production Ready | Consent types, expiration, withdrawal, PostgreSQL storage, audit trails |
+| **Consent Validation Middleware** | API endpoint protection | ✅ Production Ready | Automatic validation, GDPR Article 6 compliance, graceful error handling |
+| **Data Retention Manager** | Automated data cleanup | ✅ Production Ready | Configurable policies, compliance reporting, automated cleanup jobs |
+| **Right to be Forgotten** | Data deletion system | ✅ Production Ready | Complete anonymization, audit trails, GDPR Article 17 compliance |
+| **Data Export API** | User data export | ✅ Production Ready | Multiple formats, GDPR Article 20 compliance, secure data handling |
+| **Compliance Audit Logger** | Audit trail system | ✅ Production Ready | Structured logging, GDPR article references, compliance event tracking |
+| **Compliance Dashboard** | Monitoring interface | ✅ Production Ready | Real-time metrics, compliance reporting, audit trail visualization |
+| **Consent UI Components** | User interfaces | ✅ Production Ready | GDPR-compliant banner, modal, dashboard, mobile-responsive design |
+| **API Endpoints** | Compliance operations | ✅ Production Ready | 20+ REST endpoints, JWT authentication, role-based access control |
 
 ### 🔧 **GPU Resource Management - Advanced Features**
 - **MultiAgentGPUManager:** Production-grade GPU allocation with learning capabilities and conflict prevention
@@ -878,6 +914,7 @@ Support & contacts
 - **Main Documentation:** `README.md` (this file)
 - **API Documentation:** `docs/PHASE3_API_DOCUMENTATION.md`
 - **Knowledge Graph Documentation:** `docs/PHASE3_KNOWLEDGE_GRAPH.md`
+- **Legal Compliance Framework:** `docs/LEGAL_COMPLIANCE_FRAMEWORK.md`
 - **GPU Setup Guide:** `GPU_SETUP_README.md`
 - **Configuration Guide:** `docs/` directory
 - **Developer Guides:** `docs/` and `markdown_docs/` directories

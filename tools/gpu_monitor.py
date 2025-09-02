@@ -73,7 +73,7 @@ def read_torch():
 
 
 def sample_once():
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(datetime.UTC).isoformat()
     record = {'timestamp': now}
     nvsmi = read_nvidia_smi()
     if nvsmi is not None:

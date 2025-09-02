@@ -355,7 +355,7 @@ Respond with JSON format:
             "reasoning": "; ".join(reasoning_parts) if reasoning_parts else "Heuristic analysis",
             "content_type": "news" if is_news else "non-news",
             "url": url,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(datetime.UTC).isoformat(),
             "content_length": len(content),
             "method": "heuristic_classification"
         }
@@ -379,7 +379,7 @@ Respond with JSON format:
             
             # Add metadata
             quality_assessment["url"] = url
-            quality_assessment["timestamp"] = datetime.utcnow().isoformat()
+            quality_assessment["timestamp"] = datetime.now(datetime.UTC).isoformat()
             quality_assessment["content_length"] = len(content)
             
             return quality_assessment
@@ -394,7 +394,7 @@ Respond with JSON format:
                 "completeness": 0.0,
                 "reasoning": f"Assessment error: {str(e)}",
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(datetime.UTC).isoformat()
             }
     
     def detect_bias(self, content: str, url: str = None) -> Dict:
@@ -416,7 +416,7 @@ Respond with JSON format:
             
             # Add metadata
             bias_analysis["url"] = url
-            bias_analysis["timestamp"] = datetime.utcnow().isoformat()
+            bias_analysis["timestamp"] = datetime.now(datetime.UTC).isoformat()
             bias_analysis["content_length"] = len(content)
             
             return bias_analysis
@@ -430,7 +430,7 @@ Respond with JSON format:
                 "bias_indicators": [],
                 "confidence": 0.0,
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(datetime.UTC).isoformat()
             }
     
     def comprehensive_content_analysis(self, content: str, url: str = None) -> Dict:
@@ -460,7 +460,7 @@ Respond with JSON format:
                 ),
                 "url": url,
                 "content_preview": content[:200] + "..." if len(content) > 200 else content,
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(datetime.UTC).isoformat()
             }
             
             logger.info(f"✅ Analysis complete. Scout Score: {overall_score:.2f}")
@@ -472,7 +472,7 @@ Respond with JSON format:
                 "scout_score": 0.0,
                 "error": str(e),
                 "url": url,
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(datetime.UTC).isoformat()
             }
     
     def batch_analyze_content(self, content_list: List[Tuple[str, str]]) -> List[Dict]:
@@ -497,7 +497,7 @@ Respond with JSON format:
                         "scout_score": 0.0,
                         "error": str(e),
                         "url": url,
-                        "analysis_timestamp": datetime.utcnow().isoformat()
+                        "analysis_timestamp": datetime.now(datetime.UTC).isoformat()
                     })
         
         logger.info(f"✅ Batch analysis complete. {len(results)} items processed")

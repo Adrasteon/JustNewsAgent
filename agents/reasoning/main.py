@@ -245,7 +245,7 @@ async def lifespan(app: FastAPI):
             state_data = {
                 "facts": engine.get_facts() if engine else {},
                 "rules": engine.get_rules() if engine else [],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(datetime.UTC).isoformat()
             }
             with open(state_file, "w") as f:
                 json.dump(state_data, f, indent=2)
@@ -600,7 +600,7 @@ def log_feedback(event: str, details: Dict[str, Any]):
     feedback_log = Path(__file__).parent / "feedback_reasoning.log"
     try:
         with open(feedback_log, "a", encoding="utf-8") as f:
-            timestamp = datetime.utcnow().isoformat()
+            timestamp = datetime.now(datetime.UTC).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")
