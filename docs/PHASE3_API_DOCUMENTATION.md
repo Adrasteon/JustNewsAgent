@@ -1009,6 +1009,304 @@ curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   http://localhost:8021/articles
 ```
 
+## Analytics Dashboard API
+
+### Base URL
+```
+http://localhost:8012
+```
+
+### Endpoints
+
+#### Health Check
+```http
+GET /api/health
+```
+
+**Response:**
+```json
+{
+  "overall_health_score": 85.5,
+  "status": "healthy",
+  "total_operations": 1250,
+  "success_rate_pct": 94.2,
+  "avg_processing_time_s": 1.8,
+  "avg_throughput_items_per_s": 45.6,
+  "peak_gpu_memory_mb": 8192,
+  "avg_gpu_utilization_pct": 72.3,
+  "active_agents": 6
+}
+```
+
+#### Get Real-time Analytics
+```http
+GET /api/realtime/{hours}
+```
+
+**Parameters:**
+- `hours` (int): Number of hours to analyze (1-24)
+
+**Response:**
+```json
+{
+  "total_operations": 1250,
+  "success_rate_pct": 94.2,
+  "avg_processing_time_s": 1.8,
+  "avg_throughput_items_per_s": 45.6,
+  "peak_gpu_memory_mb": 8192,
+  "avg_gpu_utilization_pct": 72.3,
+  "bottleneck_indicators": [
+    "GPU memory usage approaching 80%",
+    "Agent queue depth increasing"
+  ],
+  "optimization_recommendations": [
+    "Consider increasing batch sizes for GPU efficiency",
+    "Optimize memory allocation for synthesizer agent"
+  ],
+  "performance_trends": {
+    "throughput_trend": "increasing",
+    "memory_trend": "stable",
+    "latency_trend": "decreasing"
+  }
+}
+```
+
+#### Get Agent Performance Profile
+```http
+GET /api/agent/{agent_name}/{hours}
+```
+
+**Parameters:**
+- `agent_name` (string): Name of the agent (scout, analyst, synthesizer, fact_checker, newsreader, memory)
+- `hours` (int): Number of hours to analyze (1-168)
+
+**Response:**
+```json
+{
+  "agent_name": "scout",
+  "performance_stats": {
+    "avg_processing_time_s": 2.1,
+    "success_rate_pct": 96.5,
+    "avg_throughput_items_per_s": 38.7,
+    "peak_memory_mb": 4096,
+    "total_operations": 450,
+    "error_count": 15
+  },
+  "resource_usage": {
+    "avg_cpu_percent": 45.2,
+    "avg_gpu_percent": 68.3,
+    "avg_memory_mb": 2048,
+    "peak_memory_mb": 4096
+  },
+  "optimization_suggestions": [
+    "Consider increasing GPU memory allocation",
+    "Batch size could be optimized for better throughput"
+  ]
+}
+```
+
+#### Get Performance Trends
+```http
+GET /api/trends/{hours}
+```
+
+**Parameters:**
+- `hours` (int): Number of hours to analyze (1-168)
+
+**Response:**
+```json
+{
+  "trends": {
+    "throughput_trend": "increasing",
+    "memory_trend": "stable",
+    "latency_trend": "decreasing",
+    "error_rate_trend": "stable"
+  },
+  "bottlenecks": [
+    "GPU memory utilization peaking at 85%",
+    "Network latency affecting API response times"
+  ],
+  "recommendations": [
+    "Increase GPU memory allocation for peak loads",
+    "Implement response caching for frequently accessed data",
+    "Consider load balancing for high-traffic periods"
+  ]
+}
+```
+
+#### Get Analytics Report
+```http
+GET /api/report/{hours}
+```
+
+**Parameters:**
+- `hours` (int): Number of hours to analyze (1-168)
+
+**Response:**
+```json
+{
+  "summary": {
+    "total_operations": 1250,
+    "success_rate": 94.2,
+    "avg_throughput": 45.6,
+    "peak_memory_usage": 8192,
+    "analysis_period_hours": 24
+  },
+  "agent_performance": {
+    "scout": {
+      "operations": 300,
+      "success_rate": 96.5,
+      "avg_time": 2.1
+    },
+    "analyst": {
+      "operations": 250,
+      "success_rate": 95.2,
+      "avg_time": 1.8
+    }
+  },
+  "system_health": {
+    "overall_score": 85.5,
+    "critical_issues": 0,
+    "warnings": 2,
+    "recommendations": 3
+  },
+  "performance_metrics": {
+    "cpu_utilization": 45.2,
+    "gpu_utilization": 72.3,
+    "memory_utilization": 68.7,
+    "network_latency": 15.3
+  },
+  "generated_at": "2025-09-02T10:30:00Z"
+}
+```
+
+#### Get Optimization Recommendations
+```http
+GET /api/optimization-recommendations
+```
+
+**Query Parameters:**
+- `hours` (int, default: 24): Number of hours to analyze
+
+**Response:**
+```json
+[
+  {
+    "id": "gpu_memory_optimization",
+    "category": "memory",
+    "priority": "high",
+    "title": "GPU Memory Optimization",
+    "description": "GPU memory usage is approaching 80% capacity. Consider optimizing memory allocation.",
+    "impact_score": 85,
+    "confidence_score": 92,
+    "complexity": "medium",
+    "time_savings": 2.5,
+    "affected_agents": ["synthesizer", "analyst"],
+    "implementation_steps": [
+      "Increase GPU memory allocation from 6GB to 8GB",
+      "Implement memory pooling for tensor operations",
+      "Add memory cleanup after batch processing"
+    ]
+  }
+]
+```
+
+#### Get Optimization Insights
+```http
+GET /api/optimization-insights
+```
+
+**Response:**
+```json
+{
+  "total_recommendations_generated": 12,
+  "average_impact_score": 78.5,
+  "most_common_category": "performance",
+  "recommendations_by_priority": {
+    "critical": 2,
+    "high": 4,
+    "medium": 5,
+    "low": 1
+  }
+}
+```
+
+#### Record Custom Metric
+```http
+POST /api/record-metric
+```
+
+**Request Body:**
+```json
+{
+  "agent_name": "scout",
+  "operation": "crawl",
+  "processing_time_s": 2.5,
+  "batch_size": 10,
+  "success": true,
+  "gpu_memory_allocated_mb": 2048.0,
+  "gpu_memory_reserved_mb": 3072.0,
+  "gpu_utilization_pct": 75.0,
+  "temperature_c": 65.0,
+  "power_draw_w": 180.0,
+  "throughput_items_per_s": 4.0
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Metric recorded successfully"
+}
+```
+
+### Dashboard Web Interface
+
+The analytics dashboard provides a comprehensive web interface accessible at:
+```
+http://localhost:8012/
+```
+
+#### Features
+- **Automatic Data Loading**: Dashboard loads data automatically on page load
+- **Real-time Updates**: Live data refresh with manual refresh capability
+- **Interactive Controls**: Time range selection and agent filtering
+- **Visual Analytics**: Chart.js visualizations for performance trends
+- **Export Reports**: JSON export functionality for analytics data
+- **Responsive Design**: Mobile-friendly dashboard interface
+
+#### Dashboard Sections
+1. **System Health**: Overall health score and key metrics
+2. **Performance Overview**: Throughput, processing time, and resource usage
+3. **Performance Trends**: Historical charts and trend analysis
+4. **GPU Resource Usage**: GPU utilization and memory tracking
+5. **Bottlenecks & Recommendations**: Current issues and optimization suggestions
+6. **Advanced Optimization**: Detailed recommendations with implementation steps
+7. **Agent Profiles**: Per-agent performance analysis
+
+### Usage Examples
+
+#### Get System Health
+```bash
+curl http://localhost:8012/api/health
+```
+
+#### Get Real-time Analytics (Last Hour)
+```bash
+curl http://localhost:8012/api/realtime/1
+```
+
+#### Get Scout Agent Performance (Last 24 Hours)
+```bash
+curl http://localhost:8012/api/agent/scout/24
+```
+
+#### Get Optimization Recommendations
+```bash
+curl http://localhost:8012/api/optimization-recommendations?hours=24
+```
+
 ## Error Handling
 
 ### REST API Error Responses

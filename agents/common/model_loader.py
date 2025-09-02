@@ -14,7 +14,7 @@ from typing import Optional, Tuple
 logger = logging.getLogger(__name__)
 
 
-def _resolve_model_store_path(agent: Optional[str]) -> Optional[Path]:
+def _resolve_model_store_path(agent: Optional[str], model_id: Optional[str] = None) -> Optional[Path]:
     root = os.environ.get("MODEL_STORE_ROOT")
     if not root or not agent:
         return None
@@ -23,6 +23,24 @@ def _resolve_model_store_path(agent: Optional[str]) -> Optional[Path]:
         ms = ModelStore(Path(root))
         cur = ms.get_current(agent)
         if cur and cur.exists():
+            # If model_id is provided, look for the specific model subdirectory
+            if model_id:
+                # Convert model_id to the directory name format used by huggingface_hub
+                # e.g., "google/bert_uncased_L-2_H-128_A-2" -> "models--google--bert_uncased_L-2_H-128_A-2"
+                model_dir_name = model_id.replace("/", "--").replace("_", "_")
+                model_dir_name = f"models--{model_dir_name}"
+                model_path = cur / model_dir_name
+                if model_path.exists():
+                    # Check if there's a snapshots directory with actual model files
+                    snapshots_dir = model_path / "snapshots"
+                    if snapshots_dir.exists():
+                        # Get the first (and typically only) snapshot directory
+                        snapshot_dirs = list(snapshots_dir.iterdir())
+                        if snapshot_dirs:
+                            return snapshot_dirs[0]
+                    # If no snapshots directory, return the model path directly
+                    return model_path
+            # If no model_id provided or specific model not found, return the current directory
             return cur
     except Exception:
         logger.debug("ModelStore not available or current not found for agent=%s", agent)
@@ -58,7 +76,7 @@ def load_transformers_model(
     TokenizerClass = tokenizer_class or AutoTokenizer
 
     # Prefer model store canonical path when configured
-    ms_path = _resolve_model_store_path(agent)
+    ms_path = _resolve_model_store_path(agent, model_id_or_path)
     strict = os.environ.get("STRICT_MODEL_STORE") == "1"
     if ms_path:
         try:
@@ -88,7 +106,7 @@ def load_sentence_transformer(model_name: str, agent: Optional[str] = None, cach
     except Exception as e:
         raise ImportError("sentence-transformers is required") from e
 
-    ms_path = _resolve_model_store_path(agent)
+    ms_path = _resolve_model_store_path(agent, model_name)
     strict = os.environ.get("STRICT_MODEL_STORE") == "1"
     if ms_path:
         try:
