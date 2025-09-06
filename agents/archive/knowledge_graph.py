@@ -17,13 +17,12 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Dict, List, Any, Optional
 import re
 import hashlib
 from collections import defaultdict
 import networkx as nx
 from difflib import SequenceMatcher
-import math
 
 from agents.archive.entity_linker import EntityLinkerManager
 
@@ -285,7 +284,6 @@ class AdvancedEntityExtractor:
         confidence = 0.0
 
         # Get context around entity mentions
-        entity_lower = entity.lower()
         text_lower = text.lower()
 
         # Look for contextual indicators
@@ -317,7 +315,7 @@ class AdvancedEntityExtractor:
             # Clean up context
             context = re.sub(r'\s+', ' ', context).strip()
             return context
-        except:
+        except (ValueError, TypeError, AttributeError):
             return ""
 
     def _find_aliases(self, entity: str, entity_type: str) -> List[str]:
@@ -1044,7 +1042,6 @@ class TemporalKnowledgeGraph:
 
             # Identify context indicators
             context_indicators = []
-            entity_lower = entity_name.lower()
 
             # Look for relationship indicators around entity mentions
             for idx in occurrences:
@@ -1276,7 +1273,7 @@ class TemporalKnowledgeGraph:
                 return "evening"
             else:
                 return "night"
-        except:
+        except (ValueError, TypeError, AttributeError):
             return "unknown"
 
     def process_article(self, article_data: Dict[str, Any]) -> Dict[str, Any]:

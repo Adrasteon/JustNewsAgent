@@ -21,7 +21,6 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
 import logging
-import hashlib
 from urllib.parse import urlparse
 import os
 import requests
@@ -213,8 +212,6 @@ class UltraFastBBCCrawler:
     async def process_url_ultra_fast(self, browser, url: str) -> Optional[Dict]:
         """Ultra-fast single URL processing"""
         
-        start_time = time.time()
-        
         try:
             # Check robots.txt compliance first
             if not self.robots_checker.check_robots_txt(url):
@@ -266,10 +263,7 @@ class UltraFastBBCCrawler:
             # Only keep high-quality news (threshold for speed)
             if news_score >= 0.4 and len(content_data["content"]) > 100:
                 
-                processing_time = time.time() - start_time
-                
                 # Enrichment: url_hash, domain, canonical, publisher_meta (minimal), paywall flag
-                url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
                 domain = urlparse(url).netloc
                 canonical = content_data.get('canonical')
                 paywall_flag = content_data.get('paywall_flag', False)

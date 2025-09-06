@@ -1,22 +1,21 @@
 #!/usr/bin/env python3
+import os
+import sys
+import logging
+from pathlib import Path
+from agents.common.database import execute_query, initialize_connection_pool
+from agents.common.auth_models import create_user_tables
+
+# Add the project root to Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 """
 Database initialization script for JustNewsAgent Authentication System
 
 Creates all necessary tables for user authentication, sessions, and password resets.
 Run this script once to set up the authentication database schema.
 """
-
-import os
-import sys
-import logging
-from pathlib import Path
-
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-from agents.common.database import execute_query, initialize_connection_pool
-from agents.common.auth_models import create_user_tables
 
 # Set up logging
 logging.basicConfig(

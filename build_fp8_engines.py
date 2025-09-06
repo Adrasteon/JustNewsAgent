@@ -4,10 +4,7 @@ Simple TensorRT Engine Builder for FP8 Precision
 Creates optimized TensorRT engines for sentiment and bias analysis models
 """
 
-import os
-import sys
 import json
-import time
 from pathlib import Path
 from datetime import datetime, timezone
 

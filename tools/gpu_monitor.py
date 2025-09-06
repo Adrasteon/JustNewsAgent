@@ -13,7 +13,7 @@ import os
 import subprocess
 import time
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'logs', 'gpu_monitor.jsonl')
 OUT_PATH = os.path.abspath(OUT_PATH)

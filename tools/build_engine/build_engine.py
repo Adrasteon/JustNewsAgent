@@ -60,7 +60,7 @@ def try_native_compile(args):
     try:
         # Try to use the repo-native compiler
         sys.path.insert(0, str(ROOT / 'agents' / 'analyst'))
-        from native_tensorrt_compiler import NativeTensorRTCompiler
+        from agents.analyst.native_tensorrt_compiler import NativeTensorRTCompiler
 
         compiler = NativeTensorRTCompiler()
         # Apply requested precision and calibration data to the compiler config

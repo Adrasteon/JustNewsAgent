@@ -28,7 +28,6 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional, Any
 import logging
-import hashlib
 from urllib.parse import urlparse, urljoin
 
 from ..crawler_utils import (

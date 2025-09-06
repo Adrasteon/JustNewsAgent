@@ -94,427 +94,11 @@ except Exception:
 
 # GPU Acceleration Integration (July 27, 2025)
 # ============================================
-class GPUAcceleratedAnalyst:
-    """
-    OPERATIONAL GPU acceleration using RTX 3090 with proven 20x+ performance
-    This class provides the production-ready GPU acceleration that was
-    successfully tested and validated on July 27, 2025:
-    - 42.1 articles per second processing rate
-    - 0.024s average per article (vs 0.5s CPU baseline)
-    - 91% sentiment analysis confidence
-    - Complete RTX 3090 24GB VRAM utilization
-    """
-
-    def __init__(self):
-        self.gpu_available = False
-        self.models_loaded = False
-        self.gpu_allocated = False
-        self.gpu_device = None
-        self.gpu_memory_gb = 2.0  # Analyst needs ~2GB for sentiment/bias models
-        self.performance_stats = {
-            "total_requests": 0,
-            "gpu_requests": 0,
-            "fallback_requests": 0,
-            "total_time": 0.0,
-            "average_time": 0.0,
-        }
-        logger.info("🚀 Initializing OPERATIONAL GPU-Accelerated Analyst")
-        # Initialize GPU allocation through production manager
-        self._initialize_gpu_allocation()
-        # Initialize GPU models
-        self._initialize_gpu_models()
-
-    def _initialize_gpu_allocation(self):
-        """Initialize GPU allocation through production manager"""
-        try:
-            # Try to import production GPU manager
-            from agents.common.gpu_manager import request_agent_gpu
-
-            PRODUCTION_GPU_AVAILABLE = True
-        except ImportError:
-            PRODUCTION_GPU_AVAILABLE = False
-        if PRODUCTION_GPU_AVAILABLE and TORCH_AVAILABLE and torch.cuda.is_available():  # type: ignore
-            try:
-                # Request GPU allocation through production manager
-                allocation = request_agent_gpu("analyst", self.gpu_memory_gb)
-                if (
-                    isinstance(allocation, dict)
-                    and allocation.get("status") == "allocated"
-                ):
-                    self.gpu_allocated = True
-                    self.gpu_device = allocation.get("gpu_device", 0)
-                    self.gpu_memory_gb = allocation.get(
-                        "allocated_memory_gb", self.gpu_memory_gb
-                    )
-                    logger.info(
-                        "✅ Analyst GPU allocated: "
-                        f"{self.gpu_memory_gb}GB on device {self.gpu_device}"
-                    )
-                else:
-                    logger.warning(f"⚠️ Analyst GPU allocation failed: {allocation}")
-                    self.gpu_device = 0  # Fallback to device 0
-            except Exception as e:
-                logger.warning(f"⚠️ Analyst GPU allocation error: {e}")
-                self.gpu_device = 0  # Fallback to device 0
-        else:
-            logger.info(
-                "📋 Production GPU manager not available, using direct GPU access"
-            )
-            self.gpu_device = (
-                0 if (TORCH_AVAILABLE and torch.cuda.is_available()) else -1  # type: ignore
-            )
-
-    def _initialize_gpu_models(self):
-        """Initialize GPU-accelerated models with professional memory management"""
-        try:
-            if TORCH_AVAILABLE and torch.cuda.is_available() and self.gpu_device >= 0:  # type: ignore
-                # Set CUDA device to allocated device
-                torch.cuda.set_device(self.gpu_device)  # type: ignore
-                gpu_name = torch.cuda.get_device_name(self.gpu_device)  # type: ignore
-                gpu_memory = (
-                    torch.cuda.get_device_properties(self.gpu_device).total_memory  # type: ignore
-                    / 1024**3
-                )
-                logger.info(f"✅ GPU Available: {gpu_name}")
-                logger.info(f"✅ GPU Memory: {gpu_memory:.1f} GB")
-                # Clear GPU cache to prevent memory conflicts
-                if TORCH_AVAILABLE and torch is not None:
-                    torch.cuda.empty_cache()
-
-                # Load PROVEN models from Quick Win with explicit device management
-                if not HAS_TRANSFORMERS or pipeline is None:
-                    raise RuntimeError("Transformers pipeline not available")
-
-                try:
-                    # Manual safetensors loading to bypass PyTorch version issue
-                    from transformers import AutoModelForSequenceClassification, AutoTokenizer
-                    
-                    sentiment_model = AutoModelForSequenceClassification.from_pretrained(
-                        "cardiffnlp/twitter-roberta-base-sentiment-latest",
-                        use_safetensors=True
-                    )
-                    sentiment_tokenizer = AutoTokenizer.from_pretrained(
-                        "cardiffnlp/twitter-roberta-base-sentiment-latest"
-                    )
-                    
-                    self.sentiment_analyzer = pipeline(  # type: ignore
-                        "sentiment-analysis",
-                        model=sentiment_model,
-                        tokenizer=sentiment_tokenizer,
-                        return_all_scores=True,
-                        device=self.gpu_device,
-                        torch_dtype=(
-                            torch.float16 if TORCH_AVAILABLE and torch is not None
-                            else None
-                        ),
-                    )
-                    logger.info("✅ Sentiment analyzer loaded successfully with safetensors")
-                except Exception as e:
-                    logger.error(f"❌ Failed to load sentiment analyzer: {e}")
-                    raise
-
-                try:
-                    # Manual safetensors loading for bias detector
-                    from transformers import AutoModelForSequenceClassification as BiasModel, AutoTokenizer as BiasTokenizer
-                    
-                    bias_model = BiasModel.from_pretrained(
-                        "unitary/toxic-bert",
-                        use_safetensors=True
-                    )
-                    bias_tokenizer = BiasTokenizer.from_pretrained(
-                        "unitary/toxic-bert"
-                    )
-                    
-                    self.bias_detector = pipeline(  # type: ignore
-                        "text-classification",
-                        model=bias_model,
-                        tokenizer=bias_tokenizer,
-                        device=self.gpu_device,
-                        torch_dtype=(
-                            torch.float16 if TORCH_AVAILABLE and torch is not None
-                            else None
-                        ),
-                    )
-                    logger.info("✅ Bias detector loaded successfully with safetensors")
-                except Exception as e:
-                    logger.error(f"❌ Failed to load bias detector: {e}")
-                    raise
-                # Verify models are on GPU
-                logger.info(
-                    "Sentiment model device: "
-                    f"{next(self.sentiment_analyzer.model.parameters()).device}"
-                )
-                logger.info(
-                    "Bias model device: "
-                    f"{next(self.bias_detector.model.parameters()).device}"
-                )
-                self.models_loaded = True
-                logger.info(
-                    "✅ OPERATIONAL GPU models loaded (validated 42.1 articles/sec)"
-                )
-            else:
-                logger.warning("⚠️  GPU not available in this environment")
-        except Exception as e:
-            logger.error(f"❌ GPU initialization failed: {e}")
-            logger.info("📱 Will use hybrid fallback system")
-
-    def score_sentiment_gpu(self, text: str) -> Optional[float]:
-        """GPU-accelerated sentiment scoring with proven performance and
-        device management
-        This method is instrumented to emit a structured GPU event for each call
-        (pilot instrumentation using
-        `agents.common.gpu_metrics`).
-        """
-        # Start structured event (emit even if GPU is unavailable so we can
-        # observe attempts and fallback behavior).
-        try:
-            from agents.common.gpu_metrics import start_event, end_event
-        except Exception:
-            start_event = None
-            end_event = None
-        event_id = None
-        if start_event is not None:
-            event_id = start_event(
-                agent="analyst", operation="score_sentiment_gpu", batch_size=1
-            )
-        # If GPU models are not loaded or torch/CUDA is not available, emit an
-        # immediate failure/placeholder event and return None to indicate
-        # fallback.
-        if not self.models_loaded or not (
-            TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
-        ):
-            if end_event is not None and event_id is not None:
-                try:
-                    end_event(
-                        event_id, success=False, error="gpu_or_models_unavailable"
-                    )
-                except Exception:
-                    pass
-            return None
-        start_time = time.time()
-        try:
-            # Ensure we're on the correct CUDA device
-            if TORCH_AVAILABLE and torch is not None:
-                torch.cuda.set_device(self.gpu_device)
-            # Clear any mixed device tensors
-            if TORCH_AVAILABLE and torch is not None:
-                with torch.cuda.device(self.gpu_device):
-                    result = self.sentiment_analyzer(text)
-            else:
-                result = self.sentiment_analyzer(text)
-            # Convert to 0.0-1.0 scale (matching original format)
-            if isinstance(result, list) and len(result) > 0:
-                scores = {item["label"].lower(): item["score"] for item in result[0]}
-                if "positive" in scores:
-                    sentiment_score = scores["positive"]
-                elif "negative" in scores:
-                    sentiment_score = 1.0 - scores["negative"]
-                else:
-                    sentiment_score = 0.5
-            else:
-                sentiment_score = 0.5
-            processing_time = time.time() - start_time
-            self.performance_stats["gpu_requests"] += 1
-            self.performance_stats["total_time"] += processing_time
-            # End structured event with outcome
-            if end_event is not None and event_id is not None:
-                try:
-                    end_event(
-                        event_id,
-                        success=True,
-                        processing_time_s=processing_time,
-                        score=sentiment_score,
-                    )
-                except Exception:
-                    pass
-            logger.info(
-                f"\u2705 GPU sentiment: {sentiment_score:.3f} ({processing_time:.3f}s)"
-            )
-            return sentiment_score
-        except Exception as e:
-            logger.error(f"\u274c GPU sentiment failed: {e}")
-            # Clear CUDA cache on error
-            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            # Emit failure event
-            if end_event is not None and event_id is not None:
-                try:
-                    end_event(event_id, success=False, error=str(e))
-                except Exception:
-                    pass
-            return None
-
-    def score_bias_gpu(self, text: str) -> Optional[float]:
-        """GPU-accelerated bias scoring with proven performance and device management"""
-        if not self.models_loaded or not (
-            TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
-        ):
-            return None
-        start_time = time.time()
-        try:
-            # Ensure we're on the correct CUDA device
-            if TORCH_AVAILABLE and torch is not None:
-                torch.cuda.set_device(self.gpu_device)
-            # Clear any mixed device tensors
-            if TORCH_AVAILABLE and torch is not None:
-                with torch.cuda.device(self.gpu_device):
-                    result = self.bias_detector(text)
-            else:
-                result = self.bias_detector(text)
-            # Convert toxicity result to bias scale
-            if isinstance(result, list) and len(result) > 0:
-                if result[0]["label"] == "TOXIC":
-                    bias_score = result[0]["score"]
-                else:
-                    bias_score = 1.0 - result[0]["score"]
-            else:
-                bias_score = 0.5
-            processing_time = time.time() - start_time
-            self.performance_stats["gpu_requests"] += 1
-            self.performance_stats["total_time"] += processing_time
-            logger.info(f"✅ GPU bias: {bias_score:.3f} ({processing_time:.3f}s)")
-            return bias_score
-        except Exception as e:
-            logger.error(f"❌ GPU bias failed: {e}")
-            # Clear CUDA cache on error
-            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            return None
-
-    def score_sentiment_batch_gpu(self, texts: List[str]) -> List[Optional[float]]:
-        """BATCH GPU-accelerated sentiment scoring with CUDA device management -
-        Up to 100x faster!"""
-        if not self.models_loaded or not texts or not (
-            TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
-        ):
-            return [None] * len(texts) if texts else []
-        start_time = time.time()
-        try:
-            # Ensure we're on the correct CUDA device
-            if TORCH_AVAILABLE and torch is not None:
-                torch.cuda.set_device(self.gpu_device)
-            # Use HuggingFace pipeline's native batch processing
-            # with explicit device context
-            if TORCH_AVAILABLE and torch is not None:
-                with torch.cuda.device(self.gpu_device):
-                    results = self.sentiment_analyzer(texts)
-            else:
-                results = self.sentiment_analyzer(texts)
-            sentiment_scores = []
-            for result in results:
-                if isinstance(result, list) and len(result) > 0:
-                    scores = {item["label"].lower(): item["score"] for item in result}
-                    if "positive" in scores:
-                        sentiment_score = scores["positive"]
-                    elif "negative" in scores:
-                        sentiment_score = 1.0 - scores["negative"]
-                    else:
-                        sentiment_score = 0.5
-                else:
-                    sentiment_score = 0.5
-                sentiment_scores.append(sentiment_score)
-            processing_time = time.time() - start_time
-            batch_size = len(texts)
-            rate = batch_size / processing_time if processing_time > 0 else 0
-            self.performance_stats["gpu_requests"] += batch_size
-            self.performance_stats["total_time"] += processing_time
-            logger.info(
-                "✅ GPU batch sentiment: "
-                f"{batch_size} articles in {processing_time:.3f}s "
-                f"({rate:.1f} articles/sec)"
-            )
-            return sentiment_scores
-        except Exception as e:
-            logger.error(f"❌ GPU batch sentiment failed: {e}")
-            # Clear CUDA cache on error
-            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            return [None] * len(texts)
-
-    def score_bias_batch_gpu(self, texts: List[str]) -> List[Optional[float]]:
-        """BATCH GPU-accelerated bias scoring with CUDA device management.
-
-        Up to 100x faster!
-        """
-        if not self.models_loaded or not texts or not (
-            TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
-        ):
-            return [None] * len(texts) if texts else []
-        start_time = time.time()
-        try:
-            # Ensure we're on the correct CUDA device
-            if TORCH_AVAILABLE and torch is not None:
-                torch.cuda.set_device(self.gpu_device)
-            # Use HuggingFace pipeline's native batch processing
-            # with explicit device context
-            if TORCH_AVAILABLE and torch is not None:
-                with torch.cuda.device(self.gpu_device):
-                    results = self.bias_detector(texts)
-            else:
-                results = self.bias_detector(texts)
-            bias_scores = []
-            for result in results:
-                if isinstance(result, dict) and "label" in result and "score" in result:
-                    if result["label"] == "TOXIC":
-                        bias_score = result["score"]
-                    else:
-                        bias_score = 1.0 - result["score"]
-                else:
-                    bias_score = 0.5
-                bias_scores.append(bias_score)
-            processing_time = time.time() - start_time
-            batch_size = len(texts)
-            rate = batch_size / processing_time if processing_time > 0 else 0
-            self.performance_stats["gpu_requests"] += batch_size
-            self.performance_stats["total_time"] += processing_time
-            logger.info(
-                "✅ GPU batch bias: "
-                f"{batch_size} articles in {processing_time:.3f}s "
-                f"({rate:.1f} articles/sec)"
-            )
-            return bias_scores
-        except Exception as e:
-            logger.error(f"❌ GPU batch bias failed: {e}")
-            # Clear CUDA cache on error
-            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            return [None] * len(texts)
-
-
-# Global GPU analyst instance
-_gpu_analyst = None
-
-
-def get_gpu_analyst():
-    """Get or create the GPU analyst instance"""
-    global _gpu_analyst
-    if _gpu_analyst is None:
-        _gpu_analyst = GPUAcceleratedAnalyst()
-    return _gpu_analyst
-
-
-def cleanup_gpu_analyst():
-    """Clean up GPU analyst and release GPU allocation"""
-    global _gpu_analyst
-    if _gpu_analyst is not None:
-        try:
-            # Release GPU allocation
-            if _gpu_analyst.gpu_allocated:
-                try:
-                    from agents.common.gpu_manager import release_agent_gpu
-
-                    release_agent_gpu("analyst")
-                    logger.info("✅ Analyst GPU allocation released")
-                except Exception as e:
-                    logger.warning(f"⚠️ Failed to release Analyst GPU allocation: {e}")
-            # Clear GPU cache
-            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
-                torch.cuda.empty_cache()
-            # Clear instance
-            _gpu_analyst = None
-            logger.info("🧹 GPU analyst cleaned up")
-        except Exception as e:
-            logger.error(f"Error during GPU analyst cleanup: {e}")
+try:
+    from .gpu_analyst import GPUAcceleratedAnalyst, get_gpu_analyst
+except ImportError:
+    GPUAcceleratedAnalyst = None
+    get_gpu_analyst = None
 
 
 class DockerModelClient:
@@ -750,23 +334,24 @@ def score_bias(text: str) -> float:
     try:
         # Try GPU acceleration first (20x+ faster)
         try:
-            gpu_analyzer = GPUAcceleratedAnalyst()
-            score = gpu_analyzer.score_bias_gpu(text)
-            if score is None:
-                raise ValueError("GPU analysis returned None")
-            # Enhanced feedback logging for training pipeline
-            log_feedback(
-                "score_bias",
-                {
-                    "text": text[:100],
-                    "score": score,
-                    "source": "gpu_accelerated",
-                    "success": True,
-                },
-                include_source="gpu_rtx3090",
-            )
-            logger.info(f"GPU bias analysis completed: {score}")
-            return score
+            if GPUAcceleratedAnalyst is not None:
+                gpu_analyzer = GPUAcceleratedAnalyst()
+                score = gpu_analyzer.score_bias_gpu(text)
+                if score is None:
+                    raise ValueError("GPU analysis returned None")
+                # Enhanced feedback logging for training pipeline
+                log_feedback(
+                    "score_bias",
+                    {
+                        "text": text[:100],
+                        "score": score,
+                        "source": "gpu_accelerated",
+                        "success": True,
+                    },
+                    include_source="gpu_rtx3090",
+                )
+                logger.info(f"GPU bias analysis completed: {score}")
+                return score
         except Exception as gpu_error:
             logger.warning(
                 f"GPU bias analysis failed, falling back to Docker: {gpu_error}"
@@ -830,23 +415,24 @@ def score_sentiment(text: str) -> float:
     try:
         # Try GPU acceleration first (20x+ faster)
         try:
-            gpu_analyzer = GPUAcceleratedAnalyst()
-            score = gpu_analyzer.score_sentiment_gpu(text)
-            if score is None:
-                raise ValueError("GPU analysis returned None")
-            # Enhanced feedback logging for training pipeline
-            log_feedback(
-                "score_sentiment",
-                {
-                    "text": text[:100],
-                    "score": score,
-                    "source": "gpu_accelerated",
-                    "success": True,
-                },
-                include_source="gpu_rtx3090",
-            )
-            logger.info(f"GPU sentiment analysis completed: {score}")
-            return score
+            if GPUAcceleratedAnalyst is not None:
+                gpu_analyzer = GPUAcceleratedAnalyst()
+                score = gpu_analyzer.score_sentiment_gpu(text)
+                if score is None:
+                    raise ValueError("GPU analysis returned None")
+                # Enhanced feedback logging for training pipeline
+                log_feedback(
+                    "score_sentiment",
+                    {
+                        "text": text[:100],
+                        "score": score,
+                        "source": "gpu_accelerated",
+                        "success": True,
+                    },
+                    include_source="gpu_rtx3090",
+                )
+                logger.info(f"GPU sentiment analysis completed: {score}")
+                return score
         except Exception as gpu_error:
             logger.warning(
                 "GPU sentiment analysis failed, falling back to Docker: "
@@ -922,46 +508,47 @@ def score_sentiment_batch(texts: List[str]) -> List[float]:
     start_time = time.time()
     try:
         # Try GPU batch processing first (10x-100x faster)
-        gpu_analyst = get_gpu_analyst()
-        if gpu_analyst.models_loaded:
-            scores = gpu_analyst.score_sentiment_batch_gpu(texts)
-            # Filter out None values and fall back to individual processing if needed
-            final_scores = []
-            failed_indices = []
-            for i, score in enumerate(scores):
-                if score is not None:
-                    final_scores.append(score)
-                else:
-                    failed_indices.append(i)
-            # If some failed, process individually
-            if failed_indices:
-                logger.warning(
-                    f"🔄 {len(failed_indices)} articles failed batch processing, "
-                    "falling back individually"
+        if get_gpu_analyst is not None:
+            gpu_analyst = get_gpu_analyst()
+            if gpu_analyst.models_loaded:
+                scores = gpu_analyst.score_sentiment_batch_gpu(texts)
+                # Filter out None values and fall back to individual processing if needed
+                final_scores = []
+                failed_indices = []
+                for i, score in enumerate(scores):
+                    if score is not None:
+                        final_scores.append(score)
+                    else:
+                        failed_indices.append(i)
+                # If some failed, process individually
+                if failed_indices:
+                    logger.warning(
+                        f"🔄 {len(failed_indices)} articles failed batch processing, "
+                        "falling back individually"
+                    )
+                    for idx in failed_indices:
+                        individual_score = score_sentiment(texts[idx])
+                        scores[idx] = individual_score
+                processing_time = time.time() - start_time
+                rate = len(texts) / processing_time if processing_time > 0 else 0
+                logger.info(
+                    "✅ BATCH sentiment completed: "
+                    f"{len(texts)} articles in {processing_time:.3f}s "
+                    f"({rate:.1f} articles/sec)"
                 )
-                for idx in failed_indices:
-                    individual_score = score_sentiment(texts[idx])
-                    scores[idx] = individual_score
-            processing_time = time.time() - start_time
-            rate = len(texts) / processing_time if processing_time > 0 else 0
-            logger.info(
-                "✅ BATCH sentiment completed: "
-                f"{len(texts)} articles in {processing_time:.3f}s "
-                f"({rate:.1f} articles/sec)"
-            )
-            # Log performance for training pipeline
-            log_feedback(
-                "score_sentiment_batch",
-                {
-                    "batch_size": len(texts),
-                    "processing_time": processing_time,
-                    "rate": rate,
-                    "source": "gpu_batch_accelerated",
-                    "success": True,
-                },
-                include_source="gpu_rtx3090_batch",
-            )
-            return [s if s is not None else 0.5 for s in scores]
+                # Log performance for training pipeline
+                log_feedback(
+                    "score_sentiment_batch",
+                    {
+                        "batch_size": len(texts),
+                        "processing_time": processing_time,
+                        "rate": rate,
+                        "source": "gpu_batch_accelerated",
+                        "success": True,
+                    },
+                    include_source="gpu_rtx3090_batch",
+                )
+                return [s if s is not None else 0.5 for s in scores]
     except Exception as gpu_error:
         logger.warning(
             "🔄 GPU batch sentiment failed, falling back to individual processing: "
@@ -999,46 +586,47 @@ def score_bias_batch(texts: List[str]) -> List[float]:
     start_time = time.time()
     try:
         # Try GPU batch processing first (10x-100x faster)
-        gpu_analyst = get_gpu_analyst()
-        if gpu_analyst.models_loaded:
-            scores = gpu_analyst.score_bias_batch_gpu(texts)
-            # Filter out None values and fall back to individual processing if needed
-            final_scores = []
-            failed_indices = []
-            for i, score in enumerate(scores):
-                if score is not None:
-                    final_scores.append(score)
-                else:
-                    failed_indices.append(i)
-            # If some failed, process individually
-            if failed_indices:
-                logger.warning(
-                    f"🔄 {len(failed_indices)} articles failed batch processing, "
-                    "falling back individually"
+        if get_gpu_analyst is not None:
+            gpu_analyst = get_gpu_analyst()
+            if gpu_analyst.models_loaded:
+                scores = gpu_analyst.score_bias_batch_gpu(texts)
+                # Filter out None values and fall back to individual processing if needed
+                final_scores = []
+                failed_indices = []
+                for i, score in enumerate(scores):
+                    if score is not None:
+                        final_scores.append(score)
+                    else:
+                        failed_indices.append(i)
+                # If some failed, process individually
+                if failed_indices:
+                    logger.warning(
+                        f"🔄 {len(failed_indices)} articles failed batch processing, "
+                        "falling back individually"
+                    )
+                    for idx in failed_indices:
+                        individual_score = score_bias(texts[idx])
+                        scores[idx] = individual_score
+                processing_time = time.time() - start_time
+                rate = len(texts) / processing_time if processing_time > 0 else 0
+                logger.info(
+                    "✅ BATCH bias completed: "
+                    f"{len(texts)} articles in {processing_time:.3f}s "
+                    f"({rate:.1f} articles/sec)"
                 )
-                for idx in failed_indices:
-                    individual_score = score_bias(texts[idx])
-                    scores[idx] = individual_score
-            processing_time = time.time() - start_time
-            rate = len(texts) / processing_time if processing_time > 0 else 0
-            logger.info(
-                "✅ BATCH bias completed: "
-                f"{len(texts)} articles in {processing_time:.3f}s "
-                f"({rate:.1f} articles/sec)"
-            )
-            # Log performance for training pipeline
-            log_feedback(
-                "score_bias_batch",
-                {
-                    "batch_size": len(texts),
-                    "processing_time": processing_time,
-                    "rate": rate,
-                    "source": "gpu_batch_accelerated",
-                    "success": True,
-                },
-                include_source="gpu_rtx3090_batch",
-            )
-            return [s if s is not None else 0.5 for s in scores]
+                # Log performance for training pipeline
+                log_feedback(
+                    "score_bias_batch",
+                    {
+                        "batch_size": len(texts),
+                        "processing_time": processing_time,
+                        "rate": rate,
+                        "source": "gpu_batch_accelerated",
+                        "success": True,
+                    },
+                    include_source="gpu_rtx3090_batch",
+                )
+                return [s if s is not None else 0.5 for s in scores]
     except Exception as gpu_error:
         logger.warning(
             "🔄 GPU batch bias failed, falling back to individual processing: "

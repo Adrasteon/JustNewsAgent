@@ -8,9 +8,7 @@ make adjustments without editing the JSON file directly.
 """
 
 import sys
-import os
 from pathlib import Path
-from typing import Dict, Any
 
 # Add config directory to path
 sys.path.insert(0, str(Path(__file__).parent))

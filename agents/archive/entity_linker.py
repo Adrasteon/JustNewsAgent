@@ -19,13 +19,9 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-import re
+from typing import Dict, List, Any, Optional
 import hashlib
 import aiohttp
-import requests
-from urllib.parse import quote
-import time
 
 logger = logging.getLogger("entity_linker")
 

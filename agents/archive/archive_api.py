@@ -16,13 +16,11 @@ API Endpoints:
 - GET /health - API health check
 """
 
-import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-import re
+from typing import Dict, List, Any, Optional
 import hashlib
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Query, Depends, BackgroundTasks, Request
@@ -35,7 +33,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from agents.archive.knowledge_graph import TemporalKnowledgeGraph, KnowledgeGraphManager
+from agents.archive.knowledge_graph import KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
 from agents.common.auth_api import router as auth_router
 
@@ -277,7 +275,7 @@ async def list_articles(
                             article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                             if article_date < published_after:
                                 continue
-                        except:
+                        except (ValueError, TypeError):
                             pass
 
                 if published_before:
@@ -287,7 +285,7 @@ async def list_articles(
                             article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                             if article_date > published_before:
                                 continue
-                        except:
+                        except (ValueError, TypeError):
                             pass
 
                 if news_score_min and article_data.get("news_score", 0) < news_score_min:
@@ -1267,7 +1265,7 @@ def _matches_article_filters(article_data: Dict[str, Any], filters: Dict[str, An
                 article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                 if article_date < datetime.fromisoformat(filters["published_after"]):
                     return False
-            except:
+            except (ValueError, TypeError):
                 pass
 
     if "published_before" in filters:
@@ -1277,7 +1275,7 @@ def _matches_article_filters(article_data: Dict[str, Any], filters: Dict[str, An
                 article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                 if article_date > datetime.fromisoformat(filters["published_before"]):
                     return False
-            except:
+            except (ValueError, TypeError):
                 pass
 
     # News score filter

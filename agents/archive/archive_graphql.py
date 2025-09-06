@@ -14,20 +14,15 @@ GraphQL Schema:
 - SearchResult: Search results with metadata
 """
 
-import asyncio
-import json
 import logging
 import hashlib
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-import re
+from datetime import datetime
 import contextlib
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import graphene
-from graphene import ObjectType, String, Int, Float, Boolean, List as GraphQLList, Field, Schema
+from graphene import ObjectType, String, Int, Float, List as GraphQLList, Field, Schema
 from graphene.types.datetime import DateTime
 import uvicorn
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -35,7 +30,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from agents.archive.knowledge_graph import TemporalKnowledgeGraph, KnowledgeGraphManager
+from agents.archive.knowledge_graph import KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
 
 # Import graphql function
@@ -110,11 +105,10 @@ class EntityType(graphene.ObjectType):
                 continue
 
             # Get target entity info
-            target_name = ""
             if target in kg_manager.kg.graph.nodes:
                 target_node = kg_manager.kg.graph.nodes[target]
                 if target_node.get("node_type") == "entity":
-                    target_name = target_node["properties"].get("name", "")
+                    pass
 
             relationship = RelationshipType(
                 source_entity_id=self.entity_id,
@@ -390,7 +384,7 @@ class Query(ObjectType):
                     else:
                         # Parse other formats
                         published_date = datetime.fromisoformat(published_date)
-            except:
+            except (ValueError, TypeError):
                 published_date = None
 
         return ArticleType(
@@ -472,7 +466,7 @@ class Query(ObjectType):
                             article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                             if article_date < published_after:
                                 continue
-                        except:
+                        except (ValueError, TypeError):
                             pass
 
                 if published_before:
@@ -482,7 +476,7 @@ class Query(ObjectType):
                             article_date = datetime.fromisoformat(pub_date.replace('Z', '+00:00'))
                             if article_date > published_before:
                                 continue
-                        except:
+                        except (ValueError, TypeError):
                             pass
 
                 if article_data.get("news_score", 0) < news_score_min or article_data.get("news_score", 0) > news_score_max:
@@ -512,7 +506,7 @@ class Query(ObjectType):
                             else:
                                 # Parse other formats
                                 published_date = datetime.fromisoformat(published_date)
-                    except:
+                    except (ValueError, TypeError):
                         published_date = None
 
                 article = ArticleType(
@@ -577,7 +571,7 @@ class Query(ObjectType):
                         entity_date = datetime.fromisoformat(first_seen.replace('Z', '+00:00'))
                         if entity_date < first_seen_after:
                             continue
-                    except:
+                    except (ValueError, TypeError):
                         pass
 
             if last_seen_before:
@@ -587,7 +581,7 @@ class Query(ObjectType):
                         entity_date = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
                         if entity_date > last_seen_before:
                             continue
-                    except:
+                    except (ValueError, TypeError):
                         pass
 
             if search_query:

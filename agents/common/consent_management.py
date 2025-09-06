@@ -15,13 +15,12 @@ Features:
 
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 import json
-import hashlib
 
-from agents.common.auth_models import auth_execute_query, auth_execute_query_single, UserRole
+from agents.common.auth_models import auth_execute_query, auth_execute_query_single
 
 logger = logging.getLogger("consent_management")
 

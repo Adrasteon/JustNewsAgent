@@ -13,9 +13,7 @@ Features:
 """
 
 import logging
-import json
-from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 
@@ -88,7 +86,7 @@ class ConsentValidationMiddleware:
             # Try to get from Authorization header
             auth_header = request.headers.get("Authorization")
             if auth_header and auth_header.startswith("Bearer "):
-                token = auth_header.replace("Bearer ", "")
+                auth_header.replace("Bearer ", "")
                 # In a real implementation, you'd decode the JWT token here
                 # For now, we'll use a placeholder
                 return "current_user"

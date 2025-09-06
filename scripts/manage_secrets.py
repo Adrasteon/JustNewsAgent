@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+import os
+import sys
+import getpass
+from pathlib import Path
+from common.secret_manager import get_secret_manager
+
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 """
 Interactive Secret Management Tool for JustNewsAgent
 
@@ -8,19 +18,6 @@ variables, and validating security configuration.
 Usage:
     python scripts/manage_secrets.py
 """
-
-import os
-import sys
-import json
-import getpass
-from pathlib import Path
-from typing import Dict, Any, Optional
-
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-from common.secret_manager import SecretManager, get_secret_manager
 
 class SecretManagerCLI:
     """Interactive CLI for secret management"""
@@ -152,7 +149,7 @@ class SecretManagerCLI:
             for warning in validation['warnings']:
                 print(f"  • {warning}")
 
-        print(f"\nVault Status:")
+        print("\nVault Status:")
         print(f"  • Encrypted: {validation['vault_encrypted']}")
         print(f"  • Exists: {validation['vault_exists']}")
 

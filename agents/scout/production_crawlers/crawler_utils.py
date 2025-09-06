@@ -27,6 +27,13 @@ from typing import Dict, Optional
 from urllib.parse import urlparse
 from urllib.robotparser import RobotFileParser
 
+# Database utilities for source management
+import os
+from contextlib import contextmanager
+from typing import List, Any
+from psycopg2 import pool
+from psycopg2.extras import RealDictCursor
+
 logger = logging.getLogger("crawler_utils")
 
 
@@ -240,13 +247,6 @@ class CanonicalMetadata:
 # Global instances for shared use
 rate_limiter = RateLimiter()
 robots_checker = RobotsChecker()
-
-# Database utilities for source management
-import os
-from contextlib import contextmanager
-from typing import Optional, List, Dict, Any
-from psycopg2 import pool
-from psycopg2.extras import RealDictCursor
 
 # Environment variables
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST")

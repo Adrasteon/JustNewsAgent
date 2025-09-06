@@ -23,20 +23,20 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks, Query, Response
+from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from agents.common.auth_models import (
-    UserCreate, UserLogin, Token, PasswordResetRequest, PasswordReset,
+    UserCreate, UserLogin, PasswordResetRequest, PasswordReset,
     UserRole, UserStatus, create_user, get_user_by_username_or_email,
-    hash_password, verify_password, create_access_token, create_refresh_token,
+    verify_password, create_access_token, create_refresh_token,
     verify_token, update_user_login, increment_login_attempts, reset_login_attempts,
     activate_user, deactivate_user, store_refresh_token, validate_refresh_token,
     revoke_refresh_token, revoke_all_user_sessions, create_password_reset_token,
     validate_password_reset_token, mark_password_reset_token_used, update_user_password,
-    get_all_users, get_user_by_id, create_user_tables, update_user_anonymized
+    get_all_users, get_user_by_id, create_user_tables
 )
 
 from agents.common.consent_management import consent_manager, ConsentType
@@ -412,7 +412,7 @@ async def request_password_reset(request: PasswordResetRequest, background_tasks
             )
 
         # Create password reset token
-        reset_token = create_password_reset_token(user['user_id'])
+        create_password_reset_token(user['user_id'])
 
         # TODO: Send password reset email in background
         # background_tasks.add_task(send_password_reset_email, request.email, reset_token)
@@ -563,7 +563,6 @@ async def request_data_export(
     try:
         import uuid
         from datetime import datetime
-        import json
         from pathlib import Path
 
         export_id = str(uuid.uuid4())
@@ -772,7 +771,7 @@ async def perform_data_export(
         try:
             with open(export_dir / f"{export_id}.json", 'w') as f:
                 json.dump(status_data, f)
-        except:
+        except (OSError, IOError):
             pass
 
 # Right to be Forgotten Endpoints
@@ -981,7 +980,7 @@ async def perform_data_deletion(
         try:
             with open(deletion_dir / f"{request_id}.json", 'w') as f:
                 json.dump(status_data, f)
-        except:
+        except (OSError, IOError):
             pass
 
 def cleanup_related_data(user_id: int):
@@ -990,27 +989,27 @@ def cleanup_related_data(user_id: int):
         # Clean up data export files
         export_dir = Path("./data_exports")
         if export_dir.exists():
-            for file_path in export_dir.glob(f"*"):
+            for file_path in export_dir.glob("*"):
                 if file_path.is_file():
                     try:
                         with open(file_path, 'r') as f:
                             data = json.load(f)
                             if data.get('user_id') == user_id:
                                 file_path.unlink()
-                    except:
+                    except (OSError, IOError, json.JSONDecodeError):
                         pass
 
         # Clean up deletion request files (except current)
         deletion_dir = Path("./data_deletions")
         if deletion_dir.exists():
-            for file_path in deletion_dir.glob(f"*"):
+            for file_path in deletion_dir.glob("*"):
                 if file_path.is_file():
                     try:
                         with open(file_path, 'r') as f:
                             data = json.load(f)
                             if data.get('user_id') == user_id:
                                 file_path.unlink()
-                    except:
+                    except (OSError, IOError, json.JSONDecodeError):
                         pass
 
         logger.info(f"Cleaned up related data files for user {user_id}")

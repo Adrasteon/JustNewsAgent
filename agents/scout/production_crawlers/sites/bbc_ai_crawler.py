@@ -20,7 +20,6 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
 import logging
-import hashlib
 from urllib.parse import urlparse
 
 # Import NewsReader from Scout agent directory
@@ -189,9 +188,7 @@ class ProductionBBCCrawler:
                     
                     try:
                         # Fallback to simple text analysis instead of image analysis for speed
-                        analysis = f"Article: {content_data['title']}\nContent: {content_data['content'][:300]}"
                         
-                        url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
                         domain = urlparse(url).netloc
                         canonical = content_data.get('canonical')
                         paywall_flag = content_data.get('paywall_flag', False)

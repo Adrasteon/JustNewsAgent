@@ -1,5 +1,5 @@
 import sys
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox,
     QCheckBox, QInputDialog, QTextEdit, QGroupBox, QGridLayout, QComboBox, QSpinBox
@@ -10,7 +10,6 @@ import requests
 import json
 import logging
 import time
-from contextlib import contextmanager
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -38,8 +37,6 @@ class DynamicResourceAllocator:
             optimized = {}
             
             # Calculate scaling factors based on workload
-            total_allocated = sum(self.agent_allocations.values())
-            available_memory = self.total_memory - total_allocated
             
             for agent, base_allocation in self.agent_allocations.items():
                 if agent == "buffer":
@@ -145,7 +142,6 @@ class DashboardGUI(QMainWindow):
             self.print_monitor_status_update()
 
     def print_monitor_status_update(self):
-        import time
         agent_ports = [8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009]
         agent_names = [
             "MCP Bus", "Chief Editor Agent", "Scout Agent", "Fact Checker Agent", "Analyst Agent",
@@ -230,7 +226,7 @@ class DashboardGUI(QMainWindow):
             cb.setStyleSheet("color: #888; padding: 4px 8px;")
 
     def add_new_crawl_url(self):
-        from PyQt5.QtWidgets import QInputDialog, QCheckBox, QHBoxLayout
+        from PyQt5.QtWidgets import QCheckBox, QHBoxLayout
         url, ok = QInputDialog.getText(self, "Add Crawl Target", "Enter new target URL:")
         if ok and url:
             row = QHBoxLayout()
@@ -279,7 +275,6 @@ class DashboardGUI(QMainWindow):
 
     def start_scout_crawl(self, url):
         import requests
-        import time
         try:
             # Call Scout Agent's enhanced_deep_crawl_site endpoint
             payload = {
@@ -308,7 +303,6 @@ class DashboardGUI(QMainWindow):
 
     def poll_crawl_stats(self):
         import requests
-        import time
         if not getattr(self, "crawl_polling", False):
             return
         try:
@@ -470,7 +464,6 @@ class DashboardGUI(QMainWindow):
             self.update_agent_status(name, port)
 
     def update_agent_status(self, name, port):
-        import time
         status_label, start_btn, stop_btn, _ = self.agent_buttons[name]
         status_label.setText("Checking")
         status_label.setStyleSheet("color: orange;")
@@ -562,7 +555,7 @@ class DashboardGUI(QMainWindow):
         self.update_agent_status(name, self.agent_buttons[name][3])
 
     def create_gpu_monitoring_tab(self):
-        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QGroupBox, QGridLayout
+        from PyQt5.QtWidgets import QLabel, QVBoxLayout
 
         tab = QWidget()
         layout = QVBoxLayout()
@@ -717,7 +710,6 @@ class DashboardGUI(QMainWindow):
             self.logger.error(f"GPU monitoring update failed: {e}")
 
     def create_monitoring_tab(self):
-        from PyQt5.QtWidgets import QTextEdit
         tab = QWidget()
         layout = QVBoxLayout()
 
@@ -742,7 +734,6 @@ class DashboardGUI(QMainWindow):
         return tab
 
     def update_monitor_output(self):
-        import time
         agent_ports = [8000, 8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009]
         agent_names = [
             "MCP Bus", "Chief Editor Agent", "Scout Agent", "Fact Checker Agent", "Analyst Agent",
@@ -824,7 +815,7 @@ class DashboardGUI(QMainWindow):
 
     def create_settings_tab(self):
         """Create enhanced settings tab with dynamic resource allocation"""
-        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QGroupBox, QComboBox, QSpinBox, QGridLayout
+        from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QPushButton
         
         tab = QWidget()
         layout = QVBoxLayout()
@@ -1193,7 +1184,7 @@ class DashboardGUI(QMainWindow):
             self.logger.error(f"Error resetting to default: {e}")
 
     def create_analysis_tab(self):
-        from PyQt5.QtWidgets import QTextEdit, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QGroupBox, QComboBox
+        from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QPushButton
 
         tab = QWidget()
         layout = QVBoxLayout()

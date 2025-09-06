@@ -9,7 +9,7 @@ Dependencies: git, networkx, fastapi, pydantic, uvicorn
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Dict, List, Any, Optional, Optional
+from typing import Dict, List, Any, Optional
 from agents.common.schemas import NeuralAssessment, ReasoningInput
 from contextlib import asynccontextmanager
 import asyncio

@@ -19,7 +19,7 @@ logger = logging.getLogger("download_agent_models")
 # type: 'transformers' or 'sentence-transformers'
 AGENT_MODEL_MAP = {
     "scout": [
-        ("transformers", "google/bert_uncased_L-2_H-128_A-2" , False),  # small bert variant used for fast tests
+        ("transformers", "google/bert_uncased_L-2_H-128_A-2", False),  # small bert variant used for fast tests
         ("transformers", "cardiffnlp/twitter-roberta-base-sentiment-latest", False),
         ("transformers", "martin-ha/toxic-comment-model", False),
     ],

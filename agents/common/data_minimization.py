@@ -446,7 +446,7 @@ async def demo_data_minimization():
         "user123"
     )
 
-    print(f"Contract Fulfillment Validation:")
+    print("Contract Fulfillment Validation:")
     print(f"  Allowed: {result['allowed']}")
     print(f"  Allowed Fields: {result['allowed_fields']}")
     print(f"  Denied Fields: {result['denied_fields']}")

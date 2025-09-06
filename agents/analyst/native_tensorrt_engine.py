@@ -24,6 +24,10 @@ import sys
 # Add parent directory for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+# Transformers and model loading imports
+from transformers import AutoTokenizer
+from agents.common.model_loader import load_transformers_model
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -31,7 +35,9 @@ logger = logging.getLogger(__name__)
 def _validate_environment():
     """Validate that the required environment is properly set up"""
     try:
-        import numpy as np
+        import importlib.util
+        if importlib.util.find_spec("numpy") is None:
+            raise ImportError("numpy is not available")
     except ImportError:
         raise ImportError(
             "numpy is not available. Please ensure you're using the JustNewsAgent environment:\n"
@@ -40,7 +46,9 @@ def _validate_environment():
         )
 
     try:
-        import torch
+        import importlib.util
+        if importlib.util.find_spec("torch") is None:
+            raise ImportError("PyTorch is not available")
     except ImportError:
         raise ImportError(
             "PyTorch is not available. Please ensure you're using the JustNewsAgent environment:\n"
@@ -66,16 +74,12 @@ except ImportError:
     trt = None
     cuda = None
 
-# Transformers and model loading imports
-from transformers import AutoTokenizer
-from agents.common.model_loader import load_transformers_model
-
 # Fallback imports
 try:
-    from .hybrid_tools_v4 import GPUAcceleratedAnalyst
+    from .gpu_analyst import GPUAcceleratedAnalyst
 except ImportError:
     try:
-        from hybrid_tools_v4 import GPUAcceleratedAnalyst
+        from gpu_analyst import GPUAcceleratedAnalyst
     except ImportError:
         GPUAcceleratedAnalyst = None
         logger.warning("⚠️  GPUAcceleratedAnalyst not available - fallback functionality disabled")
