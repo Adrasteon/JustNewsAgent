@@ -8,7 +8,7 @@ back to creating marker engine files (safe for CI and developers without GPUs).
 
 Usage:
   python tools/build_engine/build_engine.py --check-only
-  python tools/build_engine/build_engine.py --build --model <hf_model> --precision fp16
+  python tools/build_engine/build_engine.py --build --model <hf_model> --precision fp8
   python tools/build_engine/build_engine.py --build-markers
 
 Note: This is a scaffold. The full implementation will orchestrate:
@@ -95,7 +95,7 @@ def main():
     parser.add_argument('--build-markers', action='store_true')
     parser.add_argument('--build', action='store_true')
     parser.add_argument('--model', type=str, help='Model name or task (e.g., sentiment)')
-    parser.add_argument('--precision', default='fp16', choices=['fp32','fp16','int8'])
+    parser.add_argument('--precision', default='fp16', choices=['fp32','fp16','fp8','int8'])
     parser.add_argument('--calibrate', action='store_true', help='Run INT8 calibration during build (requires --precision int8)')
     parser.add_argument('--calib-data', type=str, help='Path to calibration dataset (JSONL or directory)')
     args = parser.parse_args()

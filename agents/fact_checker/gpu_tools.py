@@ -5,7 +5,7 @@
 import os
 import logging
 import torch
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 # GPU acceleration imports
@@ -71,24 +71,45 @@ class GPUAcceleratedFactChecker:
                 logger.info(f"Loading {MODEL_NAME} for GPU acceleration...")
                 
                 # Use text-generation pipeline for GPT-2 Medium (similar to analyst pattern)
-                self.fact_verification_pipeline = pipeline(
-                    "text-generation",
-                    model=MODEL_NAME,
-                    device=0,  # GPU device
-                    torch_dtype=torch.float16,  # Memory optimization
-                    trust_remote_code=True
-                )
-                
-                # News validation pipeline (lightweight model for speed)
-                self.news_validation_pipeline = pipeline(
-                    "text-classification",
-                    model="facebook/bart-large-mnli",  # Good for zero-shot classification
-                    device=0,  # GPU device
-                    torch_dtype=torch.float16
-                )
-                
-                self.models_loaded = True
-                logger.info("✅ GPU models loaded for fact checking")
+                if HAS_TRANSFORMERS and pipeline is not None:
+                    try:
+                        self.fact_verification_pipeline = pipeline(
+                            "text-generation",
+                            model=MODEL_NAME,
+                            device=0,  # GPU device
+                            torch_dtype=torch.float16,  # Memory optimization
+                            trust_remote_code=False  # Security: disable remote code execution
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load GPT-2 with float16, trying float32: {e}")
+                        self.fact_verification_pipeline = pipeline(
+                            "text-generation",
+                            model=MODEL_NAME,
+                            device=0,  # GPU device
+                            trust_remote_code=False
+                        )
+                    
+                    # News validation pipeline (lightweight model for speed)
+                    try:
+                        self.news_validation_pipeline = pipeline(
+                            "zero-shot-classification",  # Correct task for zero-shot classification
+                            model="facebook/bart-large-mnli",  # Good for zero-shot classification
+                            device=0,  # GPU device
+                            torch_dtype=torch.float16
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load BART with float16, trying float32: {e}")
+                        self.news_validation_pipeline = pipeline(
+                            "zero-shot-classification",
+                            model="facebook/bart-large-mnli",
+                            device=0,  # GPU device
+                        )
+                    
+                    self.models_loaded = True
+                    logger.info("✅ GPU models loaded for fact checking")
+                else:
+                    logger.warning("⚠️ Transformers not available, cannot load GPU models")
+                    self._initialize_cpu_fallback()
                 
             else:
                 logger.warning("⚠️ GPU not available, initializing CPU fallback")
@@ -102,7 +123,7 @@ class GPUAcceleratedFactChecker:
     def _initialize_cpu_fallback(self):
         """Initialize CPU fallback (original implementation)"""
         try:
-            if HAS_TRANSFORMERS:
+            if HAS_TRANSFORMERS and AutoModelForCausalLM is not None and AutoTokenizer is not None and pipeline is not None:
                 # Load models on CPU
                 self.cpu_model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
                 self.cpu_tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -132,13 +153,19 @@ class GPUAcceleratedFactChecker:
                 candidate_labels = ["news article", "opinion piece", "advertisement", "personal blog"]
                 result = self.news_validation_pipeline(content, candidate_labels)
 
-                # Extract results
-                scores = {label: score for label, score in zip(result['labels'], result['scores'])}
-                is_news = result['labels'][0] == "news article" and result['scores'][0] > 0.5
-                confidence = result['scores'][0]
+                # Extract results from zero-shot classification format
+                if isinstance(result, dict) and 'labels' in result and 'scores' in result:
+                    scores = {label: score for label, score in zip(result['labels'], result['scores'])}
+                    is_news = result['labels'][0] == "news article" and result['scores'][0] > 0.5
+                    confidence = result['scores'][0]
+                else:
+                    # Fallback if result format is unexpected
+                    scores = {"error": 0.0}
+                    is_news = False
+                    confidence = 0.0
 
                 self.performance_stats['gpu_requests'] += 1
-                method = "gpu_classification"
+                method = "gpu_zero_shot"
             else:
                 # CPU fallback: keyword-based validation (original logic)
                 keywords = ["breaking", "report", "headline", "news", "according to", "sources"]
@@ -231,7 +258,7 @@ class GPUAcceleratedFactChecker:
                 batch,
                 max_new_tokens=16,  # Short responses
                 do_sample=False,   # Deterministic
-                pad_token_id=self.fact_verification_pipeline.tokenizer.eos_token_id
+                pad_token_id=self.fact_verification_pipeline.tokenizer.eos_token_id if hasattr(self.fact_verification_pipeline, 'tokenizer') and self.fact_verification_pipeline.tokenizer else None
             )
             
             # Parse results
@@ -341,7 +368,7 @@ def get_gpu_fact_checker():
 def log_feedback(event: str, details: dict):
     """Log feedback for continual learning"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now(datetime.UTC).isoformat()}\\t{event}\\t{details}\\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\\t{event}\\t{details}\\n")
 
 def validate_is_news(content: str) -> bool:
     """

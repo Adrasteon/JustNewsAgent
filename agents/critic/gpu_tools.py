@@ -26,7 +26,7 @@ import json
 import logging
 import time
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 # GPU and ML imports (graceful fallback if not available)
@@ -58,7 +58,7 @@ def log_feedback(event: str, details: dict):
     """Universal feedback logging pattern"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            timestamp = datetime.now(datetime.UTC).isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")

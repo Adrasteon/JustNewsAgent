@@ -20,7 +20,7 @@ Endpoints:
 
 import logging
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks, Query, Response
@@ -239,7 +239,7 @@ async def login_user(login_data: UserLogin):
             )
 
         # Check if account is locked
-        if user.get('locked_until') and user['locked_until'] > datetime.now(datetime.UTC):
+        if user.get('locked_until') and user['locked_until'] > datetime.now(timezone.utc):
             raise HTTPException(
                 status_code=status.HTTP_423_LOCKED,
                 detail="Account is temporarily locked due to too many failed login attempts"

@@ -8,7 +8,7 @@ import hashlib
 import secrets
 import logging
 from contextlib import contextmanager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 from enum import Enum
 from psycopg2 import pool
@@ -237,9 +237,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     """Create JWT access token"""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.now(datetime.UTC) + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(datetime.UTC) + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
@@ -248,7 +248,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def create_refresh_token(data: dict) -> str:
     """Create JWT refresh token"""
     to_encode = data.copy()
-    expire = datetime.now(datetime.UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire, "type": "refresh"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     return encoded_jwt
@@ -439,7 +439,7 @@ def deactivate_user(user_id: int) -> bool:
 def store_refresh_token(user_id: int, refresh_token: str) -> bool:
     """Store refresh token in database"""
     token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
-    expires_at = datetime.now(datetime.UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
 
     query = """
     INSERT INTO user_sessions (user_id, refresh_token_hash, expires_at)
@@ -488,7 +488,7 @@ def create_password_reset_token(user_id: int) -> str:
     """Create a password reset token"""
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode()).hexdigest()
-    expires_at = datetime.now(datetime.UTC) + timedelta(hours=1)
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
 
     query = """
     INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)

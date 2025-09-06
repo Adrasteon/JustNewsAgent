@@ -17,8 +17,8 @@ Dependencies: transformers, sentence-transformers, spacy, torch, numpy
 import os
 import logging
 import json
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone
+from typing import List, Optional
 
 # Import V2 Engine
 try:
@@ -93,7 +93,7 @@ def ensure_fact_checker_engine_initialized():
 def log_feedback(event: str, details: dict):
     """Universal feedback logging for Fact Checker operations"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        timestamp = datetime.now(datetime.UTC).isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
 
 def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
@@ -135,7 +135,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
                     "source_url": source_url,
                     "v2_analysis": True,
                     "models_used": ["distilbert", "roberta"],
-                    "timestamp": datetime.now(datetime.UTC).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 # Online Training: Add prediction feedback for continuous improvement
@@ -182,7 +182,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
             "v2_analysis": False
         }
 
-def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: dict = None) -> dict:
+def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: Optional[dict] = None) -> dict:
     """
     V2 Comprehensive Fact-Checking using all 5 AI models
     
@@ -211,7 +211,7 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
                 # Add metadata
                 result["article_metadata"] = metadata or {}
                 result["article_length"] = len(article_text)
-                result["processing_timestamp"] = datetime.now(datetime.UTC).isoformat()
+                result["processing_timestamp"] = datetime.now(timezone.utc).isoformat()
                 
                 log_feedback("comprehensive_fact_check_v2", {
                     "overall_score": result.get("overall_score", 0.5),
@@ -471,12 +471,13 @@ def _fallback_verify_claim(claim: str, context: str, source_url: str) -> dict:
         "fallback": True
     }
 
-def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: dict) -> dict:
+def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: Optional[dict] = None) -> dict:
     """Fallback comprehensive fact-checking"""
     return {
         "overall_score": 0.5,
         "assessment": "unknown",
         "claims_analysis": {"extracted_claims": [], "claim_count": 0},
+        "article_metadata": metadata or {},
         "v2_analysis": False,
         "fallback": True
     }
@@ -600,7 +601,7 @@ def correct_fact_verification(claim: str,
                 "incorrect_classification": incorrect_classification,
                 "correct_classification": correct_classification,
                 "priority": priority,
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "immediate_update": priority >= 2
             }
             
@@ -659,7 +660,7 @@ def correct_credibility_assessment(source_text: str,
                 "incorrect_reliability": incorrect_reliability,
                 "correct_reliability": correct_reliability,
                 "priority": priority,
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "immediate_update": priority >= 2
             }
             
@@ -731,7 +732,7 @@ def force_fact_checker_update() -> dict:
                 result = {
                     "update_triggered": success,
                     "agent": "fact_checker",
-                    "timestamp": datetime.now(datetime.UTC).isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "immediate": True
                 }
                 

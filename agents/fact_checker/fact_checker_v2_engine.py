@@ -3,7 +3,21 @@ Fact Checker V2 - Production-Ready Multi-Model AI Architecture
 Focused fact verification with 4 specialized AI models
 
 AI Models:
-1. DistilBERT-base: Fact verification (factual/questionable classification)
+1. DistilBERT-base:             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['fact_verification'] = None
+                return
+                
+            device = 0 if (self.device.type == "cuda") else -1
+            self.pipelines['fact_verification'] = pipeline_fn(
+                "text-classification",
+                model=model_name,
+                tokenizer=model_name,
+                device=device,
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
+            )fication (factual/questionable classification)
 2. RoBERTa-base: Source credibility assessment (reliability scoring)  
 3. SentenceTransformers: Evidence retrieval (semantic search)
 4. spaCy NER: Claim extraction (verifiable claims identification)
@@ -16,7 +30,7 @@ import os
 import logging
 import warnings
 from typing import Dict, List, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import torch
 import importlib
 from pathlib import Path
@@ -50,6 +64,9 @@ def _import_sentence_transformer_class():
 # Production-ready warning suppression (silence when modules are present at runtime)
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.*")
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="spacy.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="click.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)  # Catch all deprecation warnings
 
 # Production GPU Manager integration
 try:
@@ -126,13 +143,19 @@ class FactCheckerV2Engine:
                 return
 
             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['fact_verification'] = None
+                return
+                
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['fact_verification'] = pipeline_fn(
                 "text-classification",
                 model=model_name,
                 tokenizer=model_name,
                 device=device,
-                return_all_scores=True
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
             )
 
             logger.info("✅ Model 1: Fact verification (DistilBERT) loaded")
@@ -151,13 +174,19 @@ class FactCheckerV2Engine:
                 return
 
             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['credibility_assessment'] = None
+                return
+                
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['credibility_assessment'] = pipeline_fn(
                 "text-classification",
                 model=model_name,
                 tokenizer=model_name,
                 device=device,
-                return_all_scores=True
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
             )
 
             logger.info("✅ Model 2: Credibility assessment (RoBERTa) loaded")
@@ -225,11 +254,15 @@ class FactCheckerV2Engine:
     def _initialize_claim_extraction_model(self):
         """Model 5: spaCy for claim extraction"""
         try:
-            import spacy
-            
-            # Load spaCy model - spaCy handles GPU differently than PyTorch
-            # Use CPU for spaCy as it's more stable and still fast for NLP tasks
-            self.models['claim_extraction'] = spacy.load("en_core_web_sm")
+            # Suppress all warnings during spaCy operations
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                
+                import spacy
+                
+                # Load spaCy model - spaCy handles GPU differently than PyTorch
+                # Use CPU for spaCy as it's more stable and still fast for NLP tasks
+                self.models['claim_extraction'] = spacy.load("en_core_web_sm")
             
             logger.info("✅ Model 5: Claim extraction (spaCy) loaded")
             
@@ -471,7 +504,7 @@ class FactCheckerV2Engine:
                 "source_credibility": credibility,
                 "contradictions": contradictions,
                 "entities": claims_result['entities'],
-                "timestamp": datetime.now(datetime.UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "models_used": ["distilbert", "roberta", "bert-large", "sentence-transformers", "spacy"]
             }
             

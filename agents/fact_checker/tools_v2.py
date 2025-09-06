@@ -17,8 +17,8 @@ Dependencies: transformers, sentence-transformers, spacy, torch, numpy
 import os
 import logging
 import json
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone
+from typing import List, Optional
 
 # Import V2 Engine
 try:
@@ -59,7 +59,7 @@ else:
 def log_feedback(event: str, details: dict):
     """Universal feedback logging for Fact Checker operations"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        timestamp = datetime.now(datetime.UTC).isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
 
 def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
@@ -94,7 +94,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
                     "source_url": source_url,
                     "v2_analysis": True,
                     "models_used": ["distilbert", "roberta"],
-                    "timestamp": datetime.now(datetime.UTC).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
                 
                 log_feedback("claim_verified_v2", {
@@ -117,7 +117,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
             "v2_analysis": False
         }
 
-def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: dict = None) -> dict:
+def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: Optional[dict] = None) -> dict:
     """
     V2 Comprehensive Fact-Checking using all 5 AI models
     
@@ -139,7 +139,7 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
                 # Add metadata
                 result["article_metadata"] = metadata or {}
                 result["article_length"] = len(article_text)
-                result["processing_timestamp"] = datetime.now(datetime.UTC).isoformat()
+                result["processing_timestamp"] = datetime.now(timezone.utc).isoformat()
                 
                 log_feedback("comprehensive_fact_check_v2", {
                     "overall_score": result.get("overall_score", 0.5),
@@ -358,7 +358,7 @@ def _fallback_verify_claim(claim: str, context: str, source_url: str) -> dict:
         "fallback": True
     }
 
-def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: dict) -> dict:
+def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: Optional[dict]) -> dict:
     """Fallback comprehensive fact-checking"""
     return {
         "overall_score": 0.5,

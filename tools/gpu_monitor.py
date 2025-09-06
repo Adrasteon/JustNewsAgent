@@ -12,7 +12,8 @@ import json
 import os
 import subprocess
 import time
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Dict, List, Any, Optional
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), '..', 'logs', 'gpu_monitor.jsonl')
 OUT_PATH = os.path.abspath(OUT_PATH)
@@ -72,9 +73,9 @@ def read_torch():
         return None
 
 
-def sample_once():
-    now = datetime.now(datetime.UTC).isoformat()
-    record = {'timestamp': now}
+def sample_once() -> Dict[str, Any]:
+    now = datetime.now(timezone.utc).isoformat()
+    record: Dict[str, Any] = {'timestamp': now}
     nvsmi = read_nvidia_smi()
     if nvsmi is not None:
         record['nvidia_smi'] = nvsmi

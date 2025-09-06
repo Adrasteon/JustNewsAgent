@@ -9,7 +9,7 @@ Dependencies: git, networkx, fastapi, pydantic, uvicorn
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Any, Optional, Optional
 from agents.common.schemas import NeuralAssessment, ReasoningInput
 from contextlib import asynccontextmanager
 import asyncio
@@ -21,7 +21,7 @@ import logging
 import requests
 import importlib
 import importlib.util
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Configure logging
@@ -245,7 +245,7 @@ async def lifespan(app: FastAPI):
             state_data = {
                 "facts": engine.get_facts() if engine else {},
                 "rules": engine.get_rules() if engine else [],
-                "timestamp": datetime.now(datetime.UTC).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             with open(state_file, "w") as f:
                 json.dump(state_data, f, indent=2)
@@ -275,7 +275,7 @@ class NucleoidEngine:
     """Wrapper for Nucleoid GitHub Python implementation."""
     
     def __init__(self):
-        self.nucleoid = None
+        self.nucleoid: Optional[Any] = None
         self.facts_store = {}  # Store facts for retrieval
         self.rules_store = []  # Store rules for retrieval
         self.session_id = "reasoning_session"
@@ -324,13 +324,14 @@ class NucleoidEngine:
                 if module_file:
                     try:
                         spec = importlib.util.spec_from_file_location("nucleoid_runtime_nucleoid", str(module_file))
-                        module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(module)  # type: ignore[attr-defined]
-                        NucleoidClass = getattr(module, "Nucleoid", None)
-                        if NucleoidClass:
-                            self.nucleoid = NucleoidClass()
-                            logger.info("✅ Nucleoid GitHub implementation loaded successfully (file import)")
-                            return
+                        if spec is not None:
+                            module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(module)  # type: ignore[attr-defined]
+                            NucleoidClass = getattr(module, "Nucleoid", None)
+                            if NucleoidClass:
+                                self.nucleoid = NucleoidClass()
+                                logger.info("✅ Nucleoid GitHub implementation loaded successfully (file import)")
+                                return
                     except Exception as e:
                         logger.warning(f"File-based import of Nucleoid failed: {e}")
 
@@ -362,6 +363,8 @@ class NucleoidEngine:
     
     def add_fact(self, fact_data: Dict[str, Any]) -> Any:
         """Add a fact to the reasoning system."""
+        if self.nucleoid is None:
+            raise RuntimeError("Nucleoid engine not initialized")
         try:
             # Convert fact to Nucleoid statement
             fact_id = f"fact_{len(self.facts_store)}"
@@ -395,6 +398,8 @@ class NucleoidEngine:
     
     def add_rule(self, rule: str) -> Any:
         """Add a logical rule."""
+        if self.nucleoid is None:
+            raise RuntimeError("Nucleoid engine not initialized")
         try:
             # Store rule for retrieval
             self.rules_store.append(rule)
@@ -411,6 +416,8 @@ class NucleoidEngine:
     
     def query(self, query_str: str) -> Any:
         """Execute a symbolic reasoning query."""
+        if self.nucleoid is None:
+            raise RuntimeError("Nucleoid engine not initialized")
         try:
             result = self.nucleoid.run(query_str)
             logger.info(f"Executed query: {query_str} -> {result}")
@@ -600,7 +607,7 @@ def log_feedback(event: str, details: Dict[str, Any]):
     feedback_log = Path(__file__).parent / "feedback_reasoning.log"
     try:
         with open(feedback_log, "a", encoding="utf-8") as f:
-            timestamp = datetime.now(datetime.UTC).isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")

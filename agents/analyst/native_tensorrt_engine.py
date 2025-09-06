@@ -7,7 +7,7 @@ Performance Targets:
 - 2-4x improvement over baseline (300-600 articles/sec)
 - Native CUDA execution with zero Python overhead
 - Optimized batch processing up to 100 articles
-- FP16/INT8 precision for maximum throughput
+- FP8/FP16 precision for maximum throughput
 
 Status: PRODUCTION READY - Native TensorRT execution
 """
@@ -21,23 +21,73 @@ import json
 import os
 import sys
 
-# TensorRT and CUDA imports
-import tensorrt as trt
-import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
-import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
+# Add parent directory for imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Environment validation
+def _validate_environment():
+    """Validate that the required environment is properly set up"""
+    try:
+        import numpy as np
+    except ImportError:
+        raise ImportError(
+            "numpy is not available. Please ensure you're using the JustNewsAgent environment:\n"
+            "  source activate_environment.sh\n"
+            "  python your_script.py"
+        )
+
+    try:
+        import torch
+    except ImportError:
+        raise ImportError(
+            "PyTorch is not available. Please ensure you're using the JustNewsAgent environment:\n"
+            "  source activate_environment.sh\n"
+            "  python your_script.py"
+        )
+
+# Run environment validation
+_validate_environment()
+
+# Run environment validation
+_validate_environment()
+
+# TensorRT and CUDA imports (optional)
+try:
+    import tensorrt as trt
+    import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
+    import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
+    TENSORRT_AVAILABLE = True
+except ImportError:
+    TENSORRT_AVAILABLE = False
+    # Create dummy objects for type checking
+    trt = None
+    cuda = None
 
 # Transformers and model loading imports
 from transformers import AutoTokenizer
 from agents.common.model_loader import load_transformers_model
 
 # Fallback imports
-from hybrid_tools_v4 import GPUAcceleratedAnalyst
+try:
+    from .hybrid_tools_v4 import GPUAcceleratedAnalyst
+except ImportError:
+    try:
+        from hybrid_tools_v4 import GPUAcceleratedAnalyst
+    except ImportError:
+        GPUAcceleratedAnalyst = None
+        logger.warning("⚠️  GPUAcceleratedAnalyst not available - fallback functionality disabled")
 
 # Add parent directory for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Export availability flag
+NATIVE_TENSORRT_AVAILABLE = TENSORRT_AVAILABLE
 
 class NativeTensorRTInferenceEngine:
     """
@@ -69,6 +119,12 @@ class NativeTensorRTInferenceEngine:
     
     def _initialize_cuda(self):
         """Initialize CUDA context and stream with proper context management"""
+        if not TENSORRT_AVAILABLE:
+            logger.warning("⚠️  TensorRT not available - CUDA initialization skipped")
+            self.cuda_stream = None
+            self.cuda_context = None
+            return
+            
         try:
             # Initialize CUDA explicitly (don't use autoinit)
             cuda.init()
