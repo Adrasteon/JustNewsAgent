@@ -1,0 +1,25 @@
+name: TensorRT Check
+
+on:
+  push:
+    branches: [ dev/gpu_implementation ]
+  pull_request:
+    branches: [ dev/gpu_implementation ]
+
+jobs:
+  tensorrt-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+      - name: Run marker build and targeted tests
+        run: |
+          python scripts/compile_tensorrt_stub.py --build-markers
+          pytest -q tests/test_tensorrt_stub.py tests/test_tensorrt_calibration_stub.py

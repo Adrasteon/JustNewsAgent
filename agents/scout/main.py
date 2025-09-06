@@ -3,12 +3,18 @@ Main file for the Scout Agent.
 """
 # main.py for Scout Agent
 import logging
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 import os
 import requests
 from contextlib import asynccontextmanager
+
+# Import security utilities
+from agents.scout.security_utils import log_security_event, rate_limit, validate_url
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +25,10 @@ ready = False
 # Environment variables
 SCOUT_AGENT_PORT = int(os.environ.get("SCOUT_AGENT_PORT", 8002))
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
+
+# Security configuration
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:8000").split(",")
 
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
@@ -36,6 +46,71 @@ class MCPBusClient:
         except requests.exceptions.RequestException as e:
             logger.error(f"Failed to register {agent_name} with MCP Bus: {e}")
             raise
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Scout agent is starting up.")
+    mcp_bus_client = MCPBusClient()
+    try:
+        mcp_bus_client.register_agent(
+            agent_name="scout",
+            agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
+            tools=[
+                "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
+                "intelligent_source_discovery", "intelligent_content_crawl", 
+                "intelligent_batch_analysis", "enhanced_newsreader_crawl",
+                "production_crawl_ultra_fast", "get_production_crawler_info"
+            ],
+        )
+        logger.info("Registered tools with MCP Bus.")
+    except Exception as e:
+        logger.warning(f"MCP Bus unavailable: {e}. Running in standalone mode.")
+    global ready
+    ready = True
+    yield
+    logger.info("Scout agent is shutting down.")
+
+app = FastAPI(lifespan=lifespan, title="Scout Agent", description="Secure web crawling and content analysis agent")
+
+# Security middleware
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# Request middleware for rate limiting
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    """Security middleware for request validation and rate limiting."""
+    client_ip = request.client.host if request.client else "unknown"
+    
+    # Rate limiting per IP
+    if not rate_limit(f"request_{client_ip}"):
+        log_security_event('rate_limit_exceeded', {
+            'ip': client_ip,
+            'path': request.url.path,
+            'method': request.method
+        })
+        return JSONResponse(
+            status_code=429,
+            content={"error": "Rate limit exceeded", "retry_after": 60}
+        )
+    
+    # Log suspicious requests
+    user_agent = request.headers.get("user-agent", "")
+    if not user_agent or len(user_agent) < 10:
+        log_security_event('suspicious_request', {
+            'ip': client_ip,
+            'path': request.url.path,
+            'user_agent': user_agent[:100]
+        })
+    
+    response = await call_next(request)
+    return response
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -95,10 +170,27 @@ def crawl_url(call: ToolCall):
     try:
         from agents.scout.tools import crawl_url
         logger.info(f"Calling crawl_url with args: {call.args} and kwargs: {call.kwargs}")
+        
+        # Validate URL if provided
+        url = call.kwargs.get("url") or (call.args[0] if call.args else None)
+        if url and not validate_url(url):
+            log_security_event('url_validation_failed', {
+                'url': url[:100],
+                'endpoint': '/crawl_url'
+            })
+            raise HTTPException(status_code=400, detail="Invalid or unsafe URL")
+        
         return crawl_url(*call.args, **call.kwargs)
+    except ValueError as e:
+        logger.warning(f"Validation error in crawl_url: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"An error occurred in crawl_url: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log_security_event('endpoint_error', {
+            'endpoint': '/crawl_url',
+            'error': str(e)
+        })
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/deep_crawl_site")
 def deep_crawl_site(call: ToolCall):
@@ -115,10 +207,27 @@ async def enhanced_deep_crawl_site_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import enhanced_deep_crawl_site
         logger.info(f"Calling enhanced_deep_crawl_site with args: {call.args} and kwargs: {call.kwargs}")
+        
+        # Validate URL if provided
+        url = call.kwargs.get("url") or (call.args[0] if call.args else None)
+        if url and not validate_url(url):
+            log_security_event('url_validation_failed', {
+                'url': url[:100],
+                'endpoint': '/enhanced_deep_crawl_site'
+            })
+            raise HTTPException(status_code=400, detail="Invalid or unsafe URL")
+        
         return await enhanced_deep_crawl_site(*call.args, **call.kwargs)
+    except ValueError as e:
+        logger.warning(f"Validation error in enhanced_deep_crawl_site: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"An error occurred in enhanced_deep_crawl_site: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log_security_event('endpoint_error', {
+            'endpoint': '/enhanced_deep_crawl_site',
+            'error': str(e)
+        })
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/intelligent_source_discovery")
 def intelligent_source_discovery_endpoint(call: ToolCall):
@@ -191,20 +300,54 @@ async def production_crawl_ai_enhanced_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import production_crawl_ai_enhanced
         logger.info(f"Calling production_crawl_ai_enhanced with args: {call.args} and kwargs: {call.kwargs}")
+        
+        # Validate site parameter
+        site = call.kwargs.get("site") or (call.args[0] if call.args else None)
+        if not site or not isinstance(site, str):
+            log_security_event('invalid_site', {
+                'endpoint': '/production_crawl_ai_enhanced',
+                'site': str(site)[:50]
+            })
+            raise HTTPException(status_code=400, detail="Invalid site identifier")
+        
         return await production_crawl_ai_enhanced(*call.args, **call.kwargs)
+    except ValueError as e:
+        logger.warning(f"Validation error in production_crawl_ai_enhanced: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"An error occurred in production_crawl_ai_enhanced: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log_security_event('endpoint_error', {
+            'endpoint': '/production_crawl_ai_enhanced',
+            'error': str(e)
+        })
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/production_crawl_ultra_fast")
 async def production_crawl_ultra_fast_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import production_crawl_ultra_fast
         logger.info(f"Calling production_crawl_ultra_fast with args: {call.args} and kwargs: {call.kwargs}")
+        
+        # Validate site parameter
+        site = call.kwargs.get("site") or (call.args[0] if call.args else None)
+        if not site or not isinstance(site, str):
+            log_security_event('invalid_site', {
+                'endpoint': '/production_crawl_ultra_fast',
+                'site': str(site)[:50]
+            })
+            raise HTTPException(status_code=400, detail="Invalid site identifier")
+        
         return await production_crawl_ultra_fast(*call.args, **call.kwargs)
+    except ValueError as e:
+        logger.warning(f"Validation error in production_crawl_ultra_fast: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"An error occurred in production_crawl_ultra_fast: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        log_security_event('endpoint_error', {
+            'endpoint': '/production_crawl_ultra_fast',
+            'error': str(e)
+        })
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/get_production_crawler_info")
 def get_production_crawler_info_endpoint(call: ToolCall):

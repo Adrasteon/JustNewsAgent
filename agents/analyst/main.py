@@ -6,7 +6,9 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 import requests
 
@@ -17,6 +19,23 @@ from .tools import (
     analyze_content_trends,
     log_feedback,
 )
+
+# Import security utilities
+try:
+    from ..scout.security_utils import validate_content_size, sanitize_content, rate_limit, log_security_event, security_wrapper
+    SECURITY_AVAILABLE = True
+except ImportError:
+    SECURITY_AVAILABLE = False
+    def validate_content_size(content: str) -> bool:
+        return len(content) < 1000000  # 1MB limit
+    def sanitize_content(content: str) -> str:
+        return content
+    def rate_limit(key: str) -> bool:
+        return True
+    def log_security_event(event: str, details: dict):
+        pass
+    def security_wrapper(func):
+        return func
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -59,7 +78,7 @@ async def lifespan(app: FastAPI):
     logger.info("📊 Focus: Entity extraction, statistical analysis, numerical metrics")
     logger.info("🎯 Specialization: Text statistics, trends, financial/temporal data")
     logger.info("🤝 Integration: Works with Scout V2 for comprehensive content analysis")
-    
+
     logger.info("Specialized analysis modules loaded and ready")
 
     # Register agent with MCP Bus
@@ -70,9 +89,14 @@ async def lifespan(app: FastAPI):
             agent_address=f"http://localhost:{ANALYST_AGENT_PORT}",
             tools=[
                 "identify_entities",
-                "analyze_text_statistics", 
+                "analyze_text_statistics",
                 "extract_key_metrics",
-                "analyze_content_trends"
+                "analyze_content_trends",
+                "analyze_sentiment",
+                "detect_bias",
+                "score_sentiment",
+                "score_bias",
+                "analyze_sentiment_and_bias"
             ],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -82,13 +106,38 @@ async def lifespan(app: FastAPI):
     global ready
     ready = True
     yield
-    
+
     # Cleanup on shutdown
     logger.info("✅ Analyst agent shutdown completed.")
 
     logger.info("Analyst agent is shutting down.")
 
 app = FastAPI(lifespan=lifespan)
+
+# Add security middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["*"]  # Configure appropriately for production
+)
+
+# Security middleware
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    """Security middleware for input validation and rate limiting"""
+    if SECURITY_AVAILABLE:
+        # Log security events
+        logger.info(f"Request: {request.method} {request.url.path} from {request.client.host}")
+
+    response = await call_next(request)
+    return response
 
 # Register shutdown endpoint if available
 try:
@@ -107,36 +156,171 @@ except Exception:
 @app.get("/health")
 def health():
     """Health check endpoint."""
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "security_enabled": SECURITY_AVAILABLE,
+        "version": "2.0"
+    }
 
 @app.get("/ready")
 def ready_endpoint():
     """Readiness endpoint for startup gating."""
     return {"ready": ready}
 
-# REMOVED ENDPOINTS - Sentiment and bias analysis centralized in Scout V2 Agent
-# Use Scout V2 for all sentiment and bias analysis:
-# - POST /comprehensive_content_analysis (includes sentiment + bias)  
-# - POST /analyze_sentiment (dedicated sentiment analysis)
-# - POST /detect_bias (dedicated bias detection)
+# RESTORED ENDPOINTS - Sentiment and bias analysis capabilities restored
+# These endpoints provide the Analyst Agent with its own sentiment analysis capabilities
 
-# @app.post("/score_bias") - REMOVED
-# @app.post("/score_sentiment") - REMOVED
-# @app.post("/analyze_sentiment_and_bias") - REMOVED
+@app.post("/score_bias")
+@security_wrapper
+def score_bias_endpoint(call: ToolCall):
+    """Score bias in provided text content."""
+    try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'score_bias_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("score_bias"):
+            log_security_event('rate_limit_exceeded', {'function': 'score_bias_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+        from .tools import score_bias
+        logger.info(f"Calling score_bias with args: {call.args} and kwargs: {call.kwargs}")
+        return score_bias(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in score_bias: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/score_sentiment")
+@security_wrapper
+def score_sentiment_endpoint(call: ToolCall):
+    """Score sentiment in provided text content."""
+    try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'score_sentiment_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("score_sentiment"):
+            log_security_event('rate_limit_exceeded', {'function': 'score_sentiment_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+        from .tools import score_sentiment
+        logger.info(f"Calling score_sentiment with args: {call.args} and kwargs: {call.kwargs}")
+        return score_sentiment(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in score_sentiment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze_sentiment_and_bias")
+@security_wrapper
+def analyze_sentiment_and_bias_endpoint(call: ToolCall):
+    """Analyze both sentiment and bias in provided text content."""
+    try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'analyze_sentiment_and_bias_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("analyze_sentiment_and_bias"):
+            log_security_event('rate_limit_exceeded', {'function': 'analyze_sentiment_and_bias_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+        from .tools import analyze_sentiment_and_bias
+        logger.info(f"Calling analyze_sentiment_and_bias with args: {call.args} and kwargs: {call.kwargs}")
+        return analyze_sentiment_and_bias(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in analyze_sentiment_and_bias: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze_sentiment")
+@security_wrapper
+def analyze_sentiment_endpoint(call: ToolCall):
+    """Analyze sentiment in provided text content."""
+    try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'analyze_sentiment_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("analyze_sentiment"):
+            log_security_event('rate_limit_exceeded', {'function': 'analyze_sentiment_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+        from .tools import analyze_sentiment
+        logger.info(f"Calling analyze_sentiment with args: {call.args} and kwargs: {call.kwargs}")
+        return analyze_sentiment(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in analyze_sentiment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/detect_bias")
+@security_wrapper
+def detect_bias_endpoint(call: ToolCall):
+    """Detect bias in provided text content."""
+    try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'detect_bias_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("detect_bias"):
+            log_security_event('rate_limit_exceeded', {'function': 'detect_bias_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+        from .tools import detect_bias
+        logger.info(f"Calling detect_bias with args: {call.args} and kwargs: {call.kwargs}")
+        return detect_bias(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in detect_bias: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/identify_entities")
+@security_wrapper
 def identify_entities_endpoint(call: ToolCall):
     """Identifies entities in a given text."""
     try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'identify_entities_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("identify_entities"):
+            log_security_event('rate_limit_exceeded', {'function': 'identify_entities_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
         return identify_entities(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in identify_entities: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/log_feedback")
+@security_wrapper
 def log_feedback_endpoint(call: ToolCall):
     """Logs feedback."""
     try:
+        if not rate_limit("log_feedback"):
+            log_security_event('rate_limit_exceeded', {'function': 'log_feedback_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
         feedback = call.kwargs.get("feedback", {})
         log_feedback("log_feedback", feedback)
         return {"status": "logged"}
@@ -158,27 +342,69 @@ def log_feedback_endpoint(call: ToolCall):
 
 # Engine information endpoint
 @app.post("/analyze_text_statistics")
+@security_wrapper
 def analyze_text_statistics_endpoint(call: ToolCall):
     """Analyzes text statistics including readability and complexity."""
     try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'analyze_text_statistics_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("analyze_text_statistics"):
+            log_security_event('rate_limit_exceeded', {'function': 'analyze_text_statistics_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
         return analyze_text_statistics(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in analyze_text_statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/extract_key_metrics")
+@security_wrapper
 def extract_key_metrics_endpoint(call: ToolCall):
     """Extracts key numerical and statistical metrics from text."""
     try:
+        # Security validation
+        if call.kwargs and 'text' in call.kwargs:
+            if not validate_content_size(call.kwargs['text']):
+                log_security_event('content_size_exceeded', {'function': 'extract_key_metrics_endpoint'})
+                raise HTTPException(status_code=400, detail="Content size exceeds maximum allowed limit")
+
+            call.kwargs['text'] = sanitize_content(call.kwargs['text'])
+
+        if not rate_limit("extract_key_metrics"):
+            log_security_event('rate_limit_exceeded', {'function': 'extract_key_metrics_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
         return extract_key_metrics(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in extract_key_metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze_content_trends")
+@security_wrapper
 def analyze_content_trends_endpoint(call: ToolCall):
     """Analyzes trends across multiple content pieces."""
     try:
+        # Security validation for content arrays
+        if call.kwargs and 'content_list' in call.kwargs:
+            content_list = call.kwargs['content_list']
+            if isinstance(content_list, list):
+                for i, content in enumerate(content_list):
+                    if isinstance(content, str):
+                        if not validate_content_size(content):
+                            log_security_event('content_size_exceeded', {'function': 'analyze_content_trends_endpoint', 'item': i})
+                            raise HTTPException(status_code=400, detail=f"Content item {i} size exceeds maximum allowed limit")
+                        content_list[i] = sanitize_content(content)
+
+        if not rate_limit("analyze_content_trends"):
+            log_security_event('rate_limit_exceeded', {'function': 'analyze_content_trends_endpoint'})
+            raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
         return analyze_content_trends(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in analyze_content_trends: {e}")

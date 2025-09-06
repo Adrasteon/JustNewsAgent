@@ -1,10 +1,5 @@
 {
-  "model_name": "sentiment",
-  "num_classes": 3,
-  "max_batch_size": 100,
-  "sequence_length": 514,
-  "precision": "fp16",
-  "build_time": 42.05497169494629,
-  "created_at": "2025-07-28 19:29:02",
-  "tensorrt_version": "10.10.0.31"
+  "task": "sentiment",
+  "precision": "fp8",
+  "created_at": "2025-09-06 11:26:23"
 }

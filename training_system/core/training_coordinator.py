@@ -16,17 +16,17 @@ Architecture:
 - Rollback System: Automatically reverts problematic updates
 """
 
-import os
 import json
 import logging
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from collections import deque
 import torch
 import importlib
+from agents.common.database import get_db_connection, execute_query
 
 # Lazy import placeholders for heavy training utilities
 _TRANSFORMERS_AVAILABLE = importlib.util.find_spec("transformers") is not None
@@ -40,7 +40,8 @@ def _import_trainer_and_args():
         return Trainer, TrainingArguments
     except Exception:
         return None, None
-import psycopg2
+
+# Import database utilities
 
 # Import feedback logging utility
 try:
@@ -49,7 +50,7 @@ except ImportError:
     # Fallback log_feedback function if NewsReader engine not available
     def log_feedback(event: str, details: dict):
         with open("training_feedback.log", "a", encoding="utf-8") as f:
-            f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +124,7 @@ class OnTheFlyTrainingCoordinator:
         self.training_lock = threading.Lock()
         
         # Database connection for training data persistence
-        self.db_connection = self._get_db_connection()
+        self.db_connection = None  # Will be initialized on first use via connection pooling
         
         # Start background training thread
         self.training_thread = threading.Thread(target=self._training_loop, daemon=True)
@@ -135,14 +136,10 @@ class OnTheFlyTrainingCoordinator:
         logger.info(f"   ⚡ Rollback threshold: {rollback_threshold} accuracy drop")
     
     def _get_db_connection(self):
-        """Get database connection for training data storage"""
+        """Get database connection for training data storage using connection pooling"""
         try:
-            return psycopg2.connect(
-                host=os.environ.get("POSTGRES_HOST", "localhost"),
-                database=os.environ.get("POSTGRES_DB", "justnews"),
-                user=os.environ.get("POSTGRES_USER", "postgres"),
-                password=os.environ.get("POSTGRES_PASSWORD", "password")
-            )
+            # Use the new connection pooling system
+            return get_db_connection()
         except Exception as e:
             logger.warning(f"Database connection failed: {e}")
             return None
@@ -170,7 +167,7 @@ class OnTheFlyTrainingCoordinator:
             uncertainty_score=uncertainty_score,
             importance_score=importance_score,
             source_url=source_url,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             user_feedback=user_feedback,
             correction_priority=correction_priority
         )
@@ -318,7 +315,7 @@ class OnTheFlyTrainingCoordinator:
                         accuracy_before=pre_update_performance,
                         accuracy_after=post_update_performance,
                         examples_trained=len(selected_examples),
-                        update_timestamp=datetime.utcnow()
+                        update_timestamp=datetime.now(timezone.utc)
                     )
                     self.performance_history.append(performance_record)
             
@@ -481,7 +478,7 @@ class OnTheFlyTrainingCoordinator:
                             "task_type": "screenshot_analysis",
                             "input": example.input_text,
                             "expected_output": example.expected_output,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                     )
             
@@ -495,7 +492,7 @@ class OnTheFlyTrainingCoordinator:
                             "task_type": "content_extraction", 
                             "input": example.input_text,
                             "expected_output": example.expected_output,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                     )
             
@@ -509,7 +506,7 @@ class OnTheFlyTrainingCoordinator:
                             "task_type": "layout_analysis",
                             "input": example.input_text, 
                             "expected_output": example.expected_output,
-                            "timestamp": datetime.utcnow().isoformat()
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         }
                     )
             
@@ -723,32 +720,13 @@ class OnTheFlyTrainingCoordinator:
             logger.error(f"Model rollback failed for {agent_name}: {e}")
     
     def _persist_training_example(self, example: TrainingExample):
-        """Store training example in database for persistence"""
+        """Store training example in database for persistence using connection pooling"""
         if not self.db_connection:
             return
         
         try:
-            cursor = self.db_connection.cursor()
-            
-            # Create table if not exists
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS training_examples (
-                    id SERIAL PRIMARY KEY,
-                    agent_name VARCHAR(50),
-                    task_type VARCHAR(50),
-                    input_text TEXT,
-                    expected_output JSONB,
-                    uncertainty_score FLOAT,
-                    importance_score FLOAT,
-                    source_url TEXT,
-                    timestamp TIMESTAMP,
-                    user_feedback TEXT,
-                    correction_priority INTEGER
-                )
-            """)
-            
-            # Insert example
-            cursor.execute("""
+            # Use the new connection pooling execute_query function
+            execute_query("""
                 INSERT INTO training_examples 
                 (agent_name, task_type, input_text, expected_output, uncertainty_score, 
                  importance_score, source_url, timestamp, user_feedback, correction_priority)
@@ -764,9 +742,7 @@ class OnTheFlyTrainingCoordinator:
                 example.timestamp,
                 example.user_feedback,
                 example.correction_priority
-            ))
-            
-            self.db_connection.commit()
+            ), fetch=False)
             
         except Exception as e:
             logger.error(f"Failed to persist training example: {e}")

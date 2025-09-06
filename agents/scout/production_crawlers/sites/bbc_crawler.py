@@ -21,23 +21,34 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
 import logging
+import hashlib
+from urllib.parse import urlparse
+import os
+import requests
+
+from agents.common.ingest import build_source_upsert, build_article_source_map_insert
+from agents.common.evidence import snapshot_paywalled_page, enqueue_human_review
+
+# Import shared utilities
+from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ultra_fast_bbc")
 
 class UltraFastBBCCrawler:
     """Ultra-fast crawler optimized for 1000+ articles/day processing"""
-    
-    def __init__(self, concurrent_browsers: int = 3, batch_size: int = 20):
+
+    def __init__(self, concurrent_browsers: int = 3, batch_size: int = 20, requests_per_minute: int = 30, delay_between_requests: float = 1.0):
         self.concurrent_browsers = concurrent_browsers
         self.batch_size = batch_size
-        self.processed_articles = []
+        self.rate_limiter = RateLimiter(requests_per_minute, delay_between_requests)
+        self.robots_checker = RobotsChecker()
         self.news_keywords = {
-            'high_value': ['arrested', 'charged', 'court', 'police', 'sentenced', 'convicted', 
+            'high_value': ['arrested', 'charged', 'court', 'police', 'sentenced', 'convicted',
                           'investigation', 'crime', 'murder', 'theft', 'assault', 'fraud'],
             'medium_value': ['council', 'government', 'minister', 'mp', 'mayor', 'election',
                            'announced', 'confirmed', 'reports', 'statement', 'official'],
-            'location_indicators': ['england', 'uk', 'britain', 'london', 'manchester', 
+            'location_indicators': ['england', 'uk', 'britain', 'london', 'manchester',
                                   'birmingham', 'leeds', 'liverpool', 'bristol']
         }
     
@@ -155,6 +166,9 @@ class UltraFastBBCCrawler:
             # Inject modal dismissal script immediately
             await page.evaluate(self.fast_modal_dismissal_script())
             
+            # Also use shared modal dismisser
+            await ModalDismisser.dismiss_modals(page)
+            
             # Get title (fast)
             title = await page.title()
             
@@ -172,10 +186,21 @@ class UltraFastBBCCrawler:
                 except Exception:
                     content = ""
             
+            # Attempt to quickly extract canonical link and paywall signals
+            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)
+
+            extraction_metadata = {
+                'method': 'ultra_fast_dom',
+                'extracted_length': len(content or ''),
+            }
+
             return {
                 "title": title,
                 "content": content,
-                "extraction_time": time.time()
+                "extraction_time": time.time(),
+                "canonical": canonical,
+                "paywall_flag": paywall_flag,
+                "extraction_metadata": extraction_metadata
             }
             
         except Exception as e:
@@ -191,6 +216,27 @@ class UltraFastBBCCrawler:
         start_time = time.time()
         
         try:
+            # Check robots.txt compliance first
+            if not self.robots_checker.check_robots_txt(url):
+                logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
+                return CanonicalMetadata.generate_metadata(
+                    url=url,
+                    title="Robots.txt Disallowed",
+                    content="Crawling not allowed by robots.txt",
+                    extraction_method="disallowed",
+                    status="disallowed",
+                    paywall_flag=False,
+                    confidence=0.0,
+                    publisher="BBC",
+                    crawl_mode="ultra_fast",
+                    news_score=0.0,
+                    error="robots_disallowed"
+                )
+            
+            # Apply rate limiting
+            domain = urlparse(url).netloc
+            await self.rate_limiter.wait_if_needed(domain)
+            
             # Fast context creation
             context = await browser.new_context(
                 viewport={'width': 1024, 'height': 768},
@@ -206,7 +252,7 @@ class UltraFastBBCCrawler:
             
             # Close immediately
             await context.close()
-
+            
             # Throttle per-article to reduce crawling speed: random sleep 1-3 seconds
             try:
                 delay = random.uniform(1.0, 3.0)
@@ -222,25 +268,42 @@ class UltraFastBBCCrawler:
                 
                 processing_time = time.time() - start_time
                 
-                return {
-                    "url": url,
-                    "title": content_data["title"],
-                    "content": content_data["content"][:500],  # Truncate for efficiency
-                    "news_score": news_score,
-                    "processing_time_seconds": processing_time,
-                    "timestamp": datetime.now().isoformat(),
-                    "status": "success"
-                }
+                # Enrichment: url_hash, domain, canonical, publisher_meta (minimal), paywall flag
+                url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
+                domain = urlparse(url).netloc
+                canonical = content_data.get('canonical')
+                paywall_flag = content_data.get('paywall_flag', False)
+
+                return CanonicalMetadata.generate_metadata(
+                    url=url,
+                    title=content_data["title"],
+                    content=content_data["content"],
+                    extraction_method="ultra_fast_dom",
+                    status="success",
+                    paywall_flag=paywall_flag,
+                    confidence=news_score,
+                    publisher="BBC",
+                    crawl_mode="ultra_fast",
+                    news_score=news_score,
+                    canonical=canonical
+                )
             
             return None  # Filtered out
             
         except Exception as e:
-            return {
-                "url": url,
-                "error": str(e),
-                "processing_time_seconds": time.time() - start_time,
-                "status": "error"
-            }
+            return CanonicalMetadata.generate_metadata(
+                url=url,
+                title="Error",
+                content=f"Processing failed: {e}",
+                extraction_method="error",
+                status="error",
+                paywall_flag=False,
+                confidence=0.0,
+                publisher="BBC",
+                crawl_mode="ultra_fast",
+                news_score=0.0,
+                error=str(e)
+            )
     
     async def get_urls_ultra_fast(self, max_urls: int = 200) -> List[str]:
         """Get URLs as fast as possible"""
@@ -379,6 +442,79 @@ class UltraFastBBCCrawler:
         logger.info(f"✅ Success Rate: {len(results) / len(urls) * 100:.1f}%")
         logger.info(f"Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
         
+        # Dispatch ingest requests to DB worker via MCP Bus (best-effort).
+        MCP_BUS_URL = os.environ.get('MCP_BUS_URL', 'http://localhost:8000')
+
+        async def dispatch_ingest(article: Dict):
+            # Build article payload and DB statements
+            # If article is paywalled, snapshot and enqueue for human review instead of ingesting
+            if article.get('paywall_flag'):
+                try:
+                    html_stub = article.get('content', '')
+                    metadata = {
+                        'title': article.get('title'),
+                        'domain': article.get('domain'),
+                        'url': article.get('url'),
+                        'timestamp': article.get('timestamp')
+                    }
+                    evidence_path = snapshot_paywalled_page(article.get('url'), html_stub, metadata)
+                    enqueue_human_review(evidence_path, reviewer='chief_editor')
+                    logger.info(f"Paywalled article snapshot saved and enqueued for review: {article.get('url')}")
+                except Exception as e:
+                    logger.warning(f"Failed to snapshot/enqueue paywalled article {article.get('url')}: {e}")
+                return
+
+            article_payload = {
+                'url': article.get('url'),
+                'url_hash': article.get('url_hash'),
+                'domain': article.get('domain'),
+                'canonical': article.get('canonical'),
+                'publisher_meta': {'publisher': 'BBC'},
+                'confidence': article.get('confidence', 0.5),
+                'paywall_flag': article.get('paywall_flag', False),
+                'extraction_metadata': article.get('extraction_metadata', {}),
+                'timestamp': article.get('timestamp'),
+                # article_id is not created here; let DB worker or orchestrator assign
+            }
+
+            source_sql, source_params = build_source_upsert(article_payload)
+            asm_sql, asm_params = build_article_source_map_insert(article_payload.get('article_id', 1), article_payload)
+
+            # Convert params tuples to lists for JSON serialization
+            statements = [ [source_sql, list(source_params)], [asm_sql, list(asm_params)] ]
+
+            payload = {
+                'agent': 'db_worker',
+                'tool': 'handle_ingest',
+                'args': [],
+                'kwargs': {
+                    'article_payload': article_payload,
+                    'statements': statements
+                }
+            }
+
+            loop = asyncio.get_running_loop()
+
+            def do_call():
+                try:
+                    resp = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=(2, 10))
+                    resp.raise_for_status()
+                    return resp.json()
+                except Exception as e:
+                    logger.warning(f"DB worker call failed for {article.get('url')}: {e}")
+                    return None
+
+            res = await loop.run_in_executor(None, do_call)
+            if res:
+                logger.info(f"Ingest dispatched for {article.get('url')}: {res}")
+
+        # Fire off ingestion tasks concurrently (not awaiting per-article network delays)
+        try:
+            tasks = [dispatch_ingest(a) for a in results]
+            await asyncio.gather(*tasks, return_exceptions=True)
+        except Exception as e:
+            logger.warning(f"Error dispatching ingest tasks: {e}")
+
         return summary
 
 async def main():

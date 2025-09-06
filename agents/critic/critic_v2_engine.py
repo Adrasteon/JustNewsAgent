@@ -18,8 +18,8 @@ Status: V2 Production Ready - Phase 2 Implementation
 import os
 import logging
 import torch
-from typing import List, Dict, Optional, Any
-from datetime import datetime
+from typing import List, Dict, Optional, Any, Union
+from datetime import datetime, timezone
 import numpy as np
 from dataclasses import dataclass
 from enum import Enum
@@ -186,27 +186,35 @@ class CriticV2Engine:
                 from agents.common.model_loader import load_transformers_model
                 model, tokenizer = load_transformers_model(self.config.bert_model, agent='critic', cache_dir=self.config.cache_dir)
                 # Try to convert to sequence classification if needed; assume returned model is appropriate
-                self.models['bert'] = model.to(self.device)
+                if hasattr(model, 'to'):
+                    self.models['bert'] = model.to(self.device)  # type: ignore
+                else:
+                    self.models['bert'] = model
                 self.tokenizers['bert'] = tokenizer
             except Exception:
                 # Fallback to original explicit from_pretrained path
-                self.models['bert'] = BertForSequenceClassification.from_pretrained(
-                    self.config.bert_model,
-                    cache_dir=self.config.cache_dir,
-                    num_labels=2,
-                    torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-                ).to(self.device)
+                try:
+                    self.models['bert'] = BertForSequenceClassification.from_pretrained(
+                        self.config.bert_model,
+                        cache_dir=self.config.cache_dir,
+                        num_labels=2,
+                        torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                    ).to(self.device)  # type: ignore
 
-                self.tokenizers['bert'] = BertTokenizer.from_pretrained(
-                    self.config.bert_model,
-                    cache_dir=self.config.cache_dir
-                )
+                    self.tokenizers['bert'] = BertTokenizer.from_pretrained(
+                        self.config.bert_model,
+                        cache_dir=self.config.cache_dir
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to load BERT model: {e}")
+                    self.models['bert'] = None
+                    return
 
             # Create a simple pipeline for quality scoring
-            self.pipelines['bert_quality'] = pipeline(
+            self.pipelines['bert_quality'] = pipeline(  # type: ignore
                 "text-classification",
-                model=self.models['bert'],
-                tokenizer=self.tokenizers['bert'],
+                model=self.models['bert'],  # type: ignore
+                tokenizer=self.tokenizers['bert'],  # type: ignore
                 device=0 if self.device.type == 'cuda' else -1,
                 top_k=None
             )
@@ -238,12 +246,15 @@ class CriticV2Engine:
                 try:
                     from agents.common.model_loader import load_transformers_model
                     model, tokenizer = load_transformers_model(self.config.roberta_model, agent='critic', cache_dir=self.config.cache_dir)
-                    self.models['roberta'] = model.to(self.device)
+                    if hasattr(model, 'to'):
+                        self.models['roberta'] = model.to(self.device)  # type: ignore
+                    else:
+                        self.models['roberta'] = model
                     self.tokenizers['roberta'] = tokenizer
-                    self.pipelines['roberta_bias'] = pipeline(
+                    self.pipelines['roberta_bias'] = pipeline(  # type: ignore
                         "text-classification",
-                        model=self.models['roberta'],
-                        tokenizer=self.tokenizers['roberta'],
+                        model=self.models['roberta'],  # type: ignore
+                        tokenizer=self.tokenizers['roberta'],  # type: ignore
                         device=0 if self.device.type == 'cuda' else -1,
                         top_k=None
                     )
@@ -253,17 +264,17 @@ class CriticV2Engine:
                         cache_dir=self.config.cache_dir,
                         num_labels=3,  # Biased, neutral, counter-biased
                         torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-                    ).to(self.device)
+                    ).to(self.device)  # type: ignore
 
                     self.tokenizers['roberta'] = RobertaTokenizer.from_pretrained(
                         self.config.roberta_model,
                         cache_dir=self.config.cache_dir
                     )
 
-                    self.pipelines['roberta_bias'] = pipeline(
+                    self.pipelines['roberta_bias'] = pipeline(  # type: ignore
                         "text-classification",
-                        model=self.models['roberta'],
-                        tokenizer=self.tokenizers['roberta'],
+                        model=self.models['roberta'],  # type: ignore
+                        tokenizer=self.tokenizers['roberta'],  # type: ignore
                         device=0 if self.device.type == 'cuda' else -1,
                         top_k=None
                     )
@@ -286,7 +297,7 @@ class CriticV2Engine:
                 cache_dir=self.config.cache_dir,
                 num_labels=3,  # Consistent, inconsistent, uncertain
                 torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            ).to(self.device)  # type: ignore
             
             self.tokenizers['deberta'] = DebertaTokenizer.from_pretrained(
                 self.config.deberta_model,
@@ -320,7 +331,7 @@ class CriticV2Engine:
                 cache_dir=self.config.cache_dir,
                 num_labels=5,  # Readability levels 1-5
                 torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            ).to(self.device)  # type: ignore
             
             self.tokenizers['distilbert'] = DistilBertTokenizer.from_pretrained(
                 self.config.distilbert_model,
@@ -395,8 +406,8 @@ class CriticV2Engine:
                     self.models['embeddings'] = None
 
             try:
-                if self.device.type == 'cuda' and hasattr(self.models.get('embeddings'), 'to'):
-                    self.models['embeddings'] = self.models['embeddings'].to(self.device)
+                if self.device.type == 'cuda' and self.models.get('embeddings') is not None and hasattr(self.models['embeddings'], 'to'):
+                    self.models['embeddings'] = self.models['embeddings'].to(self.device)  # type: ignore
             except Exception:
                 logger.debug("Unable to move critic embedding model to CUDA device; continuing on CPU")
             
@@ -410,7 +421,7 @@ class CriticV2Engine:
         """Log feedback for review performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -603,7 +614,7 @@ class CriticV2Engine:
             logger.error(f"Error in DistilBERT readability assessment: {e}")
             return self._fallback_readability_assessment(text)
     
-    def detect_plagiarism_embeddings(self, text: str, reference_texts: List[str] = None) -> Dict[str, Any]:
+    def detect_plagiarism_embeddings(self, text: str, reference_texts: Optional[List[str]] = None) -> Dict[str, Any]:
         """Detect plagiarism using SentenceTransformer embeddings"""
         try:
             if self.models.get('embeddings') is None:
@@ -667,7 +678,7 @@ class CriticV2Engine:
             logger.error(f"Error in plagiarism detection: {e}")
             return self._fallback_plagiarism_detection(text, reference_texts)
     
-    def comprehensive_review(self, text: str, context: str = "", reference_texts: List[str] = None) -> ReviewResult:
+    def comprehensive_review(self, text: str, context: str = "", reference_texts: Optional[List[str]] = None) -> ReviewResult:
         """
         Perform comprehensive content review using all 5 models
         
@@ -736,7 +747,7 @@ class CriticV2Engine:
                     "text_length": len(text),
                     "context_provided": bool(context),
                     "reference_count": len(reference_texts) if reference_texts else 0,
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat()
                 }
             )
             
@@ -802,10 +813,10 @@ class CriticV2Engine:
         """Calculate readability metrics"""
         if TEXTSTAT_AVAILABLE:
             return {
-                "flesch_score": textstat.flesch_reading_ease(text),
-                "flesch_grade": textstat.flesch_kincaid_grade(text),
-                "gunning_fog": textstat.gunning_fog(text),
-                "average_sentence_length": textstat.avg_sentence_length(text)
+                "flesch_score": textstat.flesch_reading_ease(text),  # type: ignore
+                "flesch_grade": textstat.flesch_kincaid_grade(text),  # type: ignore
+                "gunning_fog": textstat.gunning_fog(text),  # type: ignore
+                "average_sentence_length": textstat.avg_sentence_length(text)  # type: ignore
             }
         else:
             # Fallback simple metrics
@@ -983,18 +994,20 @@ class CriticV2Engine:
             metadata={"fallback": True}
         )
     
-    def get_model_status(self) -> Dict[str, bool]:
+    def get_model_status(self) -> Dict[str, Union[bool, int]]:
         """Get status of all models"""
-        return {
+        status: Dict[str, Union[bool, int]] = {
             "bert": self.models.get('bert') is not None,
             "roberta": self.models.get('roberta') is not None or self.pipelines.get('roberta_bias') is not None,
             "deberta": self.models.get('deberta') is not None,
             "distilbert": self.models.get('distilbert') is not None,
             "embeddings": self.models.get('embeddings') is not None,
-            "total_models": sum(1 for key in ['bert', 'roberta', 'deberta', 'distilbert', 'embeddings'] 
-                              if self.models.get(key) is not None or 
-                              self.pipelines.get(f"{key}_bias") is not None)
         }
+        total_models = sum(1 for key in ['bert', 'roberta', 'deberta', 'distilbert', 'embeddings'] 
+                          if self.models.get(key) is not None or 
+                          self.pipelines.get(f"{key}_bias") is not None)
+        status["total_models"] = total_models
+        return status
     
     def add_reference_texts(self, texts: List[str]):
         """Add reference texts for plagiarism detection"""
@@ -1022,7 +1035,7 @@ class CriticV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_critic_v2_engine():
+def run_critic_v2_engine_test():
     """Test Critic V2 Engine with sample content review"""
     try:
         print("🔧 Testing Critic V2 Engine...")
@@ -1100,4 +1113,4 @@ def test_critic_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_critic_v2_engine()
+    run_critic_v2_engine_test()

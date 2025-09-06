@@ -12,9 +12,9 @@ from transformers import (
     pipeline,
     BitsAndBytesConfig
 )
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class GPUScoutInferenceEngine:
     - GPU acceleration with FP16 precision
     """
     
-    def __init__(self, model_path: str = None):
+    def __init__(self, model_path: Optional[str] = None):
         # Default to env-configurable conversational model; DialoGPT (deprecated) is deprecated.
         self.model_path = model_path or os.environ.get("SCOUT_CONVERSATIONAL_MODEL", "distilgpt2")
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -105,12 +105,12 @@ Respond with JSON format:
                 os.environ["TRANSFORMERS_OFFLINE"] = "1"
                 os.environ["HF_DATASETS_OFFLINE"] = "1"
             
-            # Quantization config for memory efficiency
+            # Quantization config for memory efficiency - UPDATED TO FP4
             quantization_config = BitsAndBytesConfig(
                 load_in_4bit=True,
                 bnb_4bit_compute_dtype=torch.float16,
                 bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
+                bnb_4bit_quant_type="fp4"  # UPDATED: FP4 instead of NF4
             )
             
             # Load tokenizer with ModelStore-aware loader and fallback
@@ -143,8 +143,8 @@ Respond with JSON format:
                         local_files_only=use_offline
                     )
             
-            if self.tokenizer.pad_token is None:
-                self.tokenizer.pad_token = self.tokenizer.eos_token
+            if self.tokenizer.pad_token is None:  # type: ignore
+                self.tokenizer.pad_token = self.tokenizer.eos_token  # type: ignore
             
             # Load model with GPU optimization
                 # Load model using ModelStore-aware loader with explicit class when possible
@@ -182,10 +182,10 @@ Respond with JSON format:
                         self.model = None
                 
                 # Create pipeline for batch processing
-                self.classification_pipeline = pipeline(
+                self.classification_pipeline = pipeline(  # type: ignore
                     "text-generation",
-                    model=self.model,
-                    tokenizer=self.tokenizer,
+                    model=self.model,  # type: ignore
+                    tokenizer=self.tokenizer,  # type: ignore
                     batch_size=4 if self.device == "cuda" else 1,
                     max_new_tokens=512,
                     do_sample=True,
@@ -203,10 +203,10 @@ Respond with JSON format:
                     local_files_only=use_offline
                 )
                 
-                self.classification_pipeline = pipeline(
+                self.classification_pipeline = pipeline(  # type: ignore
                     "text-generation",
-                    model=self.model,
-                    tokenizer=self.tokenizer,
+                    model=self.model,  # type: ignore
+                    tokenizer=self.tokenizer,  # type: ignore
                     max_new_tokens=512,
                     do_sample=True,
                     temperature=0.1
@@ -222,7 +222,7 @@ Respond with JSON format:
             self.classification_pipeline = None
             logger.warning("⚠️ Scout will run in heuristic-only mode")
     
-    def classify_news_content(self, text: str, url: str = "") -> Dict:
+    def classify_news_content(self, text: str, url: Optional[str] = None) -> Dict:
         """GPU-accelerated news content classification with intelligent fallback"""
         try:
             # Since GPT-2/DialoGPT (deprecated) isn't great for structured output,
@@ -236,20 +236,20 @@ Respond with JSON format:
                     # Simple binary classification prompt
                     simple_prompt = f"Is this news content? Content: {text[:300]}... Answer: "
                     
-                    inputs = self.tokenizer(simple_prompt, return_tensors="pt", 
+                    inputs = self.tokenizer(simple_prompt, return_tensors="pt",  # type: ignore
                                           truncation=True, max_length=256)
                     inputs = {k: v.to(self.device) for k, v in inputs.items()}
                     
                     with torch.no_grad():
-                        outputs = self.model.generate(
+                        outputs = self.model.generate(  # type: ignore
                             **inputs,
                             max_new_tokens=10,  # Very short response
                             temperature=0.1,    # Low randomness
-                            pad_token_id=self.tokenizer.eos_token_id,
+                            pad_token_id=self.tokenizer.eos_token_id,  # type: ignore
                             do_sample=True
                         )
                     
-                    ai_response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+                    ai_response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)  # type: ignore
                     ai_response = ai_response[len(simple_prompt):].strip().lower()
                     
                     # AI enhancement for borderline cases
@@ -284,7 +284,7 @@ Respond with JSON format:
                 "method": "emergency_fallback"
             }
 
-    def _heuristic_news_classification(self, content: str, url: str = None) -> Dict:
+    def _heuristic_news_classification(self, content: str, url: Optional[str] = None) -> Dict:
         """
         Fallback heuristic-based news classification when AI is not available
         """
@@ -355,19 +355,19 @@ Respond with JSON format:
             "reasoning": "; ".join(reasoning_parts) if reasoning_parts else "Heuristic analysis",
             "content_type": "news" if is_news else "non-news",
             "url": url,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "content_length": len(content),
             "method": "heuristic_classification"
         }
     
-    def assess_content_quality(self, content: str, url: str = None) -> Dict:
+    def assess_content_quality(self, content: str, url: Optional[str] = None) -> Dict:
         """
         Assess content quality across multiple dimensions
         """
         try:
             prompt = self.classification_prompts["quality_assessment"].format(content=content[:2000])
             
-            response = self.classification_pipeline(
+            response = self.classification_pipeline(  # type: ignore
                 prompt,
                 max_new_tokens=256,
                 do_sample=True,
@@ -379,7 +379,7 @@ Respond with JSON format:
             
             # Add metadata
             quality_assessment["url"] = url
-            quality_assessment["timestamp"] = datetime.utcnow().isoformat()
+            quality_assessment["timestamp"] = datetime.now(timezone.utc).isoformat()
             quality_assessment["content_length"] = len(content)
             
             return quality_assessment
@@ -394,17 +394,17 @@ Respond with JSON format:
                 "completeness": 0.0,
                 "reasoning": f"Assessment error: {str(e)}",
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
-    def detect_bias(self, content: str, url: str = None) -> Dict:
+    def detect_bias(self, content: str, url: Optional[str] = None) -> Dict:
         """
         Detect and analyze bias in content
         """
         try:
             prompt = self.classification_prompts["bias_detection"].format(content=content[:2000])
             
-            response = self.classification_pipeline(
+            response = self.classification_pipeline(  # type: ignore
                 prompt,
                 max_new_tokens=256,
                 do_sample=True,
@@ -416,7 +416,7 @@ Respond with JSON format:
             
             # Add metadata
             bias_analysis["url"] = url
-            bias_analysis["timestamp"] = datetime.utcnow().isoformat()
+            bias_analysis["timestamp"] = datetime.now(timezone.utc).isoformat()
             bias_analysis["content_length"] = len(content)
             
             return bias_analysis
@@ -430,10 +430,10 @@ Respond with JSON format:
                 "bias_indicators": [],
                 "confidence": 0.0,
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
-    def comprehensive_content_analysis(self, content: str, url: str = None) -> Dict:
+    def comprehensive_content_analysis(self, content: str, url: Optional[str] = None) -> Dict:
         """
         Perform comprehensive analysis combining all Scout capabilities
         """
@@ -460,7 +460,7 @@ Respond with JSON format:
                 ),
                 "url": url,
                 "content_preview": content[:200] + "..." if len(content) > 200 else content,
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             logger.info(f"✅ Analysis complete. Scout Score: {overall_score:.2f}")
@@ -472,7 +472,7 @@ Respond with JSON format:
                 "scout_score": 0.0,
                 "error": str(e),
                 "url": url,
-                "analysis_timestamp": datetime.utcnow().isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     def batch_analyze_content(self, content_list: List[Tuple[str, str]]) -> List[Dict]:
@@ -497,7 +497,7 @@ Respond with JSON format:
                         "scout_score": 0.0,
                         "error": str(e),
                         "url": url,
-                        "analysis_timestamp": datetime.utcnow().isoformat()
+                        "analysis_timestamp": datetime.now(timezone.utc).isoformat()
                     })
         
         logger.info(f"✅ Batch analysis complete. {len(results)} items processed")

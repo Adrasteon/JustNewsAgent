@@ -16,18 +16,45 @@ import os
 import logging
 import torch
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Union, Any
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
-    pipeline,
-    LlavaNextProcessor,
-    LlavaNextForConditionalGeneration,
     TrainingArguments,
-    Trainer,
     logging as transformers_logging
 )
+
+# Handle problematic imports with fallbacks
+try:
+    from transformers import pipeline
+    PIPELINE_AVAILABLE = True
+except ImportError:
+    PIPELINE_AVAILABLE = False
+    def pipeline(*args, **kwargs):
+        raise ImportError("Pipeline not available due to transformers/torchvision compatibility issue")
+
+try:
+    from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+    LLAVA_AVAILABLE = True
+except ImportError:
+    LLAVA_AVAILABLE = False
+    LlavaNextProcessor = None
+    LlavaNextForConditionalGeneration = None
+
+try:
+    from transformers import Trainer
+    TRAINER_AVAILABLE = True
+except ImportError:
+    TRAINER_AVAILABLE = False
+    Trainer = None
+
+try:
+    from transformers import PreTrainedModel
+    PRETRAINED_MODEL_AVAILABLE = True
+except ImportError:
+    PRETRAINED_MODEL_AVAILABLE = False
+    PreTrainedModel = None
 from torch.utils.data import Dataset
 
 # Suppress known deprecation warnings for production
@@ -39,15 +66,12 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
 # Set transformers logging to ERROR to reduce noise
 transformers_logging.set_verbosity_error()
 
-# GPU cleanup integration
+# Production GPU Manager integration
 try:
-    import sys
-    sys.path.insert(0, '/home/adra/JustNewsAgentic')
-    from training_system.utils.gpu_cleanup import GPUModelManager
-    gpu_manager = GPUModelManager()
-    GPU_CLEANUP_AVAILABLE = True
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
-    GPU_CLEANUP_AVAILABLE = False
+    PRODUCTION_GPU_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -115,29 +139,34 @@ class NextGenGPUScoutEngine:
             "news_classifier": {
                 "model_name": "google-bert/bert-base-uncased", 
                 "task": "news_classification",
+                "revision": "main",  # Specify revision for production stability
                 "num_labels": 2,  # Binary: news/not-news
                 "batch_size": 32
             },
             "quality_assessor": {
                 "model_name": "google-bert/bert-base-uncased",
                 "task": "quality_assessment",
+                "revision": "main",  # Specify revision for production stability
                 "num_labels": 3,  # Low/Medium/High quality
                 "batch_size": 16
             },
             "sentiment_analyzer": {
                 "model_name": "cardiffnlp/twitter-roberta-base-sentiment-latest",
                 "task": "sentiment_analysis",
+                "revision": "main",  # Specify revision for production stability
                 "batch_size": 24
             },
             "bias_detector": {
                 "model_name": "martin-ha/toxic-comment-model",
                 "task": "bias_detection",
+                "revision": "main",  # Specify revision for production stability
                 "num_labels": 2,  # Binary: biased/not-biased
                 "batch_size": 16
             },
             "visual_analyzer": {
                 "model_name": "llava-hf/llava-onevision-qwen2-0.5b-ov-hf",
                 "task": "visual_analysis",
+                "revision": "main",  # Specify revision for production stability
                 "max_new_tokens": 200,
                 "batch_size": 1
             }
@@ -146,17 +175,42 @@ class NextGenGPUScoutEngine:
         # Initialize tokenizer storage
         self.tokenizers = {}
         
-        # Initialize training data for continuous learning
-        if self.enable_training:
-            self.training_data = {
-                "news_classification": {"texts": [], "labels": []},
-                "quality_assessment": {"texts": [], "labels": []},
-                "sentiment_analysis": {"texts": [], "labels": []},
-                "bias_detection": {"texts": [], "labels": []}
-            }
-            logger.info("📚 Training data structures initialized")
+        # Initialize GPU allocation for scout agent
+        self.gpu_allocated = False
+        self.gpu_device = None
+        self.gpu_memory_gb = 4.0  # Scout needs ~4GB for models
+
+        if PRODUCTION_GPU_AVAILABLE and self.device.startswith("cuda"):
+            try:
+                # Request GPU allocation through production manager
+                allocation = request_agent_gpu('scout', self.gpu_memory_gb)
+                if isinstance(allocation, dict) and allocation.get('status') == 'allocated':
+                    self.gpu_allocated = True
+                    self.gpu_device = allocation.get('gpu_device', 0)
+                    self.gpu_memory_gb = allocation.get('allocated_memory_gb', self.gpu_memory_gb)
+                    logger.info(f"✅ Scout GPU allocated: {self.gpu_memory_gb}GB on device {self.gpu_device}")
+                else:
+                    logger.warning(f"⚠️ Production GPU manager allocation failed: {allocation}")
+                    # Fall back to direct GPU access instead of CPU
+                    if torch.cuda.is_available():
+                        self.gpu_allocated = True
+                        self.gpu_device = 0  # Use first available GPU
+                        logger.info(f"📋 Production GPU manager failed, using direct GPU access on device {self.gpu_device}")
+                    else:
+                        logger.warning("⚠️ No CUDA devices available, falling back to CPU")
+                        self.device = 'cpu'
+            except Exception as e:
+                logger.warning(f"⚠️ Production GPU manager error: {e}")
+                # Fall back to direct GPU access instead of CPU
+                if torch.cuda.is_available():
+                    self.gpu_allocated = True
+                    self.gpu_device = 0  # Use first available GPU
+                    logger.info(f"📋 Production GPU manager error, using direct GPU access on device {self.gpu_device}")
+                else:
+                    logger.warning("⚠️ No CUDA devices available, falling back to CPU")
+                    self.device = 'cpu'
         else:
-            self.training_data = {}
+            logger.info("📋 Production GPU manager not available, using direct GPU access")
         
         # Initialize specialized models
         logger.info(f"🚀 Initializing Next-Gen GPU Scout Engine on {self.device}")
@@ -207,6 +261,7 @@ class NextGenGPUScoutEngine:
                     "text-classification",
                     model=self.models["news_classifier"],
                     tokenizer=self.tokenizers["news_classifier"],
+                    revision=news_config.get("revision", "main"),  # Use revision for production stability
                     device=0 if self.device.startswith("cuda") else -1,
                     top_k=None,  # Updated API - replaces return_all_scores=True
                     batch_size=1,
@@ -263,6 +318,7 @@ class NextGenGPUScoutEngine:
                     "text-classification",
                     model=self.models["quality_assessor"],
                     tokenizer=self.tokenizers["quality_assessor"],
+                    revision=quality_config.get("revision", "main"),  # Use revision for production stability
                     device=0 if self.device.startswith("cuda") else -1,
                     top_k=None,  # Updated API
                     batch_size=1,
@@ -285,22 +341,31 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 
-                # Load sentiment analysis pipeline directly (optimized)
-                self.pipelines["sentiment_analyzer"] = pipeline(
-                    "sentiment-analysis",
-                    model=sentiment_config["model_name"],
-                    device=0 if self.device.startswith("cuda") else -1,
-                    torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                    top_k=None,  # Updated API
-                    batch_size=sentiment_config["batch_size"],
-                    truncation=True,
-                    max_length=512
-                )
-                
-                # Mark as loaded for tracking
-                self.models["sentiment_analyzer"] = True
+                if PIPELINE_AVAILABLE:
+                    # Load sentiment analysis pipeline directly (optimized)
+                    self.pipelines["sentiment_analyzer"] = pipeline(
+                        "sentiment-analysis",
+                        model=sentiment_config["model_name"],
+                        revision=sentiment_config.get("revision", "main"),  # Use revision for production stability
+                        device=0 if self.device.startswith("cuda") else -1,
+                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                        top_k=None,  # Updated API
+                        batch_size=sentiment_config["batch_size"],
+                        truncation=True,
+                        max_length=512
+                    )
+                    
+                    # Mark as loaded for tracking
+                    self.models["sentiment_analyzer"] = True
+                else:
+                    logger.warning("⚠️ Sentiment analysis pipeline not available due to transformers compatibility issue")
+                    self.models["sentiment_analyzer"] = None
+                    self.pipelines["sentiment_analyzer"] = None
             
-            logger.info("✅ Sentiment Analysis Model loaded successfully")
+            if self.models["sentiment_analyzer"]:
+                logger.info("✅ Sentiment Analysis Model loaded successfully")
+            else:
+                logger.warning("⚠️ Sentiment Analysis Model not available")
             
         except Exception as e:
             logger.error(f"❌ Failed to load Sentiment Analysis Model: {e}")
@@ -333,6 +398,7 @@ class NextGenGPUScoutEngine:
                         "text-classification",
                         model=self.models["bias_detector"],
                         tokenizer=self.tokenizers["bias_detector"],
+                        revision=bias_config.get("revision", "main"),  # Use revision for production stability
                         device=0 if self.device.startswith("cuda") else -1,
                         top_k=None,
                         batch_size=1,
@@ -357,6 +423,7 @@ class NextGenGPUScoutEngine:
                         "text-classification",
                         model=self.models["bias_detector"],
                         tokenizer=self.tokenizers["bias_detector"],
+                        revision=bias_config.get("revision", "main"),  # Use revision for production stability
                         device=0 if self.device.startswith("cuda") else -1,
                         top_k=None,
                         batch_size=1,
@@ -379,52 +446,63 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 
-                try:
-                    from agents.common.model_loader import load_transformers_model
-                    model, processor = load_transformers_model(
-                        visual_config["model_name"],
-                        agent='scout',
-                        cache_dir=None,
-                        model_class=LlavaNextForConditionalGeneration,
-                        tokenizer_class=LlavaNextProcessor,
-                    )
+                if LLAVA_AVAILABLE and LlavaNextProcessor and LlavaNextForConditionalGeneration:
                     try:
-                        model = model.to(self.device)
+                        from agents.common.model_loader import load_transformers_model
+                        model, processor = load_transformers_model(
+                            visual_config["model_name"],
+                            agent='scout',
+                            cache_dir=None,
+                            model_class=LlavaNextForConditionalGeneration,
+                            tokenizer_class=LlavaNextProcessor,
+                        )
+                        try:
+                            model = model.to(self.device)
+                        except Exception:
+                            pass
+                        self.models["visual_analyzer"] = model
+                        self.tokenizers["visual_analyzer"] = processor
                     except Exception:
-                        pass
-                    self.models["visual_analyzer"] = model
-                    self.tokenizers["visual_analyzer"] = processor
-                except Exception:
-                    self.models["visual_analyzer"] = LlavaNextForConditionalGeneration.from_pretrained(
-                        visual_config["model_name"],
-                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                        low_cpu_mem_usage=True,
-                        trust_remote_code=True
-                    ).to(self.device)
+                        self.models["visual_analyzer"] = LlavaNextForConditionalGeneration.from_pretrained(
+                            visual_config["model_name"],
+                            torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            low_cpu_mem_usage=True,
+                            trust_remote_code=True
+                        ).to(self.device)
 
-                    self.tokenizers["visual_analyzer"] = LlavaNextProcessor.from_pretrained(
-                        visual_config["model_name"],
-                        trust_remote_code=True,
-                        use_fast=True  # Use fast processor to avoid warnings
-                    )
-            
-            logger.info("✅ Visual Analysis Model (LLaVA) loaded successfully")
+                        self.tokenizers["visual_analyzer"] = LlavaNextProcessor.from_pretrained(
+                            visual_config["model_name"],
+                            trust_remote_code=True,
+                            use_fast=True  # Use fast processor to avoid warnings
+                        )
+                    
+                    logger.info("✅ Visual Analysis Model (LLaVA) loaded successfully")
+                else:
+                    logger.warning("⚠️ LLaVA models not available due to transformers compatibility issue")
+                    self.models["visual_analyzer"] = None
+                    self.tokenizers["visual_analyzer"] = None
             
         except Exception as e:
             logger.warning(f"⚠️ Visual Analysis Model not available: {e}")
             self.models["visual_analyzer"] = None
         
-        # Register all loaded GPU models with cleanup manager
-        if GPU_CLEANUP_AVAILABLE and self.device.startswith("cuda"):
-            for model_name, model in self.models.items():
-                if model is not None:
-                    gpu_manager.register_model(f"scout_v2_{model_name}", model)
-            
-            for pipeline_name, pipeline_obj in self.pipelines.items():
-                if pipeline_obj is not None:
-                    gpu_manager.register_model(f"scout_v2_pipeline_{pipeline_name}", pipeline_obj)
-            
-            logger.info("🧹 GPU models registered with cleanup manager")
+        # Register models with production GPU manager
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                gpu_mgr = get_gpu_manager()
+                for model_name, model in self.models.items():
+                    if model is not None:
+                        gpu_mgr.register_model(f"scout_v2_{model_name}", model)
+
+                for pipeline_name, pipeline_obj in self.pipelines.items():
+                    if pipeline_obj is not None:
+                        gpu_mgr.register_model(f"scout_v2_pipeline_{pipeline_name}", pipeline_obj)
+
+                logger.info("🧹 Scout models registered with production GPU manager")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
+        elif self.device.startswith("cuda"):
+            logger.info("📋 Production GPU manager not available, models not registered")
     
     def classify_news_content(self, text: str, url: str = "", use_ensemble: bool = True) -> Dict[str, Any]:
         """
@@ -456,7 +534,11 @@ class NextGenGPUScoutEngine:
                 warnings.simplefilter("ignore")
                 
                 # Get predictions from the specialized news model
-                predictions = self.pipelines["news_classifier"](input_text)
+                if self.pipelines["news_classifier"]:
+                    predictions = self.pipelines["news_classifier"](input_text)
+                else:
+                    logger.debug("News classifier pipeline not available")
+                    return self._emergency_fallback(text, url)
                 
             # Process results - handle both old and new pipeline formats
             news_score = 0.0
@@ -498,7 +580,7 @@ class NextGenGPUScoutEngine:
                 "method": "ai_bert_specialized",
                 "model_used": self.model_configs["news_classifier"]["model_name"],
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "predictions": predictions
             }
             
@@ -538,7 +620,12 @@ class NextGenGPUScoutEngine:
             # Get quality predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                predictions = self.pipelines["quality_assessor"](input_text)
+                
+                if self.pipelines["quality_assessor"]:
+                    predictions = self.pipelines["quality_assessor"](input_text)
+                else:
+                    logger.debug("Quality assessor pipeline not available")
+                    return self._heuristic_quality_assessment(text, url)
             
             # Process quality scores - handle both formats
             quality_scores = {}
@@ -594,7 +681,7 @@ class NextGenGPUScoutEngine:
                     "avg_sentence_length": avg_sentence_length
                 },
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "raw_predictions": predictions
             }
             
@@ -630,7 +717,12 @@ class NextGenGPUScoutEngine:
             # Get sentiment predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                predictions = self.pipelines["sentiment_analyzer"](input_text)
+                
+                if self.pipelines["sentiment_analyzer"]:
+                    predictions = self.pipelines["sentiment_analyzer"](input_text)
+                else:
+                    logger.debug("Sentiment analyzer pipeline not available")
+                    return self._heuristic_sentiment_analysis(text, url)
             
             # Process sentiment scores
             sentiment_scores = {
@@ -688,7 +780,7 @@ class NextGenGPUScoutEngine:
                 "method": "ai_roberta_specialized",
                 "model_name": self.model_configs["sentiment_analyzer"]["model_name"],
                 "url": url,
-                "analysis_timestamp": datetime.utcnow().isoformat(),
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
                 "raw_predictions": predictions
             }
             
@@ -724,7 +816,12 @@ class NextGenGPUScoutEngine:
             # Get bias predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                predictions = self.pipelines["bias_detector"](input_text)
+                
+                if self.pipelines["bias_detector"]:
+                    predictions = self.pipelines["bias_detector"](input_text)
+                else:
+                    logger.debug("Bias detector pipeline not available")
+                    return self._heuristic_bias_detection(text, url)
             
             # Process bias scores - handle both formats
             bias_score = 0.0
@@ -770,7 +867,7 @@ class NextGenGPUScoutEngine:
                 "method": "ai_specialized_bias",
                 "model_used": self.model_configs["bias_detector"]["model_name"],
                 "url": url,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "raw_predictions": predictions
             }
             
@@ -841,7 +938,7 @@ class NextGenGPUScoutEngine:
                 "method": "ai_llava_visual",
                 "model_used": self.model_configs["visual_analyzer"]["model_name"],
                 "image_path": image_path,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "prompt_used": prompt
             }
             
@@ -898,7 +995,7 @@ class NextGenGPUScoutEngine:
             "sentiment_analysis": sentiment_analysis,
             "bias_detection": bias_analysis,
             "visual_analysis": visual_analysis,
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
             "models_used": [config["model_name"] for config in self.model_configs.values() if self.models.get(config["task"].split("_")[0] + "_" + config["task"].split("_")[1])],
             "ai_first_approach": True
         }
@@ -998,33 +1095,42 @@ class NextGenGPUScoutEngine:
             )
             
             # Initialize trainer
-            trainer = Trainer(
-                model=model,
-                args=training_args,
-                train_dataset=dataset,
-                tokenizer=tokenizer,
-            )
-            
-            # Fine-tune
-            trainer.train()
-            
-            # Save fine-tuned model
-            model_save_path = f"./fine_tuned_{task}_model"
-            model.save_pretrained(model_save_path)
-            tokenizer.save_pretrained(model_save_path)
-            
-            logger.info(f"✅ Fine-tuning completed for {task}. Model saved to {model_save_path}")
-            
-            # Update pipeline with fine-tuned model
-            self.pipelines[model_key] = pipeline(
-                "text-classification",
-                model=model,
-                tokenizer=tokenizer,
-                device=0 if self.device.startswith("cuda") else -1,
-                return_all_scores=True
-            )
-            
-            return True
+            if TRAINER_AVAILABLE and Trainer:
+                trainer = Trainer(
+                    model=model,
+                    args=training_args,
+                    train_dataset=dataset,
+                    tokenizer=tokenizer,
+                )
+                
+                # Fine-tune
+                trainer.train()
+                
+                # Save fine-tuned model
+                model_save_path = f"./fine_tuned_{task}_model"
+                model.save_pretrained(model_save_path)
+                tokenizer.save_pretrained(model_save_path)
+                
+                logger.info(f"✅ Fine-tuning completed for {task}. Model saved to {model_save_path}")
+                
+                # Update pipeline with fine-tuned model
+                if PIPELINE_AVAILABLE:
+                    self.pipelines[model_key] = pipeline(
+                        "text-classification",
+                        model=model,
+                        tokenizer=tokenizer,
+                        revision=self.model_configs.get(task, {}).get("revision", "main"),  # Use revision for production stability
+                        device=0 if self.device.startswith("cuda") else -1,
+                        top_k=None,
+                        batch_size=1,
+                        truncation=True,
+                        max_length=512
+                    )
+                
+                return True
+            else:
+                logger.warning(f"⚠️ Trainer not available for {task} fine-tuning due to transformers compatibility issue")
+                return False
             
         except Exception as e:
             logger.error(f"❌ Fine-tuning failed for {task}: {e}")
@@ -1159,7 +1265,7 @@ class NextGenGPUScoutEngine:
             "reasoning": f"Emergency fallback classification (keywords: {news_count})",
             "method": "emergency_fallback",
             "url": url,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
     
     def _heuristic_quality_assessment(self, text: str, url: str) -> Dict:
@@ -1246,7 +1352,7 @@ class NextGenGPUScoutEngine:
             "method": "heuristic_fallback",
             "model_name": "heuristic_keywords",
             "url": url,
-            "analysis_timestamp": datetime.utcnow().isoformat(),
+            "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
             "reasoning": f"Heuristic sentiment analysis (positive: {positive_count}, negative: {negative_count})"
         }
 
@@ -1266,20 +1372,28 @@ class NextGenGPUScoutEngine:
     
     def cleanup(self):
         """Clean up GPU memory and resources"""
+        # Release GPU allocation
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                release_agent_gpu('scout')
+                logger.info("✅ Scout GPU allocation released")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to release Scout GPU allocation: {e}")
+
         if self.device.startswith("cuda"):
             torch.cuda.empty_cache()
             logger.info("🧹 GPU memory cleaned up")
-        
+
         # Clear model references
         for model_name in list(self.models.keys()):
             del self.models[model_name]
         self.models.clear()
-        
+
         for tokenizer_name in list(self.tokenizers.keys()):
             del self.tokenizers[tokenizer_name]
         self.tokenizers.clear()
-        
-        logger.info("🧹 Model cleanup completed")
+
+        logger.info("🧹 Scout model cleanup completed")
     
     def __enter__(self):
         return self

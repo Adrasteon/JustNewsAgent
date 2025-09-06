@@ -20,9 +20,14 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
 import logging
+import hashlib
+from urllib.parse import urlparse
 
 # Import NewsReader from Scout agent directory
 from practical_newsreader_solution import PracticalNewsReader
+
+# Import shared utilities
+from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("production_bbc_ai_crawler")
@@ -30,12 +35,12 @@ logger = logging.getLogger("production_bbc_ai_crawler")
 class ProductionBBCCrawler:
     """Fast, production-scale BBC crawler that handles root causes"""
     
-    def __init__(self, batch_size: int = 10):
+    def __init__(self, batch_size: int = 10, requests_per_minute: int = 20, delay_between_requests: float = 2.0):
         self.newsreader = None
         self.batch_size = batch_size
-        self.processed_articles = []
-        self.failed_articles = []
-        
+        self.rate_limiter = RateLimiter(requests_per_minute, delay_between_requests)
+        self.robots_checker = RobotsChecker()
+    
     async def initialize(self):
         """Initialize NewsReader once for batch processing"""
         logger.info("🚀 Initializing Production BBC Crawler...")
@@ -50,51 +55,8 @@ class ProductionBBCCrawler:
     
     async def aggressive_modal_dismissal(self, page):
         """Aggressively dismiss all BBC modals, overlays, and cookie consent"""
-        
-        # Cookie consent - most common patterns
-        cookie_selectors = [
-            'button:has-text("Accept")',
-            'button:has-text("I Agree")', 
-            'button:has-text("Continue")',
-            'button:has-text("Accept all")',
-            'button:has-text("Accept All")',
-            '[data-testid="accept-all"]',
-            '[id*="accept"]',
-            '[id*="cookie"]',
-            '.fc-cta-consent', # OneTrust
-            '.banner-actions-button', # Common BBC pattern
-        ]
-        
-        # Sign-in and other modals
-        dismiss_selectors = [
-            'button:has-text("Not now")',
-            'button:has-text("Skip")',
-            'button:has-text("Maybe later")',
-            'button:has-text("Continue without")',
-            'button:has-text("No thanks")',
-            '[aria-label="Dismiss"]',
-            '[aria-label="Close"]',
-            '[aria-label="close"]',
-            'button[aria-label*="close"]',
-            '.close-button',
-            '.modal-close',
-            '[data-testid="close"]',
-            '[data-testid="dismiss"]',
-        ]
-        
-        all_selectors = cookie_selectors + dismiss_selectors
-        
-        # Try all selectors quickly
-        for selector in all_selectors:
-            try:
-                elements = page.locator(selector)
-                count = await elements.count()
-                if count > 0:
-                    await elements.first.click(timeout=1000)
-                    await asyncio.sleep(0.5)  # Brief pause
-                    logger.debug(f"Dismissed modal: {selector}")
-            except Exception:
-                continue  # Ignore failures, keep trying
+        # Use shared modal dismisser
+        await ModalDismisser.dismiss_modals(page)
     
     async def extract_fast_content(self, page) -> Dict[str, str]:
         """Fast DOM-based content extraction (no screenshots for speed)"""
@@ -147,10 +109,15 @@ class ProductionBBCCrawler:
                     except Exception:
                         continue
             
+            # Try to find canonical link and paywall markers
+            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)
+
             return {
                 "title": title,
                 "content": content_text.strip()[:1000],  # Limit for efficiency
-                "method": "dom_extraction"
+                "method": "dom_extraction",
+                "canonical": canonical,
+                "paywall_flag": paywall_flag
             }
             
         except Exception as e:
@@ -165,6 +132,27 @@ class ProductionBBCCrawler:
         """Process a single URL with aggressive modal handling"""
         
         try:
+            # Check robots.txt compliance first
+            if not self.robots_checker.check_robots_txt(url):
+                logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
+                return CanonicalMetadata.generate_metadata(
+                    url=url,
+                    title="Robots.txt Disallowed",
+                    content="Crawling not allowed by robots.txt",
+                    extraction_method="disallowed",
+                    status="disallowed",
+                    paywall_flag=False,
+                    confidence=0.0,
+                    publisher="BBC",
+                    crawl_mode="ai_enhanced",
+                    news_score=0.0,
+                    error="robots_disallowed"
+                )
+            
+            # Apply rate limiting
+            domain = urlparse(url).netloc
+            await self.rate_limiter.wait_if_needed(domain)
+            
             context = await browser.new_context(
                 viewport={'width': 1024, 'height': 768},
                 user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
@@ -203,15 +191,24 @@ class ProductionBBCCrawler:
                         # Fallback to simple text analysis instead of image analysis for speed
                         analysis = f"Article: {content_data['title']}\nContent: {content_data['content'][:300]}"
                         
-                        return {
-                            "url": url,
-                            "title": content_data["title"],
-                            "content": content_data["content"],
-                            "analysis": analysis,
-                            "extraction_method": content_data["method"],
-                            "timestamp": datetime.now().isoformat(),
-                            "status": "success"
-                        }
+                        url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
+                        domain = urlparse(url).netloc
+                        canonical = content_data.get('canonical')
+                        paywall_flag = content_data.get('paywall_flag', False)
+
+                        return CanonicalMetadata.generate_metadata(
+                            url=url,
+                            title=content_data["title"],
+                            content=content_data["content"],
+                            extraction_method=content_data["method"],
+                            status="success",
+                            paywall_flag=paywall_flag,
+                            confidence=0.8,
+                            publisher="BBC",
+                            crawl_mode="ai_enhanced",
+                            news_score=0.8,
+                            canonical=canonical
+                        )
                     except Exception as e:
                         logger.warning(f"Analysis failed for {url}: {e}")
             
@@ -219,15 +216,19 @@ class ProductionBBCCrawler:
             
         except Exception as e:
             logger.warning(f"Failed to process {url}: {e}")
-            return {
-                "url": url,
-                "title": "Error",
-                "content": f"Processing failed: {e}",
-                "analysis": "Failed to process",
-                "extraction_method": "error",
-                "timestamp": datetime.now().isoformat(),
-                "status": "error"
-            }
+            return CanonicalMetadata.generate_metadata(
+                url=url,
+                title="Error",
+                content=f"Processing failed: {e}",
+                extraction_method="error",
+                status="error",
+                paywall_flag=False,
+                confidence=0.0,
+                publisher="BBC",
+                crawl_mode="ai_enhanced",
+                news_score=0.0,
+                error=str(e)
+            )
     
     async def get_bbc_england_urls(self, max_urls: int = 50) -> List[str]:
         """Get BBC England article URLs quickly"""

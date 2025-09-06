@@ -20,7 +20,7 @@ import os
 import logging
 import torch
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 from dataclasses import dataclass
 from pathlib import Path
@@ -186,7 +186,7 @@ class SynthesizerV2Engine:
             self.models['bertopic'] = BERTopic(
                 embedding_model=self.config.bertopic_model,
                 umap_model=umap_model,
-                representation_model=representation_model,
+                representation_model=representation_model,  # type: ignore
                 min_topic_size=2,  # Minimum required by HDBSCAN
                 calculate_probabilities=False,  # Disable for small datasets
                 verbose=False
@@ -209,7 +209,7 @@ class SynthesizerV2Engine:
                 self.config.bart_model,
                 cache_dir=self.config.cache_dir,
                 torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            ).to(self.device)  # type: ignore
             
             self.tokenizers['bart'] = BartTokenizer.from_pretrained(
                 self.config.bart_model,
@@ -242,7 +242,7 @@ class SynthesizerV2Engine:
                 self.config.t5_model,
                 cache_dir=self.config.cache_dir,
                 torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            ).to(self.device)  # type: ignore
             
             self.tokenizers['t5'] = T5Tokenizer.from_pretrained(
                 self.config.t5_model,
@@ -278,7 +278,7 @@ class SynthesizerV2Engine:
                 self.config.dialogpt_model,
                 cache_dir=self.config.cache_dir,
                 torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-            ).to(self.device)
+            ).to(self.device)  # type: ignore
             
             self.tokenizers['dialogpt'] = AutoTokenizer.from_pretrained(
                 self.config.dialogpt_model,
@@ -334,7 +334,7 @@ class SynthesizerV2Engine:
         """Log feedback for model performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -651,16 +651,18 @@ class SynthesizerV2Engine:
         
         return refined
     
-    def get_model_status(self) -> Dict[str, bool]:
+    def get_model_status(self) -> Dict[str, Any]:
         """Get status of all models"""
-        return {
+        status: Dict[str, Any] = {
             "bertopic": self.models.get('bertopic') is not None,
             "bart": self.models.get('bart') is not None,
             "t5": self.models.get('t5') is not None,
             "dialogpt": self.models.get('dialogpt') is not None,
             "embeddings": self.models.get('embeddings') is not None,
-            "total_models": sum(1 for model in self.models.values() if model is not None)
         }
+        total_models = sum(1 for model in self.models.values() if model is not None)
+        status["total_models"] = total_models
+        return status
     
     def cleanup(self):
         """Clean up GPU memory and models"""
@@ -683,7 +685,7 @@ class SynthesizerV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_synthesizer_v2_engine():
+def run_synthesizer_v2_engine_test():
     """Test Synthesizer V2 Engine with sample data"""
     try:
         print("🔧 Testing Synthesizer V2 Engine...")
@@ -740,4 +742,4 @@ def test_synthesizer_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_synthesizer_v2_engine()
+    run_synthesizer_v2_engine_test()

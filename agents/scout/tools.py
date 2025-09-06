@@ -2,8 +2,17 @@
 import os
 import logging
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 import time
+import re
+import traceback
+
+# Import security utilities
+from agents.scout.security_utils import (
+    validate_url, sanitize_content, rate_limit, validate_content_size,
+    log_security_event, validate_batch_urls,
+    security_wrapper, sanitize_filename
+)
 
 FEEDBACK_LOG = os.environ.get("SCOUT_FEEDBACK_LOG", "./feedback_scout.log")
 
@@ -39,7 +48,6 @@ except ImportError as e:
     logger.warning(f"⚠️ Native Crawl4AI not available: {e}. Using Docker fallback.")
 
 # Import for HTML text extraction
-import re
 
 # Global Scout Intelligence Engine
 scout_engine = None
@@ -81,23 +89,32 @@ def extract_article_content(html_content: str) -> str:
     """
     if not html_content:
         return ""
-    
+
+    # Security validation - validate content size
+    if not validate_content_size(html_content):
+        logger.warning("HTML content size validation failed in extract_article_content")
+        log_security_event('content_size_exceeded', {'function': 'extract_article_content'})
+        return ""
+
+    # Sanitize HTML content before processing
+    html_content = sanitize_content(html_content)
+
     # Remove HTML tags to get clean text
     clean_text = re.sub(r'<[^>]+>', ' ', html_content)
-    
+
     # Clean up whitespace
     clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-    
+
     # Split into sentences for better content filtering
     sentences = [s.strip() for s in clean_text.split('.') if len(s.strip()) > 20]
-    
+
     # Filter out navigation/menu content from the beginning
     article_sentences = []
     content_started = False
-    
+
     for sentence in sentences:
         sentence_lower = sentence.lower()
-        
+
         # Skip common navigation elements
         if not content_started:
             skip_indicators = [
@@ -109,23 +126,23 @@ def extract_article_content(html_content: str) -> str:
                 'bbc verify', 'disability world africa', 'subscribe',
                 'sign up', 'cookie', 'privacy policy', 'terms of use'
             ]
-            
+
             if any(indicator in sentence_lower for indicator in skip_indicators):
                 continue
-            
+
             # Look for actual article content start
             article_indicators = [
                 'employees', 'workers', 'commuters', 'people', 'residents',
                 'officials', 'police', 'witnesses', 'sources', 'according to',
                 'reported', 'announced', 'said', 'told'
             ]
-            
+
             if any(indicator in sentence_lower for indicator in article_indicators) and len(sentence) > 50:
                 content_started = True
-        
+
         if content_started:
             article_sentences.append(sentence)
-    
+
     # Join the filtered sentences back
     if article_sentences:
         clean_article = '. '.join(article_sentences)
@@ -133,13 +150,13 @@ def extract_article_content(html_content: str) -> str:
         if not clean_article.endswith('.'):
             clean_article += '.'
         return clean_article
-    
+
     # Fallback: return cleaned text if no article pattern found
     return clean_text[:2000] if len(clean_text) > 2000 else clean_text
 
 def log_feedback(event: str, details: dict):
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def intelligent_source_discovery(*args, **kwargs):
     """
@@ -149,6 +166,20 @@ def intelligent_source_discovery(*args, **kwargs):
     query = kwargs.get("query", args[0] if args else "")
     max_sources = kwargs.get("max_sources", 20)
     quality_threshold = kwargs.get("quality_threshold", 0.6)
+    
+    # Security validation
+    if not query or not isinstance(query, str):
+        logger.warning("Invalid query provided for source discovery")
+        log_security_event('invalid_query', {'function': 'intelligent_source_discovery'})
+        return []
+    
+    # Sanitize query
+    query = sanitize_content(query)
+    
+    # Rate limiting
+    if not rate_limit("intelligent_source_discovery"):
+        log_security_event('rate_limit_exceeded', {'function': 'intelligent_source_discovery'})
+        return []
     
     logger.info(f"[ScoutAgent] Intelligent source discovery for: '{query}'")
     
@@ -245,6 +276,24 @@ def intelligent_content_crawl(*args, **kwargs):
         query = kwargs.get("query", "")
         logger.debug(f"URL mode - URL: {url}")
     
+    # Security validation
+    if url and not validate_url(url):
+        logger.warning(f"URL validation failed for content crawl: {url[:100]}")
+        log_security_event('url_validation_failed', {'url': url[:100], 'function': 'intelligent_content_crawl'})
+        return {"url": url[:100], "error": "Invalid or unsafe URL"}
+    
+    # Content size validation
+    if content_text and not validate_content_size(content_text):
+        logger.warning("Content size validation failed for intelligent content crawl")
+        log_security_event('content_size_exceeded', {'function': 'intelligent_content_crawl'})
+        return {"url": url[:100] if url else "", "error": "Content size exceeds maximum allowed limit"}
+    
+    # Rate limiting
+    rate_limit_key = f"content_crawl_{hash(url or content_text[:100]) % 1000}"
+    if not rate_limit(rate_limit_key):
+        log_security_event('rate_limit_exceeded', {'function': 'intelligent_content_crawl'})
+        return {"url": url[:100] if url else "", "error": "Rate limit exceeded"}
+    
     analyze_content = kwargs.get("analyze_content", True)
     
     logger.info(f"[ScoutAgent] Intelligent content crawl for URL: {url}")
@@ -315,7 +364,25 @@ def intelligent_batch_analysis(*args, **kwargs):
     urls = kwargs.get("urls", args[0] if args else [])
     quality_threshold = kwargs.get("quality_threshold", 0.6)
     
-    logger.info(f"[ScoutAgent] Intelligent batch analysis for {len(urls)} URLs")
+    # Security validation
+    if not urls or not isinstance(urls, list):
+        logger.warning("Invalid URLs provided for batch analysis")
+        log_security_event('invalid_batch_urls', {'function': 'intelligent_batch_analysis'})
+        return {"error": "Invalid URLs provided"}
+    
+    # Validate and filter URLs
+    valid_urls = validate_batch_urls(urls)
+    if not valid_urls:
+        logger.warning("No valid URLs provided for batch analysis")
+        log_security_event('no_valid_urls', {'function': 'intelligent_batch_analysis', 'total_urls': len(urls)})
+        return {"error": "No valid URLs provided"}
+    
+    # Rate limiting
+    if not rate_limit("intelligent_batch_analysis"):
+        log_security_event('rate_limit_exceeded', {'function': 'intelligent_batch_analysis'})
+        return {"error": "Rate limit exceeded"}
+    
+    logger.info(f"[ScoutAgent] Intelligent batch analysis for {len(valid_urls)} URLs")
     
     if not intelligence_available or not scout_engine:
         logger.warning("⚠️ Intelligence engine not available for batch analysis")
@@ -398,6 +465,22 @@ async def enhanced_deep_crawl_site(*args, **kwargs):
     word_count_threshold = kwargs.get("word_count_threshold", 500)  # User requested threshold
     quality_threshold = kwargs.get("quality_threshold", 0.6)
     analyze_content = kwargs.get("analyze_content", True)
+    
+    # Security validation
+    if not url:
+        logger.error("No URL provided for deep crawl")
+        log_security_event('missing_url', {'function': 'enhanced_deep_crawl_site'})
+        return {"error": "No URL provided"}
+    
+    if not validate_url(url):
+        logger.error(f"URL validation failed for deep crawl: {url[:100]}")
+        log_security_event('url_validation_failed', {'url': url[:100], 'function': 'enhanced_deep_crawl_site'})
+        return {"error": "Invalid or unsafe URL", "url": url[:100]}
+    
+    # Rate limiting
+    if not rate_limit(f"deep_crawl_{hash(url) % 1000}"):
+        log_security_event('rate_limit_exceeded', {'url': url[:100], 'function': 'enhanced_deep_crawl_site'})
+        return {"error": "Rate limit exceeded", "url": url[:100]}
     
     logger.info(f"[ScoutAgent] Enhanced deep crawl for {url} (depth={max_depth}, pages={max_pages}, min_words={word_count_threshold})")
     
@@ -567,8 +650,15 @@ async def enhanced_deep_crawl_site(*args, **kwargs):
 def discover_sources(*args, **kwargs):
     """
     Discover sources for a given query using the crawl4ai Docker container.
+    Includes security validation and rate limiting.
     """
     logger.info(f"[ScoutAgent] Discovering sources with args: {args}, kwargs: {kwargs}")
+    
+    # Rate limiting check
+    if not rate_limit("discover_sources"):
+        log_security_event('rate_limit_exceeded', {'function': 'discover_sources'})
+        return {"error": "Rate limit exceeded", "sources": []}
+    
     try:
         # Call the running crawl4ai container
         response = requests.post("http://localhost:32768/discover_sources", json={"args": args, "kwargs": kwargs})
@@ -594,6 +684,17 @@ def crawl_url(*args, **kwargs):
     if not url:
         logger.error("No URL provided for crawling")
         return {"error": "No URL provided"}
+    
+    # Security validation
+    if not validate_url(url):
+        logger.error(f"URL validation failed for: {url[:100]}")
+        log_security_event('url_validation_failed', {'url': url[:100], 'function': 'crawl_url'})
+        return {"error": "Invalid or unsafe URL", "url": url[:100]}
+    
+    # Rate limiting
+    if not rate_limit(f"crawl_url_{hash(url) % 1000}"):  # Simple hash-based identifier
+        log_security_event('rate_limit_exceeded', {'url': url[:100], 'function': 'crawl_url'})
+        return {"error": "Rate limit exceeded", "url": url[:100]}
     
     try:
         # Step 1: Get standard text content using native Crawl4AI
@@ -670,6 +771,14 @@ def crawl_url(*args, **kwargs):
             }
         }
         
+        # Sanitize content before returning
+        if combined_result["content"]:
+            combined_result["content"] = sanitize_content(combined_result["content"])
+        if combined_result["extracted_content"]:
+            combined_result["extracted_content"] = sanitize_content(combined_result["extracted_content"])
+        if combined_result["markdown"]:
+            combined_result["markdown"] = sanitize_content(combined_result["markdown"])
+        
         # Add NewsReader analysis if available
         if enhanced_analysis:
             combined_result["visual_analysis"] = enhanced_analysis
@@ -686,8 +795,8 @@ def crawl_url(*args, **kwargs):
         
     except Exception as e:
         logger.error(f"An error occurred during enhanced crawling: {e}")
-        log_feedback("enhanced_crawl_url_error", {"args": args, "error": str(e)})
-        return {"url": url, "error": str(e), "metadata": {"status": "error"}}
+        log_security_event('crawl_error', {'url': url[:100], 'error': str(e)})
+        return {"url": url[:100], "error": str(e), "metadata": {"status": "error"}}
 
 def enhanced_newsreader_crawl(*args, **kwargs):
     """
@@ -697,11 +806,23 @@ def enhanced_newsreader_crawl(*args, **kwargs):
     logger.info(f"[ScoutAgent] Enhanced NewsReader crawling with args: {args}, kwargs: {kwargs}")
     
     url = kwargs.get("url", args[0] if args else "")
-    force_visual = kwargs.get("force_visual", False)  # Force visual analysis even for text-rich content
+    # Force visual analysis parameter (reserved for future use)
     
+    # Security validation
     if not url:
         logger.error("No URL provided for enhanced crawling")
+        log_security_event('missing_url', {'function': 'enhanced_newsreader_crawl'})
         return {"error": "No URL provided"}
+    
+    if not validate_url(url):
+        logger.error(f"URL validation failed for enhanced crawl: {url[:100]}")
+        log_security_event('url_validation_failed', {'url': url[:100], 'function': 'enhanced_newsreader_crawl'})
+        return {"error": "Invalid or unsafe URL", "url": url[:100]}
+    
+    # Rate limiting
+    if not rate_limit(f"enhanced_crawl_{hash(url) % 1000}"):
+        log_security_event('rate_limit_exceeded', {'url': url[:100], 'function': 'enhanced_newsreader_crawl'})
+        return {"error": "Rate limit exceeded", "url": url[:100]}
     
     try:
         # Step 1: Standard text extraction using Crawl4AI  
@@ -832,7 +953,6 @@ def deep_crawl_site(*args, **kwargs):
 
 
 # Initialize production crawlers with robust error handling
-import traceback
 production_crawler = None
 PRODUCTION_CRAWLERS_AVAILABLE = False
 try:
@@ -880,6 +1000,26 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     """
     logger.info(f"[ScoutAgent] Ultra-fast production crawl: {site} ({target_articles} articles)")
     
+    # Security validation
+    if not site or not isinstance(site, str):
+        logger.error("Invalid site identifier provided")
+        log_security_event('invalid_site', {'function': 'production_crawl_ultra_fast'})
+        return {"error": "Invalid site identifier", "articles": []}
+    
+    # Sanitize site identifier
+    site = sanitize_filename(site)
+    
+    # Validate target_articles
+    if not isinstance(target_articles, int) or target_articles < 1 or target_articles > 1000:
+        logger.warning(f"Invalid target_articles: {target_articles}")
+        log_security_event('invalid_target_articles', {'function': 'production_crawl_ultra_fast', 'target': target_articles})
+        target_articles = min(max(target_articles, 1), 1000)  # Clamp to safe range
+    
+    # Rate limiting
+    if not rate_limit("production_crawl_ultra_fast"):
+        log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ultra_fast'})
+        return {"error": "Rate limit exceeded", "articles": []}
+    
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         error_msg = "Production crawlers not available"
         logger.error(error_msg)
@@ -911,6 +1051,27 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
         Dict with crawl results and performance metrics
     """
     logger.info(f"[ScoutAgent] AI-enhanced production crawl: {site} ({target_articles} articles)")
+    
+    # Security validation
+    if not site or not isinstance(site, str):
+        logger.error("Invalid site identifier provided")
+        log_security_event('invalid_site', {'function': 'production_crawl_ai_enhanced'})
+        return {"error": "Invalid site identifier", "articles": []}
+    
+    # Sanitize site identifier
+    site = sanitize_filename(site)
+    
+    # Validate target_articles
+    if not isinstance(target_articles, int) or target_articles < 1 or target_articles > 1000:
+        logger.warning(f"Invalid target_articles: {target_articles}")
+        log_security_event('invalid_target_articles', {'function': 'production_crawl_ai_enhanced', 'target': target_articles})
+        target_articles = min(max(target_articles, 1), 1000)  # Clamp to safe range
+    
+    # Rate limiting
+    if not rate_limit("production_crawl_ai_enhanced"):
+        log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ai_enhanced'})
+        return {"error": "Rate limit exceeded", "articles": []}
+    
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         error_msg = "Production crawlers not available"
         logger.error(error_msg)
@@ -930,26 +1091,36 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
         log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": str(e)})
         return {"error": str(e), "articles": []}
 
+@security_wrapper
 def get_production_crawler_info():
     """
     Get information about available production crawlers and supported sites
-    
+
     Returns:
         Dict with crawler capabilities and supported sites
     """
     logger.info("[ScoutAgent] Getting production crawler info")
-    
+
+    # Rate limiting
+    if not rate_limit("get_production_crawler_info"):
+        log_security_event('rate_limit_exceeded', {'function': 'get_production_crawler_info'})
+        return {
+            "available": False,
+            "error": "Rate limit exceeded",
+            "supported_sites": []
+        }
+
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         return {
             "available": False,
             "error": "Production crawlers not initialized",
             "supported_sites": []
         }
-    
+
     try:
         supported_sites = production_crawler.get_supported_sites()
         site_info = {site: production_crawler.get_site_info(site) for site in supported_sites}
-        
+
         result = {
             "available": True,
             "supported_sites": supported_sites,
@@ -960,7 +1131,7 @@ def get_production_crawler_info():
                 "ai_enhanced": "0.8+ articles/second"
             }
         }
-        
+
         log_feedback("get_production_crawler_info", {"sites_count": len(supported_sites)})
         return result
     except Exception as e:

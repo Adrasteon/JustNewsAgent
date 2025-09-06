@@ -3,7 +3,21 @@ Fact Checker V2 - Production-Ready Multi-Model AI Architecture
 Focused fact verification with 4 specialized AI models
 
 AI Models:
-1. DistilBERT-base: Fact verification (factual/questionable classification)
+1. DistilBERT-base:             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['fact_verification'] = None
+                return
+                
+            device = 0 if (self.device.type == "cuda") else -1
+            self.pipelines['fact_verification'] = pipeline_fn(
+                "text-classification",
+                model=model_name,
+                tokenizer=model_name,
+                device=device,
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
+            )fication (factual/questionable classification)
 2. RoBERTa-base: Source credibility assessment (reliability scoring)  
 3. SentenceTransformers: Evidence retrieval (semantic search)
 4. spaCy NER: Claim extraction (verifiable claims identification)
@@ -16,9 +30,11 @@ import os
 import logging
 import warnings
 from typing import Dict, List, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import torch
 import importlib
+from pathlib import Path
+import numpy as np
 
 # Lazy import helpers to avoid importing heavy ML libraries at module import time
 def _import_transformers_module():
@@ -44,22 +60,20 @@ def _import_sentence_transformer_class():
         logger = logging.getLogger(__name__)
         logger.warning(f"sentence_transformers not available at import time: {e}")
         return None
-from pathlib import Path
-import numpy as np
 
 # Production-ready warning suppression (silence when modules are present at runtime)
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.*")
 warnings.filterwarnings("ignore", category=UserWarning, module="transformers.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="spacy.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="click.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning)  # Catch all deprecation warnings
 
-# GPU cleanup integration
+# Production GPU Manager integration
 try:
-    import sys
-    sys.path.insert(0, '/home/adra/JustNewsAgentic')
-    from training_system.utils.gpu_cleanup import GPUModelManager
-    gpu_manager = GPUModelManager()
-    GPU_CLEANUP_AVAILABLE = True
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
-    GPU_CLEANUP_AVAILABLE = False
+    PRODUCTION_GPU_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -77,26 +91,47 @@ class FactCheckerV2Engine:
         self.pipelines = {}
         self.enable_training = enable_training
         
-        logger.info(f"🔥 Initializing Fact Checker V2 Engine on {self.device}")
-        
+        # Initialize GPU allocation for fact checker agent
+        self.gpu_allocated = False
+        self.gpu_device = None
+        self.gpu_memory_gb = 3.0  # Fact checker needs ~3GB for models
+
+        if PRODUCTION_GPU_AVAILABLE and self.device.type == "cuda":
+            try:
+                # Request GPU allocation through production manager
+                allocation = request_agent_gpu('fact_checker', self.gpu_memory_gb)
+                if isinstance(allocation, dict) and allocation.get('status') == 'allocated':
+                    self.gpu_allocated = True
+                    self.gpu_device = allocation.get('gpu_device', 0)
+                    self.gpu_memory_gb = allocation.get('allocated_memory_gb', self.gpu_memory_gb)
+                    logger.info(f"✅ Fact Checker GPU allocated: {self.gpu_memory_gb}GB on device {self.gpu_device}")
+                else:
+                    logger.warning(f"⚠️ Fact Checker GPU allocation failed: {allocation}")
+                    self.device = torch.device('cpu')
+            except Exception as e:
+                logger.warning(f"⚠️ Fact Checker GPU allocation error: {e}")
+                self.device = torch.device('cpu')
+        else:
+            logger.info("📋 Production GPU manager not available, using direct GPU access")
+
         # Load core fact-checking models (contradiction moved to Reasoning Agent)
         self._initialize_fact_verification_model()
         self._initialize_credibility_assessment_model()
         self._initialize_evidence_retrieval_model()
         self._initialize_claim_extraction_model()
-        
-        # Register models with GPU cleanup manager
-        if GPU_CLEANUP_AVAILABLE and self.device.type == "cuda":
-            for model_name, pipeline in self.pipelines.items():
-                if pipeline is not None:
-                    gpu_manager.register_model(f"fact_checker_v2_{model_name}", pipeline)
-        
-        # Validation and completion
-        successful_models = (
-            len([p for p in self.pipelines.values() if p is not None]) +
-            len([m for m in self.models.values() if m is not None])
-        )
-        logger.info(f"✅ Fact Checker V2 Engine ready with {successful_models} AI models")
+
+        # Register models with production GPU manager
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                gpu_mgr = get_gpu_manager()
+                for model_name, pipeline in self.pipelines.items():
+                    if pipeline is not None:
+                        gpu_mgr.register_model(f"fact_checker_v2_{model_name}", pipeline)
+                logger.info("🧹 Fact Checker models registered with production GPU manager")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
+        elif self.device.type == "cuda":
+            logger.info("📋 Production GPU manager not available, models not registered")
     
     def _initialize_fact_verification_model(self):
         """Model 1: DistilBERT-base for binary fact verification"""
@@ -108,13 +143,19 @@ class FactCheckerV2Engine:
                 return
 
             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['fact_verification'] = None
+                return
+                
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['fact_verification'] = pipeline_fn(
                 "text-classification",
                 model=model_name,
                 tokenizer=model_name,
                 device=device,
-                return_all_scores=True
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
             )
 
             logger.info("✅ Model 1: Fact verification (DistilBERT) loaded")
@@ -133,13 +174,19 @@ class FactCheckerV2Engine:
                 return
 
             pipeline_fn = getattr(transformers_mod, 'pipeline', None)
+            if pipeline_fn is None:
+                self.pipelines['credibility_assessment'] = None
+                return
+                
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['credibility_assessment'] = pipeline_fn(
                 "text-classification",
                 model=model_name,
                 tokenizer=model_name,
                 device=device,
-                return_all_scores=True
+                return_all_scores=True,  # Keep for backward compatibility
+                truncation=True,  # Add truncation for long inputs
+                max_length=512  # Limit input length
             )
 
             logger.info("✅ Model 2: Credibility assessment (RoBERTa) loaded")
@@ -207,11 +254,15 @@ class FactCheckerV2Engine:
     def _initialize_claim_extraction_model(self):
         """Model 5: spaCy for claim extraction"""
         try:
-            import spacy
-            
-            # Load spaCy model - spaCy handles GPU differently than PyTorch
-            # Use CPU for spaCy as it's more stable and still fast for NLP tasks
-            self.models['claim_extraction'] = spacy.load("en_core_web_sm")
+            # Suppress all warnings during spaCy operations
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                
+                import spacy
+                
+                # Load spaCy model - spaCy handles GPU differently than PyTorch
+                # Use CPU for spaCy as it's more stable and still fast for NLP tasks
+                self.models['claim_extraction'] = spacy.load("en_core_web_sm")
             
             logger.info("✅ Model 5: Claim extraction (spaCy) loaded")
             
@@ -453,7 +504,7 @@ class FactCheckerV2Engine:
                 "source_credibility": credibility,
                 "contradictions": contradictions,
                 "entities": claims_result['entities'],
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "models_used": ["distilbert", "roberta", "bert-large", "sentence-transformers", "spacy"]
             }
             
@@ -492,6 +543,14 @@ class FactCheckerV2Engine:
     
     def cleanup(self):
         """Cleanup GPU memory and model resources"""
+        # Release GPU allocation
+        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
+            try:
+                release_agent_gpu('fact_checker')
+                logger.info("✅ Fact Checker GPU allocation released")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to release Fact Checker GPU allocation: {e}")
+
         try:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()

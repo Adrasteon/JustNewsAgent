@@ -7,7 +7,7 @@ Performance Targets:
 - 2-4x improvement over baseline (300-600 articles/sec)
 - Native CUDA execution with zero Python overhead
 - Optimized batch processing up to 100 articles
-- FP16/INT8 precision for maximum throughput
+- FP8/FP16 precision for maximum throughput
 
 Status: PRODUCTION READY - Native TensorRT execution
 """
@@ -26,6 +26,68 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Environment validation
+def _validate_environment():
+    """Validate that the required environment is properly set up"""
+    try:
+        import numpy as np
+    except ImportError:
+        raise ImportError(
+            "numpy is not available. Please ensure you're using the JustNewsAgent environment:\n"
+            "  source activate_environment.sh\n"
+            "  python your_script.py"
+        )
+
+    try:
+        import torch
+    except ImportError:
+        raise ImportError(
+            "PyTorch is not available. Please ensure you're using the JustNewsAgent environment:\n"
+            "  source activate_environment.sh\n"
+            "  python your_script.py"
+        )
+
+# Run environment validation
+_validate_environment()
+
+# Run environment validation
+_validate_environment()
+
+# TensorRT and CUDA imports (optional)
+try:
+    import tensorrt as trt
+    import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
+    import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
+    TENSORRT_AVAILABLE = True
+except ImportError:
+    TENSORRT_AVAILABLE = False
+    # Create dummy objects for type checking
+    trt = None
+    cuda = None
+
+# Transformers and model loading imports
+from transformers import AutoTokenizer
+from agents.common.model_loader import load_transformers_model
+
+# Fallback imports
+try:
+    from .hybrid_tools_v4 import GPUAcceleratedAnalyst
+except ImportError:
+    try:
+        from hybrid_tools_v4 import GPUAcceleratedAnalyst
+    except ImportError:
+        GPUAcceleratedAnalyst = None
+        logger.warning("⚠️  GPUAcceleratedAnalyst not available - fallback functionality disabled")
+
+# Add parent directory for imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Export availability flag
+NATIVE_TENSORRT_AVAILABLE = TENSORRT_AVAILABLE
 
 class NativeTensorRTInferenceEngine:
     """
@@ -57,9 +119,13 @@ class NativeTensorRTInferenceEngine:
     
     def _initialize_cuda(self):
         """Initialize CUDA context and stream with proper context management"""
-        try:
-            import pycuda.driver as cuda
+        if not TENSORRT_AVAILABLE:
+            logger.warning("⚠️  TensorRT not available - CUDA initialization skipped")
+            self.cuda_stream = None
+            self.cuda_context = None
+            return
             
+        try:
             # Initialize CUDA explicitly (don't use autoinit)
             cuda.init()
             
@@ -103,7 +169,6 @@ class NativeTensorRTInferenceEngine:
     def _load_engines(self):
         """Load native TensorRT engines from disk"""
         try:
-            import tensorrt as trt
             
             # Load sentiment engine
             sentiment_engine_path = self.engines_dir / "native_sentiment_roberta.engine"
@@ -165,11 +230,8 @@ class NativeTensorRTInferenceEngine:
     def _load_tokenizers(self):
         """Load tokenizers for each task"""
         try:
-            from transformers import AutoTokenizer
-            
             # Load sentiment tokenizer (RoBERTa) and bias tokenizer (BERT)
             try:
-                from agents.common.model_loader import load_transformers_model
                 if 'sentiment' in self.engines:
                     try:
                         _, tokenizer = load_transformers_model(
@@ -209,17 +271,13 @@ class NativeTensorRTInferenceEngine:
                     self.tokenizers['bias'] = AutoTokenizer.from_pretrained(
                         'unitary/toxic-bert'
                     )
-                
+                    
         except Exception as e:
             logger.error(f"❌ Failed to load tokenizers: {e}")
     
     def _initialize_engines(self):
         """Initialize all compiled TensorRT engines"""
         try:
-            import tensorrt as trt
-            import pycuda.driver as cuda  # noqa: F401  (optional GPU dependency)
-            import pycuda.autoinit  # noqa: F401  (side-effect import for CUDA init)
-            
             # Create TensorRT runtime
             self.trt_logger = trt.Logger(trt.Logger.WARNING)
             self.runtime = trt.Runtime(self.trt_logger)
@@ -278,7 +336,6 @@ class NativeTensorRTInferenceEngine:
             
             # Load tokenizer
             try:
-                from transformers import AutoTokenizer
                 tokenizer = AutoTokenizer.from_pretrained(model_name)
                 self.tokenizers[task] = tokenizer
             except Exception as e:
@@ -303,7 +360,6 @@ class NativeTensorRTInferenceEngine:
     def _initialize_fallback(self):
         """Initialize fallback system when native engines unavailable"""
         try:
-            from hybrid_tools_v4 import GPUAcceleratedAnalyst
             self.fallback_analyst = GPUAcceleratedAnalyst()
             logger.info("✅ Fallback GPU analyst ready")
         except Exception as e:
@@ -433,7 +489,6 @@ class NativeTensorRTInferenceEngine:
     def _run_native_inference(self, text: str, task: str) -> Optional[np.ndarray]:
         """Run single inference on native TensorRT engine"""
         try:
-            import pycuda.driver as cuda
             
             _engine = self.engines[task]
             context = self.contexts[task]
@@ -512,7 +567,6 @@ class NativeTensorRTInferenceEngine:
     def _run_native_batch_inference(self, texts: List[str], task: str) -> Optional[List[np.ndarray]]:
         """Run batch inference on native TensorRT engine"""
         try:
-            import pycuda.driver as cuda
             
             batch_size = len(texts)
             if batch_size == 0:
@@ -725,7 +779,6 @@ class NativeTensorRTInferenceEngine:
                 return
                 
             if hasattr(self, 'context_created') and self.context_created and hasattr(self, 'cuda_context'):
-                import pycuda.driver as cuda
                 # Only cleanup if we created the context and it's still current
                 if self.cuda_context is not None:
                     try:

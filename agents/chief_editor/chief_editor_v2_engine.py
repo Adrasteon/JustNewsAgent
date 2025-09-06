@@ -4,7 +4,7 @@ import os
 import logging
 import torch
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import numpy as np
 from dataclasses import dataclass
 from enum import Enum
@@ -335,7 +335,7 @@ class ChiefEditorV2Engine:
         """Log feedback for editorial decision tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -756,7 +756,7 @@ class ChiefEditorV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_chief_editor_v2_engine():
+def run_chief_editor_v2_engine_test():
     """Test Chief Editor V2 Engine with sample editorial decisions"""
     try:
         print("🔧 Testing Chief Editor V2 Engine...")
@@ -830,4 +830,4 @@ def test_chief_editor_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_chief_editor_v2_engine()
+    run_chief_editor_v2_engine_test()

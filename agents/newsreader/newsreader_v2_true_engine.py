@@ -1,3 +1,17 @@
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
+from enum import Enum
+import torch
+import time
+from datetime import datetime, timezone
+import json
+from PIL import Image
+from playwright.async_api import async_playwright
+import os
+import logging
+import asyncio
+import warnings
+
 """
 NewsReader V2 Engine - TRUE Multi-Modal Vision Processing
 Architecture: LLaVA + Screenshot Processing (OCR & CLIP DISABLED - Testing Redundancy)
@@ -16,23 +30,9 @@ V2 Standards:
 - MCP bus integration for inter-agent communication
 """
 
-import os
-import logging
-import asyncio
-import warnings
-
 # Suppress transformers warnings about slow processors
 warnings.filterwarnings("ignore", message=".*use_fast.*slow processor.*")
 warnings.filterwarnings("ignore", message=".*slow image processor.*")
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
-from enum import Enum
-import torch
-import time
-from datetime import datetime
-import json
-from PIL import Image
-from playwright.async_api import async_playwright
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -92,7 +92,7 @@ class NewsReaderV2Config:
     # Model configurations
     llava_model: str = "llava-hf/llava-onevision-qwen2-0.5b-ov-hf"  # 87% memory reduction: 7.6GB → 1.2GB
     clip_model: str = "openai/clip-vit-large-patch14"
-    ocr_languages: List[str] = None
+    ocr_languages: Optional[List[str]] = None
     cache_dir: str = MODEL_CACHE_DIR
     
     # Quantization settings for memory optimization
@@ -198,7 +198,7 @@ class NewsReaderV2Engine:
         
         logger.info("🧹 Aggressive GPU memory cleanup completed")
 
-    def __init__(self, config: NewsReaderV2Config = None):
+    def __init__(self, config: Optional[NewsReaderV2Config] = None):
         self.config = config or NewsReaderV2Config()
         
         # Device setup with CUDA optimizations
@@ -377,7 +377,7 @@ class NewsReaderV2Engine:
             if self.device.type == 'cuda' and quantization_config is None:
                 # Only move if not quantized (quantized models are auto-placed)
                 if not any('cuda' in str(param.device) for param in self.models['llava'].parameters()):
-                    self.models['llava'] = self.models['llava'].to(self.device)
+                    self.models['llava'] = self.models['llava'].to(self.device)  # type: ignore
             
             # TORCH.COMPILE DISABLED - Causes memory pressure with 16 compile workers
             # Apply torch.compile optimization if available and model is on GPU
@@ -517,7 +517,7 @@ class NewsReaderV2Engine:
             logger.error(f"❌ Screenshot capture failed for {url}: {e}")
             raise
     
-    def analyze_screenshot_with_llava(self, screenshot_path: str, custom_prompt: str = None) -> Dict[str, Any]:
+    def analyze_screenshot_with_llava(self, screenshot_path: str, custom_prompt: Optional[str] = None) -> Dict[str, Any]:
         """
         CORE FUNCTIONALITY: Analyze screenshot using LLaVA vision-language model
         
@@ -526,6 +526,12 @@ class NewsReaderV2Engine:
         """
         if not self.is_llava_available():
             raise RuntimeError("LLaVA model not loaded - cannot analyze screenshots")
+        
+        # Log memory usage before analysis
+        if self.device.type == 'cuda':
+            pre_allocated_mb = torch.cuda.memory_allocated() / 1e6
+            pre_reserved_mb = torch.cuda.memory_reserved() / 1e6
+            logger.info(f"🔍 Pre-LLaVA analysis GPU memory: {pre_allocated_mb:.1f}MB allocated, {pre_reserved_mb:.1f}MB reserved")
         
         # Default news extraction prompt
         if not custom_prompt:
@@ -581,6 +587,12 @@ class NewsReaderV2Engine:
                 # Remove truncation for LLaVA - it handles sequence length internally
             ).to(self.device)
             
+            # Log memory after input processing
+            if self.device.type == 'cuda':
+                input_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                input_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"📊 Post-input processing GPU memory: {input_allocated_mb:.1f}MB allocated, {input_reserved_mb:.1f}MB reserved")
+            
             # Generate response with optimized parameters
             with torch.no_grad():
                 output = self.models['llava'].generate(
@@ -591,6 +603,12 @@ class NewsReaderV2Engine:
                     top_p=0.9,
                     pad_token_id=self.processors['llava'].tokenizer.eos_token_id
                 )
+            
+            # Log memory after generation
+            if self.device.type == 'cuda':
+                gen_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                gen_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"🤖 Post-generation GPU memory: {gen_allocated_mb:.1f}MB allocated, {gen_reserved_mb:.1f}MB reserved")
             
             # Decode response (only new tokens)
             generated_text = self.processors['llava'].decode(
@@ -604,6 +622,11 @@ class NewsReaderV2Engine:
             # Cleanup GPU memory after processing
             if self.device.type == 'cuda':
                 torch.cuda.empty_cache()
+                
+                # Log memory after cleanup
+                post_allocated_mb = torch.cuda.memory_allocated() / 1e6
+                post_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                logger.info(f"🧹 Post-cleanup GPU memory: {post_allocated_mb:.1f}MB allocated, {post_reserved_mb:.1f}MB reserved")
             
             return {
                 "success": True,
@@ -879,7 +902,7 @@ def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 

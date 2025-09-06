@@ -1,4 +1,3 @@
-
 """
 Specialized Analyst Agent Tools - Production Ready
 Focused on quantitative analysis, entity extraction, and statistical insights
@@ -20,7 +19,8 @@ import json
 import re
 import statistics
 import warnings
-from datetime import datetime
+import importlib.util
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from collections import Counter, defaultdict
 
@@ -75,8 +75,6 @@ warnings.filterwarnings("ignore", category=UserWarning, module="torch")
 warnings.filterwarnings("ignore", category=FutureWarning, module="transformers")
 
 # Detect availability of specialized NLP dependencies without importing them
-import importlib.util
-
 _spacy_spec = importlib.util.find_spec("spacy")
 HAS_SPACY = _spacy_spec is not None
 
@@ -153,16 +151,24 @@ def ensure_spacy_model_loaded():
         logger.warning(f"Could not load {SPACY_MODEL}: {e}")
         return None
 
-def log_feedback(event: str, details: Dict[str, Any]) -> None:
+def log_feedback(event_or_details, details=None) -> None:
     """
     Production-standard feedback logging with structured format.
     
     Args:
-        event: Event type identifier
-        details: Event details and metadata
+        event_or_details: Either event name (str) or details dict (for backward compatibility)
+        details: Event details and metadata (optional if first arg is details)
     """
     try:
-        timestamp = datetime.utcnow().isoformat()
+        # Handle backward compatibility - if first arg is dict, treat it as details
+        if isinstance(event_or_details, dict) and details is None:
+            event = "feedback"
+            details = event_or_details
+        else:
+            event = event_or_details
+            details = details or {}
+        
+        timestamp = datetime.now(timezone.utc).isoformat()
         log_entry = {
             "timestamp": timestamp,
             "event": event,
@@ -295,7 +301,7 @@ def _clean_entities(entities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     
     return cleaned[:15]  # Limit to top 15 entities
 
-def identify_entities(text: str) -> List[Dict[str, Any]]:
+def identify_entities(text: str) -> Dict[str, Any]:
     """
     Advanced entity extraction using spaCy NER with transformer fallback.
     
@@ -303,10 +309,10 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
         text: Input text for entity extraction
         
     Returns:
-        List of entity dictionaries with type, text, start, end, confidence
+        Dictionary containing entity extraction results
     """
     if not text or not text.strip():
-        return []
+        return {"entities": [], "total_entities": 0, "method": "empty_input"}
         
     logger.info(f"🔍 Extracting entities from {len(text)} characters")
     
@@ -365,7 +371,12 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
             "entities": [e["text"] for e in entities[:5]]  # Log first 5
         })
         
-        return entities
+        return {
+            "entities": entities,
+            "total_entities": len(entities),
+            "method": processing_method,
+            "text_length": len(text)
+        }
         
     except Exception as e:
         logger.error(f"❌ Entity extraction failed: {e}")
@@ -374,7 +385,12 @@ def identify_entities(text: str) -> List[Dict[str, Any]]:
             "error": str(e),
             "method": processing_method
         })
-        return []
+        return {
+            "entities": [],
+            "total_entities": 0,
+            "method": "error",
+            "error": str(e)
+        }
 
 def analyze_text_statistics(text: str) -> Dict[str, Any]:
     """
@@ -387,7 +403,12 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
         Dictionary containing statistical metrics
     """
     if not text or not text.strip():
-        return {"error": "Empty text provided"}
+        return {
+            "word_count": 0,
+            "character_count": 0,
+            "sentence_count": 0,
+            "error": "Empty text provided"
+        }
         
     logger.info(f"📊 Analyzing text statistics for {len(text)} characters")
     
@@ -416,25 +437,18 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
         readability = _calculate_readability(text, word_count, sentence_count, word_lengths)
         
         result = {
-            "basic_metrics": {
-                "character_count": len(text),
-                "word_count": word_count,
-                "sentence_count": sentence_count,
-                "paragraph_count": paragraph_count,
-                "avg_word_length": round(avg_word_length, 2),
-                "avg_sentence_length": round(avg_sentence_length, 2)
-            },
-            "complexity_metrics": {
-                "complex_words": len(complex_words),
-                "complex_word_ratio": round(complex_word_ratio, 3),
-                "vocabulary_diversity": _calculate_vocabulary_diversity(words),
-                "readability_score": readability
-            },
-            "numerical_content": {
-                "numbers_found": len(numbers),
-                "numbers": numbers[:10],  # First 10 numbers
-                "numeric_density": round(len(numbers) / word_count * 100, 2) if word_count > 0 else 0
-            }
+            "word_count": word_count,
+            "character_count": len(text),
+            "sentence_count": sentence_count,
+            "paragraph_count": paragraph_count,
+            "avg_words_per_sentence": round(avg_sentence_length, 2),  # Changed from avg_sentence_length
+            "avg_word_length": round(avg_word_length, 2),
+            "complex_words": len(complex_words),
+            "complex_word_ratio": round(complex_word_ratio, 3),
+            "vocabulary_diversity": _calculate_vocabulary_diversity(words),
+            "readability_score": readability,
+            "numbers_found": len(numbers),
+            "numeric_density": round(len(numbers) / word_count * 100, 2) if word_count > 0 else 0
         }
         
         logger.info(f"✅ Statistical analysis complete: {word_count} words, readability {readability}")
@@ -450,7 +464,11 @@ def analyze_text_statistics(text: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"❌ Text statistics analysis failed: {e}")
         log_feedback("analyze_text_statistics_error", {"error": str(e)})
-        return {"error": str(e)}
+        return {
+            "word_count": 0,
+            "character_count": len(text),
+            "error": str(e)
+        }
 
 def extract_key_metrics(text: str, url: str = None) -> Dict[str, Any]:
     """
@@ -461,43 +479,43 @@ def extract_key_metrics(text: str, url: str = None) -> Dict[str, Any]:
         url (str, optional): Article URL for context
         
     Returns:
-        Dict containing extracted metrics including financial data, 
-        temporal references, and statistical information
+        Dict containing extracted metrics
     """
     try:
         logger.info(f"🔍 Extracting key metrics from text (length: {len(text)} chars)")
         
-        metrics = {
-            "financial_metrics": _extract_financial_metrics(text),
-            "temporal_references": _extract_temporal_references(text),
-            "statistical_references": _extract_statistical_references(text),
-            "geographic_metrics": _extract_geographic_metrics(text),
-            "numerical_data": _extract_numbers(text),
-            "extraction_metadata": {
-                "text_length": len(text),
-                "url": url,
-                "extraction_time": datetime.now().isoformat(),
-                "total_metrics_found": 0  # Will be calculated
-            }
+        # Extract all metrics
+        financial_metrics = _extract_financial_metrics(text)
+        temporal_references = _extract_temporal_references(text)
+        statistical_references = _extract_statistical_references(text)
+        geographic_metrics = _extract_geographic_metrics(text)
+        numerical_data = _extract_numbers(text)
+        
+        # Combine all metrics into a single list
+        all_metrics = []
+        all_metrics.extend(financial_metrics)
+        all_metrics.extend(temporal_references)
+        all_metrics.extend(statistical_references)
+        all_metrics.extend(geographic_metrics)
+        all_metrics.extend(numerical_data)
+        
+        result = {
+            "metrics": all_metrics,
+            "total_metrics": len(all_metrics),
+            "text_length": len(text),
+            "url": url
         }
         
-        # Calculate total metrics found
-        total_metrics = (
-            len(metrics["financial_metrics"]) +
-            len(metrics["temporal_references"]) +
-            len(metrics["statistical_references"]) +
-            len(metrics["geographic_metrics"]) +
-            len(metrics["numerical_data"])
-        )
-        
-        metrics["extraction_metadata"]["total_metrics_found"] = total_metrics
-        
-        logger.info(f"✅ Extracted {total_metrics} total metrics")
-        return metrics
+        logger.info(f"✅ Extracted {len(all_metrics)} total metrics")
+        return result
         
     except Exception as e:
         logger.error(f"❌ Error extracting key metrics: {e}")
-        return {"error": str(e)}
+        return {
+            "metrics": [],
+            "total_metrics": 0,
+            "error": str(e)
+        }
 
 def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str, Any]:
     """
@@ -508,8 +526,7 @@ def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str
         urls (List[str], optional): Corresponding URLs for context
         
     Returns:
-        Dict containing trend analysis including entity trends, 
-        topic evolution, and statistical patterns
+        Dict containing trend analysis
     """
     try:
         logger.info(f"📈 Analyzing content trends across {len(texts)} texts")
@@ -517,28 +534,63 @@ def analyze_content_trends(texts: List[str], urls: List[str] = None) -> Dict[str
         # Filter out empty texts
         valid_texts = [text for text in texts if text and text.strip()]
         if not valid_texts:
-            return {"error": "No valid texts provided for trend analysis"}
-        
-        trends = {
-            "entity_trends": _analyze_entity_trends(valid_texts),
-            "topic_trends": _analyze_topic_trends(valid_texts),
-            "statistical_trends": _analyze_statistical_trends(valid_texts),
-            "temporal_patterns": _analyze_temporal_patterns(valid_texts),
-            "trend_metadata": {
-                "total_texts_analyzed": len(valid_texts),
-                "total_characters": sum(len(text) for text in valid_texts),
-                "average_text_length": sum(len(text.split()) for text in valid_texts) / len(valid_texts),
-                "urls_provided": bool(urls and len(urls) > 0),
-                "analysis_time": datetime.now().isoformat()
+            return {
+                "trends": [],
+                "topics": [],
+                "error": "No valid texts provided for trend analysis"
             }
+        
+        # Get trend analyses
+        entity_trends = _analyze_entity_trends(valid_texts)
+        topic_trends = _analyze_topic_trends(valid_texts)
+        
+        # Extract trends and topics from the analyses
+        trends = []
+        topics = []
+        
+        # Add entity trends
+        if "most_common_entities" in entity_trends:
+            for entity, count in entity_trends["most_common_entities"].items():
+                trends.append({
+                    "type": "entity",
+                    "value": entity,
+                    "frequency": count,
+                    "category": "named_entity"
+                })
+        
+        # Add topic trends
+        if "trending_topics" in topic_trends:
+            for topic, count in topic_trends["trending_topics"].items():
+                topics.append({
+                    "topic": topic,
+                    "frequency": count,
+                    "relevance_score": count / len(valid_texts)
+                })
+                trends.append({
+                    "type": "topic",
+                    "value": topic,
+                    "frequency": count,
+                    "category": "keyword"
+                })
+        
+        result = {
+            "trends": trends,
+            "topics": topics,
+            "total_texts": len(valid_texts),
+            "total_trends": len(trends),
+            "total_topics": len(topics)
         }
         
         logger.info(f"✅ Content trends analysis completed for {len(valid_texts)} texts")
-        return trends
+        return result
         
     except Exception as e:
         logger.error(f"❌ Error analyzing content trends: {e}")
-        return {"error": str(e)}
+        return {
+            "trends": [],
+            "topics": [],
+            "error": str(e)
+        }
 
 # =============================================================================
 # HELPER FUNCTIONS FOR SPECIALIZED ANALYSIS
@@ -753,3 +805,388 @@ def _analyze_temporal_patterns(texts: List[str]) -> Dict[str, Any]:
         "temporal_frequency": dict(temporal_mentions.most_common(10)),
         "temporal_density": sum(temporal_mentions.values()) / len(texts) if texts else 0
     }
+
+def _heuristic_sentiment_analysis(text: str) -> Dict[str, Any]:
+    """
+    Heuristic sentiment analysis fallback when AI models are not available.
+    
+    Args:
+        text: Text to analyze
+        
+    Returns:
+        Sentiment analysis results
+    """
+    try:
+        # Simple keyword-based sentiment analysis
+        positive_words = [
+            'good', 'great', 'excellent', 'amazing', 'wonderful', 'positive', 
+            'success', 'win', 'happy', 'pleased', 'best', 'love', 'like',
+            'improve', 'increase', 'grow', 'benefit', 'advantage', 'progress'
+        ]
+        
+        negative_words = [
+            'bad', 'terrible', 'awful', 'horrible', 'negative', 'fail', 
+            'loss', 'sad', 'angry', 'disappointed', 'worst', 'hate',
+            'worse', 'decline', 'decrease', 'problem', 'issue', 'crisis'
+        ]
+        
+        text_lower = text.lower()
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        negative_count = sum(1 for word in negative_words if word in text_lower)
+        
+        # Calculate sentiment scores
+        total_words = len(text.split())
+        positive_ratio = positive_count / max(total_words, 1)
+        negative_ratio = negative_count / max(total_words, 1)
+        
+        if positive_count > negative_count:
+            dominant_sentiment = "positive"
+            confidence = min(0.5 + (positive_count - negative_count) * 0.05, 0.9)
+        elif negative_count > positive_count:
+            dominant_sentiment = "negative"
+            confidence = min(0.5 + (negative_count - positive_count) * 0.05, 0.9)
+        else:
+            dominant_sentiment = "neutral"
+            confidence = 0.6
+        
+        # Determine intensity
+        if confidence > 0.8:
+            intensity = "strong"
+        elif confidence > 0.6:
+            intensity = "moderate"
+        else:
+            intensity = "mild"
+        
+        return {
+            "dominant_sentiment": dominant_sentiment,
+            "confidence": float(confidence),
+            "intensity": intensity,
+            "sentiment_scores": {
+                "positive": float(positive_ratio),
+                "negative": float(negative_ratio),
+                "neutral": float(1.0 - positive_ratio - negative_ratio)
+            },
+            "method": "heuristic_keywords",
+            "model_name": "keyword_analysis",
+            "analysis_timestamp": datetime.now().isoformat(),
+            "reasoning": f"Heuristic analysis (positive: {positive_count}, negative: {negative_count})"
+        }
+        
+    except Exception as e:
+        logger.error(f"Heuristic sentiment analysis error: {e}")
+        return {
+            "dominant_sentiment": "neutral",
+            "confidence": 0.5,
+            "intensity": "weak",
+            "error": str(e)
+        }
+
+def _heuristic_bias_detection(text: str) -> Dict[str, Any]:
+    """
+    Heuristic bias detection fallback when AI models are not available.
+    
+    Args:
+        text: Text to analyze for bias
+        
+    Returns:
+        Bias detection results
+    """
+    try:
+        # Bias indicators
+        bias_indicators = [
+            'always', 'never', 'all', 'everyone', 'nobody', 'everybody',
+            'terrible', 'amazing', 'best', 'worst', 'perfect', 'disaster',
+            'obviously', 'clearly', 'undoubtedly', 'absolutely', 'definitely'
+        ]
+        
+        # Political bias keywords
+        political_bias_words = [
+            'liberal', 'conservative', 'left', 'right', 'progressive', 'traditional',
+            'democrat', 'republican', 'socialist', 'capitalist', 'woke', 'patriotic'
+        ]
+        
+        text_lower = text.lower()
+        bias_count = sum(1 for word in bias_indicators if word in text_lower)
+        political_bias_count = sum(1 for word in political_bias_words if word in text_lower)
+        
+        # Calculate bias scores
+        total_words = len(text.split())
+        bias_score = min((bias_count + political_bias_count * 2) / max(total_words, 1) * 10, 1.0)
+        
+        # Determine bias level
+        if bias_score > 0.7:
+            bias_level = "high"
+        elif bias_score > 0.4:
+            bias_level = "medium"
+        elif bias_score > 0.2:
+            bias_level = "low"
+        else:
+            bias_level = "minimal"
+        
+        return {
+            "has_bias": bias_score > 0.3,
+            "bias_score": float(bias_score),
+            "bias_level": bias_level,
+            "confidence": min(bias_score + 0.3, 0.9),
+            "political_bias": float(political_bias_count / max(total_words, 1) * 5),
+            "emotional_bias": float(bias_count / max(total_words, 1) * 5),
+            "factual_bias": float(bias_score * 0.8),
+            "reasoning": f"Heuristic bias detection (bias indicators: {bias_count}, political: {political_bias_count})",
+            "method": "heuristic_keywords",
+            "model_used": "bias_indicators",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Heuristic bias detection error: {e}")
+        return {
+            "has_bias": False,
+            "bias_score": 0.0,
+            "bias_level": "minimal",
+            "error": str(e)
+        }
+
+def _calculate_combined_reliability(sentiment_result: Dict, bias_result: Dict) -> float:
+    """
+    Calculate combined reliability score from sentiment and bias analysis.
+    
+    Args:
+        sentiment_result: Results from sentiment analysis
+        bias_result: Results from bias detection
+        
+    Returns:
+        Combined reliability score (0-1)
+    """
+    try:
+        # Base reliability from sentiment neutrality
+        sentiment_reliability = 1.0
+        if sentiment_result.get("dominant_sentiment") != "neutral":
+            sentiment_confidence = sentiment_result.get("confidence", 0.5)
+            sentiment_reliability = 1.0 - (sentiment_confidence - 0.5) * 0.4
+        
+        # Bias penalty
+        bias_penalty = 1.0 - bias_result.get("bias_score", 0.0)
+        
+        # Combined reliability
+        combined_reliability = (sentiment_reliability * 0.6 + bias_penalty * 0.4)
+        
+        return min(max(combined_reliability, 0.0), 1.0)
+        
+    except Exception as e:
+        logger.error(f"Combined reliability calculation error: {e}")
+        return 0.5
+
+def _calculate_content_quality(sentiment_result: Dict, bias_result: Dict) -> float:
+    """
+    Calculate content quality score based on sentiment and bias analysis.
+    
+    Args:
+        sentiment_result: Results from sentiment analysis
+        bias_result: Results from bias detection
+        
+    Returns:
+        Content quality score (0-1)
+    """
+    try:
+        # Quality factors
+        sentiment_quality = 0.8 if sentiment_result.get("dominant_sentiment") == "neutral" else 0.6
+        bias_quality = 1.0 - bias_result.get("bias_score", 0.0)
+        sentiment_confidence = sentiment_result.get("confidence", 0.5)
+        
+        # Weighted quality score
+        quality_score = (sentiment_quality * 0.4 + bias_quality * 0.4 + sentiment_confidence * 0.2)
+        
+        return min(max(quality_score, 0.0), 1.0)
+        
+    except Exception as e:
+        logger.error(f"Content quality calculation error: {e}")
+        return 0.5
+
+def _generate_analysis_recommendations(sentiment_result: Dict, bias_result: Dict) -> List[str]:
+    """
+    Generate recommendations based on sentiment and bias analysis.
+    
+    Args:
+        sentiment_result: Results from sentiment analysis
+        bias_result: Results from bias detection
+        
+    Returns:
+        List of recommendation strings
+    """
+    recommendations = []
+    
+    try:
+        # Sentiment-based recommendations
+        sentiment = sentiment_result.get("dominant_sentiment", "neutral")
+        sentiment_intensity = sentiment_result.get("intensity", "mild")
+        
+        if sentiment != "neutral" and sentiment_intensity in ["strong", "moderate"]:
+            recommendations.append(f"Content shows {sentiment_intensity} {sentiment} sentiment - consider fact-checking")
+        
+        # Bias-based recommendations
+        bias_level = bias_result.get("bias_level", "minimal")
+        bias_score = bias_result.get("bias_score", 0.0)
+        
+        if bias_level in ["high", "medium"]:
+            recommendations.append(f"Detected {bias_level} bias ({bias_score:.2f}) - verify with multiple sources")
+        
+        if not recommendations:
+            recommendations.append("Content appears balanced and neutral")
+            
+        return recommendations
+        
+    except Exception as e:
+        logger.error(f"Recommendation generation error: {e}")
+        return ["Analysis completed - manual review recommended"]
+
+def analyze_sentiment(text: str) -> Dict[str, Any]:
+    """
+    Analyze sentiment of text content using AI models or heuristics.
+    This function provides sentiment analysis capabilities to the Analyst Agent.
+    
+    Args:
+        text: Text content to analyze for sentiment
+        
+    Returns:
+        Dictionary containing sentiment analysis results
+    """
+    if not text or not text.strip():
+        return {"error": "Empty text provided for sentiment analysis"}
+        
+    logger.info(f"😊 Analyzing sentiment for {len(text)} characters")
+    
+    try:
+        # Try to use Scout Agent's sentiment analysis if available
+        try:
+            from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
+            scout_engine = NextGenGPUScoutEngine(enable_training=False)
+            if scout_engine.models.get("sentiment_analyzer"):
+                result = scout_engine.analyze_sentiment(text)
+                log_feedback("analyze_sentiment", {
+                    "method": "scout_ai_model",
+                    "dominant_sentiment": result.get("dominant_sentiment"),
+                    "confidence": result.get("confidence")
+                })
+                return result
+        except Exception as e:
+            logger.debug(f"Scout sentiment analysis not available, using local analysis: {e}")
+        
+        # Fallback to local heuristic analysis
+        return _heuristic_sentiment_analysis(text)
+        
+    except Exception as e:
+        logger.error(f"❌ Sentiment analysis failed: {e}")
+        log_feedback("analyze_sentiment_error", {"error": str(e)})
+        return {"error": str(e)}
+
+def detect_bias(text: str) -> Dict[str, Any]:
+    """
+    Detect bias in text content using AI models or heuristics.
+    This function provides bias detection capabilities to the Analyst Agent.
+    
+    Args:
+        text: Text content to analyze for bias
+        
+    Returns:
+        Dictionary containing bias detection results
+    """
+    if not text or not text.strip():
+        return {"error": "Empty text provided for bias detection"}
+        
+    logger.info(f"⚖️ Detecting bias in {len(text)} characters")
+    
+    try:
+        # Try to use Scout Agent's bias detection if available
+        try:
+            from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
+            scout_engine = NextGenGPUScoutEngine(enable_training=False)
+            if scout_engine.models.get("bias_detector"):
+                result = scout_engine.detect_bias(text)
+                log_feedback("detect_bias", {
+                    "method": "scout_ai_model",
+                    "has_bias": result.get("has_bias"),
+                    "bias_level": result.get("bias_level")
+                })
+                return result
+        except Exception as e:
+            logger.debug(f"Scout bias detection not available, using local analysis: {e}")
+        
+        # Fallback to local heuristic analysis
+        return _heuristic_bias_detection(text)
+        
+    except Exception as e:
+        logger.error(f"❌ Bias detection failed: {e}")
+        log_feedback("detect_bias_error", {"error": str(e)})
+        return {"error": str(e)}
+
+def analyze_sentiment_and_bias(text: str) -> Dict[str, Any]:
+    """
+    Comprehensive analysis combining sentiment and bias detection.
+    This function provides combined analysis capabilities to the Analyst Agent.
+    
+    Args:
+        text: Text content to analyze
+        
+    Returns:
+        Dictionary containing combined sentiment and bias analysis results
+    """
+    if not text or not text.strip():
+        return {"error": "Empty text provided for combined analysis"}
+        
+    logger.info(f"🔍 Running combined sentiment and bias analysis for {len(text)} characters")
+    
+    try:
+        # Get individual analyses
+        sentiment_result = analyze_sentiment(text)
+        bias_result = detect_bias(text)
+        
+        # Combine results
+        combined_result = {
+            "sentiment_analysis": sentiment_result,
+            "bias_analysis": bias_result,
+            "combined_assessment": {
+                "overall_reliability": _calculate_combined_reliability(sentiment_result, bias_result),
+                "content_quality_score": _calculate_content_quality(sentiment_result, bias_result),
+                "recommendations": _generate_analysis_recommendations(sentiment_result, bias_result)
+            },
+            "analysis_timestamp": datetime.now().isoformat(),
+            "text_length": len(text),
+            "method": "analyst_combined_analysis"
+        }
+        
+        log_feedback("analyze_sentiment_and_bias", {
+            "sentiment": sentiment_result.get("dominant_sentiment", "unknown"),
+            "bias_level": bias_result.get("bias_level", "unknown"),
+            "combined_reliability": combined_result["combined_assessment"]["overall_reliability"]
+        })
+        
+        return combined_result
+        
+    except Exception as e:
+        logger.error(f"❌ Combined sentiment and bias analysis failed: {e}")
+        log_feedback("analyze_sentiment_and_bias_error", {"error": str(e)})
+        return {"error": str(e)}
+
+def score_bias(text: str) -> Dict[str, Any]:
+    """
+    Legacy bias scoring function for backward compatibility.
+    
+    Args:
+        text: Text to score for bias
+        
+    Returns:
+        Bias score results
+    """
+    return detect_bias(text)
+
+def score_sentiment(text: str) -> Dict[str, Any]:
+    """
+    Legacy sentiment scoring function for backward compatibility.
+    
+    Args:
+        text: Text to score for sentiment
+        
+    Returns:
+        Sentiment score results
+    """
+    return analyze_sentiment(text)

@@ -26,7 +26,7 @@ import json
 import logging
 import time
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 # GPU and ML imports (graceful fallback if not available)
@@ -58,7 +58,7 @@ def log_feedback(event: str, details: dict):
     """Universal feedback logging pattern"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            timestamp = datetime.utcnow().isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")
@@ -235,7 +235,7 @@ class GPUAcceleratedCritic:
             test_prompt = "Critique this news article: Sample article for testing GPU memory allocation."
             
             # Generate response to test memory
-            response = self.critique_pipeline(
+            _ = self.critique_pipeline(
                 test_prompt,
                 max_length=50,
                 num_return_sequences=1,

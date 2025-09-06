@@ -1,11 +1,11 @@
 # GPU-Accelerated Fact-Checker Agent Tools
 # Based on proven GPUAcceleratedAnalyst pattern
-# Expected Performance: 5-10x improvement with DialoGPT (deprecated)-large (774M params)
+# Expected Performance: 5-10x improvement with GPT-2 Medium (355M params) - Modern replacement for deprecated DialoGPT
 
 import os
 import logging
 import torch
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any
 
 # GPU acceleration imports
@@ -19,9 +19,9 @@ except ImportError as e:
     AutoTokenizer = None
     pipeline = None
 
-# Configuration (DialoGPT (deprecated) deprecated)
+# Configuration - Modern GPT-2 Medium replacement for deprecated DialoGPT
 # Use FACT_CHECKER_MODEL_NAME to select a conversational model for verification tasks.
-MODEL_NAME = os.environ.get("FACT_CHECKER_MODEL_NAME", "distilgpt2")  # default to lightweight replacement
+MODEL_NAME = os.environ.get("FACT_CHECKER_MODEL_NAME", "gpt2-medium")  # Modern replacement for DialoGPT
 MODEL_PATH = os.environ.get("FACT_CHECKER_MODEL_PATH", "./models/" + MODEL_NAME.replace('/', '_'))
 FEEDBACK_LOG = os.environ.get("FACT_CHECKER_FEEDBACK_LOG", "./feedback_fact_checker.log")
 
@@ -31,7 +31,7 @@ logger = logging.getLogger("fact_checker.gpu_tools")
 
 class GPUAcceleratedFactChecker:
     """
-    GPU-accelerated fact checking using DialoGPT (deprecated)-large (774M parameters)
+    GPU-accelerated fact checking using GPT-2 Medium (355M parameters) - Modern replacement for deprecated DialoGPT
     
     Based on proven GPUAcceleratedAnalyst pattern:
     - Professional GPU memory management (4GB VRAM allocation)
@@ -67,28 +67,49 @@ class GPUAcceleratedFactChecker:
                 logger.info(f"✅ GPU Available: {gpu_name}")
                 logger.info(f"✅ GPU Memory: {gpu_memory:.1f} GB")
                 
-                # Load DialoGPT (deprecated)-large with GPU optimization
+                # Load GPT-2 Medium with GPU optimization (modern replacement for DialoGPT)
                 logger.info(f"Loading {MODEL_NAME} for GPU acceleration...")
                 
-                # Use text-generation pipeline for DialoGPT (deprecated) (similar to analyst pattern)
-                self.fact_verification_pipeline = pipeline(
-                    "text-generation",
-                    model=MODEL_NAME,
-                    device=0,  # GPU device
-                    torch_dtype=torch.float16,  # Memory optimization
-                    trust_remote_code=True
-                )
-                
-                # News validation pipeline (lightweight model for speed)
-                self.news_validation_pipeline = pipeline(
-                    "text-classification",
-                    model="facebook/bart-large-mnli",  # Good for zero-shot classification
-                    device=0,  # GPU device
-                    torch_dtype=torch.float16
-                )
-                
-                self.models_loaded = True
-                logger.info("✅ GPU models loaded for fact checking")
+                # Use text-generation pipeline for GPT-2 Medium (similar to analyst pattern)
+                if HAS_TRANSFORMERS and pipeline is not None:
+                    try:
+                        self.fact_verification_pipeline = pipeline(
+                            "text-generation",
+                            model=MODEL_NAME,
+                            device=0,  # GPU device
+                            torch_dtype=torch.float16,  # Memory optimization
+                            trust_remote_code=False  # Security: disable remote code execution
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load GPT-2 with float16, trying float32: {e}")
+                        self.fact_verification_pipeline = pipeline(
+                            "text-generation",
+                            model=MODEL_NAME,
+                            device=0,  # GPU device
+                            trust_remote_code=False
+                        )
+                    
+                    # News validation pipeline (lightweight model for speed)
+                    try:
+                        self.news_validation_pipeline = pipeline(
+                            "zero-shot-classification",  # Correct task for zero-shot classification
+                            model="facebook/bart-large-mnli",  # Good for zero-shot classification
+                            device=0,  # GPU device
+                            torch_dtype=torch.float16
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to load BART with float16, trying float32: {e}")
+                        self.news_validation_pipeline = pipeline(
+                            "zero-shot-classification",
+                            model="facebook/bart-large-mnli",
+                            device=0,  # GPU device
+                        )
+                    
+                    self.models_loaded = True
+                    logger.info("✅ GPU models loaded for fact checking")
+                else:
+                    logger.warning("⚠️ Transformers not available, cannot load GPU models")
+                    self._initialize_cpu_fallback()
                 
             else:
                 logger.warning("⚠️ GPU not available, initializing CPU fallback")
@@ -102,7 +123,7 @@ class GPUAcceleratedFactChecker:
     def _initialize_cpu_fallback(self):
         """Initialize CPU fallback (original implementation)"""
         try:
-            if HAS_TRANSFORMERS:
+            if HAS_TRANSFORMERS and AutoModelForCausalLM is not None and AutoTokenizer is not None and pipeline is not None:
                 # Load models on CPU
                 self.cpu_model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
                 self.cpu_tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -132,13 +153,19 @@ class GPUAcceleratedFactChecker:
                 candidate_labels = ["news article", "opinion piece", "advertisement", "personal blog"]
                 result = self.news_validation_pipeline(content, candidate_labels)
 
-                # Extract results
-                scores = {label: score for label, score in zip(result['labels'], result['scores'])}
-                is_news = result['labels'][0] == "news article" and result['scores'][0] > 0.5
-                confidence = result['scores'][0]
+                # Extract results from zero-shot classification format
+                if isinstance(result, dict) and 'labels' in result and 'scores' in result:
+                    scores = {label: score for label, score in zip(result['labels'], result['scores'])}
+                    is_news = result['labels'][0] == "news article" and result['scores'][0] > 0.5
+                    confidence = result['scores'][0]
+                else:
+                    # Fallback if result format is unexpected
+                    scores = {"error": 0.0}
+                    is_news = False
+                    confidence = 0.0
 
                 self.performance_stats['gpu_requests'] += 1
-                method = "gpu_classification"
+                method = "gpu_zero_shot"
             else:
                 # CPU fallback: keyword-based validation (original logic)
                 keywords = ["breaking", "report", "headline", "news", "according to", "sources"]
@@ -182,7 +209,7 @@ class GPUAcceleratedFactChecker:
     
     def verify_claims_batch(self, claims: List[str], sources: List[str]) -> Dict[str, Any]:
         """
-        GPU-accelerated batch claim verification with DialoGPT (deprecated)-large
+        GPU-accelerated batch claim verification with GPT-2 Medium - Modern replacement for DialoGPT
         """
     # top-level timing is handled within specialized methods
         try:
@@ -220,7 +247,7 @@ class GPUAcceleratedFactChecker:
             batch_prompts.append(prompt)
         
         # Process in batches for optimal GPU utilization
-        batch_size = min(4, len(batch_prompts))  # Conservative batch size for 774M model
+        batch_size = min(8, len(batch_prompts))  # Larger batch size for 355M model (vs 774M DialoGPT)
         
         for i in range(0, len(batch_prompts), batch_size):
             batch = batch_prompts[i:i + batch_size]
@@ -231,7 +258,7 @@ class GPUAcceleratedFactChecker:
                 batch,
                 max_new_tokens=16,  # Short responses
                 do_sample=False,   # Deterministic
-                pad_token_id=self.fact_verification_pipeline.tokenizer.eos_token_id
+                pad_token_id=self.fact_verification_pipeline.tokenizer.eos_token_id if hasattr(self.fact_verification_pipeline, 'tokenizer') and self.fact_verification_pipeline.tokenizer else None
             )
             
             # Parse results
@@ -256,7 +283,7 @@ class GPUAcceleratedFactChecker:
         
         return {
             "results": results,
-            "method": "gpu_dialogpt",
+            "method": "gpu_gpt2_medium",
             "processing_time": elapsed,
             "batch_size": batch_size,
             "claims_processed": len(claims)
@@ -267,7 +294,7 @@ class GPUAcceleratedFactChecker:
         start_time = datetime.now()
         
         if hasattr(self, 'cpu_pipeline'):
-            # Use CPU DialoGPT (deprecated) pipeline
+            # Use CPU GPT-2 Medium pipeline (modern replacement for DialoGPT)
             joined_sources = "\\n".join(sources[:2])  # Smaller batch for CPU
             results = {}
             
@@ -341,7 +368,7 @@ def get_gpu_fact_checker():
 def log_feedback(event: str, details: dict):
     """Log feedback for continual learning"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\\t{event}\\t{details}\\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\\t{event}\\t{details}\\n")
 
 def validate_is_news(content: str) -> bool:
     """

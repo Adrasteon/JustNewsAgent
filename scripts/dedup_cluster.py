@@ -12,7 +12,7 @@ This script is lightweight, pure-Python and works on large pair lists.
 from __future__ import annotations
 import sys
 from collections import defaultdict, Counter
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 IN = "logs/crawl/dedup_fuzzy.txt"
 OUT_CLUSTERS = "logs/crawl/dedup_clusters.tsv"
@@ -111,7 +111,7 @@ def main():
     top_counts = Counter(sizes).most_common(10)
 
     with open(OUT_SUMMARY, "w", encoding="utf-8") as s:
-        s.write(f"dedup clustering summary\n")
+        s.write("dedup clustering summary\n")
         s.write(f"pairs_read\t{total_pairs}\n")
         s.write(f"unique_ids_in_pairs\t{len(seen_ids)}\n")
         s.write(f"num_clusters\t{num_clusters}\n")

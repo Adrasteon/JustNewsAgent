@@ -23,7 +23,7 @@ import json
 import pickle
 import numpy as np
 from typing import List, Dict, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 from dataclasses import dataclass
 from enum import Enum
@@ -80,6 +80,13 @@ except ImportError:
     POSTGRESQL_AVAILABLE = False
     logging.warning("psycopg2 not available - using SQLite fallback")
 
+# GPU Manager imports
+try:
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu
+    GPU_MANAGER_AVAILABLE = True
+except ImportError:
+    GPU_MANAGER_AVAILABLE = False
+
 # Configuration
 FEEDBACK_LOG = os.environ.get("MEMORY_V2_FEEDBACK_LOG", "./feedback_memory_v2.log")
 MODEL_CACHE_DIR = os.environ.get("MEMORY_V2_CACHE", "./models/memory_v2")
@@ -128,7 +135,7 @@ class MemoryItem:
     
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.utcnow()
+            self.timestamp = datetime.now(timezone.utc)
         if self.tags is None:
             self.tags = []
         if self.id is None:
@@ -192,7 +199,23 @@ class MemoryV2Engine:
     
     def __init__(self, config: Optional[MemoryV2Config] = None):
         self.config = config or MemoryV2Config()
-        self.device = torch.device(self.config.device)
+        
+        # GPU allocation
+        self.gpu_device = None
+        if GPU_MANAGER_AVAILABLE and torch.cuda.is_available():
+            try:
+                self.gpu_device = request_agent_gpu("memory_agent", memory_gb=2.0)
+                if self.gpu_device is not None:
+                    logger.info(f"✅ Memory agent allocated GPU device: {self.gpu_device}")
+                    self.device = torch.device(f"cuda:{self.gpu_device}")
+                else:
+                    logger.warning("❌ GPU allocation failed for memory agent, using CPU")
+                    self.device = torch.device("cpu")
+            except Exception as e:
+                logger.error(f"Error allocating GPU for memory agent: {e}")
+                self.device = torch.device("cpu")
+        else:
+            self.device = torch.device(self.config.device)
         
         # Model containers
         self.models = {}
@@ -259,7 +282,7 @@ class MemoryV2Engine:
             self.pipelines['bert_classifier'] = pipeline(
                 "text-classification",
                 model="nlptown/bert-base-multilingual-uncased-sentiment",  # Pre-trained classifier
-                device=0 if self.device.type == 'cuda' else -1,
+                device=self.gpu_device if self.gpu_device is not None else -1,
                 top_k=None  # Updated: Use top_k=None instead of deprecated return_all_scores=True
             )
             
@@ -272,7 +295,7 @@ class MemoryV2Engine:
                 self.pipelines['bert_classifier'] = pipeline(
                     "text-classification", 
                     model="cardiffnlp/twitter-roberta-base-sentiment-latest",
-                    device=0 if self.device.type == 'cuda' else -1,
+                    device=self.gpu_device if self.gpu_device is not None else -1,
                     top_k=None  # Updated: Use top_k=None for consistency
                 )
                 logger.info("✅ BERT fallback model loaded successfully")
@@ -506,7 +529,7 @@ class MemoryV2Engine:
         """Log feedback for memory performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
     
@@ -527,7 +550,6 @@ class MemoryV2Engine:
                 # Map classification results to ContentType
                 # This is a simplified mapping - in practice you'd train on labeled data
                 content_types = list(ContentType)
-                top_result = results[0] if isinstance(results, list) else results
                 predicted_idx = min(len(content_types) - 1, 0)  # Fallback to first type
                 return content_types[predicted_idx]
             
@@ -897,7 +919,7 @@ class MemoryV2Engine:
             results = self._semantic_search(query, content_type, limit * 2)  # Get more results
             
             # Rerank with temporal boost
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             for result in results:
                 time_delta = now - result.item.timestamp
                 days_old = time_delta.total_seconds() / (24 * 3600)
@@ -1010,7 +1032,7 @@ class MemoryV2Engine:
         """Clean up old memory items"""
         try:
             older_than_days = older_than_days or self.config.cleanup_older_than_days
-            cutoff_date = datetime.utcnow() - timedelta(days=older_than_days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=older_than_days)
             
             deleted_count = 0
             
@@ -1071,7 +1093,6 @@ class MemoryV2Engine:
     def _fallback_embedding(self, content: str) -> np.ndarray:
         """Simple embedding fallback using TF-IDF style"""
         # This is a very basic fallback - in practice you'd want a better solution
-        words = content.lower().split()
         # Create a simple hash-based embedding
         embedding = np.random.RandomState(hash(content) % 2**32).rand(self.config.embedding_dim)
         return embedding / np.linalg.norm(embedding)
@@ -1138,6 +1159,14 @@ class MemoryV2Engine:
             self.memory_cache.clear()
             self.embedding_cache.clear()
             
+            # Release GPU allocation
+            if GPU_MANAGER_AVAILABLE and self.gpu_device is not None:
+                try:
+                    release_agent_gpu("memory_agent")
+                    logger.info("✅ Released GPU allocation for memory agent")
+                except Exception as e:
+                    logger.error(f"Error releasing GPU for memory agent: {e}")
+            
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
                 
@@ -1147,7 +1176,7 @@ class MemoryV2Engine:
             logger.error(f"Error during cleanup: {e}")
 
 # Test the engine
-def test_memory_v2_engine():
+def run_memory_v2_engine_test():
     """Test Memory V2 Engine with sample storage and retrieval"""
     try:
         print("🔧 Testing Memory V2 Engine...")
@@ -1244,4 +1273,4 @@ def test_memory_v2_engine():
         return False
 
 if __name__ == "__main__":
-    test_memory_v2_engine()
+    run_memory_v2_engine_test()

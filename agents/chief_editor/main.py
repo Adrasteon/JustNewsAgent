@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel
 import os
 import requests
+from agents.chief_editor.handler import handle_review_request
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +46,7 @@ async def lifespan(app: FastAPI):
         mcp_bus_client.register_agent(
             agent_name="chief_editor",
             agent_address=f"http://localhost:{CHIEF_EDITOR_AGENT_PORT}",
-            tools=["request_story_brief", "publish_story"],
+            tools=["request_story_brief", "publish_story", "review_evidence"],
         )
         logger.info("Registered tools with MCP Bus.")
     except Exception as e:
@@ -133,6 +134,21 @@ def manage_content_lifecycle(call: ToolCall):
         return {"status": "success", "message": "Content lifecycle managed"}
     except Exception as e:
         logger.error(f"Error managing content lifecycle: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/review_evidence")
+def review_evidence(call: ToolCall):
+    """Endpoint to receive evidence review requests from other agents.
+
+    Expected kwargs: evidence_manifest (path), reason
+    Persists the request to a local JSONL queue for human reviewers or UI to pick up.
+    """
+    try:
+        kwargs = call.kwargs or {}
+        return handle_review_request(kwargs)
+    except Exception as e:
+        logger.error(f"Error enqueuing evidence review: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

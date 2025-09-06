@@ -5,7 +5,9 @@ Usage: python3 scripts/export_cluster_members.py <cluster_id> [count]
 This script reads logs/crawl/dedup_review.csv to locate the cluster and member ids.
 It imports the fetch_article/to_markdown logic from export_article_md.py by executing it as a module.
 """
-import csv, sys, subprocess
+import csv
+import sys
+import subprocess
 from pathlib import Path
 
 CSV_PATH = Path('logs/crawl/dedup_review.csv')

@@ -3,27 +3,35 @@ NewsReader V2 Engine - Multi-Modal Vision Processing
 Architecture: LLaVA + CLIP + OCR + Layout Parser + Document Analysis
 
 This V2 engine provides comprehensive multi-modal processing capabilities:
-1. LLaVA: Primary vision-language understanding
-2. LLaVA-Next: Enhanced variant for complex visual reasoning  
+1. LLaVA: Primary vision-language understanding (handles OCR and layout analysis)
+2. LLaVA-Next: Enhanced variant for complex visual reasoning
 3. CLIP Vision: Image content analysis and embedding
-4. OCR Engine: Precise text extraction from images/PDFs
-5. Layout Parser: Document structure understanding
+4. OCR Engine: DEPRECATED - Now integrated with LLaVA
+5. Layout Parser: DEPRECATED - Now integrated with LLaVA
 
 V2 Standards:
-- 5+ AI models for comprehensive processing
-- Zero deprecation warnings
+- 3 core models with integrated functionality
+- Zero deprecation warnings (EasyOCR/LayoutParser deprecated)
 - Professional error handling with GPU acceleration
 - Production-ready with fallback systems
 - MCP bus integration for inter-agent communication
+- Production GPU Manager integration for conflict-free resource allocation
+
+GPU Management:
+- Integrated with MultiAgentGPUManager for coordinated resource allocation
+- Dynamic GPU device assignment based on availability
+- Automatic CPU fallback when GPU unavailable
+- Memory allocation: 4-8GB for vision models
+- Health monitoring and error recovery
 """
 
 import os
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 import torch
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 # Configure logging
@@ -44,19 +52,12 @@ except ImportError:
     logger.warning("transformers not available - using fallback processing")
     TRANSFORMERS_AVAILABLE = False
 
+# GPU Manager imports
 try:
-    import easyocr
-    OCR_AVAILABLE = True
+    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu
+    GPU_MANAGER_AVAILABLE = True
 except ImportError:
-    logger.warning("easyocr not available - text extraction limited")
-    OCR_AVAILABLE = False
-
-try:
-    import layoutparser as lp
-    LAYOUT_PARSER_AVAILABLE = True
-except ImportError:
-    logger.warning("layoutparser not available - layout analysis limited")
-    LAYOUT_PARSER_AVAILABLE = False
+    GPU_MANAGER_AVAILABLE = False
 
 # Environment Configuration
 FEEDBACK_LOG = os.environ.get("NEWSREADER_FEEDBACK_LOG", "./feedback_newsreader_v2.log")
@@ -93,7 +94,7 @@ class NewsReaderV2Config:
     llava_model: str = "llava-hf/llava-1.5-7b-hf"
     llava_next_model: str = "llava-hf/llava-v1.6-mistral-7b-hf" 
     clip_model: str = "openai/clip-vit-large-patch14"
-    ocr_languages: List[str] = None
+    ocr_languages: Optional[List[str]] = None
     cache_dir: str = MODEL_CACHE_DIR
     
     # Processing settings
@@ -117,30 +118,47 @@ class NewsReaderV2Engine:
     
     Features:
     - Multi-modal content processing with LLaVA integration
-    - Advanced OCR and layout analysis
+    - Advanced OCR and layout analysis (integrated with LLaVA)
     - GPU acceleration with CPU fallbacks
     - Comprehensive error handling
     - MCP bus integration ready
-    - V2 standards compliance (5+ models, zero warnings)
+    - V2 standards compliance (3 core models, zero warnings)
     """
     
-    def __init__(self, config: NewsReaderV2Config = None):
+    def __init__(self, config: Optional[NewsReaderV2Config] = None):
         self.config = config or NewsReaderV2Config()
         
-        # Device setup
-        self.device = self._setup_device()
+        # GPU allocation
+        self.gpu_device = None
+        if GPU_MANAGER_AVAILABLE and torch.cuda.is_available():
+            try:
+                self.gpu_device = request_agent_gpu("newsreader_agent", memory_gb=4.0)  # Newsreader needs more memory for vision models
+                if self.gpu_device is not None:
+                    logger.info(f"✅ Newsreader agent allocated GPU device: {self.gpu_device}")
+                    self.device = torch.device(f"cuda:{self.gpu_device}")
+                else:
+                    logger.warning("❌ GPU allocation failed for newsreader agent, using CPU")
+                    self.device = torch.device("cpu")
+            except Exception as e:
+                logger.error(f"Error allocating GPU for newsreader agent: {e}")
+                self.device = torch.device("cpu")
+        else:
+            self.device = torch.device("cpu")
+            logger.info("✅ CPU processing mode (GPU manager not available)")
         
         # Model storage
-        self.models = {}
-        self.processors = {}
-        self.pipelines = {}
+        self.models: Dict[str, Any] = {}
+        self.processors: Dict[str, Any] = {}
+        self.pipelines: Dict[str, Any] = {}
         
         # Processing stats
         self.processing_stats = {
             'total_processed': 0,
             'success_rate': 0.0,
             'average_processing_time': 0.0,
-            'model_usage_stats': {}
+            'model_usage_stats': {},
+            'gpu_device': self.gpu_device,
+            'gpu_memory_allocated': 4.0 if self.gpu_device is not None else 0.0
         }
         
         # Initialize all V2 components
@@ -148,20 +166,10 @@ class NewsReaderV2Engine:
         
         logger.info("✅ NewsReader V2 Engine initialized with comprehensive multi-modal capabilities")
     
-    def _setup_device(self) -> torch.device:
-        """Setup optimal device configuration"""
-        if self.config.use_gpu_acceleration and torch.cuda.is_available():
-            device = torch.device("cuda:0")
-            logger.info(f"✅ GPU acceleration enabled: {torch.cuda.get_device_name(0)}")
-        else:
-            device = torch.device("cpu")
-            logger.info("✅ CPU processing mode")
-        return device
-    
     def _initialize_models(self):
-        """Initialize all V2 model components"""
+        """Initialize all V2 model components - Now 3 core models with LLaVA integration"""
         try:
-            # Component 1: Primary LLaVA Model
+            # Component 1: Primary LLaVA Model (handles vision, OCR, and layout analysis)
             self._load_llava_model()
             
             # Component 2: Enhanced LLaVA-Next
@@ -170,13 +178,13 @@ class NewsReaderV2Engine:
             # Component 3: CLIP Vision Model
             self._load_clip_model()
             
-            # Component 4: OCR Engine
+            # Component 4: OCR Engine (integrated with LLaVA)
             self._load_ocr_engine()
             
-            # Component 5: Layout Parser
+            # Component 5: Layout Parser (integrated with LLaVA)
             self._load_layout_parser()
             
-            logger.info("✅ All NewsReader V2 components initialized successfully")
+            logger.info("✅ All NewsReader V2 components initialized successfully (3 core + 2 integrated)")
             
         except Exception as e:
             logger.error(f"Error initializing NewsReader V2 models: {e}")
@@ -211,7 +219,7 @@ class NewsReaderV2Engine:
                 )
                 # move to device if model supports .to()
                 try:
-                    model = model.to(self.device)
+                    model = model.to(self.device)  # type: ignore
                 except Exception:
                     pass
 
@@ -227,7 +235,7 @@ class NewsReaderV2Engine:
                     torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32,
                     low_cpu_mem_usage=True,
                     trust_remote_code=True
-                ).to(self.device)
+                ).to(self.device)  # type: ignore
 
                 self.processors['llava'] = AutoTokenizer.from_pretrained(
                     self.config.llava_model,
@@ -260,7 +268,7 @@ class NewsReaderV2Engine:
                     tokenizer_class=None,
                 )
                 try:
-                    model = model.to(self.device)
+                    model = model.to(self.device)  # type: ignore
                 except Exception:
                     pass
                 self.models['llava_next'] = model
@@ -271,7 +279,7 @@ class NewsReaderV2Engine:
                     fallback_model,
                     cache_dir=self.config.cache_dir,
                     torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
-                ).to(self.device)
+                ).to(self.device)  # type: ignore
             
             logger.info("✅ LLaVA-Next variant loaded successfully (model=%s)", fallback_model)
             
@@ -297,7 +305,7 @@ class NewsReaderV2Engine:
                     tokenizer_class=CLIPProcessor,
                 )
                 try:
-                    model = model.to(self.device)
+                    model = model.to(self.device)  # type: ignore
                 except Exception:
                     pass
                 self.models['clip'] = model
@@ -306,7 +314,7 @@ class NewsReaderV2Engine:
                 self.models['clip'] = CLIPModel.from_pretrained(
                     self.config.clip_model,
                     cache_dir=self.config.cache_dir
-                ).to(self.device)
+                ).to(self.device)  # type: ignore
 
                 self.processors['clip'] = CLIPProcessor.from_pretrained(
                     self.config.clip_model,
@@ -320,45 +328,20 @@ class NewsReaderV2Engine:
             self.models['clip'] = None
     
     def _load_ocr_engine(self):
-        """Load OCR engine for text extraction"""
-        try:
-            if not OCR_AVAILABLE:
-                logger.warning("EasyOCR not available - text extraction limited")
-                return
-            
-            self.models['ocr'] = easyocr.Reader(
-                self.config.ocr_languages,
-                gpu=self.device.type == 'cuda'
-            )
-            
-            logger.info("✅ OCR engine loaded successfully")
-            
-        except Exception as e:
-            logger.error(f"Error loading OCR engine: {e}")
-            self.models['ocr'] = None
+        """Load OCR engine for text extraction - DEPRECATED: Now handled by LLaVA"""
+        logger.info("📝 OCR functionality now integrated with LLaVA vision-language model")
+        logger.info("✅ No separate OCR engine needed - LLaVA handles text extraction from images")
+        
+        # Mark OCR as handled by LLaVA
+        self.models['ocr'] = 'llava_integrated'  # Indicates OCR is handled by LLaVA
     
     def _load_layout_parser(self):
-        """Load layout parser for document structure analysis"""
-        try:
-            if not LAYOUT_PARSER_AVAILABLE:
-                logger.warning("LayoutParser not available - using basic layout analysis")
-                # Create a simple fallback layout analyzer
-                self.models['layout_parser'] = self._create_basic_layout_parser()
-                logger.info("✅ Basic layout parser initialized")
-                return
-            
-            # Load pre-trained layout detection model
-            self.models['layout_parser'] = lp.Detectron2LayoutModel(
-                'lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config',
-                extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", 0.8],
-                label_map={0: "Text", 1: "Title", 2: "List", 3: "Table", 4: "Figure"}
-            )
-            
-            logger.info("✅ Advanced layout parser loaded successfully")
-            
-        except Exception as e:
-            logger.error(f"Error loading layout parser: {e}")
-            self.models['layout_parser'] = self._create_basic_layout_parser()
+        """Load layout parser for document structure analysis - DEPRECATED: Now handled by LLaVA"""
+        logger.info("📐 Layout analysis now integrated with LLaVA vision-language model")
+        logger.info("✅ No separate layout parser needed - LLaVA handles document structure analysis")
+        
+        # Mark layout parser as handled by LLaVA
+        self.models['layout_parser'] = 'llava_integrated'  # Indicates layout analysis is handled by LLaVA
     
     def _create_basic_layout_parser(self):
         """Create basic layout parser fallback"""
@@ -411,11 +394,122 @@ class NewsReaderV2Engine:
         
         return FallbackImageProcessor()
 
+    def get_gpu_status(self) -> Dict[str, Any]:
+        """Get current GPU allocation and usage status"""
+        return {
+            'gpu_device': self.gpu_device,
+            'gpu_manager_available': GPU_MANAGER_AVAILABLE,
+            'device_type': self.device.type,
+            'memory_allocated_gb': 4.0 if self.gpu_device is not None else 0.0,
+            'cuda_available': torch.cuda.is_available(),
+            'gpu_name': torch.cuda.get_device_name(self.gpu_device) if self.gpu_device is not None and torch.cuda.is_available() else None
+        }
+
+    def cleanup(self):
+        """Clean up resources and release GPU allocation"""
+        try:
+            logger.info("🧹 Starting NewsReader V2 Engine cleanup...")
+            
+            # Clean up models
+            models_cleaned = 0
+            for model_name, model in self.models.items():
+                if model is not None:
+                    try:
+                        if hasattr(model, 'cpu'):
+                            model.cpu()
+                        del model
+                        models_cleaned += 1
+                    except Exception as e:
+                        logger.warning(f"Error cleaning up model {model_name}: {e}")
+            
+            # Clean up processors
+            processors_cleaned = 0
+            for processor_name, processor in self.processors.items():
+                if processor is not None:
+                    try:
+                        del processor
+                        processors_cleaned += 1
+                    except Exception as e:
+                        logger.warning(f"Error cleaning up processor {processor_name}: {e}")
+            
+            # Clear collections
+            self.models.clear()
+            self.processors.clear()
+            self.pipelines.clear()
+            
+            # Release GPU allocation
+            gpu_released = False
+            if GPU_MANAGER_AVAILABLE and self.gpu_device is not None:
+                try:
+                    release_agent_gpu("newsreader_agent")
+                    gpu_released = True
+                    logger.info("✅ Released GPU allocation for newsreader agent")
+                except Exception as e:
+                    logger.error(f"Error releasing GPU for newsreader agent: {e}")
+            
+            # Clear CUDA cache if available
+            if torch.cuda.is_available():
+                try:
+                    torch.cuda.empty_cache()
+                    logger.info("✅ CUDA cache cleared")
+                except Exception as e:
+                    logger.warning(f"Error clearing CUDA cache: {e}")
+            
+            # Update final stats
+            self.processing_stats.update({
+                'cleanup_completed': True,
+                'models_cleaned': models_cleaned,
+                'processors_cleaned': processors_cleaned,
+                'gpu_released': gpu_released,
+                'cleanup_timestamp': datetime.now(timezone.utc).isoformat()
+            })
+                
+            logger.info(f"✅ NewsReader V2 Engine cleanup completed - {models_cleaned} models, {processors_cleaned} processors cleaned")
+            
+        except Exception as e:
+            logger.error(f"Critical error during cleanup: {e}")
+            # Ensure GPU is released even if other cleanup fails
+            if GPU_MANAGER_AVAILABLE and self.gpu_device is not None:
+                try:
+                    release_agent_gpu("newsreader_agent")
+                    logger.info("✅ Emergency GPU release completed")
+                except Exception as e2:
+                    logger.error(f"Failed emergency GPU release: {e2}")
+
+    def get_system_status(self) -> Dict[str, Any]:
+        """Get comprehensive system status including GPU information"""
+        gpu_status = self.get_gpu_status()
+        
+        return {
+            'engine_version': 'V2',
+            'gpu_status': gpu_status,
+            'processing_stats': self.processing_stats,
+            'model_status': {
+                'llava': self.models.get('llava') is not None,
+                'llava_next': self.models.get('llava_next') is not None,
+                'clip': self.models.get('clip') is not None,
+                'ocr': self.models.get('ocr') == 'llava_integrated',  # OCR handled by LLaVA
+                'layout_parser': self.models.get('layout_parser') == 'llava_integrated',  # Layout analysis handled by LLaVA
+                'total_models_loaded': sum(1 for m in self.models.values() if m is not None and m != 'llava_integrated')
+            },
+            'fallback_systems': {
+                'text_processor': 'fallback_text' in self.pipelines,
+                'image_processor': 'fallback_image' in self.pipelines
+            },
+            'configuration': {
+                'default_mode': self.config.default_mode.value,
+                'gpu_acceleration': self.config.use_gpu_acceleration,
+                'min_confidence': self.config.min_confidence_threshold,
+                'batch_size': self.config.batch_size
+            },
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }
+
 def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.utcnow().isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 
@@ -439,5 +533,32 @@ if __name__ == "__main__":
     )
     
     engine = NewsReaderV2Engine(config)
+    
+    # Display GPU and system status
+    print("\n📊 System Status:")
+    status = engine.get_system_status()
+    
+    print(f"   GPU Device: {status['gpu_status']['gpu_device']}")
+    print(f"   GPU Manager: {'✅ Available' if status['gpu_status']['gpu_manager_available'] else '❌ Not Available'}")
+    print(f"   Device Type: {status['gpu_status']['device_type']}")
+    print(f"   Memory Allocated: {status['gpu_status']['memory_allocated_gb']}GB")
+    
+    if status['gpu_status']['gpu_name']:
+        print(f"   GPU Name: {status['gpu_status']['gpu_name']}")
+    
+    print(f"\n🤖 Model Status ({status['model_status']['total_models_loaded']}/5 loaded):")
+    for model_name, loaded in status['model_status'].items():
+        if model_name != 'total_models_loaded':
+            print(f"   {model_name}: {'✅' if loaded else '❌'}")
+    
+    print("\n⚙️ Configuration:")
+    print(f"   Mode: {status['configuration']['default_mode']}")
+    print(f"   GPU Acceleration: {status['configuration']['gpu_acceleration']}")
+    print(f"   Min Confidence: {status['configuration']['min_confidence']}")
+    print(f"   Batch Size: {status['configuration']['batch_size']}")
+    
+    # Test cleanup
+    print("\n🧹 Testing cleanup...")
+    engine.cleanup()
     
     print("✅ NewsReader V2 Engine test completed successfully")

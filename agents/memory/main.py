@@ -12,10 +12,8 @@ try:
 except Exception:
     huggingface_hub = None
 
-import psycopg2
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from psycopg2.extras import RealDictCursor
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
@@ -23,9 +21,11 @@ from agents.memory.tools import (
     get_embedding_model,
     log_training_example,
     save_article,
-    vector_search_articles,
     vector_search_articles_local,
 )
+
+# Import database utilities
+from agents.common.database import initialize_connection_pool, close_connection_pool, get_db_connection as get_pooled_connection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -89,16 +89,9 @@ class MCPBusClient:
 def get_db_connection():
     """Establishes a connection to the PostgreSQL database with pooling."""
     try:
-        conn = psycopg2.connect(
-            host=POSTGRES_HOST,
-            database=POSTGRES_DB,
-            user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
-            options='-c search_path=public'
-        )
-        logger.info("Database connection established successfully.")
-        return conn
-    except psycopg2.OperationalError as e:
+        # Use the new connection pooling system
+        return get_pooled_connection()
+    except Exception as e:
         logger.error(f"Could not connect to PostgreSQL database: {e}")
         raise HTTPException(status_code=500, detail="Database connection error")
 
@@ -133,6 +126,13 @@ async def _storage_consumer():
 async def lifespan(app: FastAPI):
     """Handles startup and shutdown events for the FastAPI application."""
     logger.info("Memory agent is starting up.")
+    # Initialize database connection pool
+    try:
+        initialize_connection_pool()
+        logger.info("Database connection pool initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize database connection pool: {e}")
+        raise
     # Register agent with MCP Bus
     mcp_bus_client = MCPBusClient()
     try:
@@ -208,6 +208,12 @@ async def lifespan(app: FastAPI):
         storage_executor.shutdown(wait=False)
     except Exception:
         pass
+    # Close database connection pool
+    try:
+        close_connection_pool()
+        logger.info("Database connection pool closed")
+    except Exception as e:
+        logger.error(f"Error closing database connection pool: {e}")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -279,16 +285,14 @@ def save_article_endpoint(request: dict):
 @app.get("/get_article/{article_id}")
 def get_article_endpoint(article_id: int):
     """Retrieves an article from the database."""
-    conn = get_db_connection()
     try:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute("SELECT * FROM articles WHERE id = %s", (article_id,))
-            article = cur.fetchone()
-            if not article:
-                raise HTTPException(status_code=404, detail="Article not found")
-            return article
-    finally:
-        conn.close()
+        from agents.common.database import execute_query_single
+        article = execute_query_single("SELECT * FROM articles WHERE id = %s", (article_id,))
+        if not article:
+            raise HTTPException(status_code=404, detail="Article not found")
+        return article
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving article: {str(e)}")
 
 @app.post("/vector_search_articles")
 def vector_search_articles_endpoint(request: dict):

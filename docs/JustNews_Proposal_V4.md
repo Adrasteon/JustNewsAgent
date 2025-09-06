@@ -1,5 +1,20 @@
 # JustNews V4: Hybrid Architecture Proposal
 
+**Last Updated**: 2025-08-21
+
+## **Current Environment Setup**
+
+This proposal is designed for the current production environment:
+
+- **RAPIDS Version**: 25.04 (GPU-accelerated data science suite)
+- **Python Version**: 3.12.11
+- **CUDA Version**: 12.4 (optimized for RTX 3090)
+- **GPU**: NVIDIA RTX 3090 (24GB VRAM, Ampere architecture)
+- **Conda Environment**: justnews-v2-py312
+- **PyTorch Version**: 2.6.0+cu124 (CUDA-enabled)
+
+All performance benchmarks and implementation details reflect this environment configuration.
+
 ## Executive Summary
 
 JustNews V4 introduces a revolutionary **Native GPU-Accelerated Architecture** that eliminates Docker dependencies and leverages specialized models for each function throughout the system. This approach provides immediate operational capability with Ubuntu native deployment while building toward complete AI independence through continuous learning and model evolution via the integrated training system.

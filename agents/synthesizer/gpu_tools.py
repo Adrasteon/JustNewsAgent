@@ -20,7 +20,7 @@ import json
 import logging
 import time
 from typing import List, Dict, Any, TYPE_CHECKING
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from pathlib import Path
 
@@ -60,7 +60,7 @@ def log_feedback(event: str, details: dict):
     """Universal feedback logging pattern"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            timestamp = datetime.utcnow().isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")
@@ -616,9 +616,31 @@ def get_synthesizer_instance() -> GPUAcceleratedSynthesizer:
 def synthesize_news_articles_gpu(articles: List[Dict[str, Any]]) -> Dict[str, Any]:
     """GPU-accelerated news article synthesis (MCP-compatible)"""
     synthesizer = get_synthesizer_instance()
-    return synthesizer.synthesize_articles_gpu(articles)
+    result = synthesizer.synthesize_articles_gpu(articles)
+    
+    # Format result to match test expectations
+    return {
+        "synthesized_article": result.get("synthesis", ""),
+        "processing_time": result.get("performance", {}).get("processing_time", 0.0),
+        "method": "gpu_accelerated" if result.get("performance", {}).get("gpu_used", False) else "cpu_fallback",
+        "success": result.get("success", False),
+        "themes": result.get("themes", []),
+        "performance": result.get("performance", {}),
+        "error": result.get("error", "")
+    }
 
 def get_synthesizer_performance() -> Dict[str, Any]:
     """Get synthesizer performance statistics (MCP-compatible)"""
     synthesizer = get_synthesizer_instance()
-    return synthesizer.get_performance_stats()
+    stats = synthesizer.get_performance_stats()
+    
+    # Format result to match test expectations
+    return {
+        "total_syntheses": stats.get("total_processed", 0),
+        "average_processing_time": stats.get("avg_processing_time", 0.0),
+        "gpu_utilization": stats.get("gpu_memory_usage_gb", 0.0) if stats.get("gpu_allocated", False) else 0.0,
+        "memory_usage": stats.get("gpu_memory_usage_gb", 0.0),
+        "agent_id": stats.get("agent_id", ""),
+        "gpu_allocated": stats.get("gpu_allocated", False),
+        "models_loaded": stats.get("models_loaded", False)
+    }

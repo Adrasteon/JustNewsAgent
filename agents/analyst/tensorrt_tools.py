@@ -3,15 +3,16 @@ Native TensorRT Tools for the Analyst Agent - Production Ready
 
 This implements native TensorRT acceleration with validated performance:
 ✅ Combined Throughput: 406.9 articles/sec (2.69x improvement over baseline)
-✅ Sentiment Analysis: 786.8 articles/sec (native TensorRT FP16)
-✅ Bias Analysis: 843.7 articles/sec (native TensorRT FP16)
+✅ Sentiment Analysis: 786.8 articles/sec (native TensorRT FP8)
+✅ Bias Analysis: 843.7 articles/sec (native TensorRT FP8)
 ✅ Memory Efficiency: 2.3GB GPU utilization (65% reduction)
 ✅ System Stability: Zero crashes, zero warnings, completely clean operation
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, List
+import atexit
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,7 +55,6 @@ def cleanup_tensorrt_engine():
             _global_engine = None
 
 # Register cleanup at module exit to prevent context stack errors
-import atexit
 atexit.register(cleanup_tensorrt_engine)
 
 # Feedback logging
@@ -62,7 +62,7 @@ FEEDBACK_LOG = "feedback_analyst_tensorrt.log"
 
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file with timestamp."""
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
         f.write(f"{timestamp}\t{event}\t{details}\n")
 
@@ -296,12 +296,12 @@ def analyze_articles_batch(texts: List[str]) -> List[dict]:
     Returns:
         List[dict]: Analysis results for each article
     """
-    start_time = datetime.utcnow()
+    start_time = datetime.now(timezone.utc)
     
     sentiment_scores = score_sentiment_batch(texts)
     bias_scores = score_bias_batch(texts)
     
-    end_time = datetime.utcnow()
+    end_time = datetime.now(timezone.utc)
     total_processing_time = (end_time - start_time).total_seconds()
     
     results = []

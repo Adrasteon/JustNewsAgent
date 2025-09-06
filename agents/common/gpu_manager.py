@@ -1,19 +1,65 @@
-"""Simple GPU manager shim used by agents during testing and lightweight runs.
+"""
+GPU Manager - Production Implementation Wrapper
 
-This module provides a minimal, dependency-free GPU allocation API so
-modules that import it (e.g. agent gpu_tools) can operate without
-requiring the full production GPU manager. The implementation is
-intentionally conservative: it simulates a single-GPU environment and
-provides no-op register/release operations.
-
-The real project contains a more advanced GPUModelManager used in
-production; this shim keeps the codebase importable for linting and
-unit tests.
+This module now serves as a wrapper around the production MultiAgentGPUManager,
+maintaining backward compatibility while providing production-ready features.
 """
 from __future__ import annotations
 
-from threading import Lock
+import threading
 from typing import Any, Dict, Optional
+
+# Import production GPU manager
+try:
+    from agents.common.gpu_manager_production import (
+        get_gpu_manager,
+        request_agent_gpu as _request_agent_gpu,
+        release_agent_gpu as _release_agent_gpu
+    )
+    PRODUCTION_AVAILABLE = True
+except ImportError:
+    PRODUCTION_AVAILABLE = False
+
+# Fallback to original shim if production manager unavailable
+if not PRODUCTION_AVAILABLE:
+    from threading import Lock
+
+    class GPUModelManager:
+        """Lightweight in-process GPU model registry (fallback)"""
+        def __init__(self) -> None:
+            self._lock = Lock()
+            self._registry: Dict[str, Any] = {}
+
+        def register_model(self, name: str, model: Any) -> None:
+            with self._lock:
+                self._registry[name] = model
+
+        def get(self, name: str) -> Optional[Any]:
+            with self._lock:
+                return self._registry.get(name)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    _GLOBAL_MANAGER: Optional[GPUModelManager] = None
+    _GLOBAL_LOCK = Lock()
+
+    def get_gpu_manager() -> GPUModelManager:
+        global _GLOBAL_MANAGER
+        with _GLOBAL_LOCK:
+            if _GLOBAL_MANAGER is None:
+                _GLOBAL_MANAGER = GPUModelManager()
+            return _GLOBAL_MANAGER
+
+    def _request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> Optional[int]:
+        return 0  # Always return GPU 0 for compatibility
+
+    def _release_agent_gpu(agent_name: str) -> None:
+        return None
+
 
 __all__ = [
     "request_agent_gpu",
@@ -24,52 +70,54 @@ __all__ = [
 
 
 class GPUModelManager:
-    """Lightweight in-process GPU model registry.
-
-    This class does not manage real GPU devices. It offers a simple
-    registry and context-manager API that mirrors the production
-    manager enough for tests and linting.
-    """
+    """Wrapper around production GPU manager for backward compatibility"""
 
     def __init__(self) -> None:
-        self._lock = Lock()
-        self._registry: Dict[str, Any] = {}
+        if PRODUCTION_AVAILABLE:
+            self._manager = get_gpu_manager()
+        else:
+            # Fallback to simple registry
+            import threading
+            self._lock = threading.Lock()
+            self._registry: Dict[str, Any] = {}
 
     def register_model(self, name: str, model: Any) -> None:
-        """Register a model object under a name.
-
-        Args:
-            name: Unique name for the model.
-            model: The model or pipeline object to store.
-        """
-        with self._lock:
-            self._registry[name] = model
+        """Register a model object under a name."""
+        if PRODUCTION_AVAILABLE:
+            # Use production manager's model registry if available
+            self._manager._model_registry = getattr(self._manager, '_model_registry', {})
+            self._manager._model_registry[name] = model
+        else:
+            with self._lock:
+                self._registry[name] = model
 
     def get(self, name: str) -> Optional[Any]:
         """Return a registered model or None if not present."""
-        with self._lock:
-            return self._registry.get(name)
+        if PRODUCTION_AVAILABLE:
+            registry = getattr(self._manager, '_model_registry', {})
+            return registry.get(name)
+        else:
+            with self._lock:
+                return self._registry.get(name)
 
-    def __enter__(self) -> "GPUModelManager":
-        # No-op resource acquisition for the shim
+    def __enter__(self):
+        if PRODUCTION_AVAILABLE:
+            return self._manager.__enter__()
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
-        # No-op cleanup
+        if PRODUCTION_AVAILABLE:
+            return self._manager.__exit__(exc_type, exc, tb)
         return None
 
 
-# Global, shared manager instance used by get_gpu_manager()
+# Global, shared manager instance
 _GLOBAL_MANAGER: Optional[GPUModelManager] = None
-_GLOBAL_LOCK = Lock()
+_GLOBAL_LOCK = threading.Lock()
 
 
 def get_gpu_manager() -> GPUModelManager:
-    """Return a shared GPUModelManager instance.
-
-    The function lazily creates a singleton to avoid import-time side
-    effects.
-    """
+    """Return a shared GPUModelManager instance."""
     global _GLOBAL_MANAGER
     with _GLOBAL_LOCK:
         if _GLOBAL_MANAGER is None:
@@ -78,28 +126,19 @@ def get_gpu_manager() -> GPUModelManager:
 
 
 def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> Optional[int]:
-    """Request allocation of a GPU for an agent.
-
-    This shim always returns GPU index 0 to indicate a (simulated)
-    allocation. Callers should handle None if no allocation is
-    possible; production code will attempt real allocation.
-
-    Args:
-        agent_name: Human-readable agent name (used for logging in
-            production manager).
-        memory_gb: Requested memory in GB (ignored by shim).
-
-    Returns:
-        An integer GPU index or None if allocation failed.
-    """
-    # In the shim we optimistically return 0. Tests and linting code
-    # should not rely on multiple GPU indices.
-    return 0
+    """Request allocation of a GPU for an agent."""
+    if PRODUCTION_AVAILABLE:
+        result = _request_agent_gpu(agent_name, memory_gb)
+        if isinstance(result, dict):
+            return result.get('gpu_device', 0) if result.get('status') == 'allocated' else None
+        return result
+    else:
+        return _request_agent_gpu(agent_name, memory_gb)
 
 
 def release_agent_gpu(agent_name: str) -> None:
-    """Release a previously requested GPU for an agent.
-
-    The shim performs no action; it exists to keep call sites simple.
-    """
-    return None
+    """Release a previously requested GPU for an agent."""
+    if PRODUCTION_AVAILABLE:
+        _release_agent_gpu(agent_name)
+    else:
+        _release_agent_gpu(agent_name)

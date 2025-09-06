@@ -1,5 +1,5 @@
 """
-Online Learning Integration for JustNewsAgentic
+Online Learning Integration for justnewsagent
 Demonstrates practical "training on the fly" implementation
 """
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class OnlineNERTrainer:
     """
     Online learning system for Named Entity Recognition
-    Integrates with JustNewsAgentic agent pipeline
+    Integrates with justnewsagent agent pipeline
     """
     
     def __init__(self, model, config: Dict[str, Any] = None):
