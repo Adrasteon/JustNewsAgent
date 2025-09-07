@@ -3,7 +3,7 @@
 requirements_file = "agents/scout/requirements.txt"
 
 # Read the requirements file
-with open(requirements_file, "r") as file:
+with open(requirements_file) as file:
     lines = file.readlines()
 
 # Prepare updated requirements without enforcing hashes

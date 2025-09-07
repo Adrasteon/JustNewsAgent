@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import List, Dict
 
 AGENTS_DIR = Path(__file__).resolve().parents[1] / 'agents'
 
@@ -90,8 +89,8 @@ app = _find_app()
 '''
 
 
-def scan_agents(agents_dir: Path) -> Dict[str, Dict[str, bool]]:
-    results: Dict[str, Dict[str, bool]] = {}
+def scan_agents(agents_dir: Path) -> dict[str, dict[str, bool]]:
+    results: dict[str, dict[str, bool]] = {}
     if not agents_dir.exists():
         raise FileNotFoundError(f'Agents directory not found: {agents_dir}')
 
@@ -126,7 +125,7 @@ def create_wrapper_main(agent_path: Path) -> None:
     print(f'Created wrapper: {target}')
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--create-wrappers', action='store_true', help='Create safe wrapper main.py files for agents missing main.py')
     args = parser.parse_args(argv)

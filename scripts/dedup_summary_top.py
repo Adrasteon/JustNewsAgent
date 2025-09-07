@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import csv
 import sys
+
 path = "logs/crawl/dedup_review.csv"
 try:
     with open(path, encoding="utf-8") as f:

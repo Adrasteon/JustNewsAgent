@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import getpass
 import os
 import sys
-import getpass
 from pathlib import Path
+
 from common.secret_manager import get_secret_manager
 
 # Add project root to path

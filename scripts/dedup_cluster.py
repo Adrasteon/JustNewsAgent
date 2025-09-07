@@ -10,9 +10,9 @@ Outputs:
 This script is lightweight, pure-Python and works on large pair lists.
 """
 from __future__ import annotations
+
 import sys
-from collections import defaultdict, Counter
-from typing import Dict, List
+from collections import Counter, defaultdict
 
 IN = "logs/crawl/dedup_fuzzy.txt"
 OUT_CLUSTERS = "logs/crawl/dedup_clusters.tsv"
@@ -22,8 +22,8 @@ OUT_SAMPLE = "logs/crawl/dedup_sample.txt"
 # Simple union-find
 class UnionFind:
     def __init__(self):
-        self.parent: Dict[int,int] = {}
-        self.size: Dict[int,int] = {}
+        self.parent: dict[int,int] = {}
+        self.size: dict[int,int] = {}
     def find(self, a: int) -> int:
         if a not in self.parent:
             self.parent[a] = a
@@ -47,12 +47,12 @@ class UnionFind:
 
 def main():
     uf = UnionFind()
-    titles: Dict[int,str] = {}
+    titles: dict[int,str] = {}
     total_pairs = 0
     seen_ids = set()
 
     print("reading edges from", IN, file=sys.stderr)
-    with open(IN, "r", encoding="utf-8") as f:
+    with open(IN, encoding="utf-8") as f:
         header = f.readline()
         if not header:
             print("empty file", file=sys.stderr)
@@ -86,7 +86,7 @@ def main():
     print(f"read {total_pairs} pairs, {len(seen_ids)} unique ids", file=sys.stderr)
 
     # group by root
-    groups: Dict[int, List[int]] = defaultdict(list)
+    groups: dict[int, list[int]] = defaultdict(list)
     for id_ in seen_ids:
         root = uf.find(id_)
         groups[root].append(id_)

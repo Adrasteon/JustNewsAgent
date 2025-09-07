@@ -7,14 +7,16 @@ maintaining backward compatibility while providing production-ready features.
 from __future__ import annotations
 
 import threading
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import production GPU manager
 try:
+    from agents.common.gpu_manager_production import get_gpu_manager
     from agents.common.gpu_manager_production import (
-        get_gpu_manager,
+        release_agent_gpu as _release_agent_gpu,
+    )
+    from agents.common.gpu_manager_production import (
         request_agent_gpu as _request_agent_gpu,
-        release_agent_gpu as _release_agent_gpu
     )
     PRODUCTION_AVAILABLE = True
 except ImportError:
@@ -28,13 +30,13 @@ if not PRODUCTION_AVAILABLE:
         """Lightweight in-process GPU model registry (fallback)"""
         def __init__(self) -> None:
             self._lock = Lock()
-            self._registry: Dict[str, Any] = {}
+            self._registry: dict[str, Any] = {}
 
         def register_model(self, name: str, model: Any) -> None:
             with self._lock:
                 self._registry[name] = model
 
-        def get(self, name: str) -> Optional[Any]:
+        def get(self, name: str) -> Any | None:
             with self._lock:
                 return self._registry.get(name)
 
@@ -44,7 +46,7 @@ if not PRODUCTION_AVAILABLE:
         def __exit__(self, exc_type, exc, tb) -> None:
             return None
 
-    _GLOBAL_MANAGER: Optional[GPUModelManager] = None
+    _GLOBAL_MANAGER: GPUModelManager | None = None
     _GLOBAL_LOCK = Lock()
 
     def get_gpu_manager() -> GPUModelManager:
@@ -54,7 +56,7 @@ if not PRODUCTION_AVAILABLE:
                 _GLOBAL_MANAGER = GPUModelManager()
             return _GLOBAL_MANAGER
 
-    def _request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> Optional[int]:
+    def _request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> int | None:
         return 0  # Always return GPU 0 for compatibility
 
     def _release_agent_gpu(agent_name: str) -> None:
@@ -79,7 +81,7 @@ class GPUModelManager:
             # Fallback to simple registry
             import threading
             self._lock = threading.Lock()
-            self._registry: Dict[str, Any] = {}
+            self._registry: dict[str, Any] = {}
 
     def register_model(self, name: str, model: Any) -> None:
         """Register a model object under a name."""
@@ -91,7 +93,7 @@ class GPUModelManager:
             with self._lock:
                 self._registry[name] = model
 
-    def get(self, name: str) -> Optional[Any]:
+    def get(self, name: str) -> Any | None:
         """Return a registered model or None if not present."""
         if PRODUCTION_AVAILABLE:
             registry = getattr(self._manager, '_model_registry', {})
@@ -112,7 +114,7 @@ class GPUModelManager:
 
 
 # Global, shared manager instance
-_GLOBAL_MANAGER: Optional[GPUModelManager] = None
+_GLOBAL_MANAGER: GPUModelManager | None = None
 _GLOBAL_LOCK = threading.Lock()
 
 
@@ -125,7 +127,7 @@ def get_gpu_manager() -> GPUModelManager:
         return _GLOBAL_MANAGER
 
 
-def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> Optional[int]:
+def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> int | None:
     """Request allocation of a GPU for an agent."""
     if PRODUCTION_AVAILABLE:
         result = _request_agent_gpu(agent_name, memory_gb)

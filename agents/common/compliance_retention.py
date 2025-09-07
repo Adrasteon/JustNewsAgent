@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Legal Compliance Framework - Data Retention Policies
@@ -16,12 +17,11 @@ Features:
 
 import asyncio
 import json
-
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -51,10 +51,10 @@ class RetentionPolicy:
     action: RetentionAction
     enabled: bool = True
     description: str = ""
-    last_cleanup: Optional[datetime] = None
+    last_cleanup: datetime | None = None
     records_processed: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage"""
         data = asdict(self)
         data['data_type'] = self.data_type.value
@@ -64,7 +64,7 @@ class RetentionPolicy:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'RetentionPolicy':
+    def from_dict(cls, data: dict[str, Any]) -> 'RetentionPolicy':
         """Create from dictionary"""
         data['data_type'] = DataType(data['data_type'])
         data['action'] = RetentionAction(data['action'])
@@ -140,11 +140,11 @@ class DataRetentionManager:
 
         logger.info("📋 Data Retention Manager initialized")
 
-    def _load_policies(self) -> Dict[DataType, RetentionPolicy]:
+    def _load_policies(self) -> dict[DataType, RetentionPolicy]:
         """Load retention policies from config file"""
         if self.config_path.exists():
             try:
-                with open(self.config_path, 'r', encoding='utf-8') as f:
+                with open(self.config_path, encoding='utf-8') as f:
                     data = json.load(f)
                     policies = {}
                     for key, policy_data in data.items():
@@ -201,7 +201,7 @@ class DataRetentionManager:
         return datetime.now() - timedelta(days=policy.retention_days)
 
     async def cleanup_expired_data(self, data_type: DataType,
-                                  data_access_func, dry_run: bool = False) -> Dict[str, Any]:
+                                  data_access_func, dry_run: bool = False) -> dict[str, Any]:
         """
         Clean up expired data according to retention policy
 
@@ -289,8 +289,8 @@ class DataRetentionManager:
                 "action_taken": "error"
             }
 
-    async def run_full_cleanup(self, data_access_funcs: Dict[DataType, Any],
-                              dry_run: bool = False) -> Dict[str, Any]:
+    async def run_full_cleanup(self, data_access_funcs: dict[DataType, Any],
+                              dry_run: bool = False) -> dict[str, Any]:
         """
         Run cleanup for all enabled data types
 
@@ -327,7 +327,7 @@ class DataRetentionManager:
 
         return summary
 
-    def get_compliance_report(self) -> Dict[str, Any]:
+    def get_compliance_report(self) -> dict[str, Any]:
         """Generate compliance report for data retention"""
         report = {
             "compliance_report": True,
@@ -359,7 +359,7 @@ class UserDataAccess:
     def __init__(self, db_connection):
         self.db = db_connection
 
-    async def get_expired_data(self, data_type: DataType, cutoff_date: datetime) -> List[Dict[str, Any]]:
+    async def get_expired_data(self, data_type: DataType, cutoff_date: datetime) -> list[dict[str, Any]]:
         """Get expired user data"""
         if data_type == DataType.USER_SESSIONS:
             # Query for expired sessions
@@ -369,22 +369,22 @@ class UserDataAccess:
             return []  # Placeholder
         return []
 
-    async def delete_expired_data(self, data_type: DataType, expired_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def delete_expired_data(self, data_type: DataType, expired_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Delete expired user data"""
         # Implementation would delete from database
         return {"deleted": len(expired_data)}
 
-    async def anonymize_expired_data(self, data_type: DataType, expired_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def anonymize_expired_data(self, data_type: DataType, expired_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Anonymize expired user data"""
         # Implementation would hash/anonymize personal data
         return {"anonymized": len(expired_data)}
 
-    async def archive_expired_data(self, data_type: DataType, expired_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def archive_expired_data(self, data_type: DataType, expired_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Archive expired user data"""
         # Implementation would move to archive storage
         return {"archived": len(expired_data)}
 
-    async def flag_for_review(self, data_type: DataType, expired_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def flag_for_review(self, data_type: DataType, expired_data: list[dict[str, Any]]) -> dict[str, Any]:
         """Flag expired data for manual review"""
         # Implementation would mark for review
         return {"flagged": len(expired_data)}

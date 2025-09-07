@@ -22,8 +22,6 @@ import argparse
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PY_PATTERN = re.compile(r"\.py$", re.IGNORECASE)
@@ -39,7 +37,7 @@ MODEL_LITERALS = [
     os.environ.get("DIALOGPT_REPLACEMENT_MODEL", "distilgpt2"),
 ]
 
-def find_files(root: Path) -> List[Path]:
+def find_files(root: Path) -> list[Path]:
     files = []
     for p in root.rglob('*'):
         if p.is_file():
@@ -60,7 +58,7 @@ def make_backup(path: Path):
         return None
 
 
-def ensure_import_os(lines: List[str]) -> List[str]:
+def ensure_import_os(lines: list[str]) -> list[str]:
     joined = '\n'.join(lines[:50])  # search top of file
     if re.search(r'(^|\n)\s*import\s+os(\s|$)', joined):
         return lines
@@ -75,7 +73,7 @@ def ensure_import_os(lines: List[str]) -> List[str]:
     return lines
 
 
-def process_python_file(path: Path, apply: bool) -> Tuple[bool, List[str]]:
+def process_python_file(path: Path, apply: bool) -> tuple[bool, list[str]]:
     text = path.read_text(encoding='utf-8')
     changed = False
     notes = []
@@ -116,7 +114,7 @@ def process_python_file(path: Path, apply: bool) -> Tuple[bool, List[str]]:
     return False, notes
 
 
-def process_text_file(path: Path, apply: bool) -> Tuple[bool, List[str]]:
+def process_text_file(path: Path, apply: bool) -> tuple[bool, list[str]]:
     text = path.read_text(encoding='utf-8')
     changed = False
     notes = []

@@ -4,18 +4,18 @@ Provides a process-local cached SentenceTransformer instance to avoid repeated
 model downloads / loads and reduce GPU memory churn. Callers should prefer
 this helper when they need a SentenceTransformer instance.
 """
-from typing import Optional, Tuple, Dict, Any
-
-import os
-from common.observability import get_logger
-import threading
-from pathlib import Path
 import inspect
-import warnings
+import os
+import threading
 import time
+import warnings
+from pathlib import Path
+from typing import Any
+
+from common.observability import get_logger
 
 
-def _detect_caller_agent() -> Optional[str]:
+def _detect_caller_agent() -> str | None:
     """Return the agent folder name (e.g. 'memory', 'synthesizer') by
     inspecting the stack. Skip internal common modules (agents/common).
     """
@@ -51,13 +51,13 @@ _SUPPRESSION_LOGGED = False
 
 # GPU Manager Integration
 _gpu_manager = None
-_model_memory_tracking: Dict[str, Dict[str, Any]] = {}
+_model_memory_tracking: dict[str, dict[str, Any]] = {}
 _memory_tracking_lock = threading.Lock()
 
 # Smart Pre-loading Configuration
 _PRELOAD_MODELS = os.environ.get("EMBEDDING_PRELOAD_MODELS", "all-MiniLM-L6-v2").split(",")
 _PRELOAD_ENABLED = os.environ.get("EMBEDDING_PRELOAD_ENABLED", "false").lower() == "true"
-_PRELOAD_THREAD: Optional[threading.Thread] = None
+_PRELOAD_THREAD: threading.Thread | None = None
 _PRELOAD_COMPLETED = False
 
 def _get_gpu_manager():
@@ -77,7 +77,7 @@ def _get_gpu_manager():
                 _gpu_manager = None
     return _gpu_manager
 
-def _track_model_memory_usage(model_name: str, device_key: str, model_size_mb: float, agent_name: Optional[str] = None):
+def _track_model_memory_usage(model_name: str, device_key: str, model_size_mb: float, agent_name: str | None = None):
     """Track memory usage for loaded models"""
     with _memory_tracking_lock:
         key = f"{model_name}_{device_key}"
@@ -100,7 +100,7 @@ def _get_model_memory_usage(model_name: str, device_key: str) -> float:
             return _model_memory_tracking[key]['memory_mb']
     return 0.0
 
-def get_embedding_memory_stats() -> Dict[str, Any]:
+def get_embedding_memory_stats() -> dict[str, Any]:
     """Get comprehensive memory usage statistics for all loaded embedding models"""
     # Note: This function is called from get_embedding_cache_info() which already holds the lock
     # So we don't acquire the lock here to avoid deadlock
@@ -119,7 +119,7 @@ def get_embedding_memory_stats() -> Dict[str, Any]:
         'cache_hit_ratio': _calculate_cache_hit_ratio()
     }
 
-def _group_models_by_agent() -> Dict[str, list]:
+def _group_models_by_agent() -> dict[str, list]:
     """Group loaded models by agent for analysis"""
     agent_groups = {}
     for info in _model_memory_tracking.values():
@@ -184,7 +184,7 @@ def _estimate_model_memory_usage(model, device_key: str) -> float:
     else:
         return 200  # Small models (default)
 
-def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folder: Optional[str] = None, device: Optional[object] = None):
+def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folder: str | None = None, device: object | None = None):
     """Return a shared SentenceTransformer instance for this process.
 
     Args:
@@ -247,7 +247,7 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
         # torch not available or other error; use string representation
         device_key = str(device) if device is not None else "auto"
 
-    cache_key: Tuple[str, str, str] = (model_name, cache_folder or "", device_key)
+    cache_key: tuple[str, str, str] = (model_name, cache_folder or "", device_key)
 
     # Ensure there's a lock per cache key to avoid concurrent duplicate loads
     lock = _MODEL_CACHE_LOCKS.get(cache_key)
@@ -458,7 +458,7 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
     _MODEL_CACHE[cache_key] = wrapped
     return wrapped
 
-def get_optimal_embedding_batch_size(model_name: str = "all-MiniLM-L6-v2", device: Optional[object] = None) -> int:
+def get_optimal_embedding_batch_size(model_name: str = "all-MiniLM-L6-v2", device: object | None = None) -> int:
     """Get optimal batch size for embedding operations based on available resources"""
     try:
         gpu_manager = _get_gpu_manager()
@@ -484,7 +484,7 @@ def get_optimal_embedding_batch_size(model_name: str = "all-MiniLM-L6-v2", devic
     else:
         return 4   # CPU default
 
-def get_embedding_performance_config(model_name: str = "all-MiniLM-L6-v2", device: Optional[object] = None) -> Dict[str, Any]:
+def get_embedding_performance_config(model_name: str = "all-MiniLM-L6-v2", device: object | None = None) -> dict[str, Any]:
     """Get performance configuration for embedding operations"""
     batch_size = get_optimal_embedding_batch_size(model_name, device)
 
@@ -497,7 +497,7 @@ def get_embedding_performance_config(model_name: str = "all-MiniLM-L6-v2", devic
 
     return config
 
-def _estimate_embedding_throughput(batch_size: int, device: Optional[object]) -> float:
+def _estimate_embedding_throughput(batch_size: int, device: object | None) -> float:
     """Estimate embedding throughput based on batch size and device"""
     try:
         if device is not None and str(device).startswith('cuda'):
@@ -640,7 +640,7 @@ def cleanup_embedding_cache():
 
     logger.info(f"Cleaned up {len(models_to_cleanup)} cached embedding models")
 
-def get_embedding_cache_info() -> Dict[str, Any]:
+def get_embedding_cache_info() -> dict[str, Any]:
     """Get information about the current embedding cache state"""
     try:
         with _memory_tracking_lock:
@@ -760,7 +760,7 @@ def wait_for_preloading(timeout: float = 30.0) -> bool:
 
     return _PRELOAD_COMPLETED
 
-def get_preloading_status() -> Dict[str, Any]:
+def get_preloading_status() -> dict[str, Any]:
     """Get the current preloading status"""
     global _PRELOAD_THREAD, _PRELOAD_COMPLETED
 

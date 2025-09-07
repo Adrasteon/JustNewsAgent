@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: GraphQL Query Interface
@@ -16,26 +17,28 @@ GraphQL Schema:
 """
 
 
+import contextlib
 import hashlib
 from datetime import datetime
-import contextlib
-from fastapi import FastAPI, Request, HTTPException
+
+import graphene
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-import graphene
-from graphene import ObjectType, String, Int, Float, List as GraphQLList, Field, Schema
+from graphene import Field, Float, Int, ObjectType, Schema, String
+from graphene import List as GraphQLList
 from graphene.types.datetime import DateTime
-import uvicorn
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-
-from agents.archive.knowledge_graph import KnowledgeGraphManager
-from agents.archive.archive_manager import ArchiveManager
 
 # Import graphql function
 from graphql import graphql
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+
+from agents.archive.archive_manager import ArchiveManager
+from agents.archive.knowledge_graph import KnowledgeGraphManager
 
 logger = get_logger(__name__)
 

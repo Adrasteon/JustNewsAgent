@@ -14,13 +14,13 @@ The endpoint is POST /shutdown and returns 202 immediately.
 from __future__ import annotations
 
 import os
-from common.observability import get_logger
 import signal
 import threading
 import time
 
+from fastapi import FastAPI, HTTPException, Request
 
-from fastapi import FastAPI, Request, HTTPException
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 

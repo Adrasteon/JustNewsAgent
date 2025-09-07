@@ -26,16 +26,18 @@ Note: Contradiction detection moved to Reasoning Agent (Nucleoid symbolic logic)
 Performance: Production-ready with GPU acceleration
 """
 
+import importlib
 import os
+import warnings
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import torch
+
 from common.observability import get_logger
 
-import warnings
-from typing import Dict, List, Any
-from datetime import datetime, timezone
-import torch
-import importlib
-from pathlib import Path
-import numpy as np
 
 # Lazy import helpers to avoid importing heavy ML libraries at module import time
 def _import_transformers_module():
@@ -71,7 +73,11 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)  # Catch all depr
 
 # Production GPU Manager integration
 try:
-    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    from agents.common.gpu_manager import (
+        get_gpu_manager,
+        release_agent_gpu,
+        request_agent_gpu,
+    )
     PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
     PRODUCTION_GPU_AVAILABLE = False
@@ -83,7 +89,7 @@ class FactCheckerV2Engine:
     Next-Generation Fact Checking Engine with 5 Specialized AI Models
     Production-ready architecture matching Scout V2 standards
     """
-    
+
     def __init__(self, enable_training=False):
         """Initialize all 5 specialized AI models"""
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -91,7 +97,7 @@ class FactCheckerV2Engine:
         self.tokenizers = {}
         self.pipelines = {}
         self.enable_training = enable_training
-        
+
         # Initialize GPU allocation for fact checker agent
         self.gpu_allocated = False
         self.gpu_device = None
@@ -133,7 +139,7 @@ class FactCheckerV2Engine:
                 logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
         elif self.device.type == "cuda":
             logger.info("📋 Production GPU manager not available, models not registered")
-    
+
     def _initialize_fact_verification_model(self):
         """Model 1: DistilBERT-base for binary fact verification"""
         try:
@@ -147,7 +153,7 @@ class FactCheckerV2Engine:
             if pipeline_fn is None:
                 self.pipelines['fact_verification'] = None
                 return
-                
+
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['fact_verification'] = pipeline_fn(
                 "text-classification",
@@ -164,7 +170,7 @@ class FactCheckerV2Engine:
         except Exception as e:
             logger.error(f"❌ Failed to load fact verification model: {e}")
             self.pipelines['fact_verification'] = None
-    
+
     def _initialize_credibility_assessment_model(self):
         """Model 2: RoBERTa-base for source credibility scoring"""
         try:
@@ -178,7 +184,7 @@ class FactCheckerV2Engine:
             if pipeline_fn is None:
                 self.pipelines['credibility_assessment'] = None
                 return
-                
+
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['credibility_assessment'] = pipeline_fn(
                 "text-classification",
@@ -195,12 +201,12 @@ class FactCheckerV2Engine:
         except Exception as e:
             logger.error(f"❌ Failed to load credibility assessment model: {e}")
             self.pipelines['credibility_assessment'] = None
-    
+
     def _initialize_evidence_retrieval_model(self):
         """Model 4: SentenceTransformers for evidence retrieval"""
         try:
             model_name = "sentence-transformers/all-mpnet-base-v2"
-            
+
             # Prefer process-local shared embedding model when available
             agent_cache = os.environ.get('FACT_CHECKER_MODEL_CACHE') or str(Path('./agents/fact_checker/models').resolve())
             try:
@@ -212,7 +218,10 @@ class FactCheckerV2Engine:
                 )
             except Exception:
                 try:
-                    from agents.common.embedding import ensure_agent_model_exists, get_shared_embedding_model
+                    from agents.common.embedding import (
+                        ensure_agent_model_exists,
+                        get_shared_embedding_model,
+                    )
                     try:
                         ensure_agent_model_exists(model_name, agent_cache)
                     except Exception:
@@ -223,7 +232,9 @@ class FactCheckerV2Engine:
                     try:
                         model_dir = None
                         try:
-                            from agents.common.embedding import ensure_agent_model_exists
+                            from agents.common.embedding import (
+                                ensure_agent_model_exists,
+                            )
                             model_dir = ensure_agent_model_exists(model_name, agent_cache)
                         except Exception:
                             pass
@@ -245,28 +256,28 @@ class FactCheckerV2Engine:
                             self.models['evidence_retrieval'] = None
                     except Exception:
                         self.models['evidence_retrieval'] = None
-            
+
             logger.info("✅ Model 4: Evidence retrieval (SentenceTransformers) loaded")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load evidence retrieval model: {e}")
             self.models['evidence_retrieval'] = None
-    
+
     def _initialize_claim_extraction_model(self):
         """Model 5: spaCy for claim extraction"""
         try:
             # Suppress all warnings during spaCy operations
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 import spacy
-                
+
                 # Load spaCy model - spaCy handles GPU differently than PyTorch
                 # Use CPU for spaCy as it's more stable and still fast for NLP tasks
                 self.models['claim_extraction'] = spacy.load("en_core_web_sm")
-            
+
             logger.info("✅ Model 5: Claim extraction (spaCy) loaded")
-            
+
         except ImportError:
             logger.error("❌ spaCy not installed. Install with: pip install spacy && python -m spacy download en_core_web_sm")
             self.models['claim_extraction'] = None
@@ -276,8 +287,8 @@ class FactCheckerV2Engine:
         except Exception as e:
             logger.error(f"❌ Failed to load claim extraction model: {e}")
             self.models['claim_extraction'] = None
-    
-    def verify_fact(self, claim: str, context: str = "") -> Dict[str, Any]:
+
+    def verify_fact(self, claim: str, context: str = "") -> dict[str, Any]:
         """
         Primary fact verification using DistilBERT
         Returns factual/questionable classification with confidence
@@ -285,13 +296,13 @@ class FactCheckerV2Engine:
         try:
             if not self.pipelines.get('fact_verification'):
                 return {"verification_score": 0.5, "classification": "unknown", "confidence": 0.0}
-            
+
             # Prepare input text
             input_text = f"{claim} [SEP] {context}" if context else claim
-            
+
             # Get fact verification prediction
             result = self.pipelines['fact_verification'](input_text)
-            
+
             # Extract verification score (assuming binary classification)
             if isinstance(result, list) and len(result) > 0:
                 scores = result[0] if isinstance(result[0], list) else result
@@ -300,21 +311,21 @@ class FactCheckerV2Engine:
                 confidence = factual_score
             else:
                 factual_score = 0.5
-                classification = "unknown"  
+                classification = "unknown"
                 confidence = 0.0
-                
+
             return {
                 "verification_score": factual_score,
                 "classification": classification,
                 "confidence": confidence,
                 "model": "distilbert-fact-verification"
             }
-            
+
         except Exception as e:
             logger.error(f"Fact verification error: {e}")
             return {"verification_score": 0.5, "classification": "error", "confidence": 0.0}
-    
-    def assess_source_credibility(self, source_text: str, domain: str = "") -> Dict[str, Any]:
+
+    def assess_source_credibility(self, source_text: str, domain: str = "") -> dict[str, Any]:
         """
         Source credibility assessment using RoBERTa
         Returns reliability score (0.0-1.0)
@@ -322,13 +333,13 @@ class FactCheckerV2Engine:
         try:
             if not self.pipelines.get('credibility_assessment'):
                 return {"credibility_score": 0.5, "reliability": "unknown", "confidence": 0.0}
-            
+
             # Prepare input with domain context
             input_text = f"Source: {domain} - {source_text}" if domain else source_text
-            
+
             # Get credibility assessment
             result = self.pipelines['credibility_assessment'](input_text)
-            
+
             # Extract credibility score
             if isinstance(result, list) and len(result) > 0:
                 scores = result[0] if isinstance(result[0], list) else result
@@ -339,31 +350,31 @@ class FactCheckerV2Engine:
                 credibility_score = 0.5
                 reliability = "unknown"
                 confidence = 0.0
-                
+
             return {
                 "credibility_score": credibility_score,
                 "reliability": reliability,
                 "confidence": confidence,
                 "model": "roberta-credibility-assessment"
             }
-            
+
         except Exception as e:
             logger.error(f"Credibility assessment error: {e}")
             return {"credibility_score": 0.5, "reliability": "error", "confidence": 0.0}
-    
-    def detect_contradictions(self, text_a: str, text_b: str) -> Dict[str, Any]:
+
+    def detect_contradictions(self, text_a: str, text_b: str) -> dict[str, Any]:
         """
         Contradiction detection moved to Reasoning Agent (Nucleoid)
         This method now delegates to the Reasoning Agent for proper symbolic logic
         """
         return {
-            "contradiction_score": 0.5, 
-            "status": "delegated_to_reasoning_agent", 
+            "contradiction_score": 0.5,
+            "status": "delegated_to_reasoning_agent",
             "confidence": 1.0,
             "message": "Contradiction detection handled by Reasoning Agent with Nucleoid symbolic logic"
         }
-    
-    def retrieve_evidence(self, query: str, evidence_database: List[str]) -> Dict[str, Any]:
+
+    def retrieve_evidence(self, query: str, evidence_database: list[str]) -> dict[str, Any]:
         """
         Evidence retrieval using SentenceTransformers
         Finds supporting/contradicting evidence from knowledge base
@@ -371,31 +382,31 @@ class FactCheckerV2Engine:
         try:
             if not self.models.get('evidence_retrieval') or not evidence_database:
                 return {"evidence": [], "similarity_scores": [], "top_evidence": ""}
-            
+
             # Encode query and evidence database
             query_embedding = self.models['evidence_retrieval'].encode([query])
             evidence_embeddings = self.models['evidence_retrieval'].encode(evidence_database)
-            
+
             # Calculate similarities
             similarities = self.models['evidence_retrieval'].similarity(query_embedding, evidence_embeddings)[0]
-            
+
             # Get top evidence
             top_indices = similarities.argsort(descending=True)[:3]
             top_evidence = [evidence_database[i] for i in top_indices]
             top_scores = [float(similarities[i]) for i in top_indices]
-            
+
             return {
                 "evidence": top_evidence,
                 "similarity_scores": top_scores,
                 "top_evidence": top_evidence[0] if top_evidence else "",
                 "model": "sentence-transformers-evidence-retrieval"
             }
-            
+
         except Exception as e:
             logger.error(f"Evidence retrieval error: {e}")
             return {"evidence": [], "similarity_scores": [], "top_evidence": ""}
-    
-    def extract_claims(self, text: str) -> Dict[str, Any]:
+
+    def extract_claims(self, text: str) -> dict[str, Any]:
         """
         Claim extraction using spaCy NER + custom patterns
         Extracts verifiable factual claims from news text
@@ -403,29 +414,29 @@ class FactCheckerV2Engine:
         try:
             claims = []
             entities = []
-            
+
             if self.models.get('claim_extraction'):
                 # spaCy NER approach
                 doc = self.models['claim_extraction'](text)
-                
+
                 # Extract entities that could be part of factual claims
                 entities = [(ent.text, ent.label_) for ent in doc.ents]
-                
+
                 # Extract potential factual claims using patterns
                 for sent in doc.sents:
                     sent_text = sent.text.strip()
-                    
+
                     # Simple heuristics for factual claims
                     if any(indicator in sent_text.lower() for indicator in [
                         'according to', 'reported that', 'announced', 'confirmed',
                         'statistics show', 'data indicates', 'study found'
                     ]):
                         claims.append(sent_text)
-                        
+
             else:
                 # Fallback pattern-based approach
                 import re
-                
+
                 # Extract sentences with factual indicators
                 sentences = re.split(r'[.!?]+', text)
                 for sent in sentences:
@@ -433,19 +444,19 @@ class FactCheckerV2Engine:
                         'according to', 'reported', 'announced', 'confirmed', 'said'
                     ]):
                         claims.append(sent.strip())
-            
+
             return {
                 "claims": claims[:5],  # Top 5 claims
                 "entities": entities[:10],  # Top 10 entities
                 "claim_count": len(claims),
                 "model": "spacy-claim-extraction" if self.models.get('claim_extraction') else "pattern-based-fallback"
             }
-            
+
         except Exception as e:
             logger.error(f"Claim extraction error: {e}")
             return {"claims": [], "entities": [], "claim_count": 0}
-    
-    def comprehensive_fact_check(self, article_text: str, source_url: str = "") -> Dict[str, Any]:
+
+    def comprehensive_fact_check(self, article_text: str, source_url: str = "") -> dict[str, Any]:
         """
         Comprehensive fact-checking using all 5 AI models
         Returns complete fact-checking analysis
@@ -453,7 +464,7 @@ class FactCheckerV2Engine:
         try:
             # Extract claims from article
             claims_result = self.extract_claims(article_text)
-            
+
             # Verify each major claim
             fact_verifications = []
             for claim in claims_result['claims'][:3]:  # Top 3 claims
@@ -462,11 +473,11 @@ class FactCheckerV2Engine:
                     "claim": claim,
                     "verification": verification
                 })
-            
-            # Assess source credibility  
+
+            # Assess source credibility
             domain = source_url.split('/')[2] if source_url and '/' in source_url else ""
             credibility = self.assess_source_credibility(article_text[:500], domain)
-            
+
             # Check for internal contradictions
             sentences = article_text.split('.')[:5]  # First 5 sentences
             contradictions = []
@@ -478,14 +489,14 @@ class FactCheckerV2Engine:
                         "sentence_b": sentences[i+1].strip(),
                         "contradiction_score": contradiction['contradiction_score']
                     })
-            
+
             # Calculate overall fact-check score
             avg_verification = np.mean([fv['verification']['verification_score'] for fv in fact_verifications]) if fact_verifications else 0.5
             credibility_score = credibility['credibility_score']
             contradiction_penalty = len(contradictions) * 0.1
-            
+
             overall_score = max(0.0, min(1.0, (avg_verification + credibility_score) / 2 - contradiction_penalty))
-            
+
             # Determine overall assessment
             if overall_score >= 0.7:
                 assessment = "highly_reliable"
@@ -493,7 +504,7 @@ class FactCheckerV2Engine:
                 assessment = "moderately_reliable"
             else:
                 assessment = "questionable"
-            
+
             return {
                 "overall_score": overall_score,
                 "assessment": assessment,
@@ -505,10 +516,10 @@ class FactCheckerV2Engine:
                 "source_credibility": credibility,
                 "contradictions": contradictions,
                 "entities": claims_result['entities'],
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "models_used": ["distilbert", "roberta", "bert-large", "sentence-transformers", "spacy"]
             }
-            
+
         except Exception as e:
             logger.error(f"Comprehensive fact-check error: {e}")
             return {
@@ -516,8 +527,8 @@ class FactCheckerV2Engine:
                 "assessment": "error",
                 "error": str(e)
             }
-    
-    def get_model_info(self) -> Dict[str, Dict]:
+
+    def get_model_info(self) -> dict[str, dict]:
         """Get information about all loaded models"""
         return {
             "fact_verification": {
@@ -541,7 +552,7 @@ class FactCheckerV2Engine:
                 "purpose": "Factual claim extraction from news text"
             }
         }
-    
+
     def cleanup(self):
         """Cleanup GPU memory and model resources"""
         # Release GPU allocation

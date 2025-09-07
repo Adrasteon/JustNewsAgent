@@ -19,6 +19,7 @@ Demonstrates:
 import asyncio
 import json
 from datetime import datetime
+
 from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
 from agents.scout.production_crawlers.sites.generic_site_crawler import SiteConfig
 
@@ -86,7 +87,9 @@ async def demo_multi_site_clustering():
 
     # Demonstrate multi-site crawler setup
     print("\n🔄 Setting up multi-site crawler...")
-    from agents.scout.production_crawlers.sites.generic_site_crawler import MultiSiteCrawler
+    from agents.scout.production_crawlers.sites.generic_site_crawler import (
+        MultiSiteCrawler,
+    )
 
     multi_crawler = MultiSiteCrawler(
         concurrent_sites=2,  # Crawl 2 sites at once

@@ -24,8 +24,6 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
-from typing import Dict, List
-
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP_FILE = Path(os.environ.get('MAP_FILE', str(ROOT / 'markdown_docs' / 'agent_documentation' / 'AGENT_MODEL_MAP.json')))
@@ -33,7 +31,7 @@ MODEL_STORE_ROOT = Path(os.environ.get('MODEL_STORE_ROOT', '/media/adra/Data/jus
 VERSION_NAME = os.environ.get('MODEL_STORE_VERSION', 'v1')
 
 
-def load_map(path: Path) -> Dict[str, List[str]]:
+def load_map(path: Path) -> dict[str, list[str]]:
     with path.open() as f:
         return json.load(f)
 
@@ -56,7 +54,7 @@ def snapshot_download(repo_id: str, target: Path) -> bool:
 
     # Fallback: try to use transformers to populate cache
     try:
-        from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
+        from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
         print(f"Attempting transformers.from_pretrained for {repo_id}")
         AutoTokenizer.from_pretrained(repo_id, cache_dir=str(target))
         try:
@@ -73,7 +71,7 @@ def snapshot_download(repo_id: str, target: Path) -> bool:
     return False
 
 
-def populate_one_agent(agent: str, models: List[str]):
+def populate_one_agent(agent: str, models: list[str]):
     print(f"\n--- Processing agent: {agent}")
     agent_dir = MODEL_STORE_ROOT / agent
     version_dir = agent_dir / VERSION_NAME

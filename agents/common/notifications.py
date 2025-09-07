@@ -4,11 +4,12 @@ Provides Slack webhook and SMTP email notification utilities. Both are
 best-effort: when no configuration present the functions are no-ops.
 """
 import os
-from common.observability import get_logger
 import smtplib
 from email.message import EmailMessage
+
 import requests
 
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 

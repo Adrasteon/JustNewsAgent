@@ -3,14 +3,14 @@ Centralized Logging System for JustNewsAgent
 Production-ready logging with structured output, file rotation, and environment-specific configuration.
 """
 
+import json
 import logging
 import logging.handlers
-import sys
-import json
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Optional
 
 
 class StructuredFormatter(logging.Formatter):

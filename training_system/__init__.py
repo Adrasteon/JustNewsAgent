@@ -30,28 +30,27 @@ __author__ = "JustNews V2 Development Team"
 
 # Core imports for easy access
 try:
-    from .core.training_coordinator import (
-        OnTheFlyTrainingCoordinator,
-        TrainingExample,
-        ModelPerformance,
-        initialize_online_training,
-        get_training_coordinator,
-        add_training_feedback,
-        add_user_correction,
-        get_online_training_status
-    )
-
     from .core.system_manager import (
         SystemWideTrainingManager,
-        get_system_training_manager,
         collect_prediction,
-        submit_correction,
+        force_update,
+        get_system_training_manager,
         get_training_dashboard,
-        force_update
+        submit_correction,
     )
-    
+    from .core.training_coordinator import (
+        ModelPerformance,
+        OnTheFlyTrainingCoordinator,
+        TrainingExample,
+        add_training_feedback,
+        add_user_correction,
+        get_online_training_status,
+        get_training_coordinator,
+        initialize_online_training,
+    )
+
     _imports_available = True
-    
+
 except ImportError as e:
     # Fallback for environments where dependencies aren't available
     _imports_available = False
@@ -61,7 +60,7 @@ except ImportError as e:
         # Use a captured string to avoid referencing the exception object
         # which may not be available at call-time in some import scenarios.
         raise ImportError(f"Training system not available: {_import_error_message}")
-    
+
     # Create placeholder functions
     OnTheFlyTrainingCoordinator = _not_available
     TrainingExample = _not_available
@@ -82,19 +81,19 @@ except ImportError as e:
 __all__ = [
     # Core coordinator
     'OnTheFlyTrainingCoordinator',
-    'TrainingExample', 
+    'TrainingExample',
     'ModelPerformance',
     'initialize_online_training',
     'get_training_coordinator',
     'add_training_feedback',
     'add_user_correction',
     'get_online_training_status',
-    
+
     # System manager
     'SystemWideTrainingManager',
     'get_system_training_manager',
     'collect_prediction',
-    'submit_correction', 
+    'submit_correction',
     'get_training_dashboard',
     'force_update'
 ]

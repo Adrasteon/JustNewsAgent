@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Phase 3: Knowledge Graph Foundation
@@ -14,16 +15,16 @@ PHASE 3 GOALS:
 """
 
 import asyncio
-import json
-
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-import re
 import hashlib
+import json
+import re
 from collections import defaultdict
-import networkx as nx
+from datetime import datetime, timedelta
 from difflib import SequenceMatcher
+from pathlib import Path
+from typing import Any
+
+import networkx as nx
 
 from agents.archive.entity_linker import EntityLinkerManager
 
@@ -140,7 +141,7 @@ class AdvancedEntityExtractor:
 
         logger.info("🔍 Advanced entity extractor initialized with disambiguation capabilities")
 
-    def extract_entities(self, text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, List[Dict[str, Any]]]:
+    def extract_entities(self, text: str, context: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
         """
         Extract entities from text with advanced disambiguation
 
@@ -222,7 +223,7 @@ class AdvancedEntityExtractor:
         return True
 
     def _calculate_confidence(self, entity: str, entity_type: str, text: str,
-                            context: Optional[Dict[str, Any]] = None) -> float:
+                            context: dict[str, Any] | None = None) -> float:
         """Calculate confidence score for extracted entity with enhanced analysis"""
         confidence = 0.5  # Base confidence
 
@@ -319,7 +320,7 @@ class AdvancedEntityExtractor:
         except (ValueError, TypeError, AttributeError):
             return ""
 
-    def _find_aliases(self, entity: str, entity_type: str) -> List[str]:
+    def _find_aliases(self, entity: str, entity_type: str) -> list[str]:
         """Find known aliases for an entity"""
         aliases = []
 
@@ -341,7 +342,7 @@ class AdvancedEntityExtractor:
 
         return list(set(aliases))
 
-    def _post_process_entities(self, entities: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+    def _post_process_entities(self, entities: dict[str, list[dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
         """Post-process extracted entities for better quality"""
         processed = defaultdict(list)
 
@@ -366,7 +367,7 @@ class AdvancedEntityExtractor:
 
         return dict(processed)
 
-    def _disambiguate_entities(self, entities: Dict[str, List[Dict[str, Any]]]) -> Dict[str, List[Dict[str, Any]]]:
+    def _disambiguate_entities(self, entities: dict[str, list[dict[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
         """Disambiguate similar entities using clustering"""
         disambiguated = defaultdict(list)
 
@@ -396,8 +397,8 @@ class AdvancedEntityExtractor:
 
         return dict(disambiguated)
 
-    def _cluster_similar_entities(self, entities: List[Dict[str, Any]],
-                                similarity_threshold: float = 0.8) -> List[List[Dict[str, Any]]]:
+    def _cluster_similar_entities(self, entities: list[dict[str, Any]],
+                                similarity_threshold: float = 0.8) -> list[list[dict[str, Any]]]:
         """Cluster similar entities based on name similarity"""
         clusters = []
         unclustered = entities.copy()
@@ -445,7 +446,7 @@ class EntityExtractor(AdvancedEntityExtractor):
     This maintains the original interface while providing advanced capabilities
     """
 
-    def extract_entities(self, text: str) -> Dict[str, List[str]]:
+    def extract_entities(self, text: str) -> dict[str, list[str]]:
         """
         Extract entities from text content (backward-compatible interface)
 
@@ -472,14 +473,14 @@ class KnowledgeGraphNode:
     Nodes can represent entities, articles, or temporal events
     """
 
-    def __init__(self, node_id: str, node_type: str, properties: Dict[str, Any]):
+    def __init__(self, node_id: str, node_type: str, properties: dict[str, Any]):
         self.node_id = node_id
         self.node_type = node_type
         self.properties = properties
         self.created_at = datetime.now().isoformat()
         self.updated_at = self.created_at
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert node to dictionary representation"""
         return {
             "node_id": self.node_id,
@@ -490,7 +491,7 @@ class KnowledgeGraphNode:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'KnowledgeGraphNode':
+    def from_dict(cls, data: dict[str, Any]) -> 'KnowledgeGraphNode':
         """Create node from dictionary representation"""
         node = cls(data["node_id"], data["node_type"], data["properties"])
         node.created_at = data.get("created_at", node.created_at)
@@ -506,7 +507,7 @@ class KnowledgeGraphEdge:
     """
 
     def __init__(self, source_id: str, target_id: str, edge_type: str,
-                 properties: Dict[str, Any] = None):
+                 properties: dict[str, Any] = None):
         self.source_id = source_id
         self.target_id = target_id
         self.edge_type = edge_type
@@ -561,7 +562,7 @@ class KnowledgeGraphEdge:
 
         return min(confidence, 1.0)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert edge to dictionary representation"""
         return {
             "source_id": self.source_id,
@@ -574,7 +575,7 @@ class KnowledgeGraphEdge:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'KnowledgeGraphEdge':
+    def from_dict(cls, data: dict[str, Any]) -> 'KnowledgeGraphEdge':
         """Create edge from dictionary representation"""
         edge = cls(data["source_id"], data["target_id"], data["edge_type"], data["properties"])
         edge.created_at = data.get("created_at", edge.created_at)
@@ -590,7 +591,7 @@ class EntityClustering:
         self.clusters = {}
         self.entity_aliases = {}
 
-    def cluster_entities(self, entities: List[str]) -> Dict[str, List[str]]:
+    def cluster_entities(self, entities: list[str]) -> dict[str, list[str]]:
         """
         Cluster similar entities based on string similarity and context
 
@@ -697,7 +698,7 @@ class EntityClustering:
 
         return False
 
-    def merge_clusters(self, graph: nx.MultiDiGraph) -> Dict[str, str]:
+    def merge_clusters(self, graph: nx.MultiDiGraph) -> dict[str, str]:
         """
         Merge entity clusters in the knowledge graph
 
@@ -752,7 +753,7 @@ class EntityClustering:
 
         return merged_entities
 
-    def get_cluster_confidence(self, cluster: List[str]) -> float:
+    def get_cluster_confidence(self, cluster: list[str]) -> float:
         """Calculate confidence score for a cluster"""
         if len(cluster) <= 1:
             return 1.0
@@ -810,7 +811,7 @@ class TemporalKnowledgeGraph:
         try:
             # Load nodes
             if self.nodes_file.exists():
-                with open(self.nodes_file, 'r', encoding='utf-8') as f:
+                with open(self.nodes_file, encoding='utf-8') as f:
                     for line in f:
                         if line.strip():
                             node_data = json.loads(line)
@@ -819,7 +820,7 @@ class TemporalKnowledgeGraph:
 
             # Load edges
             if self.edges_file.exists():
-                with open(self.edges_file, 'r', encoding='utf-8') as f:
+                with open(self.edges_file, encoding='utf-8') as f:
                     for line in f:
                         if line.strip():
                             edge_data = json.loads(line)
@@ -857,7 +858,7 @@ class TemporalKnowledgeGraph:
         except Exception as e:
             logger.error(f"Failed to save graph: {e}")
 
-    def add_article_node(self, article_data: Dict[str, Any]) -> str:
+    def add_article_node(self, article_data: dict[str, Any]) -> str:
         """
         Add an article as a node in the knowledge graph
 
@@ -895,7 +896,7 @@ class TemporalKnowledgeGraph:
         logger.info(f"📄 Added article node: {article_data.get('title', 'Unknown')[:50]}...")
         return node_id
 
-    def add_entity_nodes(self, entities: Dict[str, List[str]]) -> Dict[str, str]:
+    def add_entity_nodes(self, entities: dict[str, list[str]]) -> dict[str, str]:
         """
         Add entity nodes to the knowledge graph
 
@@ -938,8 +939,8 @@ class TemporalKnowledgeGraph:
         logger.info(f"🏷️ Added {len(entity_nodes)} entity nodes")
         return entity_nodes
 
-    def add_relationships(self, article_node_id: str, entity_nodes: Dict[str, str],
-                         article_data: Dict[str, Any]):
+    def add_relationships(self, article_node_id: str, entity_nodes: dict[str, str],
+                         article_data: dict[str, Any]):
         """
         Add relationships between article and entities with strength analysis
 
@@ -1005,7 +1006,7 @@ class TemporalKnowledgeGraph:
 
         logger.info(f"🔗 Added relationships for article: {article_node_id} with strength analysis")
 
-    def _analyze_entity_relationships(self, entity_names: List[str], text: str) -> Dict[str, Dict[str, Any]]:
+    def _analyze_entity_relationships(self, entity_names: list[str], text: str) -> dict[str, dict[str, Any]]:
         """Analyze relationships between entities in the text"""
         relationships = {}
 
@@ -1108,7 +1109,7 @@ class TemporalKnowledgeGraph:
 
         return consistency
 
-    def _calculate_source_reliability(self, article_data: Dict[str, Any]) -> float:
+    def _calculate_source_reliability(self, article_data: dict[str, Any]) -> float:
         """Calculate reliability score for the article source"""
         reliability = 0.7  # Base reliability
 
@@ -1130,7 +1131,7 @@ class TemporalKnowledgeGraph:
 
         return min(reliability, 1.0)
 
-    def _calculate_cross_validation(self, entity_name: str, article_data: Dict[str, Any]) -> float:
+    def _calculate_cross_validation(self, entity_name: str, article_data: dict[str, Any]) -> float:
         """Calculate cross-validation score for entity mentions"""
         validation = 0.0
 
@@ -1150,7 +1151,7 @@ class TemporalKnowledgeGraph:
 
         return min(validation, 1.0)
 
-    def apply_entity_clustering(self, similarity_threshold: float = 0.8) -> Dict[str, Any]:
+    def apply_entity_clustering(self, similarity_threshold: float = 0.8) -> dict[str, Any]:
         """
         Apply entity clustering to group similar entities in the knowledge graph
 
@@ -1223,7 +1224,7 @@ class TemporalKnowledgeGraph:
 
         return summary
 
-    def get_clustering_statistics(self) -> Dict[str, Any]:
+    def get_clustering_statistics(self) -> dict[str, Any]:
         """
         Get statistics about entity clusters in the knowledge graph
 
@@ -1277,7 +1278,7 @@ class TemporalKnowledgeGraph:
         except (ValueError, TypeError, AttributeError):
             return "unknown"
 
-    def process_article(self, article_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_article(self, article_data: dict[str, Any]) -> dict[str, Any]:
         """
         Process a single article through the knowledge graph pipeline
 
@@ -1315,7 +1316,7 @@ class TemporalKnowledgeGraph:
         logger.info(f"✅ Processed article: {summary}")
         return summary
 
-    def query_entities(self, entity_type: str = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def query_entities(self, entity_type: str = None, limit: int = 50) -> list[dict[str, Any]]:
         """
         Query entities in the knowledge graph
 
@@ -1341,7 +1342,7 @@ class TemporalKnowledgeGraph:
 
         return entities
 
-    def query_article_relationships(self, article_node_id: str) -> Dict[str, Any]:
+    def query_article_relationships(self, article_node_id: str) -> dict[str, Any]:
         """
         Query relationships for a specific article
 
@@ -1378,7 +1379,7 @@ class TemporalKnowledgeGraph:
 
         return relationships
 
-    def get_graph_statistics(self) -> Dict[str, Any]:
+    def get_graph_statistics(self) -> dict[str, Any]:
         """Get comprehensive statistics about the knowledge graph"""
         stats = {
             "total_nodes": len(self.graph.nodes),
@@ -1417,8 +1418,8 @@ class KnowledgeGraphManager:
         self.entity_linker = EntityLinkerManager(self.kg, cache_dir=str(Path(kg_storage_path) / "entity_cache"))
         logger.info("🎯 Phase 3 Knowledge Graph Manager initialized with entity linking")
 
-    async def process_archive_batch(self, archive_summary: Dict[str, Any],
-                                  archive_manager) -> Dict[str, Any]:
+    async def process_archive_batch(self, archive_summary: dict[str, Any],
+                                  archive_manager) -> dict[str, Any]:
         """
         Process a batch of archived articles through the knowledge graph
 
@@ -1479,7 +1480,7 @@ class KnowledgeGraphManager:
 
         return summary
 
-    async def enrich_entities_with_external_knowledge(self, limit: int = 100) -> Dict[str, Any]:
+    async def enrich_entities_with_external_knowledge(self, limit: int = 100) -> dict[str, Any]:
         """
         Enrich entities in the knowledge graph with external knowledge bases
 
@@ -1504,7 +1505,7 @@ class KnowledgeGraphManager:
             logger.error(f"Entity enrichment failed: {e}")
             return {"error": str(e), "enrichment_failed": True}
 
-    async def get_entity_external_info(self, entity_name: str, entity_type: str = None) -> Dict[str, Any]:
+    async def get_entity_external_info(self, entity_name: str, entity_type: str = None) -> dict[str, Any]:
         """
         Get external information for a specific entity
 
@@ -1521,7 +1522,7 @@ class KnowledgeGraphManager:
             logger.error(f"Failed to get external info for {entity_name}: {e}")
             return {"error": str(e)}
 
-    def get_entity_linking_statistics(self) -> Dict[str, Any]:
+    def get_entity_linking_statistics(self) -> dict[str, Any]:
         """
         Get statistics about entity linking and enrichment
 

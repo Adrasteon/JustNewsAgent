@@ -2,13 +2,15 @@
 Main file for the MCP Bus.
 """
 # main.py for MCP Message Bus
-from common.observability import get_logger
+import atexit
+import time
+from contextlib import asynccontextmanager
+
+import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import requests
-import time
-import atexit
-from contextlib import asynccontextmanager
+
+from common.observability import get_logger
 
 app = FastAPI()
 
@@ -58,7 +60,7 @@ def register_agent(agent: Agent):
 def call_tool(call: ToolCall):
     if call.agent not in agents:
         raise HTTPException(status_code=404, detail=f"Agent not found: {call.agent}")
-    
+
     agent_name = call.agent
     agent_address = agents[agent_name]
 
@@ -98,7 +100,7 @@ def call_tool(call: ToolCall):
 @app.get("/agents")
 def get_agents():
     return agents
-    
+
 
 @app.get("/health")
 def health():

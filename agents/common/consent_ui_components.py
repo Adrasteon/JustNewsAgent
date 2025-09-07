@@ -14,7 +14,7 @@ Features:
 """
 
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any
 
 
 class ConsentUIComponents:
@@ -30,7 +30,7 @@ class ConsentUIComponents:
         self.templates_dir.mkdir(parents=True, exist_ok=True)
         self.static_dir.mkdir(parents=True, exist_ok=True)
 
-    def generate_consent_banner(self, consent_types: List[Dict[str, Any]]) -> str:
+    def generate_consent_banner(self, consent_types: list[dict[str, Any]]) -> str:
         """Generate consent banner HTML for initial consent collection"""
         consent_items = []
         for consent in consent_types:
@@ -106,7 +106,7 @@ class ConsentUIComponents:
 
         return banner_html
 
-    def generate_consent_preferences_modal(self, consent_types: List[Dict[str, Any]]) -> str:
+    def generate_consent_preferences_modal(self, consent_types: list[dict[str, Any]]) -> str:
         """Generate consent preferences modal HTML"""
         consent_items = []
         for consent in consent_types:
@@ -194,7 +194,7 @@ class ConsentUIComponents:
 
         return modal_html
 
-    def generate_consent_dashboard(self, user_consents: List[Dict[str, Any]]) -> str:
+    def generate_consent_dashboard(self, user_consents: list[dict[str, Any]]) -> str:
         """Generate consent dashboard HTML for user consent management"""
         consent_rows = []
         for consent in user_consents:

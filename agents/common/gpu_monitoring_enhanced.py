@@ -13,18 +13,19 @@ Features:
 """
 
 
-import time
-import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from collections import deque
 import subprocess
+import threading
+import time
+from collections import deque
+from datetime import datetime, timedelta
+from typing import Any
+
 import psutil
 
 # GPU and ML imports with graceful fallbacks
 try:
-    import torch
     import numpy as np
+    import torch
     GPU_AVAILABLE = torch.cuda.is_available()
     TORCH_AVAILABLE = True
 except ImportError:
@@ -43,7 +44,7 @@ class GPUMetricsCollector:
         self.collection_interval = collection_interval
 
         # Historical data storage
-        self.metrics_history: Dict[str, deque] = {
+        self.metrics_history: dict[str, deque] = {
             'gpu_utilization': deque(maxlen=max_history),
             'gpu_memory_used': deque(maxlen=max_history),
             'gpu_memory_free': deque(maxlen=max_history),
@@ -55,7 +56,7 @@ class GPUMetricsCollector:
 
         # Current state
         self.current_metrics = {}
-        self.collection_thread: Optional[threading.Thread] = None
+        self.collection_thread: threading.Thread | None = None
         self.running = False
 
         # Alert thresholds
@@ -131,7 +132,7 @@ class GPUMetricsCollector:
         except Exception as e:
             logger.error(f"Failed to collect metrics: {e}")
 
-    def _get_gpu_metrics(self) -> Dict[str, Any]:
+    def _get_gpu_metrics(self) -> dict[str, Any]:
         """Get comprehensive GPU metrics"""
         if not GPU_AVAILABLE:
             return {'available': False}
@@ -154,7 +155,7 @@ class GPUMetricsCollector:
             logger.error(f"Failed to get GPU metrics: {e}")
             return {'available': False, 'error': str(e)}
 
-    def _get_device_metrics(self, device_id: int) -> Dict[str, Any]:
+    def _get_device_metrics(self, device_id: int) -> dict[str, Any]:
         """Get metrics for a specific GPU device"""
         try:
             # Get nvidia-smi data
@@ -183,7 +184,7 @@ class GPUMetricsCollector:
             logger.error(f"Failed to get device {device_id} metrics: {e}")
             return {'device_id': device_id, 'error': str(e)}
 
-    def _get_nvidia_smi_data(self, device_id: int) -> Dict[str, float]:
+    def _get_nvidia_smi_data(self, device_id: int) -> dict[str, float]:
         """Get GPU data from nvidia-smi"""
         try:
             cmd = [
@@ -212,7 +213,7 @@ class GPUMetricsCollector:
         except Exception:
             return {}
 
-    def _get_torch_memory_data(self, device_id: int) -> Dict[str, float]:
+    def _get_torch_memory_data(self, device_id: int) -> dict[str, float]:
         """Get memory data from PyTorch"""
         if not TORCH_AVAILABLE or not torch.cuda.is_available():
             return {'used_memory_gb': 0}
@@ -229,7 +230,7 @@ class GPUMetricsCollector:
         except Exception:
             return {'used_memory_gb': 0}
 
-    def _get_gpu_processes(self, device_id: int) -> List[Dict[str, Any]]:
+    def _get_gpu_processes(self, device_id: int) -> list[dict[str, Any]]:
         """Get processes using the GPU"""
         try:
             cmd = [
@@ -263,7 +264,7 @@ class GPUMetricsCollector:
         except Exception:
             return []
 
-    def _get_system_metrics(self) -> Dict[str, Any]:
+    def _get_system_metrics(self) -> dict[str, Any]:
         """Get system-wide metrics"""
         try:
             return {
@@ -277,7 +278,7 @@ class GPUMetricsCollector:
         except Exception:
             return {}
 
-    def _get_allocation_metrics(self) -> Dict[str, Any]:
+    def _get_allocation_metrics(self) -> dict[str, Any]:
         """Get agent allocation metrics"""
         try:
             # Import here to avoid circular imports
@@ -296,7 +297,7 @@ class GPUMetricsCollector:
         except Exception:
             return {'error': 'Could not get allocation metrics'}
 
-    def _store_historical_data(self, current: Dict[str, Any]):
+    def _store_historical_data(self, current: dict[str, Any]):
         """Store metrics in historical data"""
         timestamp = current['timestamp']
 
@@ -324,7 +325,7 @@ class GPUMetricsCollector:
         # Store allocation metrics
         self.metrics_history['agent_allocations'].append(current['allocations'].get('active_allocations', 0))
 
-    def _check_alerts(self, current: Dict[str, Any]):
+    def _check_alerts(self, current: dict[str, Any]):
         """Check for alert conditions"""
         if not current['gpu']['available']:
             return
@@ -359,7 +360,7 @@ class GPUMetricsCollector:
             if power >= self.alert_thresholds['power_draw_anomaly']:
                 self._create_alert('WARNING', f'GPU {device_id} high power draw: {power}W', device)
 
-    def _create_alert(self, level: str, message: str, device_data: Dict[str, Any]):
+    def _create_alert(self, level: str, message: str, device_data: dict[str, Any]):
         """Create an alert"""
         alert = {
             'timestamp': datetime.now(),
@@ -372,7 +373,7 @@ class GPUMetricsCollector:
         self.alerts.append(alert)
         logger.warning(f"🚨 GPU Alert [{level}]: {message}")
 
-    def get_current_dashboard(self) -> Dict[str, Any]:
+    def get_current_dashboard(self) -> dict[str, Any]:
         """Get current dashboard data"""
         return {
             'current_metrics': self.current_metrics,
@@ -380,7 +381,7 @@ class GPUMetricsCollector:
             'summary': self._get_dashboard_summary()
         }
 
-    def get_historical_dashboard(self, hours: int = 1) -> Dict[str, Any]:
+    def get_historical_dashboard(self, hours: int = 1) -> dict[str, Any]:
         """Get historical dashboard data"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
 
@@ -401,7 +402,7 @@ class GPUMetricsCollector:
             'period_hours': hours
         }
 
-    def _get_dashboard_summary(self) -> Dict[str, Any]:
+    def _get_dashboard_summary(self) -> dict[str, Any]:
         """Get dashboard summary statistics"""
         if not self.current_metrics:
             return {'status': 'no_data'}
@@ -431,7 +432,7 @@ class GPUMetricsCollector:
             'active_alerts': len([a for a in self.alerts if (datetime.now() - a['timestamp']).seconds < 3600])  # Last hour
         }
 
-    def get_performance_trends(self, hours: int = 24) -> Dict[str, Any]:
+    def get_performance_trends(self, hours: int = 24) -> dict[str, Any]:
         """Get performance trend analysis"""
         historical = self.get_historical_dashboard(hours)
 
@@ -455,7 +456,7 @@ class GPUMetricsCollector:
             'trends': trends
         }
 
-    def _calculate_trend(self, values: List[float]) -> str:
+    def _calculate_trend(self, values: list[float]) -> str:
         """Calculate trend direction"""
         if len(values) < 2:
             return 'stable'
@@ -477,7 +478,7 @@ class GPUMetricsCollector:
             return 'decreasing'
 
 # Global metrics collector
-_metrics_collector: Optional[GPUMetricsCollector] = None
+_metrics_collector: GPUMetricsCollector | None = None
 _collector_lock = threading.Lock()
 
 def get_metrics_collector() -> GPUMetricsCollector:
@@ -498,12 +499,12 @@ def stop_gpu_monitoring():
     collector = get_metrics_collector()
     collector.stop_collection()
 
-def get_gpu_dashboard() -> Dict[str, Any]:
+def get_gpu_dashboard() -> dict[str, Any]:
     """Get current GPU dashboard"""
     collector = get_metrics_collector()
     return collector.get_current_dashboard()
 
-def get_gpu_trends(hours: int = 24) -> Dict[str, Any]:
+def get_gpu_trends(hours: int = 24) -> dict[str, Any]:
     """Get GPU performance trends"""
     collector = get_metrics_collector()
     return collector.get_performance_trends(hours)

@@ -7,14 +7,13 @@ and exercise ModelStore publishing behavior without requiring TensorRT.
 from __future__ import annotations
 
 import json
-
 import os
-from common.observability import get_logger
 import shutil
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Optional
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -58,7 +57,7 @@ class NativeTensorRTCompiler:
         except Exception:
             return ''
 
-    def _upload_artifacts_to_modelstore(self, task_name: str, engine_path: Path, onnx_path: Path, metadata_path: Path, calibration_cache: Optional[str] = None) -> None:
+    def _upload_artifacts_to_modelstore(self, task_name: str, engine_path: Path, onnx_path: Path, metadata_path: Path, calibration_cache: str | None = None) -> None:
         """Stage artifacts into ModelStore and finalize them.
 
         Best-effort: logs on failure and returns; does not raise. Writes
@@ -72,7 +71,7 @@ class NativeTensorRTCompiler:
 
         store = ModelStore(self.model_store_root)
         precision = os.environ.get('TENSORRT_PRECISION', 'unknown')
-        version = f"v{task_name}-{precision}-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+        version = f"v{task_name}-{precision}-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
 
         artifact_paths = [('engine', engine_path), ('onnx', onnx_path), ('metadata', metadata_path)]
         if calibration_cache:
@@ -126,7 +125,7 @@ class NativeTensorRTCompiler:
         except Exception as e:
             logger.warning(f"ModelStore staging failed: {e}")
 
-    def _run_int8_calibration(self, calib_data_path: str, onnx_path: str) -> Optional[Path]:
+    def _run_int8_calibration(self, calib_data_path: str, onnx_path: str) -> Path | None:
         """Create representative calibration samples and a calibration cache file.
 
         This is a best-effort implementation: when required runtimes are
@@ -137,8 +136,8 @@ class NativeTensorRTCompiler:
         try:
             # Quick environment checks: prefer real runtimes but tolerate mocks
             try:
-                import tensorrt as trt  # noqa: F401
                 import pycuda.driver as cuda  # noqa: F401
+                import tensorrt as trt  # noqa: F401
             except Exception:
                 # Write placeholder calib cache next to ONNX
                 onnx_p = Path(onnx_path)
@@ -155,7 +154,7 @@ class NativeTensorRTCompiler:
             p = Path(calib_data_path)
             if p.is_file():
                 if p.suffix == '.jsonl':
-                    with open(p, 'r', encoding='utf-8') as fh:
+                    with open(p, encoding='utf-8') as fh:
                         import json as _json
                         for ln in fh:
                             if not ln.strip():

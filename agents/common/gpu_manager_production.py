@@ -14,18 +14,18 @@ Features:
 """
 
 
-import time
-import threading
-from datetime import datetime
-from typing import Dict, Optional, Any
-from dataclasses import dataclass
-from contextlib import contextmanager
 import subprocess
+import threading
+import time
+from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 # GPU and ML imports with graceful fallbacks
 try:
-    import torch
     import numpy as np
+    import torch
     GPU_AVAILABLE = torch.cuda.is_available()
     TORCH_AVAILABLE = True
 except ImportError:
@@ -65,7 +65,7 @@ class GPUHealthMonitor:
         self.check_interval = check_interval
         self.last_check = 0
         self._lock = threading.Lock()
-        self._health_cache: Dict[int, GPUStatus] = {}
+        self._health_cache: dict[int, GPUStatus] = {}
 
     def get_gpu_status(self, device_id: int = 0) -> GPUStatus:
         """Get current GPU status with caching"""
@@ -118,7 +118,7 @@ class GPUHealthMonitor:
                 is_healthy=False
             )
 
-    def _get_nvidia_smi_data(self, device_id: int) -> Dict[str, float]:
+    def _get_nvidia_smi_data(self, device_id: int) -> dict[str, float]:
         """Get GPU data from nvidia-smi"""
         try:
             cmd = [
@@ -149,7 +149,7 @@ class GPUHealthMonitor:
         except Exception:
             return {}
 
-    def _get_torch_memory_data(self, device_id: int) -> Dict[str, float]:
+    def _get_torch_memory_data(self, device_id: int) -> dict[str, float]:
         """Get memory data from PyTorch"""
         if not TORCH_AVAILABLE or not torch.cuda.is_available():
             return {'used_memory_gb': 0}
@@ -160,7 +160,7 @@ class GPUHealthMonitor:
         except Exception:
             return {'used_memory_gb': 0}
 
-    def _assess_health(self, nvidia_data: Dict, torch_data: Dict) -> bool:
+    def _assess_health(self, nvidia_data: dict, torch_data: dict) -> bool:
         """Assess overall GPU health"""
         try:
             # Check temperature (should be < 85°C)
@@ -203,7 +203,7 @@ class MultiAgentGPUManager:
         self.health_monitor = GPUHealthMonitor(health_check_interval)
 
         # Allocation tracking
-        self._allocations: Dict[str, GPUAllocation] = {}
+        self._allocations: dict[str, GPUAllocation] = {}
         self._lock = threading.Lock()
 
         # Performance metrics
@@ -223,9 +223,9 @@ class MultiAgentGPUManager:
         self,
         agent_name: str,
         requested_memory_gb: float = 4.0,
-        preferred_device: Optional[int] = None,
+        preferred_device: int | None = None,
         model_type: str = "general"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Request GPU allocation for an agent
 
@@ -337,7 +337,7 @@ class MultiAgentGPUManager:
             logger.info(f"✅ GPU released: {agent_name} <- GPU {allocation.gpu_device}")
             return True
 
-    def _find_available_gpu(self, requested_memory_gb: float, preferred_device: Optional[int] = None) -> Optional[int]:
+    def _find_available_gpu(self, requested_memory_gb: float, preferred_device: int | None = None) -> int | None:
         """Find an available GPU with sufficient memory"""
         if not GPU_AVAILABLE:
             return None
@@ -562,7 +562,7 @@ class MultiAgentGPUManager:
         except Exception as e:
             logger.warning(f"Failed to cleanup GPU memory for device {device_id}: {e}")
 
-    def get_allocation_status(self, agent_name: str) -> Optional[Dict[str, Any]]:
+    def get_allocation_status(self, agent_name: str) -> dict[str, Any] | None:
         """Get allocation status for an agent"""
         with self._lock:
             allocation = self._allocations.get(agent_name)
@@ -578,7 +578,7 @@ class MultiAgentGPUManager:
                 'status': allocation.status
             }
 
-    def get_system_status(self) -> Dict[str, Any]:
+    def get_system_status(self) -> dict[str, Any]:
         """Get overall system status"""
         gpu_statuses = []
         if GPU_AVAILABLE:
@@ -616,7 +616,7 @@ class MultiAgentGPUManager:
             }
 
 # Global manager instance
-_global_gpu_manager: Optional[MultiAgentGPUManager] = None
+_global_gpu_manager: MultiAgentGPUManager | None = None
 _manager_lock = threading.Lock()
 
 def get_gpu_manager() -> MultiAgentGPUManager:
@@ -627,7 +627,7 @@ def get_gpu_manager() -> MultiAgentGPUManager:
             _global_gpu_manager = MultiAgentGPUManager()
         return _global_gpu_manager
 
-def request_agent_gpu(agent_name: str, memory_gb: float = 4.0, model_type: str = "general") -> Dict[str, Any]:
+def request_agent_gpu(agent_name: str, memory_gb: float = 4.0, model_type: str = "general") -> dict[str, Any]:
     """Request GPU allocation for an agent (compatibility function)"""
     manager = get_gpu_manager()
     return manager.request_gpu_allocation(agent_name, memory_gb, model_type=model_type)

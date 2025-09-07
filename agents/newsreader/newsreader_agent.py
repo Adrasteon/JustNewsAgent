@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Practical NewsReader Solution - Implementing User's Insight on INT8 Quantization
@@ -10,21 +11,21 @@ Key Insight: Use smaller, quantizable models instead of forcing large models to 
 """
 
 import asyncio
-
 from contextlib import asynccontextmanager
-from typing import Dict, Any, cast, Optional
-import torch
-from transformers import (
-    LlavaProcessor,
-    LlavaForConditionalGeneration,
-    BitsAndBytesConfig,
-    Blip2Processor,
-    Blip2ForConditionalGeneration
-)
-from PIL import Image
+from typing import Any, cast
+
 import requests
+import torch
 from fastapi import FastAPI
+from PIL import Image
 from pydantic import BaseModel
+from transformers import (
+    BitsAndBytesConfig,
+    Blip2ForConditionalGeneration,
+    Blip2Processor,
+    LlavaForConditionalGeneration,
+    LlavaProcessor,
+)
 
 # Configure logging
 
@@ -49,7 +50,7 @@ class PracticalNewsReader:
         self.model = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    def get_memory_usage(self) -> Dict[str, float]:
+    def get_memory_usage(self) -> dict[str, float]:
         """Get current GPU memory usage."""
         if torch.cuda.is_available():
             return {
@@ -166,8 +167,8 @@ class PracticalNewsReader:
             raise
 
     async def analyze_image_url(
-        self, image_url: str, prompt: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, image_url: str, prompt: str | None = None
+    ) -> dict[str, Any]:
         """
         Analyze image with text generation.
 
@@ -218,7 +219,7 @@ class PracticalNewsReader:
                     pad_token_id = 2  # Fallback if attribute doesn't exist
 
                 output = self.model.generate(
-                    **cast(Dict[str, Any], inputs),
+                    **cast(dict[str, Any], inputs),
                     max_new_tokens=256,
                     do_sample=True,
                     temperature=0.7,

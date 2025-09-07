@@ -26,8 +26,8 @@ import argparse
 import os
 import shutil
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 
 def iter_agents(agents_root: Path) -> Iterable[Path]:

@@ -19,19 +19,19 @@ Usage:
 
 import json
 import os
-from common.observability import get_logger
-
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
 class ConfigManager:
     """Centralized configuration manager with environment overrides"""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None):
         self.config_file = config_file or self._find_config_file()
-        self._config: Dict[str, Any] = {}
+        self._config: dict[str, Any] = {}
         self._load_config()
 
     def _find_config_file(self) -> str:
@@ -55,7 +55,7 @@ class ConfigManager:
         """Load configuration from file with environment overrides"""
         try:
             if os.path.exists(self.config_file):
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     self._config = json.load(f)
                 logger.info(f"✅ Loaded configuration from {self.config_file}")
             else:
@@ -134,7 +134,7 @@ class ConfigManager:
         """Set configuration value by key path"""
         self._set_nested_value(key_path, value)
 
-    def get_section(self, section: str) -> Dict[str, Any]:
+    def get_section(self, section: str) -> dict[str, Any]:
         """Get entire configuration section"""
         return self._config.get(section, {})
 
@@ -142,7 +142,7 @@ class ConfigManager:
         """Reload configuration from file"""
         self._load_config()
 
-    def save(self, file_path: Optional[str] = None):
+    def save(self, file_path: str | None = None):
         """Save current configuration to file"""
         save_path = file_path or self.config_file
         try:
@@ -153,7 +153,7 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Failed to save configuration: {e}")
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default configuration values"""
         return {
             "system": {
@@ -205,19 +205,19 @@ config = get_config()
 
 
 # Utility functions for common configuration access
-def get_crawling_config() -> Dict[str, Any]:
+def get_crawling_config() -> dict[str, Any]:
     """Get crawling configuration"""
     return config.get_section('crawling')
 
-def get_database_config() -> Dict[str, Any]:
+def get_database_config() -> dict[str, Any]:
     """Get database configuration"""
     return config.get_section('database')
 
-def get_gpu_config() -> Dict[str, Any]:
+def get_gpu_config() -> dict[str, Any]:
     """Get GPU configuration"""
     return config.get_section('gpu')
 
-def get_rate_limits() -> Dict[str, Any]:
+def get_rate_limits() -> dict[str, Any]:
     """Get rate limiting configuration"""
     return config.get('crawling.rate_limiting', {})
 

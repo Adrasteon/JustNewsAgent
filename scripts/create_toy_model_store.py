@@ -4,8 +4,8 @@
 This script must be run on the host where the `/media/adra/Data` volume is mounted.
 It will create a per-agent directory with a 'current' symlink and a placeholder model file.
 """
-from pathlib import Path
 import os
+from pathlib import Path
 
 BASE = Path(os.environ.get('BASE_MODEL_DIR', '/media/adra/Data/justnews'))
 MODEL_STORE = BASE / 'model_store'

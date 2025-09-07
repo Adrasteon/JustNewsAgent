@@ -16,16 +16,16 @@ Features:
 """
 
 import json
-import time
 import threading
+import time
+from collections import defaultdict, deque
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any
+
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
-from dataclasses import dataclass, asdict
-from collections import defaultdict, deque
-
-from pathlib import Path
 
 # Configure logging
 
@@ -57,9 +57,9 @@ class AnalyticsSummary:
     success_rate_pct: float
     peak_gpu_memory_mb: float
     avg_gpu_utilization_pct: float
-    bottleneck_indicators: List[str]
-    optimization_recommendations: List[str]
-    performance_trends: Dict[str, Any]
+    bottleneck_indicators: list[str]
+    optimization_recommendations: list[str]
+    performance_trends: dict[str, Any]
 
 class AdvancedAnalyticsEngine:
     """
@@ -182,7 +182,7 @@ class AdvancedAnalyticsEngine:
                 performance_trends=trends
             )
 
-    def get_agent_performance_profile(self, agent_name: str, hours: int = 24) -> Dict[str, Any]:
+    def get_agent_performance_profile(self, agent_name: str, hours: int = 24) -> dict[str, Any]:
         """Get detailed performance profile for a specific agent"""
         with self.lock:
             agent_data = []
@@ -227,7 +227,7 @@ class AdvancedAnalyticsEngine:
 
             return profile
 
-    def get_system_health_score(self) -> Dict[str, Any]:
+    def get_system_health_score(self) -> dict[str, Any]:
         """Get overall system health score and status"""
         analytics = self.get_real_time_analytics(hours=1)
 
@@ -258,7 +258,7 @@ class AdvancedAnalyticsEngine:
             "recommendations": simple_recommendations
         }
 
-    def _detect_bottlenecks(self, metrics: List[PerformanceMetrics]) -> List[str]:
+    def _detect_bottlenecks(self, metrics: list[PerformanceMetrics]) -> list[str]:
         """Detect performance bottlenecks"""
         bottlenecks = []
 
@@ -287,7 +287,7 @@ class AdvancedAnalyticsEngine:
 
         return bottlenecks
 
-    def _generate_recommendations(self, metrics: List[PerformanceMetrics], bottlenecks: List[str]) -> List[str]:
+    def _generate_recommendations(self, metrics: list[PerformanceMetrics], bottlenecks: list[str]) -> list[str]:
         """Generate optimization recommendations"""
         recommendations = []
 
@@ -321,7 +321,7 @@ class AdvancedAnalyticsEngine:
 
         return list(set(recommendations))  # Remove duplicates
 
-    def _calculate_trends(self, metrics: List[PerformanceMetrics]) -> Dict[str, Any]:
+    def _calculate_trends(self, metrics: list[PerformanceMetrics]) -> dict[str, Any]:
         """Calculate performance trends"""
         if len(metrics) < 10:
             return {"insufficient_data": True}
@@ -408,7 +408,7 @@ class AdvancedAnalyticsEngine:
         except Exception as e:
             logger.error(f"Error saving analytics snapshot: {e}")
 
-    def export_analytics_report(self, hours: int = 24) -> Dict[str, Any]:
+    def export_analytics_report(self, hours: int = 24) -> dict[str, Any]:
         """Export comprehensive analytics report"""
         analytics = self.get_real_time_analytics(hours=hours)
 

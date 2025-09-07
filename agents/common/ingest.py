@@ -5,8 +5,8 @@ prepare upsert statements and article_source_map payloads. For Phase 1 these are
 stubs designed to be used by unit tests and later wired to the real DB code or
 agent-driven transactions via `mcp_bus`.
 """
-from typing import Dict, Tuple, Any
 import json
+from typing import Any
 
 try:
     import psycopg2
@@ -15,7 +15,7 @@ except Exception:
     psycopg2 = None
 
 
-def build_source_upsert(payload: Dict[str, Any]) -> Tuple[str, Tuple]:
+def build_source_upsert(payload: dict[str, Any]) -> tuple[str, tuple]:
     """Return a simple SQL upsert (Postgres) and params for `public.sources`.
 
     Fields expected on payload: url, url_hash, domain, canonical, publisher_meta
@@ -38,7 +38,7 @@ def build_source_upsert(payload: Dict[str, Any]) -> Tuple[str, Tuple]:
     return sql, params
 
 
-def build_article_source_map_insert(article_id: int, source_payload: Dict[str, Any]) -> Tuple[str, Tuple]:
+def build_article_source_map_insert(article_id: int, source_payload: dict[str, Any]) -> tuple[str, tuple]:
     """Build SQL and params for inserting into article_source_map.
 
     Expects article_id and source_payload with url_hash, confidence, paywall_flag, and extraction_metadata
@@ -59,7 +59,7 @@ def build_article_source_map_insert(article_id: int, source_payload: Dict[str, A
     return sql, params
 
 
-def canonical_selection_rule(candidates: list) -> Dict[str, Any]:
+def canonical_selection_rule(candidates: list) -> dict[str, Any]:
     """Simple canonical selection implementation used for testing.
 
     candidates: list of dicts with keys ['source_id'|'url_hash', 'confidence', 'timestamp', 'matched_by']
@@ -79,7 +79,7 @@ def canonical_selection_rule(candidates: list) -> Dict[str, Any]:
     return sorted_candidates[0]
 
 
-def ingest_article(article_payload: Dict[str, Any], db_execute) -> Dict[str, Any]:
+def ingest_article(article_payload: dict[str, Any], db_execute) -> dict[str, Any]:
     """High-level ingest helper that performs a transactional upsert of source,
     inserts article_source_map and returns the chosen canonical candidate using
     the simple canonical selection rule.
@@ -120,7 +120,7 @@ def ingest_article(article_payload: Dict[str, Any], db_execute) -> Dict[str, Any
     }
 
 
-def ingest_article_db(article_payload: Dict[str, Any], dsn: str) -> Dict[str, Any]:
+def ingest_article_db(article_payload: dict[str, Any], dsn: str) -> dict[str, Any]:
     """Execute the ingest using a real Postgres connection (psycopg2).
 
     This helper will run the source upsert and article_source_map insert inside

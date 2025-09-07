@@ -4,8 +4,8 @@ Interactive database operations script for JustNewsAgent
 Provides convenient database operations using the connection pooling utilities
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add the project root to the Python path
@@ -18,11 +18,12 @@ os.environ.setdefault("POSTGRES_USER", "justnews_user")
 os.environ.setdefault("POSTGRES_PASSWORD", "password123")
 
 from agents.common.database import (
-    initialize_connection_pool,
     execute_query,
     execute_query_single,
-    get_pool_stats
+    get_pool_stats,
+    initialize_connection_pool,
 )
+
 
 def show_menu():
     """Display the main menu"""

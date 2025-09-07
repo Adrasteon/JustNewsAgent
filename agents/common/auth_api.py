@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Researcher Authentication API Endpoints
@@ -21,26 +22,46 @@ Endpoints:
 
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, HTTPException, Depends, status, BackgroundTasks, Query
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Any
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import FileResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
 from agents.common.auth_models import (
-    UserCreate, UserLogin, PasswordResetRequest, PasswordReset,
-    UserRole, UserStatus, create_user, get_user_by_username_or_email,
-    verify_password, create_access_token, create_refresh_token,
-    verify_token, update_user_login, increment_login_attempts, reset_login_attempts,
-    activate_user, deactivate_user, store_refresh_token, validate_refresh_token,
-    revoke_refresh_token, revoke_all_user_sessions, create_password_reset_token,
-    validate_password_reset_token, mark_password_reset_token_used, update_user_password,
-    get_all_users, get_user_by_id, create_user_tables
+    PasswordReset,
+    PasswordResetRequest,
+    UserCreate,
+    UserLogin,
+    UserRole,
+    UserStatus,
+    activate_user,
+    create_access_token,
+    create_password_reset_token,
+    create_refresh_token,
+    create_user,
+    create_user_tables,
+    deactivate_user,
+    get_all_users,
+    get_user_by_id,
+    get_user_by_username_or_email,
+    increment_login_attempts,
+    mark_password_reset_token_used,
+    reset_login_attempts,
+    revoke_all_user_sessions,
+    revoke_refresh_token,
+    store_refresh_token,
+    update_user_login,
+    update_user_password,
+    validate_password_reset_token,
+    validate_refresh_token,
+    verify_password,
+    verify_token,
 )
-
-from agents.common.consent_management import consent_manager, ConsentType
+from agents.common.consent_management import ConsentType, consent_manager
 from agents.common.data_minimization import DataMinimizationManager, DataPurpose
 
 logger = get_logger(__name__)
@@ -57,7 +78,7 @@ class LoginResponse(BaseModel):
     refresh_token: str
     token_type: str = "bearer"
     expires_in: int
-    user: Dict[str, Any]
+    user: dict[str, Any]
 
 class UserResponse(BaseModel):
     """User information response"""
@@ -68,7 +89,7 @@ class UserResponse(BaseModel):
     role: UserRole
     status: UserStatus
     created_at: datetime
-    last_login: Optional[datetime] = None
+    last_login: datetime | None = None
 
 class RegisterResponse(BaseModel):
     """Registration response model"""
@@ -91,22 +112,22 @@ class DataExportResponse(BaseModel):
     """Response model for data export"""
     export_id: str
     status: str
-    estimated_completion: Optional[str] = None
-    download_url: Optional[str] = None
+    estimated_completion: str | None = None
+    download_url: str | None = None
 
 class UserDataExport(BaseModel):
     """User data export model"""
-    user_profile: Dict[str, Any]
-    login_history: List[Dict[str, Any]]
-    session_history: List[Dict[str, Any]]
-    search_history: Optional[List[Dict[str, Any]]] = None
-    export_metadata: Dict[str, Any]
+    user_profile: dict[str, Any]
+    login_history: list[dict[str, Any]]
+    session_history: list[dict[str, Any]]
+    search_history: list[dict[str, Any]] | None = None
+    export_metadata: dict[str, Any]
 
 # Right to be Forgotten Models
 class DataDeletionRequest(BaseModel):
     """Request model for data deletion"""
     confirmation: str = Field(..., description="Must be 'DELETE_ALL_MY_DATA' to confirm")
-    reason: Optional[str] = Field(None, description="Optional reason for deletion request")
+    reason: str | None = Field(None, description="Optional reason for deletion request")
 
 class DataDeletionResponse(BaseModel):
     """Response model for data deletion"""
@@ -119,7 +140,7 @@ class DataDeletionResponse(BaseModel):
 class ConsentGrantRequest(BaseModel):
     """Request model for granting consent"""
     consent_type: str
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 class ConsentWithdrawRequest(BaseModel):
     """Request model for withdrawing consent"""
@@ -130,21 +151,21 @@ class ConsentStatusResponse(BaseModel):
     consent_type: str
     granted: bool
     required: bool
-    expires_days: Optional[int]
-    last_updated: Optional[str]
+    expires_days: int | None
+    last_updated: str | None
     status: str
 
 class UserConsentSummary(BaseModel):
     """User consent summary"""
     user_id: int
-    consents: Dict[str, Dict[str, Any]]
+    consents: dict[str, dict[str, Any]]
     required_consents_granted: int
     optional_consents_granted: int
     total_required_consents: int
     total_optional_consents: int
     compliance_status: str
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Dict[str, Any]:
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict[str, Any]:
     """Dependency to get current authenticated user"""
     token = credentials.credentials
     payload = verify_token(token)
@@ -171,7 +192,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
     return user
 
-async def get_admin_user(current_user: Dict[str, Any] = Depends(get_current_user)) -> Dict[str, Any]:
+async def get_admin_user(current_user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
     """Dependency to ensure user has admin role"""
     if current_user['role'] != UserRole.ADMIN.value:
         raise HTTPException(
@@ -240,7 +261,7 @@ async def login_user(login_data: UserLogin):
             )
 
         # Check if account is locked
-        if user.get('locked_until') and user['locked_until'] > datetime.now(timezone.utc):
+        if user.get('locked_until') and user['locked_until'] > datetime.now(UTC):
             raise HTTPException(
                 status_code=status.HTTP_423_LOCKED,
                 detail="Account is temporarily locked due to too many failed login attempts"
@@ -316,7 +337,7 @@ async def login_user(login_data: UserLogin):
         )
 
 @router.post("/refresh")
-async def refresh_access_token(refresh_data: Dict[str, str]):
+async def refresh_access_token(refresh_data: dict[str, str]):
     """Refresh access token using refresh token"""
     try:
         refresh_token = refresh_data.get("refresh_token")
@@ -370,7 +391,7 @@ async def refresh_access_token(refresh_data: Dict[str, str]):
         )
 
 @router.post("/logout")
-async def logout_user(refresh_data: Dict[str, str], current_user: Dict[str, Any] = Depends(get_current_user)):
+async def logout_user(refresh_data: dict[str, str], current_user: dict[str, Any] = Depends(get_current_user)):
     """Logout user and revoke refresh token"""
     try:
         refresh_token = refresh_data.get("refresh_token")
@@ -388,7 +409,7 @@ async def logout_user(refresh_data: Dict[str, str], current_user: Dict[str, Any]
         )
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_current_user_info(current_user: dict[str, Any] = Depends(get_current_user)):
     """Get current user information"""
     return UserResponse(
         user_id=current_user['user_id'],
@@ -469,11 +490,11 @@ async def confirm_password_reset(reset_data: PasswordReset):
             detail="Password reset confirmation failed"
         )
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users", response_model=list[UserResponse])
 async def list_users(
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to list users"""
     try:
@@ -502,7 +523,7 @@ async def list_users(
 @router.put("/users/{user_id}/activate")
 async def activate_user_account(
     user_id: int,
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to activate user account"""
     try:
@@ -527,7 +548,7 @@ async def activate_user_account(
 @router.put("/users/{user_id}/deactivate")
 async def deactivate_user_account(
     user_id: int,
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to deactivate user account"""
     try:
@@ -558,7 +579,7 @@ async def deactivate_user_account(
 async def request_data_export(
     request: DataExportRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Request export of user's personal data (GDPR Article 20)"""
     try:
@@ -596,7 +617,7 @@ async def request_data_export(
 @router.get("/data-export/{export_id}")
 async def get_data_export_status(
     export_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Get status of data export request"""
     try:
@@ -609,7 +630,7 @@ async def get_data_export_status(
                 detail="Export not found"
             )
 
-        with open(export_file, 'r') as f:
+        with open(export_file) as f:
             export_data = json.load(f)
 
         # Check if export belongs to current user
@@ -633,7 +654,7 @@ async def get_data_export_status(
 @router.get("/data-export/{export_id}/download")
 async def download_data_export(
     export_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Download completed data export"""
     try:
@@ -649,7 +670,7 @@ async def download_data_export(
         # Check ownership via status file
         status_file = export_dir / f"{export_id}.json"
         if status_file.exists():
-            with open(status_file, 'r') as f:
+            with open(status_file) as f:
                 status_data = json.load(f)
                 if status_data.get('user_id') != current_user['user_id']:
                     raise HTTPException(
@@ -682,8 +703,8 @@ async def perform_data_export(
 ):
     """Background task to perform comprehensive data export"""
     try:
-        from datetime import datetime
         import json
+        from datetime import datetime
 
         logger.info(f"Starting data export for user {user_id}, export ID: {export_id}")
 
@@ -772,7 +793,7 @@ async def perform_data_export(
         try:
             with open(export_dir / f"{export_id}.json", 'w') as f:
                 json.dump(status_data, f)
-        except (OSError, IOError):
+        except OSError:
             pass
 
 # Right to be Forgotten Endpoints
@@ -781,7 +802,7 @@ async def perform_data_export(
 async def request_data_deletion(
     request: DataDeletionRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Request complete deletion of user's personal data (GDPR Right to be Forgotten)"""
     try:
@@ -824,7 +845,7 @@ async def request_data_deletion(
 @router.get("/data-deletion/{request_id}")
 async def get_data_deletion_status(
     request_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Get status of data deletion request"""
     try:
@@ -837,7 +858,7 @@ async def get_data_deletion_status(
                 detail="Deletion request not found"
             )
 
-        with open(status_file, 'r') as f:
+        with open(status_file) as f:
             deletion_data = json.load(f)
 
         # Check if request belongs to current user
@@ -862,12 +883,12 @@ async def get_data_deletion_status(
 async def perform_data_deletion(
     request_id: str,
     user_id: int,
-    reason: Optional[str]
+    reason: str | None
 ):
     """Background task to perform complete user data deletion"""
     try:
-        from datetime import datetime
         import json
+        from datetime import datetime
 
         logger.info(f"Starting data deletion for user {user_id}, request ID: {request_id}")
 
@@ -981,7 +1002,7 @@ async def perform_data_deletion(
         try:
             with open(deletion_dir / f"{request_id}.json", 'w') as f:
                 json.dump(status_data, f)
-        except (OSError, IOError):
+        except OSError:
             pass
 
 def cleanup_related_data(user_id: int):
@@ -993,11 +1014,11 @@ def cleanup_related_data(user_id: int):
             for file_path in export_dir.glob("*"):
                 if file_path.is_file():
                     try:
-                        with open(file_path, 'r') as f:
+                        with open(file_path) as f:
                             data = json.load(f)
                             if data.get('user_id') == user_id:
                                 file_path.unlink()
-                    except (OSError, IOError, json.JSONDecodeError):
+                    except (OSError, json.JSONDecodeError):
                         pass
 
         # Clean up deletion request files (except current)
@@ -1006,11 +1027,11 @@ def cleanup_related_data(user_id: int):
             for file_path in deletion_dir.glob("*"):
                 if file_path.is_file():
                     try:
-                        with open(file_path, 'r') as f:
+                        with open(file_path) as f:
                             data = json.load(f)
                             if data.get('user_id') == user_id:
                                 file_path.unlink()
-                    except (OSError, IOError, json.JSONDecodeError):
+                    except (OSError, json.JSONDecodeError):
                         pass
 
         logger.info(f"Cleaned up related data files for user {user_id}")
@@ -1021,7 +1042,7 @@ def cleanup_related_data(user_id: int):
 # Consent Management Endpoints
 
 @router.get("/consents", response_model=UserConsentSummary)
-async def get_user_consents(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_user_consents(current_user: dict[str, Any] = Depends(get_current_user)):
     """Get current user's consent status"""
     try:
         summary = consent_manager.get_consent_summary(current_user['user_id'])
@@ -1037,7 +1058,7 @@ async def get_user_consents(current_user: Dict[str, Any] = Depends(get_current_u
 @router.post("/consents/grant")
 async def grant_user_consent(
     request: ConsentGrantRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Grant consent for a specific type"""
     try:
@@ -1090,7 +1111,7 @@ async def grant_user_consent(
 @router.post("/consents/withdraw")
 async def withdraw_user_consent(
     request: ConsentWithdrawRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Withdraw consent for a specific type"""
     try:
@@ -1144,7 +1165,7 @@ async def withdraw_user_consent(
         )
 
 @router.get("/consents/policies")
-async def get_consent_policies(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_consent_policies(current_user: dict[str, Any] = Depends(get_current_user)):
     """Get available consent policies"""
     try:
         policies = {}
@@ -1174,7 +1195,7 @@ async def get_consent_policies(current_user: Dict[str, Any] = Depends(get_curren
 @router.get("/consents/check/{consent_type}")
 async def check_user_consent(
     consent_type: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: dict[str, Any] = Depends(get_current_user)
 ):
     """Check if user has granted a specific consent"""
     try:
@@ -1209,7 +1230,7 @@ async def check_user_consent(
 
 @router.get("/admin/consents/statistics")
 async def get_consent_statistics(
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to get consent statistics"""
     try:
@@ -1226,7 +1247,7 @@ async def get_consent_statistics(
 @router.get("/admin/consents/users/{user_id}")
 async def get_user_consent_details(
     user_id: int,
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to get detailed consent information for a user"""
     try:
@@ -1255,7 +1276,7 @@ async def get_user_consent_details(
 async def admin_grant_user_consent(
     user_id: int,
     request: ConsentGrantRequest,
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Admin endpoint to grant consent on behalf of a user"""
     try:
@@ -1345,7 +1366,7 @@ async def get_data_minimization_status(
 
 @router.post("/data-minimization/validate")
 async def validate_data_collection(
-    request: Dict[str, Any],
+    request: dict[str, Any],
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Validate data collection against minimization policies"""
@@ -1386,7 +1407,7 @@ async def validate_data_collection(
 
 @router.post("/data-minimization/minimize")
 async def minimize_data_payload(
-    request: Dict[str, Any],
+    request: dict[str, Any],
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Minimize data payload according to policies"""
@@ -1495,7 +1516,7 @@ async def get_data_usage_summary(
 
 @router.post("/data-minimization/policies")
 async def add_data_policy(
-    request: Dict[str, Any],
+    request: dict[str, Any],
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     """Add a new data collection policy (Admin only)"""
@@ -1509,7 +1530,7 @@ async def add_data_policy(
             )
 
         # Parse policy data
-        from agents.common.data_minimization import DataCollectionPolicy, DataCategory
+        from agents.common.data_minimization import DataCategory, DataCollectionPolicy
 
         purpose_str = request.get("purpose")
         categories_str = request.get("categories", [])

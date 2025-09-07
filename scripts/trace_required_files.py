@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import Set, List
 
 REPO_ROOT = Path.cwd()
 OUT = Path('/tmp/required_files.txt')
@@ -21,7 +20,7 @@ seed_patterns = [
 ]
 
 
-def find_seed_files() -> List[Path]:
+def find_seed_files() -> list[Path]:
     files = []
     for pat in seed_patterns:
         for p in REPO_ROOT.glob(pat):
@@ -30,7 +29,7 @@ def find_seed_files() -> List[Path]:
     return sorted(files)
 
 
-def parse_imports(path: Path) -> Set[str]:
+def parse_imports(path: Path) -> set[str]:
     code = path.read_text(errors='ignore')
     tree = ast.parse(code, filename=str(path))
     imports = set()
@@ -44,7 +43,7 @@ def parse_imports(path: Path) -> Set[str]:
     return imports
 
 
-def module_name_to_paths(modname: str) -> List[Path]:
+def module_name_to_paths(modname: str) -> list[Path]:
     # map module names like agents.balancer.tools to possible file paths
     parts = modname.split('.')
     candidates = []
@@ -62,7 +61,7 @@ def module_name_to_paths(modname: str) -> List[Path]:
 def trace():
     seeds = find_seed_files()
     print('Seeds:', len(seeds))
-    required: Set[Path] = set(Path(s) for s in seeds)
+    required: set[Path] = set(Path(s) for s in seeds)
     queue = list(required)
     seen_modules = set()
 

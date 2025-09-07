@@ -2,8 +2,8 @@
 """Simple engine verifier: checks engine file and metadata JSON exist and basic fields match."""
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 
 def verify(engine_path: Path):

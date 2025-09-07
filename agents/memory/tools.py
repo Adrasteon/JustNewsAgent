@@ -1,9 +1,11 @@
-from pathlib import Path
-from common.observability import get_logger
-import os
-from datetime import datetime, timezone
 import json
+import os
+from datetime import UTC, datetime
+from pathlib import Path
+
 import requests
+
+from common.observability import get_logger
 
 try:
     import torch
@@ -21,7 +23,8 @@ except Exception:
         SentenceTransformer = None
 
 # Import the new database connection utilities
-from agents.common.database import get_db_connection as get_pooled_connection, execute_query, execute_query_single
+from agents.common.database import execute_query, execute_query_single
+from agents.common.database import get_db_connection as get_pooled_connection
 
 """
 Tools for the Memory Agent.
@@ -54,7 +57,7 @@ def get_db_connection():
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file."""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{details}\n")
 
 def get_embedding_model():
     """Return a SentenceTransformer instance, using the shared helper when available."""

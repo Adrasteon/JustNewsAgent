@@ -20,26 +20,27 @@ Usage:
     secrets.set('api.openai_key', 'sk-...', encrypt=True)
 """
 
-import os
-from common.observability import get_logger
-import json
 import base64
+import json
+import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
 class SecretManager:
     """Enterprise-grade secret management system"""
 
-    def __init__(self, vault_path: Optional[str] = None):
+    def __init__(self, vault_path: str | None = None):
         self.vault_path = vault_path or self._get_default_vault_path()
-        self._key: Optional[bytes] = None
-        self._vault: Dict[str, Any] = {}
+        self._key: bytes | None = None
+        self._vault: dict[str, Any] = {}
         self._load_vault()
 
     def _get_default_vault_path(self) -> str:
@@ -90,7 +91,7 @@ class SecretManager:
         if os.path.exists(self.vault_path) and not self._key:
             # Try to load unencrypted vault (for development)
             try:
-                with open(self.vault_path, 'r') as f:
+                with open(self.vault_path) as f:
                     self._vault = json.load(f)
                 logger.info("Loaded unencrypted vault (development mode)")
             except Exception:
@@ -165,7 +166,7 @@ class SecretManager:
             logger.error(f"Failed to save plaintext vault: {e}")
             raise
 
-    def list_secrets(self) -> Dict[str, str]:
+    def list_secrets(self) -> dict[str, str]:
         """List all available secrets (masked for security)"""
         result = {}
 
@@ -186,7 +187,7 @@ class SecretManager:
             return '*' * len(value)
         return value[:2] + '*' * (len(value) - 4) + value[-2:]
 
-    def validate_security(self) -> Dict[str, Any]:
+    def validate_security(self) -> dict[str, Any]:
         """Validate security configuration"""
         issues = []
         warnings = []
@@ -201,7 +202,7 @@ class SecretManager:
         for config_file in config_files:
             if os.path.exists(config_file):
                 try:
-                    with open(config_file, 'r') as f:
+                    with open(config_file) as f:
                         content = f.read().lower()
                         if any(word in content for word in ['password', 'secret', 'key', 'token']):
                             issues.append(f"Potential secrets found in {config_file}")
@@ -248,11 +249,11 @@ def set_secret(key: str, value: Any, encrypt: bool = True):
     """Set a secret value"""
     return get_secret_manager().set(key, value, encrypt)
 
-def list_secrets() -> Dict[str, str]:
+def list_secrets() -> dict[str, str]:
     """List all available secrets (masked)"""
     return get_secret_manager().list_secrets()
 
-def validate_secrets() -> Dict[str, Any]:
+def validate_secrets() -> dict[str, Any]:
     """Validate security configuration"""
     return get_secret_manager().validate_security()
 

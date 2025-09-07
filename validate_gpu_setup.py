@@ -4,13 +4,13 @@ GPU Environment Validation and Testing Script
 Validates GPU setup and tests configuration after automated setup
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 import time
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 # Add project paths
 script_dir = Path(__file__).parent
@@ -32,7 +32,7 @@ class GPUEnvironmentValidator:
         self.logs_dir = self.project_root / "logs"
         self.results = {}
 
-    def run_full_validation(self) -> Dict[str, Any]:
+    def run_full_validation(self) -> dict[str, Any]:
         """Run complete validation suite"""
         print("🔍 GPU Environment Validation Suite")
         print("=" * 50)
@@ -80,7 +80,7 @@ class GPUEnvironmentValidator:
 
         return self.results
 
-    def check_project_structure(self) -> Dict[str, Any]:
+    def check_project_structure(self) -> dict[str, Any]:
         """Check if project structure is correct"""
         required_paths = [
             "agents/common/gpu_config_manager.py",
@@ -105,7 +105,7 @@ class GPUEnvironmentValidator:
             'structure_valid': len(missing_paths) == 0
         }
 
-    def check_dependencies(self) -> Dict[str, Any]:
+    def check_dependencies(self) -> dict[str, Any]:
         """Check if required dependencies are installed"""
         dependencies = {
             'python3': 'python3 --version',
@@ -131,7 +131,7 @@ class GPUEnvironmentValidator:
             'all_available': len(missing_deps) == 0
         }
 
-    def check_gpu_hardware(self) -> Dict[str, Any]:
+    def check_gpu_hardware(self) -> dict[str, Any]:
         """Check GPU hardware detection"""
         gpu_info = {
             'vendor': 'unknown',
@@ -165,7 +165,7 @@ class GPUEnvironmentValidator:
 
         return gpu_info
 
-    def check_conda_environment(self) -> Dict[str, Any]:
+    def check_conda_environment(self) -> dict[str, Any]:
         """Check conda environment setup"""
         env_name = "justnews-v2-py312"
         env_info = {
@@ -201,7 +201,7 @@ class GPUEnvironmentValidator:
 
         return env_info
 
-    def check_configuration_files(self) -> Dict[str, Any]:
+    def check_configuration_files(self) -> dict[str, Any]:
         """Check configuration files"""
         config_files = [
             "gpu_config.json",
@@ -223,7 +223,7 @@ class GPUEnvironmentValidator:
             if file_path.exists():
                 config_status[config_file]['size_bytes'] = file_path.stat().st_size
                 try:
-                    with open(file_path, 'r') as f:
+                    with open(file_path) as f:
                         json.load(f)
                     config_status[config_file]['valid_json'] = True
                 except Exception as e:
@@ -237,7 +237,7 @@ class GPUEnvironmentValidator:
             'all_valid': all_valid
         }
 
-    def check_configuration_loading(self) -> Dict[str, Any]:
+    def check_configuration_loading(self) -> dict[str, Any]:
         """Test configuration loading"""
         if not IMPORTS_AVAILABLE:
             return {'skipped': True, 'reason': 'Imports not available'}
@@ -261,7 +261,7 @@ class GPUEnvironmentValidator:
                 'error': str(e)
             }
 
-    def check_environment_variables(self) -> Dict[str, Any]:
+    def check_environment_variables(self) -> dict[str, Any]:
         """Check environment variables"""
         env_vars = [
             'JUSTNEWS_ENV',
@@ -288,7 +288,7 @@ class GPUEnvironmentValidator:
             'env_file_path': str(env_file)
         }
 
-    def test_gpu_monitoring(self) -> Dict[str, Any]:
+    def test_gpu_monitoring(self) -> dict[str, Any]:
         """Test GPU monitoring functionality"""
         if not IMPORTS_AVAILABLE:
             return {'skipped': True, 'reason': 'Imports not available'}
@@ -315,7 +315,7 @@ class GPUEnvironmentValidator:
                 'error': str(e)
             }
 
-    def test_configuration_profiles(self) -> Dict[str, Any]:
+    def test_configuration_profiles(self) -> dict[str, Any]:
         """Test configuration profiles"""
         if not IMPORTS_AVAILABLE:
             return {'skipped': True, 'reason': 'Imports not available'}
@@ -343,7 +343,7 @@ class GPUEnvironmentValidator:
                 'error': str(e)
             }
 
-    def validate_performance_settings(self) -> Dict[str, Any]:
+    def validate_performance_settings(self) -> dict[str, Any]:
         """Validate performance settings"""
         if not IMPORTS_AVAILABLE:
             return {'skipped': True, 'reason': 'Imports not available'}

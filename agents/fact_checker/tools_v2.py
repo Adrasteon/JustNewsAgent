@@ -14,16 +14,18 @@ V4 Compliance: TensorRT-ready multi-model architecture with MCP bus integration
 Dependencies: transformers, sentence-transformers, spacy, torch, numpy
 """
 
-import os
-from common.observability import get_logger
-
 import json
-from datetime import datetime, timezone
-from typing import List, Optional
+import os
+from datetime import UTC, datetime
+
+from common.observability import get_logger
 
 # Import V2 Engine
 try:
-    from agents.fact_checker.fact_checker_v2_engine import get_fact_checker_engine, initialize_fact_checker_v2
+    from agents.fact_checker.fact_checker_v2_engine import (
+        get_fact_checker_engine,
+        initialize_fact_checker_v2,
+    )
     FACT_CHECKER_V2_AVAILABLE = True
 except ImportError as e:
     FACT_CHECKER_V2_AVAILABLE = False
@@ -60,7 +62,7 @@ else:
 def log_feedback(event: str, details: dict):
     """Universal feedback logging for Fact Checker operations"""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
         f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
 
 def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
@@ -82,11 +84,11 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
             if engine:
                 # Primary fact verification
                 verification = engine.verify_fact(claim, context)
-                
+
                 # Source credibility assessment
                 domain = source_url.split('/')[2] if source_url and '/' in source_url else ""
                 credibility = engine.assess_source_credibility(context[:500], domain)
-                
+
                 result = {
                     "verification_result": verification,
                     "credibility_assessment": credibility,
@@ -95,20 +97,20 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
                     "source_url": source_url,
                     "v2_analysis": True,
                     "models_used": ["distilbert", "roberta"],
-                    "timestamp": datetime.now(timezone.utc).isoformat()
+                    "timestamp": datetime.now(UTC).isoformat()
                 }
-                
+
                 log_feedback("claim_verified_v2", {
                     "verification_score": verification.get("verification_score", 0.5),
                     "credibility_score": credibility.get("credibility_score", 0.5),
                     "classification": verification.get("classification", "unknown")
                 })
-                
+
                 return result
-                
+
         # Fallback to basic verification
         return _fallback_verify_claim(claim, context, source_url)
-        
+
     except Exception as e:
         logger.error(f"Claim verification error: {e}")
         return {
@@ -118,7 +120,7 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
             "v2_analysis": False
         }
 
-def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: Optional[dict] = None) -> dict:
+def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: dict | None = None) -> dict:
     """
     V2 Comprehensive Fact-Checking using all 5 AI models
     
@@ -136,24 +138,24 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
             engine = get_fact_checker_engine()
             if engine:
                 result = engine.comprehensive_fact_check(article_text, source_url)
-                
+
                 # Add metadata
                 result["article_metadata"] = metadata or {}
                 result["article_length"] = len(article_text)
-                result["processing_timestamp"] = datetime.now(timezone.utc).isoformat()
-                
+                result["processing_timestamp"] = datetime.now(UTC).isoformat()
+
                 log_feedback("comprehensive_fact_check_v2", {
                     "overall_score": result.get("overall_score", 0.5),
                     "assessment": result.get("assessment", "unknown"),
                     "claims_count": len(result.get("claims_analysis", {}).get("extracted_claims", [])),
                     "contradictions_found": len(result.get("contradictions", []))
                 })
-                
+
                 return result
-                
+
         # Fallback to basic fact-checking
         return _fallback_comprehensive_fact_check(article_text, source_url, metadata)
-        
+
     except Exception as e:
         logger.error(f"Comprehensive fact-check error: {e}")
         return {
@@ -163,7 +165,7 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
             "v2_analysis": False
         }
 
-def detect_contradictions(text_passages: List[str]) -> dict:
+def detect_contradictions(text_passages: list[str]) -> dict:
     """
     V2 Contradiction Detection using BERT-large
     
@@ -178,15 +180,15 @@ def detect_contradictions(text_passages: List[str]) -> dict:
             engine = get_fact_checker_engine()
             if engine:
                 contradictions = []
-                
+
                 # Check all pairs of passages
                 for i in range(len(text_passages)):
                     for j in range(i + 1, len(text_passages)):
                         contradiction = engine.detect_contradictions(
-                            text_passages[i], 
+                            text_passages[i],
                             text_passages[j]
                         )
-                        
+
                         if contradiction.get("status") == "contradiction":
                             contradictions.append({
                                 "passage_a_index": i,
@@ -196,7 +198,7 @@ def detect_contradictions(text_passages: List[str]) -> dict:
                                 "contradiction_score": contradiction.get("contradiction_score", 0.0),
                                 "confidence": contradiction.get("confidence", 0.0)
                             })
-                
+
                 result = {
                     "contradictions_found": len(contradictions),
                     "contradictions": contradictions,
@@ -204,14 +206,14 @@ def detect_contradictions(text_passages: List[str]) -> dict:
                     "model_used": "bert-large-contradiction-detection",
                     "v2_analysis": True
                 }
-                
+
                 log_feedback("contradiction_detection_v2", {
                     "passages_count": len(text_passages),
                     "contradictions_found": len(contradictions)
                 })
-                
+
                 return result
-                
+
         # Fallback basic contradiction detection
         return {
             "contradictions_found": 0,
@@ -220,7 +222,7 @@ def detect_contradictions(text_passages: List[str]) -> dict:
             "model_used": "fallback",
             "v2_analysis": False
         }
-        
+
     except Exception as e:
         logger.error(f"Contradiction detection error: {e}")
         return {
@@ -245,7 +247,7 @@ def extract_verifiable_claims(text: str) -> dict:
             engine = get_fact_checker_engine()
             if engine:
                 result = engine.extract_claims(text)
-                
+
                 # Enhance with verification readiness assessment
                 result["verification_ready_claims"] = []
                 for claim in result.get("claims", []):
@@ -254,23 +256,23 @@ def extract_verifiable_claims(text: str) -> dict:
                         1 for indicator in ["according to", "reported", "announced", "study", "data"]
                         if indicator in claim.lower()
                     ])
-                    
+
                     if verification_indicators > 0 or len(claim.split()) > 5:
                         result["verification_ready_claims"].append(claim)
-                
+
                 result["v2_analysis"] = True
-                
+
                 log_feedback("claims_extraction_v2", {
                     "total_claims": result.get("claim_count", 0),
                     "entities_found": len(result.get("entities", [])),
                     "verification_ready": len(result["verification_ready_claims"])
                 })
-                
+
                 return result
-                
+
         # Fallback basic claim extraction
         return _fallback_extract_claims(text)
-        
+
     except Exception as e:
         logger.error(f"Claim extraction error: {e}")
         return {
@@ -297,18 +299,18 @@ def assess_source_credibility(source_text: str, domain: str = "") -> dict:
             engine = get_fact_checker_engine()
             if engine:
                 result = engine.assess_source_credibility(source_text, domain)
-                
+
                 log_feedback("credibility_assessment_v2", {
                     "domain": domain,
                     "credibility_score": result.get("credibility_score", 0.5),
                     "reliability": result.get("reliability", "unknown")
                 })
-                
+
                 return result
-                
+
         # Fallback basic credibility assessment
         return _fallback_assess_credibility(source_text, domain)
-        
+
     except Exception as e:
         logger.error(f"Credibility assessment error: {e}")
         return {
@@ -325,13 +327,13 @@ def get_model_status() -> dict:
             engine = get_fact_checker_engine()
             if engine:
                 return engine.get_model_info()
-                
+
         return {
             "status": "fallback_mode",
             "v2_available": False,
             "reason": "V2 engine not available"
         }
-        
+
     except Exception as e:
         logger.error(f"Model status error: {e}")
         return {"status": "error", "error": str(e)}
@@ -343,7 +345,7 @@ def _fallback_verify_claim(claim: str, context: str, source_url: str) -> dict:
     confidence = 0.6 if any(indicator in claim.lower() for indicator in [
         "according to", "reported", "announced", "confirmed"
     ]) else 0.4
-    
+
     return {
         "verification_result": {
             "verification_score": confidence,
@@ -359,7 +361,7 @@ def _fallback_verify_claim(claim: str, context: str, source_url: str) -> dict:
         "fallback": True
     }
 
-def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: Optional[dict]) -> dict:
+def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metadata: dict | None) -> dict:
     """Fallback comprehensive fact-checking"""
     return {
         "overall_score": 0.5,
@@ -372,7 +374,7 @@ def _fallback_comprehensive_fact_check(article_text: str, source_url: str, metad
 def _fallback_extract_claims(text: str) -> dict:
     """Fallback claim extraction using basic patterns"""
     import re
-    
+
     sentences = re.split(r'[.!?]+', text)
     claims = [
         sent.strip() for sent in sentences
@@ -380,7 +382,7 @@ def _fallback_extract_claims(text: str) -> dict:
             "according to", "reported", "announced", "said", "claimed"
         ])
     ]
-    
+
     return {
         "claims": claims[:5],
         "entities": [],
@@ -393,14 +395,14 @@ def _fallback_assess_credibility(source_text: str, domain: str) -> dict:
     """Fallback credibility assessment"""
     # Basic domain-based heuristics
     trusted_indicators = ["bbc", "reuters", "ap", "npr", "pbs"]
-    
+
     if any(indicator in domain.lower() for indicator in trusted_indicators):
         credibility = 0.8
         reliability = "high"
     else:
         credibility = 0.5
         reliability = "unknown"
-    
+
     return {
         "credibility_score": credibility,
         "reliability": reliability,
@@ -409,12 +411,12 @@ def _fallback_assess_credibility(source_text: str, domain: str) -> dict:
         "fallback": True
     }
 
-# Legacy function for backward compatibility  
+# Legacy function for backward compatibility
 def get_dialog_model():
     """Legacy function - maintained for backward compatibility"""
     if AutoModelForCausalLM is None or AutoTokenizer is None:
         raise ImportError("transformers library is not installed.")
-    
+
     if not os.path.exists(MODEL_PATH) or not os.listdir(MODEL_PATH):
         print(f"Downloading {MODEL_NAME} to {MODEL_PATH}...")
         model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, cache_dir=MODEL_PATH)
@@ -423,7 +425,7 @@ def get_dialog_model():
         print(f"Loading {MODEL_NAME} from local cache {MODEL_PATH}...")
         model = AutoModelForCausalLM.from_pretrained(MODEL_PATH)
         tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
-    
+
     return model, tokenizer
 
 def check_claims(article: str, source: str) -> dict:
@@ -443,11 +445,11 @@ def validate_is_news(content: str) -> bool:
 def verify_claims(claims: list[str], sources: list[str]) -> dict:
     """Enhanced legacy function with V2 capabilities"""
     logger.info(f"Verifying {len(claims)} claims with {len(sources)} sources")
-    
+
     results = {}
     for claim in claims:
         verification = verify_claim(claim, "\n".join(sources))
         results[claim] = verification.get("verification_result", {}).get("classification", "unknown")
-    
+
     log_feedback("verify_claims", {"claims_count": len(claims), "sources_count": len(sources)})
     return results

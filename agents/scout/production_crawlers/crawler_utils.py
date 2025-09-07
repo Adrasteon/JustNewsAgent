@@ -20,20 +20,20 @@ support database-driven multi-site clustering operations.
 import asyncio
 import hashlib
 
+# Database utilities for source management
+import os
 import time
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Any
 from urllib.parse import urlparse
 from urllib.robotparser import RobotFileParser
 
-# Database utilities for source management
-import os
-from common.observability import get_logger
-from contextlib import contextmanager
-from typing import List, Any
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -172,8 +172,8 @@ class CanonicalMetadata:
                          extraction_method: str = "unknown", status: str = "success",
                          paywall_flag: bool = False, confidence: float = 0.0,
                          publisher: str = "BBC", crawl_mode: str = "ultra_fast",
-                         news_score: float = 0.0, canonical: Optional[str] = None,
-                         error: Optional[str] = None) -> Dict:
+                         news_score: float = 0.0, canonical: str | None = None,
+                         error: str | None = None) -> dict:
         """Generate standardized canonical metadata for crawler results"""
 
         url_hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
@@ -204,7 +204,7 @@ class CanonicalMetadata:
         return metadata
 
     @staticmethod
-    async def extract_canonical_and_paywall(page) -> tuple[Optional[str], bool]:
+    async def extract_canonical_and_paywall(page) -> tuple[str | None, bool]:
         """Extract canonical URL and detect paywall from page"""
         canonical = None
         paywall_flag = False
@@ -260,7 +260,7 @@ POOL_MIN_CONNECTIONS = int(os.environ.get("DB_POOL_MIN_CONNECTIONS", "2"))
 POOL_MAX_CONNECTIONS = int(os.environ.get("DB_POOL_MAX_CONNECTIONS", "10"))
 
 # Global connection pool
-_connection_pool: Optional[pool.ThreadedConnectionPool] = None
+_connection_pool: pool.ThreadedConnectionPool | None = None
 
 def initialize_connection_pool():
     """
@@ -305,14 +305,14 @@ def get_db_connection():
         if conn:
             _connection_pool.putconn(conn)
 
-def execute_query(query: str, params: tuple = None) -> List[Dict[str, Any]]:
+def execute_query(query: str, params: tuple = None) -> list[dict[str, Any]]:
     """Execute a query and return results as list of dicts"""
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(query, params or ())
             return [dict(row) for row in cur.fetchall()]
 
-def execute_query_single(query: str, params: tuple = None) -> Optional[Dict[str, Any]]:
+def execute_query_single(query: str, params: tuple = None) -> dict[str, Any] | None:
     """Execute a query and return a single result as dict"""
     with get_db_connection() as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
@@ -320,7 +320,7 @@ def execute_query_single(query: str, params: tuple = None) -> Optional[Dict[str,
             row = cur.fetchone()
             return dict(row) if row else None
 
-def get_active_sources() -> List[Dict[str, Any]]:
+def get_active_sources() -> list[dict[str, Any]]:
     """Get all active news sources from the database"""
     try:
         sources = execute_query("""
@@ -339,7 +339,7 @@ def get_active_sources() -> List[Dict[str, Any]]:
         logger.error(f"❌ Failed to query sources from database: {e}")
         return []
 
-def get_sources_by_domain(domains: List[str]) -> List[Dict[str, Any]]:
+def get_sources_by_domain(domains: list[str]) -> list[dict[str, Any]]:
     """Get sources for specific domains"""
     if not domains:
         return []

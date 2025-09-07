@@ -1,94 +1,108 @@
-from common.observability import get_logger
-import sys
-from typing import Dict, List, Optional
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QMessageBox,
-    QCheckBox, QInputDialog, QTextEdit, QGroupBox, QGridLayout, QComboBox, QSpinBox
-)
-import subprocess
-import threading
-import requests
 import json
-
+import subprocess
+import sys
+import threading
 import time
+
+import requests
+from PyQt5.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QGridLayout,
+    QGroupBox,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QSpinBox,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from common.observability import get_logger
 
 # Configure logging
 logger = get_logger(__name__)
 
 class DynamicResourceAllocator:
     """Dynamic GPU memory allocation manager for JustNewsAgent"""
-    
+
     def __init__(self, total_gpu_memory_gb: float = 24.0):
         self.total_memory = total_gpu_memory_gb
         self.agent_allocations = {
             "scout": 8.0,      # Current: 8GB
-            "analyst": 2.3,    # Current: 2.3GB  
+            "analyst": 2.3,    # Current: 2.3GB
             "synthesizer": 3.0, # Current: 3GB
             "fact_checker": 2.5,  # Keep separate
             "memory": 2.0,
             "buffer": 3.0      # Safety buffer
         }
-        self.current_usage: Dict[str, float] = {}
+        self.current_usage: dict[str, float] = {}
         self.logger = get_logger(__name__)
-    
-    def optimize_allocation(self, current_usage: Dict[str, float]) -> Dict[str, float]:
+
+    def optimize_allocation(self, current_usage: dict[str, float]) -> dict[str, float]:
         """Dynamically adjust allocations based on real-time usage"""
         try:
             self.current_usage = current_usage
             optimized = {}
-            
+
             # Calculate scaling factors based on workload
-            
+
             for agent, base_allocation in self.agent_allocations.items():
                 if agent == "buffer":
                     optimized[agent] = base_allocation
                     continue
-                    
+
                 # Scale based on current usage patterns
                 usage_factor = current_usage.get(agent, 0.5)  # Default to 50% if unknown
                 scaling_factor = min(usage_factor * 1.5, 2.0)  # Max 2x scaling
-                
+
                 new_allocation = base_allocation * scaling_factor
                 # Ensure we don't exceed total memory
                 if sum(optimized.values()) + new_allocation > self.total_memory:
                     new_allocation = base_allocation
-                
+
                 optimized[agent] = round(new_allocation, 1)
-            
+
             self.logger.info(f"Optimized allocations: {optimized}")
             return optimized
-            
+
         except Exception as e:
             self.logger.error(f"Error optimizing allocations: {e}")
             return self.agent_allocations.copy()
-    
-    def get_recommendations(self) -> List[str]:
+
+    def get_recommendations(self) -> list[str]:
         """Generate optimization recommendations"""
         recommendations = []
-        
+
         try:
             # Analyze current usage patterns
             high_usage_agents = [agent for agent, usage in self.current_usage.items() if usage > 0.8]
             low_usage_agents = [agent for agent, usage in self.current_usage.items() if usage < 0.3]
-            
+
             if high_usage_agents:
                 recommendations.append(f"Consider increasing memory for: {', '.join(high_usage_agents)}")
-            
+
             if low_usage_agents:
                 recommendations.append(f"Consider reducing memory for: {', '.join(low_usage_agents)}")
-            
+
             # Check for bottlenecks
             total_usage = sum(self.current_usage.values())
             if total_usage > 0.9:
                 recommendations.append("High overall GPU usage - consider workload redistribution")
-            
+
             if not recommendations:
                 recommendations.append("Current allocations are optimal")
-                
+
         except Exception as e:
             self.logger.error(f"Error generating recommendations: {e}")
             recommendations.append("Unable to generate recommendations due to error")
-        
+
         return recommendations
 
 class DashboardGUI(QMainWindow):
@@ -98,7 +112,7 @@ class DashboardGUI(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
 
         # Robust error logging setup
-        
+
         self.logger = get_logger(__name__)
         handler = logging.FileHandler("dashboard_gui_error.log", encoding="utf-8")
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -149,7 +163,7 @@ class DashboardGUI(QMainWindow):
             "Synthesizer Agent", "Critic Agent", "Memory Agent", "Reasoning Agent", "NewsReader Agent"
         ]
         lines = []
-        for name, port in zip(agent_names, agent_ports):
+        for name, port in zip(agent_names, agent_ports, strict=False):
             try:
                 if port == 8000:
                     resp = requests.get(f"http://localhost:{port}/agents", timeout=1)
@@ -744,7 +758,7 @@ class DashboardGUI(QMainWindow):
         try:
             # Print initial status for all agents
             initial_lines = []
-            for name, port in zip(agent_names, agent_ports):
+            for name, port in zip(agent_names, agent_ports, strict=False):
                 try:
                     if port == 8000:
                         resp = requests.get(f"http://localhost:{port}/agents", timeout=1)
@@ -764,7 +778,7 @@ class DashboardGUI(QMainWindow):
             # Now only log status changes
             while self.monitor_thread_running:
                 output_lines = []
-                for name, port in zip(agent_names, agent_ports):
+                for name, port in zip(agent_names, agent_ports, strict=False):
                     try:
                         if port == 8000:
                             resp = requests.get(f"http://localhost:{port}/agents", timeout=1)
@@ -816,20 +830,20 @@ class DashboardGUI(QMainWindow):
 
     def create_settings_tab(self):
         """Create enhanced settings tab with dynamic resource allocation"""
-        from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QPushButton
-        
+        from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
+
         tab = QWidget()
         layout = QVBoxLayout()
-        
+
         # Title
         title = QLabel("Configuration Management & Resource Allocation")
         title.setStyleSheet("font-size: 18px; font-weight: bold; margin-bottom: 10px;")
         layout.addWidget(title)
-        
+
         # Dynamic Resource Allocation Section
         resource_group = QGroupBox("Dynamic Resource Allocation")
         resource_layout = QVBoxLayout()
-        
+
         # Current allocations display
         self.allocation_display = QTextEdit()
         self.allocation_display.setReadOnly(True)
@@ -837,26 +851,26 @@ class DashboardGUI(QMainWindow):
         self.allocation_display.setStyleSheet("background: #181818; color: #fff; font-family: monospace; font-size: 11px;")
         resource_layout.addWidget(QLabel("Current Allocations:"))
         resource_layout.addWidget(self.allocation_display)
-        
+
         # Optimization controls
         controls_layout = QHBoxLayout()
         self.optimize_btn = QPushButton("Optimize Allocations")
         self.optimize_btn.clicked.connect(self.optimize_allocations)
         self.recommend_btn = QPushButton("Get Recommendations")
         self.recommend_btn.clicked.connect(self.show_recommendations)
-        
+
         controls_layout.addWidget(self.optimize_btn)
         controls_layout.addWidget(self.recommend_btn)
         controls_layout.addStretch()
         resource_layout.addLayout(controls_layout)
-        
+
         resource_group.setLayout(resource_layout)
         layout.addWidget(resource_group)
-        
+
         # GPU Configuration Section (existing)
         gpu_config_group = QGroupBox("GPU Configuration")
         gpu_config_layout = QVBoxLayout()
-        
+
         # Configuration Profile Selection
         profile_layout = QHBoxLayout()
         profile_layout.addWidget(QLabel("Configuration Profile:"))
@@ -866,34 +880,34 @@ class DashboardGUI(QMainWindow):
         profile_layout.addWidget(self.config_profile_combo)
         profile_layout.addStretch()
         gpu_config_layout.addLayout(profile_layout)
-        
+
         # GPU Settings
         settings_layout = QGridLayout()
-        
+
         self.max_memory_spin = QSpinBox()
         self.max_memory_spin.setRange(1, 32)
         self.max_memory_spin.setValue(8)
         self.max_memory_spin.setSuffix(" GB")
-        
+
         self.health_check_spin = QSpinBox()
         self.health_check_spin.setRange(10, 300)
         self.health_check_spin.setValue(30)
         self.health_check_spin.setSuffix(" sec")
-        
+
         self.memory_margin_spin = QSpinBox()
         self.memory_margin_spin.setRange(0, 20)
         self.memory_margin_spin.setValue(10)
         self.memory_margin_spin.setSuffix(" %")
-        
+
         settings_layout.addWidget(QLabel("Max Memory per Agent:"), 0, 0)
         settings_layout.addWidget(self.max_memory_spin, 0, 1)
         settings_layout.addWidget(QLabel("Health Check Interval:"), 1, 0)
         settings_layout.addWidget(self.health_check_spin, 1, 1)
         settings_layout.addWidget(QLabel("Memory Safety Margin:"), 2, 0)
         settings_layout.addWidget(self.memory_margin_spin, 2, 1)
-        
+
         gpu_config_layout.addLayout(settings_layout)
-        
+
         # Control buttons
         buttons_layout = QHBoxLayout()
         self.load_config_btn = QPushButton("Load Current Config")
@@ -902,37 +916,37 @@ class DashboardGUI(QMainWindow):
         self.save_config_btn.clicked.connect(self.save_configuration)
         self.reset_config_btn = QPushButton("Reset to Default")
         self.reset_config_btn.clicked.connect(self.reset_to_default)
-        
+
         buttons_layout.addWidget(self.load_config_btn)
         buttons_layout.addWidget(self.save_config_btn)
         buttons_layout.addWidget(self.reset_config_btn)
         buttons_layout.addStretch()
-        
+
         gpu_config_layout.addLayout(buttons_layout)
-        
+
         gpu_config_group.setLayout(gpu_config_layout)
         layout.addWidget(gpu_config_group)
-        
+
         # Workload Redistribution Section
         workload_group = QGroupBox("Workload Redistribution")
         workload_layout = QVBoxLayout()
-        
+
         # Agent utilization controls
         self.critic_boost_check = QCheckBox("Boost Critic Agent utilization")
         self.critic_boost_check.setChecked(False)
         self.reasoning_boost_check = QCheckBox("Enhance Reasoning Agent tasks")
         self.reasoning_boost_check.setChecked(False)
-        
+
         workload_layout.addWidget(self.critic_boost_check)
         workload_layout.addWidget(self.reasoning_boost_check)
-        
+
         workload_group.setLayout(workload_layout)
         layout.addWidget(workload_group)
-        
+
         # Throughput Optimization Section
         throughput_group = QGroupBox("Throughput Optimization")
         throughput_layout = QVBoxLayout()
-        
+
         # Batch processing controls
         batch_layout = QHBoxLayout()
         batch_layout.addWidget(QLabel("Batch Size:"))
@@ -941,88 +955,88 @@ class DashboardGUI(QMainWindow):
         self.batch_size_spin.setValue(32)
         self.batch_size_spin.setSingleStep(16)
         batch_layout.addWidget(self.batch_size_spin)
-        
+
         self.enable_batch_check = QCheckBox("Enable Batch Processing")
         self.enable_batch_check.setChecked(True)
-        
+
         throughput_layout.addLayout(batch_layout)
         throughput_layout.addWidget(self.enable_batch_check)
-        
+
         throughput_group.setLayout(throughput_layout)
         layout.addWidget(throughput_group)
-        
+
         # Current Configuration Display
         config_display_group = QGroupBox("Current Configuration")
         config_display_layout = QVBoxLayout()
-        
+
         self.config_display = QTextEdit()
         self.config_display.setReadOnly(True)
         self.config_display.setMaximumHeight(200)
         self.config_display.setStyleSheet("background: #181818; color: #fff; font-family: monospace; font-size: 11px;")
         config_display_layout.addWidget(self.config_display)
-        
+
         config_display_group.setLayout(config_display_layout)
         layout.addWidget(config_display_group)
-        
+
         # Status Section
         status_group = QGroupBox("Configuration Status")
         status_layout = QVBoxLayout()
-        
+
         self.config_status_label = QLabel("Status: Ready")
         self.config_status_label.setStyleSheet("color: green;")
         status_layout.addWidget(self.config_status_label)
-        
+
         status_group.setLayout(status_layout)
         layout.addWidget(status_group)
-        
+
         tab.setLayout(layout)
-        
+
         # Load initial configuration
         self.load_current_config()
         self.update_allocation_display()
-        
+
         return tab
-    
+
     def optimize_allocations(self):
         """Optimize GPU memory allocations dynamically"""
         try:
             # Get current usage from GPU monitoring
             current_usage = self.get_current_gpu_usage()
-            
+
             # Optimize allocations
             optimized = self.resource_allocator.optimize_allocation(current_usage)
-            
+
             # Update display
             self.update_allocation_display(optimized)
-            
+
             # Apply optimizations (would send to agents)
             self.apply_optimized_allocations(optimized)
-            
+
             self.config_status_label.setText("Status: Allocations optimized successfully")
             self.config_status_label.setStyleSheet("color: green;")
             self.logger.info("GPU allocations optimized")
-            
+
         except Exception as e:
             self.config_status_label.setText(f"Status: Optimization failed - {str(e)}")
             self.config_status_label.setStyleSheet("color: red;")
             self.logger.error(f"Allocation optimization failed: {e}")
-    
+
     def show_recommendations(self):
         """Show optimization recommendations"""
         try:
             recommendations = self.resource_allocator.get_recommendations()
             rec_text = "\n".join(f"• {rec}" for rec in recommendations)
-            
+
             msg = QMessageBox()
             msg.setWindowTitle("Optimization Recommendations")
             msg.setText(rec_text)
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
-            
+
         except Exception as e:
             self.logger.error(f"Error showing recommendations: {e}")
-    
-    def get_current_gpu_usage(self) -> Dict[str, float]:
+
+    def get_current_gpu_usage(self) -> dict[str, float]:
         """Get current GPU usage for all agents"""
         # This would query the GPU monitoring system
         # For now, return mock data
@@ -1035,32 +1049,32 @@ class DashboardGUI(QMainWindow):
             "critic": 0.3,
             "reasoning": 0.4
         }
-    
-    def apply_optimized_allocations(self, allocations: Dict[str, float]):
+
+    def apply_optimized_allocations(self, allocations: dict[str, float]):
         """Apply optimized allocations to agents"""
         try:
             # Send allocations to MCP Bus for distribution
             payload = {"allocations": allocations}
             response = requests.post("http://localhost:8000/optimize_resources", json=payload, timeout=5)
-            
+
             if response.status_code != 200:
                 self.logger.warning(f"Failed to apply allocations: HTTP {response.status_code}")
-                
+
         except Exception as e:
             self.logger.error(f"Error applying allocations: {e}")
-    
-    def update_allocation_display(self, allocations: Optional[Dict[str, float]] = None):
+
+    def update_allocation_display(self, allocations: dict[str, float] | None = None):
         """Update the allocation display"""
         try:
             if allocations is None:
                 allocations = self.resource_allocator.agent_allocations
-            
+
             display_text = "Current GPU Memory Allocations:\n"
             for agent, memory in allocations.items():
                 display_text += f"• {agent.title()}: {memory}GB\n"
-            
+
             self.allocation_display.setPlainText(display_text)
-            
+
         except Exception as e:
             self.logger.error(f"Error updating allocation display: {e}")
 
@@ -1185,7 +1199,7 @@ class DashboardGUI(QMainWindow):
             self.logger.error(f"Error resetting to default: {e}")
 
     def create_analysis_tab(self):
-        from PyQt5.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QPushButton
+        from PyQt5.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout
 
         tab = QWidget()
         layout = QVBoxLayout()

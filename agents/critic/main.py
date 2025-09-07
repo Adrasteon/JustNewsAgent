@@ -15,13 +15,15 @@ For bias detection, use Scout V2 Agent endpoints:
 """
 # main.py for Critic Agent
 
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from datetime import datetime
-import os
+
 from common.observability import get_logger
-import requests
-from contextlib import asynccontextmanager
 
 # Configure logging
 
@@ -58,7 +60,7 @@ async def lifespan(app: FastAPI):
         mcp_bus_client.register_agent(
             agent_name="critic",
             agent_address=f"http://localhost:{CRITIC_AGENT_PORT}",
-            tools=["critique_synthesis", "critique_neutrality", 
+            tools=["critique_synthesis", "critique_neutrality",
                    "critique_content_gpu", "get_critic_performance"],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -139,18 +141,18 @@ def critique_content_gpu_endpoint(call: ToolCall):
         from .gpu_tools import critique_content_gpu
         logger.info(f"Calling GPU critique with {len(call.args[0]) if call.args else 0} articles")
         result = critique_content_gpu(*call.args, **call.kwargs)
-        
+
         # Log performance for monitoring
         if result.get('success') and 'performance' in result:
             perf = result['performance']
             logger.info(f"✅ GPU critique: {perf['articles_per_sec']:.1f} articles/sec")
-        
+
         return result
     except Exception as e:
         logger.error(f"❌ GPU critique error: {e}")
         # Graceful fallback to CPU implementation
         try:
-            from .tools import critique_synthesis, critique_neutrality
+            from .tools import critique_neutrality, critique_synthesis
             logger.info("🔄 Falling back to CPU critique")
             # Simple fallback implementation
             articles = call.args[0] if call.args else []

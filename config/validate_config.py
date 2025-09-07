@@ -8,11 +8,11 @@ about configuration issues, missing values, and optimization suggestions.
 
 import json
 import os
-from common.observability import get_logger
 import sys
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
+from typing import Any
 
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -21,15 +21,15 @@ class ConfigValidator:
 
     def __init__(self, config_file: str):
         self.config_file = config_file
-        self.config: Dict[str, Any] = {}
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
-        self.suggestions: List[str] = []
+        self.config: dict[str, Any] = {}
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
+        self.suggestions: list[str] = []
 
     def load_config(self) -> bool:
         """Load and parse configuration file"""
         try:
-            with open(self.config_file, 'r') as f:
+            with open(self.config_file) as f:
                 self.config = json.load(f)
             return True
         except FileNotFoundError:
@@ -193,7 +193,7 @@ class ConfigValidator:
 
         return "\n".join(report_lines)
 
-    def validate(self) -> Tuple[bool, str]:
+    def validate(self) -> tuple[bool, str]:
         """Run all validation checks"""
         if not self.load_config():
             return False, self.generate_report()

@@ -8,8 +8,8 @@ Outputs JSON with per-agent lists showing how each required model was found:
 Also lists agents present on disk, unexpected model dirs, and summary counts.
 """
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MAP_PATH = REPO_ROOT / 'markdown_docs' / 'agent_documentation' / 'AGENT_MODEL_MAP.json'

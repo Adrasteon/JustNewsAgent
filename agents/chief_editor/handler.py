@@ -3,19 +3,18 @@
 This module is intentionally lightweight and imports no FastAPI or Pydantic so
 it can be used from unit tests and from the FastAPI endpoint.
 """
-import os
-from common.observability import get_logger
 import json
+import os
+from datetime import UTC, datetime
+from typing import Any
 
-from datetime import datetime, timezone
-from typing import Dict, Any
-
-from agents.common.notifications import notify_slack, notify_email
+from agents.common.notifications import notify_email, notify_slack
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
 
-def handle_review_request(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def handle_review_request(kwargs: dict[str, Any]) -> dict[str, Any]:
     """Write the review request to the queue and notify humans (best-effort).
 
     Expected kwargs: evidence_manifest, reason
@@ -28,7 +27,7 @@ def handle_review_request(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     record = {
         'manifest': manifest,
         'reason': reason,
-        'received_at': datetime.now(timezone.utc).isoformat()
+        'received_at': datetime.now(UTC).isoformat()
     }
 
     try:

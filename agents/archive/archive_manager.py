@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Phase 3: Comprehensive Archive Integration - Archive Storage Setup
@@ -14,15 +15,14 @@ PHASE 3 GOALS:
 """
 
 import asyncio
+import hashlib
 import json
-
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import hashlib
+from typing import Any
+
 # import boto3  # Commented out for now - will be added when S3 support is needed
 # from botocore.exceptions import ClientError
-
 # Phase 3 Knowledge Graph Integration
 from .knowledge_graph import KnowledgeGraphManager
 
@@ -38,7 +38,7 @@ class ArchiveStorageManager:
     - Database metadata indexing
     """
 
-    def __init__(self, storage_type: str = "local", config: Dict[str, Any] = None):
+    def __init__(self, storage_type: str = "local", config: dict[str, Any] = None):
         self.storage_type = storage_type
         self.config = config or {}
 
@@ -60,7 +60,7 @@ class ArchiveStorageManager:
 
         logger.info(f"✅ Archive storage initialized: {storage_type}")
 
-    async def store_article(self, article_data: Dict[str, Any]) -> str:
+    async def store_article(self, article_data: dict[str, Any]) -> str:
         """
         Store article with complete metadata and provenance
 
@@ -102,7 +102,7 @@ class ArchiveStorageManager:
         logger.info(f"💾 Archived article: {article_data.get('title', 'Unknown')[:50]}...")
         return storage_key
 
-    async def _store_s3(self, key: str, data: Dict[str, Any]):
+    async def _store_s3(self, key: str, data: dict[str, Any]):
         """Store data in S3"""
         try:
             json_data = json.dumps(data, indent=2, default=str, ensure_ascii=False)
@@ -116,7 +116,7 @@ class ArchiveStorageManager:
             logger.error(f"S3 storage failed: {e}")
             raise
 
-    async def _store_local(self, key: str, data: Dict[str, Any]):
+    async def _store_local(self, key: str, data: dict[str, Any]):
         """Store data locally"""
         file_path = self.local_base_path / key
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -124,7 +124,7 @@ class ArchiveStorageManager:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, default=str, ensure_ascii=False)
 
-    async def retrieve_article(self, storage_key: str) -> Optional[Dict[str, Any]]:
+    async def retrieve_article(self, storage_key: str) -> dict[str, Any] | None:
         """Retrieve archived article by storage key"""
         try:
             if self.storage_type == "s3":
@@ -135,19 +135,19 @@ class ArchiveStorageManager:
             logger.error(f"Failed to retrieve {storage_key}: {e}")
             return None
 
-    async def _retrieve_s3(self, key: str) -> Dict[str, Any]:
+    async def _retrieve_s3(self, key: str) -> dict[str, Any]:
         """Retrieve from S3"""
         response = self.s3_client.get_object(Bucket=self.bucket_name, Key=key)
         data = json.loads(response['Body'].read().decode('utf-8'))
         return data
 
-    async def _retrieve_local(self, key: str) -> Dict[str, Any]:
+    async def _retrieve_local(self, key: str) -> dict[str, Any]:
         """Retrieve from local storage"""
         file_path = self.local_base_path / key
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             return json.load(f)
 
-    async def archive_batch(self, articles: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def archive_batch(self, articles: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Archive a batch of articles with performance metrics
 
@@ -204,12 +204,12 @@ class ArchiveMetadataIndex:
         # TODO: Implement database connection and indexing
         logger.info("📚 Archive metadata index initialized")
 
-    async def index_article(self, storage_key: str, article_data: Dict[str, Any]):
+    async def index_article(self, storage_key: str, article_data: dict[str, Any]):
         """Index article metadata for search"""
         # TODO: Implement metadata indexing
         logger.debug(f"📝 Indexed article: {storage_key}")
 
-    async def search_articles(self, query: str, filters: Dict[str, Any] = None) -> List[str]:
+    async def search_articles(self, query: str, filters: dict[str, Any] = None) -> list[str]:
         """Search archived articles by metadata"""
         # TODO: Implement search functionality
         logger.debug(f"🔍 Search query: {query}")
@@ -222,7 +222,7 @@ class ArchiveManager:
     Coordinates storage, indexing, and retrieval operations with Knowledge Graph integration
     """
 
-    def __init__(self, storage_config: Dict[str, Any] = None):
+    def __init__(self, storage_config: dict[str, Any] = None):
         self.storage_config = storage_config or {"type": "local"}
         storage_type = self.storage_config.get("type", "local")
         config = {k: v for k, v in self.storage_config.items() if k != "type"}
@@ -235,7 +235,7 @@ class ArchiveManager:
 
         logger.info("🏗️ Phase 3 Archive Manager initialized with Knowledge Graph integration")
 
-    async def archive_from_crawler(self, crawler_results: Dict[str, Any]) -> Dict[str, Any]:
+    async def archive_from_crawler(self, crawler_results: dict[str, Any]) -> dict[str, Any]:
         """
         Archive results from Phase 2 crawler with Knowledge Graph integration
 

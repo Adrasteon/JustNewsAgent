@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 GPU Accelerated Analyst - Standalone Module
@@ -10,7 +11,7 @@ in hybrid_tools_v4.py to break the circular import with native_tensorrt_engine.p
 
 
 import time
-from typing import List, Optional
+
 import torch
 from transformers import pipeline
 
@@ -27,7 +28,7 @@ except ImportError:
     pipeline = None
 
 try:
-    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu
+    from agents.common.gpu_manager import release_agent_gpu, request_agent_gpu
     PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
     PRODUCTION_GPU_AVAILABLE = False
@@ -122,7 +123,10 @@ class GPUAcceleratedAnalyst:
 
                 try:
                     # Manual safetensors loading to bypass PyTorch version issue
-                    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+                    from transformers import (
+                        AutoModelForSequenceClassification,
+                        AutoTokenizer,
+                    )
 
                     sentiment_model = AutoModelForSequenceClassification.from_pretrained(
                         "cardiffnlp/twitter-roberta-base-sentiment-latest",
@@ -150,7 +154,10 @@ class GPUAcceleratedAnalyst:
 
                 try:
                     # Manual safetensors loading for bias detector
-                    from transformers import AutoModelForSequenceClassification as BiasModel, AutoTokenizer as BiasTokenizer
+                    from transformers import (
+                        AutoModelForSequenceClassification as BiasModel,
+                    )
+                    from transformers import AutoTokenizer as BiasTokenizer
 
                     bias_model = BiasModel.from_pretrained(
                         "unitary/toxic-bert",
@@ -193,7 +200,7 @@ class GPUAcceleratedAnalyst:
             logger.error(f"❌ GPU initialization failed: {e}")
             logger.info("📱 Will use hybrid fallback system")
 
-    def score_sentiment_gpu(self, text: str) -> Optional[float]:
+    def score_sentiment_gpu(self, text: str) -> float | None:
         """GPU-accelerated sentiment scoring with proven performance and
         device management
         This method is instrumented to emit a structured GPU event for each call
@@ -203,7 +210,7 @@ class GPUAcceleratedAnalyst:
         # Start structured event (emit even if GPU is unavailable so we can
         # observe attempts and fallback behavior).
         try:
-            from agents.common.gpu_metrics import start_event, end_event
+            from agents.common.gpu_metrics import end_event, start_event
         except Exception:
             start_event = None
             end_event = None
@@ -279,7 +286,7 @@ class GPUAcceleratedAnalyst:
                     pass
             return None
 
-    def score_bias_gpu(self, text: str) -> Optional[float]:
+    def score_bias_gpu(self, text: str) -> float | None:
         """GPU-accelerated bias scoring with proven performance and device management"""
         if not self.models_loaded or not (
             TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
@@ -316,7 +323,7 @@ class GPUAcceleratedAnalyst:
                 torch.cuda.empty_cache()
             return None
 
-    def score_sentiment_batch_gpu(self, texts: List[str]) -> List[Optional[float]]:
+    def score_sentiment_batch_gpu(self, texts: list[str]) -> list[float | None]:
         """BATCH GPU-accelerated sentiment scoring with CUDA device management -
         Up to 100x faster!"""
         if not self.models_loaded or not texts or not (
@@ -366,7 +373,7 @@ class GPUAcceleratedAnalyst:
                 torch.cuda.empty_cache()
             return [None] * len(texts)
 
-    def score_bias_batch_gpu(self, texts: List[str]) -> List[Optional[float]]:
+    def score_bias_batch_gpu(self, texts: list[str]) -> list[float | None]:
         """BATCH GPU-accelerated bias scoring with CUDA device management.
 
         Up to 100x faster!

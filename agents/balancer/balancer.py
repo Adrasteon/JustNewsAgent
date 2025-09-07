@@ -20,15 +20,18 @@ try:
 except Exception:
     structlog = None
 
+import importlib
 import os
-from common.observability import get_logger
-from typing import List, Dict, Any
+import time
+from pathlib import Path
+from typing import Any
+
+import psutil
 import torch
 from transformers import pipeline
-from pathlib import Path
-import importlib
-import time
-import psutil
+
+from common.observability import get_logger
+
 try:
     SentenceTransformer = None
 except Exception:
@@ -53,8 +56,8 @@ MCP_BUS_URL = "http://localhost:8000"  # Update as needed
 if structlog is not None:
     logger = structlog.get_logger("balancer_agent")
 else:
-    
-    
+
+
     logger = get_logger(__name__)
 
 def get_device() -> int:
@@ -206,7 +209,7 @@ def call_agent_tool(agent: str, tool: str, *args, **kwargs) -> Any:
 
 
 # --- Multi-Agent Delegation ---
-def analyze_article(text: str) -> Dict[str, Any]:
+def analyze_article(text: str) -> dict[str, Any]:
     """Delegate analysis to Analyst, Fact Checker, and Synthesizer agents via MCP bus."""
     try:
         sentiment = call_agent_tool("analyst", "score_sentiment", text)
@@ -231,7 +234,7 @@ def analyze_article(text: str) -> Dict[str, Any]:
     logger.info("multi_agent_analysis_completed", status="success")
     return {"sentiment": sentiment, "bias": bias, "fact": fact_result, "summary": summary}
 
-def extract_quotes(text: str) -> List[str]:
+def extract_quotes(text: str) -> list[str]:
     quote_pipe = get_quote_extraction_pipeline()
     results = quote_pipe(text)
     quotes = [r['word'] for r in results if r['entity_group'] == 'QUOTE']
@@ -258,7 +261,7 @@ def log_gpu_usage(operation: str):
     except Exception as e:
         logger.warning(f"GPU usage logging failed: {e}")
 
-def batch_fetch_articles(urls: List[str], batch_size: int = 4) -> List[str]:
+def batch_fetch_articles(urls: list[str], batch_size: int = 4) -> list[str]:
     """Batch fetch articles with configurable batch size and GPU logging."""
     articles = []
     for i in range(0, len(urls), batch_size):
@@ -285,7 +288,7 @@ def log_training_example(task: str, input: dict, output: dict, critique: str = "
     except Exception as e:
         logger.warning(f"Training log failed: {e}")
 
-def generate_balanced_article(main_article: str, quotes: List[str], alt_statements: List[str]) -> str:
+def generate_balanced_article(main_article: str, quotes: list[str], alt_statements: list[str]) -> str:
     summary = summarize_article(main_article)
     neutral = neutralize_text(summary)
     article = neutral + "\n\nCounter-balancing statements:\n"
@@ -321,11 +324,11 @@ def main():
 
 # MCP Bus Registration and Health Check (JustNews V4 pattern)
 try:
-    from fastapi import FastAPI, HTTPException, Request
-    from fastapi.responses import JSONResponse
-    from fastapi.exceptions import RequestValidationError
-    from pydantic import BaseModel
     import uvicorn
+    from fastapi import FastAPI, HTTPException, Request
+    from fastapi.exceptions import RequestValidationError
+    from fastapi.responses import JSONResponse
+    from pydantic import BaseModel
 except Exception:
     # Provide minimal fallbacks when FastAPI stack isn't installed
     FastAPI = None
@@ -338,8 +341,8 @@ except Exception:
 
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler  # type: ignore[import]
-    from slowapi.util import get_remote_address  # type: ignore[import]
     from slowapi.errors import RateLimitExceeded  # type: ignore[import]
+    from slowapi.util import get_remote_address  # type: ignore[import]
 except Exception:
     # No-op rate limiter fallbacks
     def _rate_limit_exceeded_handler(request, exc):
@@ -396,27 +399,27 @@ class AgentRegistration(BaseModel):
     agent_name: str
     description: str
     version: str
-    endpoints: Dict[str, str]
+    endpoints: dict[str, str]
 
 @app.post("/register")
-def register_agent(reg: AgentRegistration) -> Dict[str, Any]:
+def register_agent(reg: AgentRegistration) -> dict[str, Any]:
     """Register balancer agent with MCP bus."""
     logger.info(f"Agent registered: {reg.agent_name} v{reg.version}")
     return {"status": "success", "agent": reg.agent_name}
 
 @app.get("/health")
-def health_check() -> Dict[str, str]:
+def health_check() -> dict[str, str]:
     """Health check endpoint for MCP bus compliance."""
     return {"status": "ok", "agent": "balancer"}
 
 
 @app.get("/ready")
-def ready_check() -> Dict[str, Any]:
+def ready_check() -> dict[str, Any]:
     """Readiness endpoint for balancer."""
     # Balancer doesn't have heavy model warmup in this trimmed setup; report ready=true
     return {"ready": True}
 
-def check_mcp_bus_health() -> Dict[str, Any]:
+def check_mcp_bus_health() -> dict[str, Any]:
     """Check MCP bus health by querying /health endpoint."""
     try:
         start = time.time()
@@ -428,7 +431,7 @@ def check_mcp_bus_health() -> Dict[str, Any]:
         logger.error("mcp_bus_health_error", error=str(e), status="error")
         return {"status": "error", "detail": str(e)}
 
-def get_model_status() -> Dict[str, Any]:
+def get_model_status() -> dict[str, Any]:
     """Check if all models are loaded and available."""
     status = {}
     for name, loader in {
@@ -447,7 +450,7 @@ def get_model_status() -> Dict[str, Any]:
     return status
 
 @app.get("/status")
-def status_endpoint() -> Dict[str, Any]:
+def status_endpoint() -> dict[str, Any]:
     """Report agent health, MCP bus connectivity, and model status."""
     mcp_status = check_mcp_bus_health()
     model_status = get_model_status()
@@ -460,7 +463,7 @@ def status_endpoint() -> Dict[str, Any]:
 # --- Resource Monitoring Endpoint ---
 
 @app.get("/resource_status")
-def resource_status() -> Dict[str, Any]:
+def resource_status() -> dict[str, Any]:
     """Report current CPU, memory, and GPU usage."""
     cpu_percent = psutil.cpu_percent(interval=0.5)
     mem = psutil.virtual_memory()

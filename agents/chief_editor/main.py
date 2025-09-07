@@ -3,13 +3,15 @@ Main file for the Chief Editor Agent.
 """
 # main.py for Chief Editor Agent
 
-from fastapi import FastAPI, HTTPException
-from contextlib import asynccontextmanager
-from pydantic import BaseModel
 import os
-from common.observability import get_logger
+from contextlib import asynccontextmanager
+
 import requests
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
 from agents.chief_editor.handler import handle_review_request
+from common.observability import get_logger
 
 # Configure logging
 
@@ -55,7 +57,7 @@ async def lifespan(app: FastAPI):
     global ready
     ready = True
     yield
-    
+
     logger.info("Chief Editor agent is shutting down.")
 
 # Initialize FastAPI with the lifespan context manager

@@ -11,10 +11,10 @@ Provides comprehensive web-based analytics interface with:
 """
 
 from datetime import datetime
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -137,7 +137,7 @@ async def get_optimization_insights():
         raise HTTPException(status_code=500, detail=f"Insights generation failed: {str(e)}")
 
 @analytics_app.post("/api/record-metric")
-async def record_custom_metric(metric_data: Dict[str, Any]):
+async def record_custom_metric(metric_data: dict[str, Any]):
     """Record a custom performance metric"""
     try:
         from ..common.advanced_analytics import PerformanceMetrics

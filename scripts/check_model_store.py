@@ -20,7 +20,7 @@ MODEL_STORE_ROOT = Path('/media/adra/Data/justnews/model_store')
 
 
 def read_map():
-    with open(MAP_PATH, 'r', encoding='utf-8') as f:
+    with open(MAP_PATH, encoding='utf-8') as f:
         return json.load(f)
 
 

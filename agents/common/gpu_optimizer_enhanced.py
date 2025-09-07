@@ -12,19 +12,19 @@ Features:
 """
 
 import json
-
-import time
 import threading
-from datetime import datetime
-from typing import Dict, Optional, Any, NamedTuple
+import time
 from collections import defaultdict, deque
-import numpy as np
+from datetime import datetime
 from pathlib import Path
+from typing import Any, NamedTuple
+
+import numpy as np
 
 # GPU and ML imports with graceful fallbacks
 try:
-    import torch
     import psutil
+    import torch
     GPU_AVAILABLE = torch.cuda.is_available()
     TORCH_AVAILABLE = True
 except ImportError:
@@ -54,8 +54,8 @@ class ResourceProfile:
         self.agent_name = agent_name
         self.model_type = model_type
         self.performance_history: deque = deque(maxlen=1000)
-        self.optimal_batch_sizes: Dict[float, int] = {}
-        self.memory_usage_patterns: Dict[int, float] = {}
+        self.optimal_batch_sizes: dict[float, int] = {}
+        self.memory_usage_patterns: dict[int, float] = {}
         self.last_updated = datetime.now()
 
     def add_performance_record(self, record: PerformanceRecord):
@@ -93,7 +93,7 @@ class ResourceProfile:
                 if best_batch_size >= threshold:
                     self.optimal_batch_sizes[memory_gb] = best_batch_size
 
-    def get_optimal_batch_size(self, memory_gb: float) -> Optional[int]:
+    def get_optimal_batch_size(self, memory_gb: float) -> int | None:
         """Get optimal batch size for given memory allocation"""
         if not self.optimal_batch_sizes:
             return None
@@ -104,7 +104,7 @@ class ResourceProfile:
 
         return self.optimal_batch_sizes.get(closest_memory)
 
-    def predict_memory_usage(self, batch_size: int) -> Optional[float]:
+    def predict_memory_usage(self, batch_size: int) -> float | None:
         """Predict memory usage for a given batch size"""
         if batch_size in self.memory_usage_patterns:
             return self.memory_usage_patterns[batch_size]
@@ -145,7 +145,7 @@ class EnhancedGPUOptimizer:
         self.history_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Performance profiles
-        self.profiles: Dict[str, ResourceProfile] = {}
+        self.profiles: dict[str, ResourceProfile] = {}
         self.performance_history: deque = deque(maxlen=5000)
 
         # Optimization state
@@ -172,7 +172,7 @@ class EnhancedGPUOptimizer:
         save_thread.start()
 
     def get_optimized_allocation(self, agent_name: str, model_type: str,
-                               requested_memory_gb: float) -> Dict[str, Any]:
+                               requested_memory_gb: float) -> dict[str, Any]:
         """
         Get optimized GPU allocation parameters
 
@@ -317,7 +317,7 @@ class EnhancedGPUOptimizer:
         """Constrain batch size within reasonable bounds"""
         return max(min_size, min(max_size, batch_size))
 
-    def _get_gpu_status(self) -> Dict[str, float]:
+    def _get_gpu_status(self) -> dict[str, float]:
         """Get current GPU status"""
         try:
             if GPU_AVAILABLE and torch.cuda.is_available():
@@ -368,7 +368,7 @@ class EnhancedGPUOptimizer:
 
         return (size_confidence + consistency_confidence) / 2.0
 
-    def get_optimization_stats(self) -> Dict[str, Any]:
+    def get_optimization_stats(self) -> dict[str, Any]:
         """Get optimization statistics"""
         total_records = len(self.performance_history)
         successful_records = len([r for r in self.performance_history if r.success])
@@ -400,7 +400,7 @@ class EnhancedGPUOptimizer:
         """Load historical performance data"""
         try:
             if self.history_file.exists():
-                with open(self.history_file, 'r') as f:
+                with open(self.history_file) as f:
                     data = json.load(f)
 
                 # Restore performance records
@@ -444,7 +444,7 @@ class EnhancedGPUOptimizer:
             logger.error(f"Failed to save optimization history: {e}")
 
 # Global optimizer instance
-_optimizer: Optional[EnhancedGPUOptimizer] = None
+_optimizer: EnhancedGPUOptimizer | None = None
 _optimizer_lock = threading.Lock()
 
 def get_gpu_optimizer() -> EnhancedGPUOptimizer:
@@ -455,7 +455,7 @@ def get_gpu_optimizer() -> EnhancedGPUOptimizer:
             _optimizer = EnhancedGPUOptimizer()
         return _optimizer
 
-def optimize_gpu_allocation(agent_name: str, model_type: str, memory_gb: float) -> Dict[str, Any]:
+def optimize_gpu_allocation(agent_name: str, model_type: str, memory_gb: float) -> dict[str, Any]:
     """Get optimized GPU allocation parameters"""
     optimizer = get_gpu_optimizer()
     return optimizer.get_optimized_allocation(agent_name, model_type, memory_gb)
@@ -471,7 +471,7 @@ def record_gpu_performance(agent_name: str, model_type: str, batch_size: int,
         processing_time_seconds, items_processed, gpu_utilization_percent, success
     )
 
-def get_optimization_stats() -> Dict[str, Any]:
+def get_optimization_stats() -> dict[str, Any]:
     """Get optimization statistics"""
     optimizer = get_gpu_optimizer()
     return optimizer.get_optimization_stats()

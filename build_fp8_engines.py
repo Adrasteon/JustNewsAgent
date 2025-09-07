@@ -5,8 +5,9 @@ Creates optimized TensorRT engines for sentiment and bias analysis models
 """
 
 import json
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, timezone
+
 
 def create_fp8_tensorrt_engine(model_name: str, task: str, engines_dir: Path):
     """Create a TensorRT engine marker with FP8 precision metadata"""
@@ -19,7 +20,7 @@ def create_fp8_tensorrt_engine(model_name: str, task: str, engines_dir: Path):
         f.write(f"TensorRT FP8 Engine for {model_name}\n")
         f.write(f"Task: {task}\n")
         f.write("Precision: FP8\n")
-        f.write(f"Created: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Created: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S')}\n")
         f.write("Status: Ready for FP8 inference\n")
         f.write("Note: This is a marker file. Actual engine compilation requires TensorRT-LLM\n")
 
@@ -28,7 +29,7 @@ def create_fp8_tensorrt_engine(model_name: str, task: str, engines_dir: Path):
         "task": task,
         "model": model_name,
         "precision": "fp8",
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "max_batch_size": 32,
         "sequence_length": 512,
         "num_classes": 3 if task == "sentiment" else 2,

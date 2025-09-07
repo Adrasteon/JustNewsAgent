@@ -3,19 +3,19 @@ User authentication and authorization models for JustNewsAgent
 Provides JWT-based authentication with role-based access control
 """
 
-import os
-from common.observability import get_logger
 import hashlib
+import os
 import secrets
-
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
-from typing import Optional, List
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+
+import jwt
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
-import jwt
 from pydantic import BaseModel, EmailStr
+
+from common.observability import get_logger
 
 # Authentication Database Configuration (separate from main app database)
 AUTH_POSTGRES_HOST = os.environ.get("AUTH_POSTGRES_HOST", "localhost")
@@ -28,7 +28,7 @@ AUTH_POOL_MIN_CONNECTIONS = int(os.environ.get("AUTH_DB_POOL_MIN_CONNECTIONS", "
 AUTH_POOL_MAX_CONNECTIONS = int(os.environ.get("AUTH_DB_POOL_MAX_CONNECTIONS", "5"))
 
 # Authentication connection pool (separate from main app pool)
-_auth_connection_pool: Optional[pool.ThreadedConnectionPool] = None
+_auth_connection_pool: pool.ThreadedConnectionPool | None = None
 
 logger = get_logger(__name__)
 
@@ -105,7 +105,7 @@ def get_auth_db_cursor(commit: bool = False):
         finally:
             cursor.close()
 
-def auth_execute_query(query: str, params: tuple = None, fetch: bool = True) -> Optional[list]:
+def auth_execute_query(query: str, params: tuple = None, fetch: bool = True) -> list | None:
     """
     Execute an authentication database query with automatic connection management.
 
@@ -123,7 +123,7 @@ def auth_execute_query(query: str, params: tuple = None, fetch: bool = True) -> 
             return cursor.fetchall()
         return None
 
-def auth_execute_query_single(query: str, params: tuple = None, commit: bool = False) -> Optional[dict]:
+def auth_execute_query_single(query: str, params: tuple = None, commit: bool = False) -> dict | None:
     """
     Execute an authentication query and return a single result row.
 
@@ -162,7 +162,7 @@ class UserStatus(str, Enum):
 
 class User(BaseModel):
     """User model"""
-    user_id: Optional[int] = None
+    user_id: int | None = None
     email: EmailStr
     username: str
     full_name: str
@@ -170,11 +170,11 @@ class User(BaseModel):
     status: UserStatus = UserStatus.PENDING
     hashed_password: str
     salt: str
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    last_login: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    last_login: datetime | None = None
     login_attempts: int = 0
-    locked_until: Optional[datetime] = None
+    locked_until: datetime | None = None
 
 class UserCreate(BaseModel):
     """User creation model"""
@@ -203,7 +203,7 @@ class TokenData(BaseModel):
     username: str
     email: str
     role: UserRole
-    exp: Optional[datetime] = None
+    exp: datetime | None = None
 
 class PasswordResetRequest(BaseModel):
     """Password reset request model"""
@@ -214,7 +214,7 @@ class PasswordReset(BaseModel):
     token: str
     new_password: str
 
-def hash_password(password: str, salt: Optional[str] = None) -> tuple[str, str]:
+def hash_password(password: str, salt: str | None = None) -> tuple[str, str]:
     """Hash a password with salt"""
     if salt is None:
         salt = secrets.token_hex(16)
@@ -234,13 +234,13 @@ def verify_password(password: str, hashed_password: str, salt: str) -> bool:
     computed_hash, _ = hash_password(password, salt)
     return secrets.compare_digest(computed_hash, hashed_password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Create JWT access token"""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(UTC) + timedelta(minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode.update({"exp": expire, "type": "access"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
@@ -249,12 +249,12 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 def create_refresh_token(data: dict) -> str:
     """Create JWT refresh token"""
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
     to_encode.update({"exp": expire, "type": "refresh"})
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     return encoded_jwt
 
-def verify_token(token: str, token_type: str = "access") -> Optional[TokenData]:
+def verify_token(token: str, token_type: str = "access") -> TokenData | None:
     """Verify and decode JWT token"""
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
@@ -336,7 +336,7 @@ def create_user_tables():
     for query in queries:
         auth_execute_query(query, fetch=False)
 
-def get_user_by_username_or_email(username_or_email: str) -> Optional[dict]:
+def get_user_by_username_or_email(username_or_email: str) -> dict | None:
     """Get user by username or email"""
     query = """
     SELECT user_id, email, username, full_name, role, status, hashed_password, salt,
@@ -347,7 +347,7 @@ def get_user_by_username_or_email(username_or_email: str) -> Optional[dict]:
     result = auth_execute_query_single(query, (username_or_email, username_or_email))
     return result
 
-def get_user_by_id(user_id: int) -> Optional[dict]:
+def get_user_by_id(user_id: int) -> dict | None:
     """Get user by ID"""
     query = """
     SELECT user_id, email, username, full_name, role, status, hashed_password, salt,
@@ -358,7 +358,7 @@ def get_user_by_id(user_id: int) -> Optional[dict]:
     result = auth_execute_query_single(query, (user_id,))
     return result
 
-def create_user(user_data: UserCreate) -> Optional[int]:
+def create_user(user_data: UserCreate) -> int | None:
     """Create a new user"""
     hashed_password, salt = hash_password(user_data.password)
 
@@ -440,7 +440,7 @@ def deactivate_user(user_id: int) -> bool:
 def store_refresh_token(user_id: int, refresh_token: str) -> bool:
     """Store refresh token in database"""
     token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
-    expires_at = datetime.now(timezone.utc) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
+    expires_at = datetime.now(UTC) + timedelta(days=JWT_REFRESH_TOKEN_EXPIRE_DAYS)
 
     query = """
     INSERT INTO user_sessions (user_id, refresh_token_hash, expires_at)
@@ -452,7 +452,7 @@ def store_refresh_token(user_id: int, refresh_token: str) -> bool:
     except Exception:
         return False
 
-def validate_refresh_token(refresh_token: str) -> Optional[int]:
+def validate_refresh_token(refresh_token: str) -> int | None:
     """Validate refresh token and return user_id if valid"""
     token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
 
@@ -489,7 +489,7 @@ def create_password_reset_token(user_id: int) -> str:
     """Create a password reset token"""
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode()).hexdigest()
-    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+    expires_at = datetime.now(UTC) + timedelta(hours=1)
 
     query = """
     INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
@@ -498,7 +498,7 @@ def create_password_reset_token(user_id: int) -> str:
     auth_execute_query(query, (user_id, token_hash, expires_at), fetch=False)
     return token
 
-def validate_password_reset_token(token: str) -> Optional[int]:
+def validate_password_reset_token(token: str) -> int | None:
     """Validate password reset token and return user_id if valid"""
     token_hash = hashlib.sha256(token.encode()).hexdigest()
 
@@ -533,7 +533,7 @@ def update_user_password(user_id: int, new_password: str) -> bool:
     auth_execute_query(query, (hashed_password, salt, user_id), fetch=False)
     return True
 
-def get_all_users(limit: int = 100, offset: int = 0) -> List[dict]:
+def get_all_users(limit: int = 100, offset: int = 0) -> list[dict]:
     """Get all users with pagination"""
     query = """
     SELECT user_id, email, username, full_name, role, status, created_at, updated_at, last_login

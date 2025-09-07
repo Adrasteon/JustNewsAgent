@@ -11,21 +11,23 @@ Features:
 """
 
 
-from datetime import datetime
 import contextlib
+from datetime import datetime
+
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
-import uvicorn
+
+from .gpu_manager_production import get_gpu_manager
 
 # Import monitoring components
 from .gpu_monitoring_enhanced import (
-    get_metrics_collector,
     get_gpu_dashboard,
     get_gpu_trends,
+    get_metrics_collector,
     start_gpu_monitoring,
-    stop_gpu_monitoring
+    stop_gpu_monitoring,
 )
-from .gpu_manager_production import get_gpu_manager
 
 logger = get_logger(__name__)
 

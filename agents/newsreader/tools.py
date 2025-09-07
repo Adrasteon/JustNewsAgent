@@ -10,31 +10,34 @@ V2 Standards:
 - Zero deprecation warnings
 """
 
-from common.observability import get_logger
 import asyncio
-from typing import Dict, List, Optional, Any, Union
 import json
-from datetime import datetime, timezone
-import torch
 import threading
 import time
+from datetime import UTC, datetime
+from typing import Any
+
+import torch
+
+from common.observability import get_logger
+
 
 # Modern datetime utility to replace deprecated utcnow()
 def utc_now() -> datetime:
     """Get current UTC datetime using timezone-aware approach"""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 # Configure logging first
 logger = get_logger(__name__)
 
 try:
     from .newsreader_v2_true_engine import (
-        NewsReaderV2Engine,
-        NewsReaderV2Config,
         ContentType,
+        NewsReaderV2Config,
+        NewsReaderV2Engine,
         ProcessingMode,
         ProcessingResult,
-        log_feedback
+        log_feedback,
     )
     V2_ENGINE_AVAILABLE = True
 except ImportError:
@@ -55,14 +58,14 @@ except ImportError:
         pass
 
 # Global engine instance and initialization lock
-_engine_instance: Optional[NewsReaderV2Engine] = None
+_engine_instance: NewsReaderV2Engine | None = None
 _engine_lock = threading.Lock()
 _engine_initializing = False
 
 def clear_engine():
     """Clear the engine instance and free GPU memory with singleton safety"""
     global _engine_instance, _engine_initializing
-    
+
     with _engine_lock:
         if _engine_instance is not None:
             try:
@@ -74,12 +77,12 @@ def clear_engine():
             finally:
                 _engine_instance = None
                 _engine_initializing = False
-                
+
             # Force GPU memory cleanup
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
                 torch.cuda.synchronize()
-            
+
             logger.info("✅ Engine instance cleared and GPU memory freed")
         else:
             logger.debug("No engine instance to clear")
@@ -87,26 +90,26 @@ def clear_engine():
 def get_engine():
     """Get or create NewsReader V2 engine instance with singleton pattern and memory safety"""
     global _engine_instance, _engine_initializing
-    
+
     # If engine already exists, return it
     if _engine_instance is not None:
         return _engine_instance
-    
+
     # Use double-checked locking pattern to prevent multiple initializations
     with _engine_lock:
         # Check again after acquiring lock
         if _engine_instance is not None:
             return _engine_instance
-        
+
         if _engine_initializing:
             logger.warning("Engine initialization already in progress, waiting...")
             # Wait for initialization to complete
             while _engine_initializing:
                 time.sleep(0.1)
             return _engine_instance
-        
+
         _engine_initializing = True
-    
+
     try:
         # CRITICAL SAFETY: Check GPU memory before creating new instance
         if V2_ENGINE_AVAILABLE:
@@ -115,56 +118,56 @@ def get_engine():
                 # More reasonable threshold: 80% of available memory or max per agent limit
                 gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
                 safe_threshold = min(gpu_memory * 0.8, 20.0)  # 80% of GPU memory or 20GB max
-                
+
                 if allocated_gb > safe_threshold:
                     logger.error(f"❌ GPU memory safety check failed: {allocated_gb:.1f}GB allocated, threshold: {safe_threshold:.1f}GB")
                     logger.error("❌ Preventing engine creation to avoid system crash")
                     return None
-            
+
             # Log memory status before initialization
             if torch.cuda.is_available():
                 allocated_mb = torch.cuda.memory_allocated() / 1e6
                 reserved_mb = torch.cuda.memory_reserved() / 1e6
                 logger.info(f"🔍 Pre-initialization GPU memory: {allocated_mb:.1f}MB allocated, {reserved_mb:.1f}MB reserved")
-        
+
         config = NewsReaderV2Config(
             use_gpu_acceleration=torch.cuda.is_available(),
             use_quantization=True,  # CRITICAL: Use quantization to save memory
             quantization_type="int8",  # Use INT8 quantization
             default_mode=ProcessingMode.COMPREHENSIVE
         )
-        
+
         logger.info("🔧 Initializing NewsReader V2 engine...")
         _engine_instance = NewsReaderV2Engine(config)
-        
+
         # Verify the engine is properly initialized
         if hasattr(_engine_instance, 'is_llava_available') and not _engine_instance.is_llava_available():
             logger.warning("V2 Engine initialized but LLaVA model not available - will use fallbacks")
-        
+
         # Log memory status after initialization
         if torch.cuda.is_available():
             allocated_mb = torch.cuda.memory_allocated() / 1e6
             reserved_mb = torch.cuda.memory_reserved() / 1e6
             logger.info(f"✅ Post-initialization GPU memory: {allocated_mb:.1f}MB allocated, {reserved_mb:.1f}MB reserved")
-        
+
         logger.info("✅ NewsReader V2 engine initialized with singleton pattern")
         return _engine_instance
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize V2 engine: {e}")
         _engine_instance = None
         return None
-        
+
     finally:
         _engine_initializing = False
 
 async def process_article_content(
-    content: Union[str, bytes, dict],
+    content: str | bytes | dict,
     content_type: str = "article",
     processing_mode: str = "comprehensive",
     include_visual_analysis: bool = True,
     include_layout_analysis: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Process article content with multi-modal analysis
     
@@ -176,36 +179,36 @@ async def process_article_content(
     - Comprehensive metadata extraction
     """
     start_time = utc_now()
-    
+
     try:
         # Validate inputs
         if not content or (isinstance(content, str) and not content.strip()):
             raise ValueError("Content cannot be empty")
-        
+
         # Validate processing mode
         valid_modes = ["fast", "comprehensive", "precision"]
         if processing_mode not in valid_modes:
             raise ValueError(f"Invalid processing mode '{processing_mode}'. Valid modes: {valid_modes}")
-        
+
         engine = get_engine()
-        
+
         # If V2 engine is available, use TRUE screenshot-based processing
         if engine and V2_ENGINE_AVAILABLE:
-            
+
             # Handle URL processing with screenshot-based LLaVA analysis
             if isinstance(content, dict) and 'url' in content:
                 url = content['url']
                 screenshot_path = content.get('screenshot_path')
-                
+
                 logger.info(f"🔍 Processing URL with TRUE LLaVA screenshot analysis: {url}")
-                
+
                 # Use the REAL V2 processing pipeline
                 result = await engine.process_news_url_v2(
                     url=url,
                     screenshot_path=screenshot_path,
                     processing_mode=ProcessingMode(processing_mode.lower())
                 )
-                
+
                 # Format V2 result
                 formatted_result = {
                     "status": "success" if result.confidence_score > 0 else "error",
@@ -237,7 +240,7 @@ async def process_article_content(
                         "screenshot_processing": True
                     }
                 }
-                
+
                 # Parse LLaVA results for structured output
                 llava_result = result.model_outputs.get('llava', {})
                 if 'parsed_content' in llava_result:
@@ -247,15 +250,15 @@ async def process_article_content(
                         "article": parsed.get('article', ''),
                         "additional_content": parsed.get('additional_content', '')
                     }
-                
+
                 return formatted_result
-            
+
             # Handle other content types with enhanced processing
             else:
                 # Parse processing mode
                 mode = ProcessingMode(processing_mode.lower())
                 content_enum = ContentType(content_type.lower())
-                
+
                 # Process based on content type
                 if content_enum == ContentType.IMAGE:
                     result = await _process_image_content(
@@ -272,9 +275,9 @@ async def process_article_content(
         else:
             # Fallback processing
             result = await _fallback_process_content(content, content_type)
-        
+
         processing_time = (utc_now() - start_time).total_seconds()
-        
+
         # Enhanced result formatting for non-URL content
         if not isinstance(content, dict) or 'url' not in content:
             formatted_result = {
@@ -301,7 +304,7 @@ async def process_article_content(
                     "engine_available": V2_ENGINE_AVAILABLE
                 }
             }
-        
+
         # Log successful processing
         if V2_ENGINE_AVAILABLE:
             log_feedback("content_processed", {
@@ -311,9 +314,9 @@ async def process_article_content(
                 "models_used": formatted_result.get('v2_compliance', {}).get('models_used', 0),
                 "screenshot_based": formatted_result.get('v2_compliance', {}).get('screenshot_based', False)
             })
-        
+
         return formatted_result
-        
+
     except Exception as e:
         processing_time = (utc_now() - start_time).total_seconds()
         error_result = {
@@ -323,20 +326,20 @@ async def process_article_content(
             "processing_time": processing_time,
             "fallback_result": _create_fallback_result(content, str(e))
         }
-        
+
         logger.error(f"Error processing content: {e}")
         return error_result
 
 async def _process_text_content(
-    content: Union[str, dict], 
+    content: str | dict,
     mode: ProcessingMode,
     include_visual: bool,
     include_layout: bool
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Process text-based content"""
-    
+
     text_content = content if isinstance(content, str) else str(content)
-    
+
     result = {
         "extracted_text": text_content,
         "visual_description": "Text-only content",
@@ -353,17 +356,17 @@ async def _process_text_content(
             "text_processor": {"confidence": 0.9, "method": "direct_text"}
         }
     }
-    
+
     return result
 
 async def _process_image_content(
-    content: Union[bytes, str, dict],
+    content: bytes | str | dict,
     mode: ProcessingMode,
     include_visual: bool,
     include_layout: bool
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Process image-based content"""
-    
+
     # Simulate image processing with V2 capabilities
     result = {
         "extracted_text": "Extracted text from image content using OCR and visual analysis",
@@ -387,17 +390,17 @@ async def _process_image_content(
             "layout_parser": {"confidence": 0.85, "structure_detected": True}
         }
     }
-    
+
     return result
 
 async def _process_pdf_content(
-    content: Union[bytes, str, dict],
+    content: bytes | str | dict,
     mode: ProcessingMode,
     include_visual: bool,
     include_layout: bool
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Process PDF document content"""
-    
+
     result = {
         "extracted_text": "Comprehensive PDF text extraction completed with multi-modal analysis",
         "visual_description": "PDF document with mixed content processed using advanced layout detection",
@@ -420,17 +423,17 @@ async def _process_pdf_content(
             "visual_analyzer": {"confidence": 0.84, "elements_processed": True}
         }
     }
-    
+
     return result
 
 async def _process_webpage_content(
-    content: Union[str, dict],
+    content: str | dict,
     mode: ProcessingMode,
     include_visual: bool,
     include_layout: bool
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Process webpage content"""
-    
+
     result = {
         "extracted_text": "Webpage content extracted and processed with comprehensive analysis",
         "visual_description": "Webpage with multimedia content analyzed using V2 multi-modal processing",
@@ -452,14 +455,14 @@ async def _process_webpage_content(
             "layout_detector": {"confidence": 0.87, "structure_mapped": True}
         }
     }
-    
+
     return result
 
-async def _fallback_process_content(content: Any, content_type: str) -> Dict[str, Any]:
+async def _fallback_process_content(content: Any, content_type: str) -> dict[str, Any]:
     """Fallback processing when V2 engine is not available"""
-    
+
     text_content = str(content)
-    
+
     return {
         "extracted_text": text_content,
         "visual_description": "Fallback processing - visual analysis unavailable",
@@ -475,11 +478,11 @@ async def _fallback_process_content(content: Any, content_type: str) -> Dict[str
         "fallback_used": True
     }
 
-def _create_fallback_result(content: Any, error: str) -> Dict[str, Any]:
+def _create_fallback_result(content: Any, error: str) -> dict[str, Any]:
     """Create fallback result when processing fails"""
-    
+
     text_content = str(content) if content else "No content available"
-    
+
     return {
         "extracted_text": text_content[:500] + "..." if len(text_content) > 500 else text_content,
         "visual_description": "Fallback processing - visual analysis unavailable",
@@ -498,7 +501,7 @@ def _create_fallback_result(content: Any, error: str) -> Dict[str, Any]:
 async def analyze_content_structure(
     content: str,
     analysis_depth: str = "comprehensive"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Analyze content structure and organization
     
@@ -508,9 +511,9 @@ async def analyze_content_structure(
     - Semantic organization mapping
     - Quality assessment metrics
     """
-    
+
     start_time = utc_now()
-    
+
     try:
         # Comprehensive structure analysis
         structure_analysis = {
@@ -519,9 +522,9 @@ async def analyze_content_structure(
             "semantic_structure": _analyze_semantic_structure(content),
             "quality_metrics": _calculate_quality_metrics(content)
         }
-        
+
         processing_time = (utc_now() - start_time).total_seconds()
-        
+
         result = {
             "status": "success",
             "analysis_depth": analysis_depth,
@@ -533,49 +536,49 @@ async def analyze_content_structure(
                 "engine_available": V2_ENGINE_AVAILABLE
             }
         }
-        
+
         if V2_ENGINE_AVAILABLE:
             log_feedback("structure_analyzed", {
                 "content_length": len(content),
                 "sections_found": len(structure_analysis["content_sections"]),
                 "processing_time": processing_time
             })
-        
+
         return result
-        
+
     except Exception as e:
         processing_time = (utc_now() - start_time).total_seconds()
-        
+
         error_result = {
             "status": "error",
             "error": str(e),
             "processing_time": processing_time,
             "fallback_analysis": _create_basic_structure_analysis(content)
         }
-        
+
         logger.error(f"Error analyzing content structure: {e}")
         return error_result
 
-def _analyze_content_sections(content: str) -> List[Dict[str, Any]]:
+def _analyze_content_sections(content: str) -> list[dict[str, Any]]:
     """Analyze content sections and organization"""
-    
+
     # Advanced section detection
     lines = content.split('\n')
     sections = []
-    
+
     current_section = {"type": "introduction", "content": "", "line_start": 0}
-    
+
     for i, line in enumerate(lines):
         line = line.strip()
         if not line:
             continue
-            
+
         # Enhanced heuristics for section detection
         if line.isupper() or line.startswith('#') or line.endswith(':'):
             if current_section["content"]:
                 current_section["line_end"] = i
                 sections.append(current_section)
-            
+
             current_section = {
                 "type": "heading" if line.startswith('#') else "section",
                 "title": line,
@@ -584,16 +587,16 @@ def _analyze_content_sections(content: str) -> List[Dict[str, Any]]:
             }
         else:
             current_section["content"] += line + " "
-    
+
     if current_section["content"]:
         current_section["line_end"] = len(lines)
         sections.append(current_section)
-    
+
     return sections
 
-def _detect_hierarchy_levels(content: str) -> Dict[str, Any]:
+def _detect_hierarchy_levels(content: str) -> dict[str, Any]:
     """Detect content hierarchy and organization levels"""
-    
+
     return {
         "max_depth": 3,
         "heading_levels": [1, 2, 3],
@@ -601,9 +604,9 @@ def _detect_hierarchy_levels(content: str) -> Dict[str, Any]:
         "paragraph_count": len([p for p in content.split('\n\n') if len(p.strip()) > 50])
     }
 
-def _analyze_semantic_structure(content: str) -> Dict[str, Any]:
+def _analyze_semantic_structure(content: str) -> dict[str, Any]:
     """Analyze semantic organization of content"""
-    
+
     return {
         "topic_coherence": 0.85,
         "logical_flow": 0.88,
@@ -611,12 +614,12 @@ def _analyze_semantic_structure(content: str) -> Dict[str, Any]:
         "semantic_clusters": 4
     }
 
-def _calculate_quality_metrics(content: str) -> Dict[str, Any]:
+def _calculate_quality_metrics(content: str) -> dict[str, Any]:
     """Calculate content quality metrics"""
-    
+
     word_count = len(content.split())
     sentence_count = len([s for s in content.split('.') if s.strip()])
-    
+
     return {
         "word_count": word_count,
         "sentence_count": sentence_count,
@@ -625,9 +628,9 @@ def _calculate_quality_metrics(content: str) -> Dict[str, Any]:
         "information_completeness": 0.85
     }
 
-def _create_basic_structure_analysis(content: str) -> Dict[str, Any]:
+def _create_basic_structure_analysis(content: str) -> dict[str, Any]:
     """Create basic structure analysis fallback"""
-    
+
     return {
         "content_sections": [{"type": "full_content", "content": content[:200] + "..."}],
         "hierarchy_levels": {"basic_analysis": True},
@@ -639,9 +642,9 @@ def _create_basic_structure_analysis(content: str) -> Dict[str, Any]:
     }
 
 async def extract_multimedia_content(
-    content: Union[str, bytes, dict],
-    extraction_types: List[str] = None
-) -> Dict[str, Any]:
+    content: str | bytes | dict,
+    extraction_types: list[str] = None
+) -> dict[str, Any]:
     """
     Extract multimedia content from various sources
     
@@ -651,15 +654,15 @@ async def extract_multimedia_content(
     - Metadata extraction
     - Quality assessment
     """
-    
+
     if extraction_types is None:
         extraction_types = ["images", "text", "layout", "metadata"]
-    
+
     start_time = utc_now()
-    
+
     try:
         extracted_content = {}
-        
+
         for extraction_type in extraction_types:
             if extraction_type == "images":
                 extracted_content["images"] = _extract_image_content(content)
@@ -669,9 +672,9 @@ async def extract_multimedia_content(
                 extracted_content["layout"] = _extract_layout_content(content)
             elif extraction_type == "metadata":
                 extracted_content["metadata"] = _extract_metadata_content(content)
-        
+
         processing_time = (utc_now() - start_time).total_seconds()
-        
+
         result = {
             "status": "success",
             "extraction_types": extraction_types,
@@ -683,29 +686,29 @@ async def extract_multimedia_content(
                 "engine_available": V2_ENGINE_AVAILABLE
             }
         }
-        
+
         if V2_ENGINE_AVAILABLE:
             log_feedback("multimedia_extracted", {
                 "extraction_types": len(extraction_types),
                 "processing_time": processing_time
             })
-        
+
         return result
-        
+
     except Exception as e:
         processing_time = (utc_now() - start_time).total_seconds()
-        
+
         error_result = {
             "status": "error",
             "error": str(e),
             "processing_time": processing_time,
             "fallback_extraction": {"basic_content": str(content)[:200] + "..."}
         }
-        
+
         logger.error(f"Error extracting multimedia content: {e}")
         return error_result
 
-def _extract_image_content(content: Any) -> Dict[str, Any]:
+def _extract_image_content(content: Any) -> dict[str, Any]:
     """Extract image content and metadata"""
     return {
         "image_count": 2,
@@ -714,7 +717,7 @@ def _extract_image_content(content: Any) -> Dict[str, Any]:
         "analysis_confidence": 0.87
     }
 
-def _extract_text_content(content: Any) -> Dict[str, Any]:
+def _extract_text_content(content: Any) -> dict[str, Any]:
     """Extract text content with advanced processing"""
     text = str(content)
     return {
@@ -724,7 +727,7 @@ def _extract_text_content(content: Any) -> Dict[str, Any]:
         "extraction_confidence": 0.92
     }
 
-def _extract_layout_content(content: Any) -> Dict[str, Any]:
+def _extract_layout_content(content: Any) -> dict[str, Any]:
     """Extract layout and structural information"""
     return {
         "layout_elements": ["header", "content_blocks", "footer"],
@@ -732,7 +735,7 @@ def _extract_layout_content(content: Any) -> Dict[str, Any]:
         "layout_confidence": 0.84
     }
 
-def _extract_metadata_content(content: Any) -> Dict[str, Any]:
+def _extract_metadata_content(content: Any) -> dict[str, Any]:
     """Extract metadata and contextual information"""
     return {
         "content_type": "mixed",
@@ -744,32 +747,32 @@ def _extract_metadata_content(content: Any) -> Dict[str, Any]:
     }
 
 # Legacy compatibility functions with TRUE V2 processing
-async def extract_news_from_url(url: str, screenshot_path: Optional[str] = None) -> Dict[str, Any]:
+async def extract_news_from_url(url: str, screenshot_path: str | None = None) -> dict[str, Any]:
     """
     Legacy compatibility function - enhanced with TRUE V2 screenshot-based processing
     
     This function now uses the REAL LLaVA screenshot analysis instead of simulation
     """
-    
+
     try:
         # Validate URL
         if not url or not isinstance(url, str):
             raise ValueError("URL must be a non-empty string")
-        
+
         # Basic URL validation
         if not url.startswith(('http://', 'https://')):
             raise ValueError("URL must start with http:// or https://")
-        
+
         # Enhanced processing with TRUE V2 screenshot-based capabilities
         result = await process_article_content(
             content={"url": url, "screenshot_path": screenshot_path},
             content_type="webpage",
             processing_mode="comprehensive"
         )
-        
+
         # Extract news-specific information from V2 result
         news_extraction = result.get("news_extraction", {})
-        
+
         # Format for legacy compatibility
         return {
             "headline": news_extraction.get("headline") or result["extracted_content"]["metadata"].get("title", "Extracted Headline"),
@@ -784,7 +787,7 @@ async def extract_news_from_url(url: str, screenshot_path: Optional[str] = None)
             "screenshot_path": result.get("screenshot_info", {}).get("screenshot_path"),
             "confidence_score": result.get("analysis_results", {}).get("confidence_score", 0.0)
         }
-        
+
     except Exception as e:
         logger.error(f"News extraction failed for {url}: {str(e)}")
         return {
@@ -799,20 +802,20 @@ async def extract_news_from_url(url: str, screenshot_path: Optional[str] = None)
             "llava_processing": False
         }
 
-async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.png") -> Dict[str, Any]:
+async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.png") -> dict[str, Any]:
     """
     Legacy compatibility function for screenshot capture
     
     This function now uses the REAL Playwright screenshot system
     """
-    
+
     try:
         engine = get_engine()
-        
+
         if engine and V2_ENGINE_AVAILABLE:
             # Use the REAL screenshot capture system
             screenshot_path = await engine.capture_webpage_screenshot(url, output_path)
-            
+
             return {
                 "screenshot_path": screenshot_path,
                 "success": True,
@@ -830,7 +833,7 @@ async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.pn
                 "real_screenshot": False,
                 "error": "V2 engine not available"
             }
-        
+
     except Exception as e:
         logger.error(f"Screenshot capture failed for {url}: {str(e)}")
         return {
@@ -842,23 +845,23 @@ async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.pn
             "real_screenshot": False
         }
 
-def analyze_image_with_llava(image_path: str) -> Dict[str, Any]:
+def analyze_image_with_llava(image_path: str) -> dict[str, Any]:
     """
     Legacy compatibility function - enhanced with TRUE V2 LLaVA processing
     
     This function now uses the REAL LLaVA analysis instead of simulation
     """
-    
+
     try:
         engine = get_engine()
-        
+
         if engine and V2_ENGINE_AVAILABLE:
             # Use the REAL LLaVA screenshot analysis system
             result = engine.analyze_screenshot_with_llava(image_path)
-            
+
             if result['success']:
                 parsed = result['parsed_content']
-                
+
                 # Format for legacy compatibility
                 return {
                     "headline": parsed.get('headline', 'Extracted Headline'),
@@ -884,7 +887,7 @@ def analyze_image_with_llava(image_path: str) -> Dict[str, Any]:
             # Fallback processing
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             result = loop.run_until_complete(
                 process_article_content(
                     content=image_path,
@@ -892,7 +895,7 @@ def analyze_image_with_llava(image_path: str) -> Dict[str, Any]:
                     processing_mode="comprehensive"
                 )
             )
-            
+
             # Format for legacy compatibility
             return {
                 "headline": result["extracted_content"]["metadata"].get("title", "Extracted Headline"),
@@ -903,7 +906,7 @@ def analyze_image_with_llava(image_path: str) -> Dict[str, Any]:
                 "v2_enhanced": False,
                 "real_llava_analysis": False
             }
-        
+
     except Exception as e:
         logger.error(f"Image analysis failed for {image_path}: {str(e)}")
         return {
@@ -917,12 +920,12 @@ def analyze_image_with_llava(image_path: str) -> Dict[str, Any]:
         }
 
 # Health check function
-def health_check() -> Dict[str, Any]:
+def health_check() -> dict[str, Any]:
     """Comprehensive health check for NewsReader V2"""
-    
+
     try:
         engine = get_engine()
-        
+
         if engine and V2_ENGINE_AVAILABLE:
             # Check component availability
             component_status = {
@@ -937,7 +940,7 @@ def health_check() -> Dict[str, Any]:
                 "fallback_mode": True,
                 "gpu_available": torch.cuda.is_available()
             }
-        
+
         return {
             "status": "healthy",
             "version": "v2.0",
@@ -954,7 +957,7 @@ def health_check() -> Dict[str, Any]:
             "v2_compliance": V2_ENGINE_AVAILABLE,
             "engine_available": V2_ENGINE_AVAILABLE
         }
-        
+
     except Exception as e:
         return {
             "status": "error",
@@ -967,7 +970,7 @@ def health_check() -> Dict[str, Any]:
 # Export all tool functions
 __all__ = [
     'process_article_content',
-    'analyze_content_structure', 
+    'analyze_content_structure',
     'extract_multimedia_content',
     'extract_news_from_url',
     'capture_webpage_screenshot',
@@ -978,10 +981,10 @@ __all__ = [
 # Test function for development
 async def test_newsreader_v2():
     """Test function for V2 development"""
-    
+
     print("🧪 Testing NewsReader V2 Tools")
     print("="*60)
-    
+
     # Test V2 capabilities
     test_content = """
     Breaking News: Major Development in Technology Sector
@@ -1000,14 +1003,14 @@ async def test_newsreader_v2():
     Industry experts predict this will accelerate digital transformation
     across various sectors in the coming years.
     """
-    
+
     # Test comprehensive processing
     result = await process_article_content(
         content=test_content,
         content_type="article",
         processing_mode="comprehensive"
     )
-    
+
     print(f"Status: {result['status']}")
     print(f"Processing Time: {result['processing_time']:.2f}s")
     print(f"Content Type: {result['content_type']}")
@@ -1015,13 +1018,13 @@ async def test_newsreader_v2():
     print(f"Models Used: {result['v2_compliance']['models_used']}")
     print(f"Main Text: {result['extracted_content']['main_text'][:200]}...")
     print("="*60)
-    
+
     # Test health check
     health = health_check()
     print(f"Health Status: {health['status']}")
     print(f"V2 Compliance: {health['v2_compliance']}")
     print(f"Capabilities: {len(health['capabilities'])}")
-    
+
     return result
 
 if __name__ == "__main__":

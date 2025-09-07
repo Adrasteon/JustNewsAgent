@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Compliance Audit Logging System
@@ -17,13 +18,12 @@ Features:
 
 import asyncio
 import json
-
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -54,18 +54,18 @@ class AuditEvent:
     event_type: AuditEventType
     severity: AuditEventSeverity
     timestamp: datetime
-    user_id: Optional[int]
-    user_email: Optional[str]
-    ip_address: Optional[str]
-    user_agent: Optional[str]
+    user_id: int | None
+    user_email: str | None
+    ip_address: str | None
+    user_agent: str | None
     resource_type: str
-    resource_id: Optional[str]
+    resource_id: str | None
     action: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     compliance_relevant: bool = False
-    gdpr_article: Optional[str] = None
+    gdpr_article: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage"""
         data = asdict(self)
         data['event_type'] = self.event_type.value
@@ -74,7 +74,7 @@ class AuditEvent:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'AuditEvent':
+    def from_dict(cls, data: dict[str, Any]) -> 'AuditEvent':
         """Create from dictionary"""
         data['event_type'] = AuditEventType(data['event_type'])
         data['severity'] = AuditEventSeverity(data['severity'])
@@ -122,16 +122,16 @@ class ComplianceAuditLogger:
         self,
         event_type: AuditEventType,
         severity: AuditEventSeverity,
-        user_id: Optional[int] = None,
-        user_email: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
+        user_id: int | None = None,
+        user_email: str | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
         resource_type: str = "unknown",
-        resource_id: Optional[str] = None,
+        resource_id: str | None = None,
         action: str = "unknown",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
         compliance_relevant: bool = False,
-        gdpr_article: Optional[str] = None
+        gdpr_article: str | None = None
     ):
         """Log a compliance audit event"""
         event = AuditEvent(
@@ -188,7 +188,7 @@ class ComplianceAuditLogger:
         )
 
     def log_data_access(self, user_id: int, user_email: str, resource_type: str,
-                       resource_id: str, ip_address: str, details: Dict[str, Any] = None):
+                       resource_id: str, ip_address: str, details: dict[str, Any] = None):
         """Log data access event"""
         self.log_event(
             event_type=AuditEventType.DATA_ACCESS,
@@ -204,7 +204,7 @@ class ComplianceAuditLogger:
 
     def log_data_modification(self, user_id: int, user_email: str, resource_type: str,
                             resource_id: str, action: str, ip_address: str,
-                            details: Dict[str, Any] = None):
+                            details: dict[str, Any] = None):
         """Log data modification event"""
         self.log_event(
             event_type=AuditEventType.DATA_MODIFICATION,
@@ -220,7 +220,7 @@ class ComplianceAuditLogger:
 
     def log_data_deletion(self, user_id: int, user_email: str, resource_type: str,
                          resource_id: str, ip_address: str, gdpr_compliant: bool = True,
-                         details: Dict[str, Any] = None):
+                         details: dict[str, Any] = None):
         """Log data deletion event"""
         self.log_event(
             event_type=AuditEventType.DATA_DELETION,
@@ -237,7 +237,7 @@ class ComplianceAuditLogger:
         )
 
     def log_data_export(self, user_id: int, user_email: str, export_id: str,
-                       ip_address: str, details: Dict[str, Any] = None):
+                       ip_address: str, details: dict[str, Any] = None):
         """Log data export event"""
         self.log_event(
             event_type=AuditEventType.DATA_EXPORT,
@@ -254,7 +254,7 @@ class ComplianceAuditLogger:
         )
 
     def log_retention_cleanup(self, data_type: str, records_deleted: int,
-                            cutoff_date: str, details: Dict[str, Any] = None):
+                            cutoff_date: str, details: dict[str, Any] = None):
         """Log data retention cleanup event"""
         self.log_event(
             event_type=AuditEventType.RETENTION_CLEANUP,
@@ -271,8 +271,8 @@ class ComplianceAuditLogger:
         )
 
     def log_security_event(self, event_type: str, severity: AuditEventSeverity,
-                          user_id: Optional[int], ip_address: str,
-                          details: Dict[str, Any] = None):
+                          user_id: int | None, ip_address: str,
+                          details: dict[str, Any] = None):
         """Log security-related event"""
         self.log_event(
             event_type=AuditEventType.SECURITY_EVENT,
@@ -292,7 +292,7 @@ class AuditLogAnalyzer:
     def __init__(self, audit_logger: ComplianceAuditLogger):
         self.audit_logger = audit_logger
 
-    def get_compliance_events(self, days: int = 30) -> List[Dict[str, Any]]:
+    def get_compliance_events(self, days: int = 30) -> list[dict[str, Any]]:
         """Get all compliance-relevant events from the last N days"""
         cutoff_date = datetime.now() - timedelta(days=days)
         events = []
@@ -300,7 +300,7 @@ class AuditLogAnalyzer:
         # Read all log files from the period
         for log_file in self.audit_logger.log_dir.glob("audit_*.jsonl"):
             try:
-                with open(log_file, 'r', encoding='utf-8') as f:
+                with open(log_file, encoding='utf-8') as f:
                     for line in f:
                         if line.strip():
                             event_data = json.loads(line)
@@ -314,7 +314,7 @@ class AuditLogAnalyzer:
 
         return events
 
-    def get_user_activity_report(self, user_id: int, days: int = 30) -> Dict[str, Any]:
+    def get_user_activity_report(self, user_id: int, days: int = 30) -> dict[str, Any]:
         """Generate activity report for a specific user"""
         cutoff_date = datetime.now() - timedelta(days=days)
         user_events = []
@@ -322,7 +322,7 @@ class AuditLogAnalyzer:
         # Read all log files from the period
         for log_file in self.audit_logger.log_dir.glob("audit_*.jsonl"):
             try:
-                with open(log_file, 'r', encoding='utf-8') as f:
+                with open(log_file, encoding='utf-8') as f:
                     for line in f:
                         if line.strip():
                             event_data = json.loads(line)
@@ -350,7 +350,7 @@ class AuditLogAnalyzer:
             "generated_at": datetime.now().isoformat()
         }
 
-    def get_gdpr_compliance_summary(self, days: int = 90) -> Dict[str, Any]:
+    def get_gdpr_compliance_summary(self, days: int = 90) -> dict[str, Any]:
         """Generate GDPR compliance summary"""
         events = self.get_compliance_events(days)
 

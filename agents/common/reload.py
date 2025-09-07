@@ -13,19 +13,20 @@ Usage:
 The endpoint accepts JSON: {"handlers": ["embedding_model"]} or {"all": true}
 and returns per-handler success/failure details.
 """
-from common.observability import get_logger
 from __future__ import annotations
 
-
 import traceback
-from typing import Callable, Dict, Any, List
+from collections.abc import Callable
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
 # Simple in-process registry of reload handlers
-_RELOAD_HANDLERS: Dict[str, Callable[[], Any]] = {}
+_RELOAD_HANDLERS: dict[str, Callable[[], Any]] = {}
 
 
 def register_reload_handler(name: str, fn: Callable[[], Any]) -> None:
@@ -55,7 +56,7 @@ def register_reload_endpoint(app: FastAPI, path: str = "/admin/reload") -> None:
         if not body:
             raise HTTPException(status_code=400, detail="Missing request body")
 
-        targets: List[str] = []
+        targets: list[str] = []
         if body.get("all"):
             targets = list(_RELOAD_HANDLERS.keys())
         else:

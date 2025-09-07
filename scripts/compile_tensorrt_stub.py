@@ -13,8 +13,8 @@ The marker files are text placeholders and do not require GPU or TensorRT.
 
 import argparse
 import json
-from pathlib import Path
 import time
+from pathlib import Path
 
 ENGINES_DIR = Path(__file__).parent.parent / "agents" / "analyst" / "tensorrt_engines"
 ENGINES_DIR.mkdir(parents=True, exist_ok=True)
@@ -69,7 +69,7 @@ def main():
             for name in ('native_sentiment_roberta', 'native_bias_bert'):
                 meta_path = ENGINES_DIR / f"{name}.json"
                 try:
-                    with open(meta_path, 'r', encoding='utf-8') as f:
+                    with open(meta_path, encoding='utf-8') as f:
                         meta = json.load(f)
                 except Exception:
                     meta = {}

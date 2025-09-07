@@ -4,7 +4,7 @@
 This avoids importing FastAPI/Pydantic in the test environment.
 """
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 manifest = Path('tests/tmp_manifest.json')
@@ -17,7 +17,7 @@ if queue_file.exists():
 record = {
     'manifest': str(manifest),
     'reason': 'paywalled_snapshot',
-    'received_at': datetime.now(timezone.utc).isoformat()
+    'received_at': datetime.now(UTC).isoformat()
 }
 with open(queue_file, 'a', encoding='utf-8') as f:
     f.write(json.dumps(record) + '\n')

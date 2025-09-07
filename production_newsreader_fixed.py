@@ -20,10 +20,12 @@ newsreader_path = Path(__file__).parent / "agents" / "newsreader" / "main_option
 sys.path.insert(0, str(newsreader_path))
 
 try:
-    from practical_newsreader_solution import PracticalNewsReader as ProductionNewsReader
+    from practical_newsreader_solution import (
+        PracticalNewsReader as ProductionNewsReader,
+    )
 except ImportError:
     # Fallback to the main newsreader agent
-    newsreader_agent_path = Path(__file__).parent / "agents" / "newsreader"  
+    newsreader_agent_path = Path(__file__).parent / "agents" / "newsreader"
     sys.path.insert(0, str(newsreader_agent_path))
     from newsreader_agent import PracticalNewsReader as ProductionNewsReader
 

@@ -13,7 +13,7 @@ unit tests.
 from __future__ import annotations
 
 from threading import Lock
-from typing import Any, Dict, Optional
+from typing import Any
 
 __all__ = [
     "request_agent_gpu",
@@ -33,7 +33,7 @@ class GPUModelManager:
 
     def __init__(self) -> None:
         self._lock = Lock()
-        self._registry: Dict[str, Any] = {}
+        self._registry: dict[str, Any] = {}
 
     def register_model(self, name: str, model: Any) -> None:
         """Register a model object under a name.
@@ -45,12 +45,12 @@ class GPUModelManager:
         with self._lock:
             self._registry[name] = model
 
-    def get(self, name: str) -> Optional[Any]:
+    def get(self, name: str) -> Any | None:
         """Return a registered model or None if not present."""
         with self._lock:
             return self._registry.get(name)
 
-    def __enter__(self) -> "GPUModelManager":
+    def __enter__(self) -> GPUModelManager:
         # No-op resource acquisition for the shim
         return self
 
@@ -60,7 +60,7 @@ class GPUModelManager:
 
 
 # Global, shared manager instance used by get_gpu_manager()
-_GLOBAL_MANAGER: Optional[GPUModelManager] = None
+_GLOBAL_MANAGER: GPUModelManager | None = None
 _GLOBAL_LOCK = Lock()
 
 
@@ -77,7 +77,7 @@ def get_gpu_manager() -> GPUModelManager:
         return _GLOBAL_MANAGER
 
 
-def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> Optional[int]:
+def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> int | None:
     """Request allocation of a GPU for an agent.
 
     This shim always returns GPU index 0 to indicate a (simulated)

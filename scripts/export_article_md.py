@@ -3,6 +3,7 @@
 Usage: python3 scripts/export_article_md.py <article_id> [output_path]
 """
 import sys
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
 

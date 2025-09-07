@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Consent Management System
@@ -15,11 +16,11 @@ Features:
 """
 
 
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
-from dataclasses import dataclass, asdict
-from enum import Enum
 import json
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any
 
 from agents.common.auth_models import auth_execute_query, auth_execute_query_single
 
@@ -49,14 +50,14 @@ class ConsentRecord:
     consent_type: ConsentType
     status: ConsentStatus
     granted_at: datetime
-    withdrawn_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    withdrawn_at: datetime | None = None
+    expires_at: datetime | None = None
     consent_version: str = "1.0"
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    details: dict[str, Any] | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage"""
         data = asdict(self)
         data['consent_type'] = self.consent_type.value
@@ -69,7 +70,7 @@ class ConsentRecord:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ConsentRecord':
+    def from_dict(cls, data: dict[str, Any]) -> 'ConsentRecord':
         """Create from dictionary"""
         data['consent_type'] = ConsentType(data['consent_type'])
         data['status'] = ConsentStatus(data['status'])
@@ -89,7 +90,7 @@ class ConsentPolicy:
     description: str
     required: bool = False
     default_granted: bool = False
-    expires_days: Optional[int] = None
+    expires_days: int | None = None
     version: str = "1.0"
     last_updated: datetime = None
 
@@ -97,7 +98,7 @@ class ConsentPolicy:
         if self.last_updated is None:
             self.last_updated = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data['consent_type'] = self.consent_type.value
@@ -116,7 +117,7 @@ class ConsentManager:
         self._ensure_consent_tables()
         logger.info("🛡️ Consent Manager initialized")
 
-    def _load_default_policies(self) -> Dict[ConsentType, ConsentPolicy]:
+    def _load_default_policies(self) -> dict[ConsentType, ConsentPolicy]:
         """Load default consent policies"""
         return {
             ConsentType.DATA_PROCESSING: ConsentPolicy(
@@ -254,7 +255,7 @@ class ConsentManager:
 
     def grant_consent(self, user_id: int, consent_type: ConsentType,
                      ip_address: str = None, user_agent: str = None,
-                     details: Dict[str, Any] = None) -> str:
+                     details: dict[str, Any] = None) -> str:
         """Grant user consent for a specific type"""
         consent_id = f"consent_{user_id}_{consent_type.value}_{int(datetime.now().timestamp())}"
 
@@ -317,7 +318,7 @@ class ConsentManager:
             return True
         return False
 
-    def get_user_consents(self, user_id: int) -> Dict[ConsentType, ConsentRecord]:
+    def get_user_consents(self, user_id: int) -> dict[ConsentType, ConsentRecord]:
         """Get all consents for a user"""
         query = """
         SELECT * FROM user_consents
@@ -376,7 +377,7 @@ class ConsentManager:
             ConsentStatus.GRANTED.value
         ), fetch=False)
 
-    def get_consent_summary(self, user_id: int) -> Dict[str, Any]:
+    def get_consent_summary(self, user_id: int) -> dict[str, Any]:
         """Get consent summary for a user"""
         user_consents = self.get_user_consents(user_id)
 
@@ -417,7 +418,7 @@ class ConsentManager:
 
         return summary
 
-    def get_consent_statistics(self) -> Dict[str, Any]:
+    def get_consent_statistics(self) -> dict[str, Any]:
         """Get system-wide consent statistics"""
         stats = {
             "total_users": 0,

@@ -13,18 +13,19 @@ Features:
 """
 
 import os
-from common.observability import get_logger
+import warnings
+from datetime import UTC, datetime
+from typing import Any
 
 import torch
-import warnings
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, Any
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
     TrainingArguments,
-    logging as transformers_logging
 )
+from transformers import logging as transformers_logging
+
+from common.observability import get_logger
 
 # Handle problematic imports with fallbacks
 try:
@@ -36,7 +37,7 @@ except ImportError:
         raise ImportError("Pipeline not available due to transformers/torchvision compatibility issue")
 
 try:
-    from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+    from transformers import LlavaNextForConditionalGeneration, LlavaNextProcessor
     LLAVA_AVAILABLE = True
 except ImportError:
     LLAVA_AVAILABLE = False
@@ -69,7 +70,11 @@ transformers_logging.set_verbosity_error()
 
 # Production GPU Manager integration
 try:
-    from agents.common.gpu_manager import request_agent_gpu, release_agent_gpu, get_gpu_manager
+    from agents.common.gpu_manager import (
+        get_gpu_manager,
+        release_agent_gpu,
+        request_agent_gpu,
+    )
     PRODUCTION_GPU_AVAILABLE = True
 except ImportError:
     PRODUCTION_GPU_AVAILABLE = False
@@ -78,20 +83,20 @@ logger = get_logger(__name__)
 
 class OptimizedNewsDataset(Dataset):
     """Custom dataset for fine-tuning news classification models"""
-    
-    def __init__(self, texts: List[str], labels: List[int], tokenizer, max_length: int = 512):
+
+    def __init__(self, texts: list[str], labels: list[int], tokenizer, max_length: int = 512):
         self.texts = texts
         self.labels = labels
         self.tokenizer = tokenizer
         self.max_length = max_length
-    
+
     def __len__(self):
         return len(self.texts)
-    
+
     def __getitem__(self, idx):
         text = str(self.texts[idx])
         label = self.labels[idx]
-        
+
         encoding = self.tokenizer(
             text,
             truncation=True,
@@ -99,7 +104,7 @@ class OptimizedNewsDataset(Dataset):
             max_length=self.max_length,
             return_tensors='pt'
         )
-        
+
         return {
             'input_ids': encoding['input_ids'].flatten(),
             'attention_mask': encoding['attention_mask'].flatten(),
@@ -120,8 +125,8 @@ class NextGenGPUScoutEngine:
     - Model training and fine-tuning
     - Production-ready warning suppression
     """
-    
-    def __init__(self, enable_training: bool = False, device: Optional[str] = None):
+
+    def __init__(self, enable_training: bool = False, device: str | None = None):
         """
         Initialize Next-Gen GPU Scout Engine with specialized models
         
@@ -134,11 +139,11 @@ class NextGenGPUScoutEngine:
         self.models = {}
         self.pipelines = {}
         self.processors = {}
-        
+
         # Enhanced model configurations for specialized tasks
         self.model_configs = {
             "news_classifier": {
-                "model_name": "google-bert/bert-base-uncased", 
+                "model_name": "google-bert/bert-base-uncased",
                 "task": "news_classification",
                 "revision": "main",  # Specify revision for production stability
                 "num_labels": 2,  # Binary: news/not-news
@@ -172,10 +177,10 @@ class NextGenGPUScoutEngine:
                 "batch_size": 1
             }
         }
-        
+
         # Initialize tokenizer storage
         self.tokenizers = {}
-        
+
         # Initialize GPU allocation for scout agent
         self.gpu_allocated = False
         self.gpu_device = None
@@ -212,22 +217,22 @@ class NextGenGPUScoutEngine:
                     self.device = 'cpu'
         else:
             logger.info("📋 Production GPU manager not available, using direct GPU access")
-        
+
         # Initialize specialized models
         logger.info(f"🚀 Initializing Next-Gen GPU Scout Engine on {self.device}")
         self._initialize_specialized_models()
-    
+
     def _initialize_specialized_models(self):
         """Initialize all specialized AI models for different tasks"""
-        
+
         try:
             # 1. News Classification Model (BERT-based) - Production Ready
             logger.info("🔥 Loading News Classification Model (BERT)...")
             news_config = self.model_configs["news_classifier"]
-            
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 try:
                     from agents.common.model_loader import load_transformers_model
                     model, tokenizer = load_transformers_model(
@@ -257,7 +262,7 @@ class NextGenGPUScoutEngine:
                         trust_remote_code=True,
                         use_fast=True  # Use fast tokenizer to avoid deprecation
                     )
-                
+
                 self.pipelines["news_classifier"] = pipeline(
                     "text-classification",
                     model=self.models["news_classifier"],
@@ -269,22 +274,22 @@ class NextGenGPUScoutEngine:
                     truncation=True,
                     max_length=512
                 )
-            
+
             logger.info("✅ News Classification Model loaded successfully")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load News Classification Model: {e}")
             self.models["news_classifier"] = None
             self.pipelines["news_classifier"] = None
-        
+
         try:
             # 2. Content Quality Assessment Model (BERT-based) - Production Ready
             logger.info("🔥 Loading Quality Assessment Model (BERT)...")
             quality_config = self.model_configs["quality_assessor"]
-            
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 try:
                     from agents.common.model_loader import load_transformers_model
                     model, tokenizer = load_transformers_model(
@@ -314,7 +319,7 @@ class NextGenGPUScoutEngine:
                         trust_remote_code=True,
                         use_fast=True
                     )
-                
+
                 self.pipelines["quality_assessor"] = pipeline(
                     "text-classification",
                     model=self.models["quality_assessor"],
@@ -326,22 +331,22 @@ class NextGenGPUScoutEngine:
                     truncation=True,
                     max_length=512
                 )
-            
+
             logger.info("✅ Quality Assessment Model loaded successfully")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load Quality Assessment Model: {e}")
             self.models["quality_assessor"] = None
             self.pipelines["quality_assessor"] = None
-        
+
         try:
             # 3. Sentiment Analysis Model (RoBERTa) - Production Ready
             logger.info("🔥 Loading Sentiment Analysis Model (RoBERTa)...")
             sentiment_config = self.model_configs["sentiment_analyzer"]
-            
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 if PIPELINE_AVAILABLE:
                     # Load sentiment analysis pipeline directly (optimized)
                     self.pipelines["sentiment_analyzer"] = pipeline(
@@ -355,29 +360,29 @@ class NextGenGPUScoutEngine:
                         truncation=True,
                         max_length=512
                     )
-                    
+
                     # Mark as loaded for tracking
                     self.models["sentiment_analyzer"] = True
                 else:
                     logger.warning("⚠️ Sentiment analysis pipeline not available due to transformers compatibility issue")
                     self.models["sentiment_analyzer"] = None
                     self.pipelines["sentiment_analyzer"] = None
-            
+
             if self.models["sentiment_analyzer"]:
                 logger.info("✅ Sentiment Analysis Model loaded successfully")
             else:
                 logger.warning("⚠️ Sentiment Analysis Model not available")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load Sentiment Analysis Model: {e}")
             self.models["sentiment_analyzer"] = None
             self.pipelines["sentiment_analyzer"] = None
-        
+
         try:
             # 4. Bias Detection Model (Specialized) - Production Ready
             logger.info("🔥 Loading Bias Detection Model (Specialized)...")
             bias_config = self.model_configs["bias_detector"]
-            
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 try:
@@ -431,22 +436,22 @@ class NextGenGPUScoutEngine:
                         truncation=True,
                         max_length=512
                     )
-            
+
             logger.info("✅ Bias Detection Model loaded successfully")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to load Bias Detection Model: {e}")
             self.models["bias_detector"] = None
             self.pipelines["bias_detector"] = None
-        
+
         try:
             # 5. Visual Analysis Model (LLaVA) - Production Ready
             logger.info("🔥 Loading Visual Analysis Model (LLaVA)...")
             visual_config = self.model_configs["visual_analyzer"]
-            
+
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 if LLAVA_AVAILABLE and LlavaNextProcessor and LlavaNextForConditionalGeneration:
                     try:
                         from agents.common.model_loader import load_transformers_model
@@ -476,17 +481,17 @@ class NextGenGPUScoutEngine:
                             trust_remote_code=True,
                             use_fast=True  # Use fast processor to avoid warnings
                         )
-                    
+
                     logger.info("✅ Visual Analysis Model (LLaVA) loaded successfully")
                 else:
                     logger.warning("⚠️ LLaVA models not available due to transformers compatibility issue")
                     self.models["visual_analyzer"] = None
                     self.tokenizers["visual_analyzer"] = None
-            
+
         except Exception as e:
             logger.warning(f"⚠️ Visual Analysis Model not available: {e}")
             self.models["visual_analyzer"] = None
-        
+
         # Register models with production GPU manager
         if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
             try:
@@ -504,8 +509,8 @@ class NextGenGPUScoutEngine:
                 logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
         elif self.device.startswith("cuda"):
             logger.info("📋 Production GPU manager not available, models not registered")
-    
-    def classify_news_content(self, text: str, url: str = "", use_ensemble: bool = True) -> Dict[str, Any]:
+
+    def classify_news_content(self, text: str, url: str = "", use_ensemble: bool = True) -> dict[str, Any]:
         """
         AI-First news content classification using specialized BERT model
         Production-ready with comprehensive error handling
@@ -522,29 +527,29 @@ class NextGenGPUScoutEngine:
             if not self.models.get("news_classifier"):
                 logger.debug("News classification model not available, using fallback")
                 return self._emergency_fallback(text, url)
-            
+
             # Primary AI Classification with production-ready handling
             logger.debug("🤖 Running AI-first news classification...")
-            
+
             # Prepare input text with URL context if available
             input_text = f"URL: {url}\nContent: {text}" if url else text
             input_text = input_text[:512]  # Truncate to model limits
-            
+
             # Suppress warnings during inference for clean operation
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 # Get predictions from the specialized news model
                 if self.pipelines["news_classifier"]:
                     predictions = self.pipelines["news_classifier"](input_text)
                 else:
                     logger.debug("News classifier pipeline not available")
                     return self._emergency_fallback(text, url)
-                
+
             # Process results - handle both old and new pipeline formats
             news_score = 0.0
             non_news_score = 0.0
-            
+
             if isinstance(predictions, list):
                 for pred in predictions:
                     if isinstance(pred, dict) and 'label' in pred and 'score' in pred:
@@ -558,11 +563,11 @@ class NextGenGPUScoutEngine:
                     news_score = predictions.get('score', 0.0)
                 else:
                     non_news_score = predictions.get('score', 0.0)
-            
+
             # Determine classification
             is_news = news_score > non_news_score
             confidence = max(news_score, non_news_score)
-            
+
             # Content type classification
             if is_news and confidence > 0.8:
                 content_type = "news"
@@ -572,7 +577,7 @@ class NextGenGPUScoutEngine:
                 content_type = "non_news"
             else:
                 content_type = "uncertain"
-            
+
             result = {
                 "is_news": is_news,
                 "confidence": float(confidence),
@@ -581,22 +586,22 @@ class NextGenGPUScoutEngine:
                 "method": "ai_bert_specialized",
                 "model_used": self.model_configs["news_classifier"]["model_name"],
                 "url": url,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "predictions": predictions
             }
-            
+
             # Ensemble enhancement if enabled
             if use_ensemble and confidence < 0.9:
                 result = self._enhance_with_quality_signals(result, text, url)
-            
+
             logger.debug(f"✅ AI News Classification: {result['is_news']} ({result['confidence']:.2f})")
             return result
-            
+
         except Exception as e:
             logger.warning(f"AI news classification failed, using fallback: {e}")
             return self._emergency_fallback(text, url)
-    
-    def assess_content_quality(self, text: str, url: str = "") -> Dict[str, Any]:
+
+    def assess_content_quality(self, text: str, url: str = "") -> dict[str, Any]:
         """
         AI-powered content quality assessment using BERT model
         Production-ready with warning suppression
@@ -612,34 +617,34 @@ class NextGenGPUScoutEngine:
             if not self.models.get("quality_assessor"):
                 logger.debug("Quality assessment model not available, using heuristics")
                 return self._heuristic_quality_assessment(text, url)
-            
+
             logger.debug("🔍 Running AI quality assessment...")
-            
+
             # Prepare input for quality assessment
             input_text = text[:512]
-            
+
             # Get quality predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 if self.pipelines["quality_assessor"]:
                     predictions = self.pipelines["quality_assessor"](input_text)
                 else:
                     logger.debug("Quality assessor pipeline not available")
                     return self._heuristic_quality_assessment(text, url)
-            
+
             # Process quality scores - handle both formats
             quality_scores = {}
             max_score = 0.0
             quality_label = "low"
-            
+
             if isinstance(predictions, list):
                 for pred in predictions:
                     if isinstance(pred, dict) and 'label' in pred and 'score' in pred:
                         score = pred['score']
                         label = pred['label'].lower()
                         quality_scores[label] = score
-                        
+
                         if score > max_score:
                             max_score = score
                             quality_label = label
@@ -648,7 +653,7 @@ class NextGenGPUScoutEngine:
                 max_score = predictions.get('score', 0.0)
                 quality_label = predictions.get('label', 'low').lower()
                 quality_scores[quality_label] = max_score
-            
+
             # Map to standardized quality metrics
             if quality_label in ['high', 'positive', 'label_2']:
                 overall_quality = min(max_score + 0.1, 1.0)
@@ -659,12 +664,12 @@ class NextGenGPUScoutEngine:
             else:
                 overall_quality = max(max_score - 0.1, 0.0)
                 quality_rating = "low"
-            
+
             # Additional quality metrics
             word_count = len(text.split())
             sentence_count = len([s for s in text.split('.') if s.strip()])
             avg_sentence_length = word_count / max(sentence_count, 1)
-            
+
             result = {
                 "overall_quality": float(overall_quality),
                 "quality_rating": quality_rating,
@@ -682,18 +687,18 @@ class NextGenGPUScoutEngine:
                     "avg_sentence_length": avg_sentence_length
                 },
                 "url": url,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "raw_predictions": predictions
             }
-            
+
             logger.debug(f"✅ AI Quality Assessment: {quality_rating} ({overall_quality:.2f})")
             return result
-            
+
         except Exception as e:
             logger.debug(f"AI quality assessment failed, using heuristics: {e}")
             return self._heuristic_quality_assessment(text, url)
-    
-    def analyze_sentiment(self, text: str, url: str = "") -> Dict[str, Any]:
+
+    def analyze_sentiment(self, text: str, url: str = "") -> dict[str, Any]:
         """
         AI-powered sentiment analysis using specialized RoBERTa model
         Production-ready with comprehensive error handling
@@ -709,38 +714,38 @@ class NextGenGPUScoutEngine:
             if not self.models.get("sentiment_analyzer"):
                 logger.debug("Sentiment analysis model not available, using heuristics")
                 return self._heuristic_sentiment_analysis(text, url)
-            
+
             logger.debug("😊 Running AI sentiment analysis...")
-            
+
             # Prepare input for sentiment analysis
             input_text = text[:512]
-            
+
             # Get sentiment predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 if self.pipelines["sentiment_analyzer"]:
                     predictions = self.pipelines["sentiment_analyzer"](input_text)
                 else:
                     logger.debug("Sentiment analyzer pipeline not available")
                     return self._heuristic_sentiment_analysis(text, url)
-            
+
             # Process sentiment scores
             sentiment_scores = {
                 'positive': 0.0,
                 'negative': 0.0,
                 'neutral': 0.0
             }
-            
+
             dominant_sentiment = "neutral"
             confidence = 0.0
-            
+
             if isinstance(predictions, list):
                 for pred in predictions:
                     if isinstance(pred, dict) and 'label' in pred and 'score' in pred:
                         label = pred['label'].lower()
                         score = pred['score']
-                        
+
                         if label in ['positive', 'pos', 'label_2']:
                             sentiment_scores['positive'] = max(sentiment_scores['positive'], score)
                         elif label in ['negative', 'neg', 'label_0']:
@@ -751,18 +756,18 @@ class NextGenGPUScoutEngine:
                 # Single prediction format
                 label = predictions.get('label', '').lower()
                 score = predictions.get('score', 0.0)
-                
+
                 if label in ['positive', 'pos', 'label_2']:
                     sentiment_scores['positive'] = score
                 elif label in ['negative', 'neg', 'label_0']:
                     sentiment_scores['negative'] = score
                 else:
                     sentiment_scores['neutral'] = score
-            
+
             # Determine dominant sentiment
             dominant_sentiment = max(sentiment_scores, key=sentiment_scores.get)
             confidence = sentiment_scores[dominant_sentiment]
-            
+
             # Sentiment intensity categorization
             if confidence > 0.8:
                 intensity = "strong"
@@ -772,7 +777,7 @@ class NextGenGPUScoutEngine:
                 intensity = "mild"
             else:
                 intensity = "weak"
-            
+
             result = {
                 "dominant_sentiment": dominant_sentiment,
                 "confidence": float(confidence),
@@ -781,18 +786,18 @@ class NextGenGPUScoutEngine:
                 "method": "ai_roberta_specialized",
                 "model_name": self.model_configs["sentiment_analyzer"]["model_name"],
                 "url": url,
-                "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
+                "analysis_timestamp": datetime.now(UTC).isoformat(),
                 "raw_predictions": predictions
             }
-            
+
             logger.debug(f"✅ AI Sentiment Analysis: {dominant_sentiment} ({confidence:.2f})")
             return result
-            
+
         except Exception as e:
             logger.debug(f"AI sentiment analysis failed, using heuristics: {e}")
             return self._heuristic_sentiment_analysis(text, url)
 
-    def detect_bias(self, text: str, url: str = "") -> Dict[str, Any]:
+    def detect_bias(self, text: str, url: str = "") -> dict[str, Any]:
         """
         AI-powered bias detection using specialized classification model
         Production-ready with comprehensive error handling
@@ -808,26 +813,26 @@ class NextGenGPUScoutEngine:
             if not self.models.get("bias_detector"):
                 logger.debug("Bias detection model not available, using heuristics")
                 return self._heuristic_bias_detection(text, url)
-            
+
             logger.debug("⚖️ Running AI bias detection...")
-            
+
             # Prepare input for bias detection
             input_text = text[:512]
-            
+
             # Get bias predictions with warning suppression
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                
+
                 if self.pipelines["bias_detector"]:
                     predictions = self.pipelines["bias_detector"](input_text)
                 else:
                     logger.debug("Bias detector pipeline not available")
                     return self._heuristic_bias_detection(text, url)
-            
+
             # Process bias scores - handle both formats
             bias_score = 0.0
             non_bias_score = 0.0
-            
+
             if isinstance(predictions, list):
                 for pred in predictions:
                     if isinstance(pred, dict) and 'label' in pred and 'score' in pred:
@@ -841,11 +846,11 @@ class NextGenGPUScoutEngine:
                     bias_score = predictions.get('score', 0.0)
                 else:
                     non_bias_score = predictions.get('score', 0.0)
-            
+
             # Determine bias level
             has_bias = bias_score > non_bias_score
             confidence = max(bias_score, non_bias_score)
-            
+
             # Bias categorization
             if bias_score > 0.8:
                 bias_level = "high"
@@ -855,7 +860,7 @@ class NextGenGPUScoutEngine:
                 bias_level = "low"
             else:
                 bias_level = "minimal"
-            
+
             result = {
                 "has_bias": has_bias,
                 "bias_score": float(bias_score),
@@ -868,18 +873,18 @@ class NextGenGPUScoutEngine:
                 "method": "ai_specialized_bias",
                 "model_used": self.model_configs["bias_detector"]["model_name"],
                 "url": url,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "raw_predictions": predictions
             }
-            
+
             logger.debug(f"✅ AI Bias Detection: {bias_level} bias ({bias_score:.2f})")
             return result
-            
+
         except Exception as e:
             logger.debug(f"AI bias detection failed, using heuristics: {e}")
             return self._heuristic_bias_detection(text, url)
-    
-    def analyze_visual_content(self, image_path: str, prompt: str = "Describe this image and determine if it contains news-worthy content") -> Dict[str, Any]:
+
+    def analyze_visual_content(self, image_path: str, prompt: str = "Describe this image and determine if it contains news-worthy content") -> dict[str, Any]:
         """
         AI-powered visual content analysis using local LLaVA model
         
@@ -899,19 +904,19 @@ class NextGenGPUScoutEngine:
                     "confidence": 0.0,
                     "method": "unavailable"
                 }
-            
+
             from PIL import Image
-            
+
             logger.debug("👁️ Running AI visual analysis...")
-            
+
             # Load and process image
             image = Image.open(image_path)
             processor = self.tokenizers["visual_analyzer"]
             model = self.models["visual_analyzer"]
-            
+
             # Prepare inputs
             inputs = processor(prompt, image, return_tensors="pt").to(self.device)
-            
+
             # Generate analysis
             with torch.no_grad():
                 output = model.generate(
@@ -920,18 +925,18 @@ class NextGenGPUScoutEngine:
                     do_sample=True,
                     temperature=0.1
                 )
-            
+
             # Decode response
             response = processor.decode(output[0], skip_special_tokens=True)
             analysis = response[len(prompt):].strip()
-            
+
             # Determine if visual content is news-worthy
             news_keywords = ['news', 'breaking', 'event', 'incident', 'report', 'announcement']
             is_news_visual = any(keyword in analysis.lower() for keyword in news_keywords)
-            
+
             # Calculate confidence based on response quality
             confidence = min(len(analysis) / 100, 1.0)
-            
+
             result = {
                 "visual_analysis": analysis,
                 "is_news_visual": is_news_visual,
@@ -939,13 +944,13 @@ class NextGenGPUScoutEngine:
                 "method": "ai_llava_visual",
                 "model_used": self.model_configs["visual_analyzer"]["model_name"],
                 "image_path": image_path,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "prompt_used": prompt
             }
-            
+
             logger.debug(f"✅ AI Visual Analysis completed: {is_news_visual}")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ AI visual analysis failed: {e}")
             return {
@@ -954,8 +959,8 @@ class NextGenGPUScoutEngine:
                 "confidence": 0.0,
                 "method": "error"
             }
-    
-    def comprehensive_content_analysis(self, text: str, url: str = "", image_path: str = None) -> Dict[str, Any]:
+
+    def comprehensive_content_analysis(self, text: str, url: str = "", image_path: str = None) -> dict[str, Any]:
         """
         Complete AI-powered content analysis using all specialized models
         
@@ -968,26 +973,26 @@ class NextGenGPUScoutEngine:
             Comprehensive analysis results
         """
         logger.info("🔍 Running comprehensive AI content analysis...")
-        
+
         # Run all AI analyses
         news_analysis = self.classify_news_content(text, url, use_ensemble=True)
         quality_analysis = self.assess_content_quality(text, url)
         sentiment_analysis = self.analyze_sentiment(text, url)
         bias_analysis = self.detect_bias(text, url)
-        
+
         # Visual analysis if image provided
         visual_analysis = None
         if image_path and os.path.exists(image_path):
             visual_analysis = self.analyze_visual_content(image_path)
-        
+
         # Calculate overall Scout score
         scout_score = self._calculate_comprehensive_scout_score(
             news_analysis, quality_analysis, sentiment_analysis, bias_analysis, visual_analysis
         )
-        
+
         # Generate recommendation
         recommendation = self._generate_comprehensive_recommendation(scout_score, news_analysis, quality_analysis, sentiment_analysis, bias_analysis)
-        
+
         result = {
             "scout_score": scout_score,
             "recommendation": recommendation,
@@ -996,15 +1001,15 @@ class NextGenGPUScoutEngine:
             "sentiment_analysis": sentiment_analysis,
             "bias_detection": bias_analysis,
             "visual_analysis": visual_analysis,
-            "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
+            "analysis_timestamp": datetime.now(UTC).isoformat(),
             "models_used": [config["model_name"] for config in self.model_configs.values() if self.models.get(config["task"].split("_")[0] + "_" + config["task"].split("_")[1])],
             "ai_first_approach": True
         }
-        
+
         logger.info(f"✅ Comprehensive analysis completed. Scout Score: {scout_score:.2f}")
         return result
-    
-    def add_training_example(self, task: str, text: str, label: Union[int, str], url: str = ""):
+
+    def add_training_example(self, task: str, text: str, label: int | str, url: str = ""):
         """
         Add training example for continuous learning
         
@@ -1017,11 +1022,11 @@ class NextGenGPUScoutEngine:
         if not self.enable_training:
             logger.warning("⚠️ Training not enabled")
             return
-        
+
         if task not in self.training_data:
             logger.error(f"❌ Unknown training task: {task}")
             return
-        
+
         # Convert string labels to integers if needed
         if isinstance(label, str):
             if task == "news_classification":
@@ -1034,14 +1039,14 @@ class NextGenGPUScoutEngine:
                 label = label_map.get(label.lower(), 1)
             elif task == "bias_detection":
                 label = 1 if label.lower() in ['bias', 'biased', 'true', '1', 'yes'] else 0
-        
+
         # Add to training data
         input_text = f"URL: {url}\nContent: {text}" if url else text
         self.training_data[task]["texts"].append(input_text)
         self.training_data[task]["labels"].append(label)
-        
+
         logger.debug(f"📚 Added training example for {task}: {len(self.training_data[task]['texts'])} examples")
-    
+
     def fine_tune_model(self, task: str, epochs: int = 3, learning_rate: float = 2e-5, batch_size: int = 8):
         """
         Fine-tune a specific model with collected training data
@@ -1055,33 +1060,33 @@ class NextGenGPUScoutEngine:
         if not self.enable_training:
             logger.error("❌ Training not enabled")
             return False
-        
+
         if task not in self.training_data:
             logger.error(f"❌ Unknown training task: {task}")
             return False
-        
+
         training_texts = self.training_data[task]["texts"]
         training_labels = self.training_data[task]["labels"]
-        
+
         if len(training_texts) < 10:
             logger.warning(f"⚠️ Insufficient training data for {task}: {len(training_texts)} examples")
             return False
-        
+
         try:
             logger.info(f"🏋️ Fine-tuning {task} model with {len(training_texts)} examples...")
-            
+
             # Get model and tokenizer
             model_key = task.split("_")[0] + "_" + task.split("_")[1]
             if not self.models.get(model_key):
                 logger.error(f"❌ Model not available for {task}")
                 return False
-            
+
             model = self.models[model_key]
             tokenizer = self.tokenizers[model_key]
-            
+
             # Create dataset
             dataset = OptimizedNewsDataset(training_texts, training_labels, tokenizer)
-            
+
             # Training arguments
             training_args = TrainingArguments(
                 output_dir=f"./fine_tuned_{task}",
@@ -1094,7 +1099,7 @@ class NextGenGPUScoutEngine:
                 save_total_limit=2,
                 remove_unused_columns=False,
             )
-            
+
             # Initialize trainer
             if TRAINER_AVAILABLE and Trainer:
                 trainer = Trainer(
@@ -1103,17 +1108,17 @@ class NextGenGPUScoutEngine:
                     train_dataset=dataset,
                     tokenizer=tokenizer,
                 )
-                
+
                 # Fine-tune
                 trainer.train()
-                
+
                 # Save fine-tuned model
                 model_save_path = f"./fine_tuned_{task}_model"
                 model.save_pretrained(model_save_path)
                 tokenizer.save_pretrained(model_save_path)
-                
+
                 logger.info(f"✅ Fine-tuning completed for {task}. Model saved to {model_save_path}")
-                
+
                 # Update pipeline with fine-tuned model
                 if PIPELINE_AVAILABLE:
                     self.pipelines[model_key] = pipeline(
@@ -1127,80 +1132,80 @@ class NextGenGPUScoutEngine:
                         truncation=True,
                         max_length=512
                     )
-                
+
                 return True
             else:
                 logger.warning(f"⚠️ Trainer not available for {task} fine-tuning due to transformers compatibility issue")
                 return False
-            
+
         except Exception as e:
             logger.error(f"❌ Fine-tuning failed for {task}: {e}")
             return False
-    
-    def _enhance_with_quality_signals(self, base_result: Dict, text: str, url: str) -> Dict:
+
+    def _enhance_with_quality_signals(self, base_result: dict, text: str, url: str) -> dict:
         """Enhance classification with quality signals for borderline cases"""
         try:
             quality_result = self.assess_content_quality(text, url)
-            
+
             # Adjust confidence based on quality
             quality_bonus = quality_result.get("overall_quality", 0.5) * 0.1
             base_result["confidence"] = min(base_result["confidence"] + quality_bonus, 1.0)
             base_result["reasoning"] += f" + Quality enhancement ({quality_result.get('overall_quality', 0):.2f})"
-            
+
             return base_result
-            
+
         except Exception as e:
             logger.debug(f"Quality enhancement failed: {e}")
             return base_result
-    
-    def _calculate_comprehensive_scout_score(self, news_analysis: Dict, quality_analysis: Dict, sentiment_analysis: Dict, bias_analysis: Dict, visual_analysis: Dict = None) -> float:
+
+    def _calculate_comprehensive_scout_score(self, news_analysis: dict, quality_analysis: dict, sentiment_analysis: dict, bias_analysis: dict, visual_analysis: dict = None) -> float:
         """Calculate comprehensive Scout score from all analyses"""
         try:
             # Base news confidence
             news_score = news_analysis.get("confidence", 0.0) if news_analysis.get("is_news", False) else 0.0
-            
+
             # Quality weighted score
             quality_score = quality_analysis.get("overall_quality", 0.0)
-            
+
             # Sentiment neutrality bonus (neutral sentiment is preferred for news)
             sentiment_bonus = 0.0
             dominant_sentiment = sentiment_analysis.get("dominant_sentiment", "neutral")
             sentiment_confidence = sentiment_analysis.get("confidence", 0.5)
-            
+
             if dominant_sentiment == "neutral":
                 sentiment_bonus = 0.2  # Neutral sentiment is ideal for news
             elif dominant_sentiment in ["positive", "negative"] and sentiment_confidence < 0.7:
                 sentiment_bonus = 0.1  # Mild sentiment is acceptable
             else:
                 sentiment_bonus = -0.1  # Strong sentiment may indicate bias
-            
+
             # Bias penalty (high bias reduces score)
             bias_penalty = 1.0 - bias_analysis.get("bias_score", 0.5)
-            
+
             # Visual enhancement if available
             visual_bonus = 0.0
             if visual_analysis and visual_analysis.get("is_news_visual"):
                 visual_bonus = visual_analysis.get("confidence", 0.0) * 0.1
-            
+
             # Combined Scout score with sentiment consideration
             scout_score = (news_score * 0.35 + quality_score * 0.25 + bias_penalty * 0.2 + sentiment_bonus * 0.15 + visual_bonus * 0.05)
-            
+
             return min(max(scout_score, 0.0), 1.0)  # Clamp to [0, 1]
-            
+
         except Exception as e:
             logger.error(f"Scout score calculation error: {e}")
             return 0.5
-    
-    def _generate_comprehensive_recommendation(self, scout_score: float, news_analysis: Dict, quality_analysis: Dict, sentiment_analysis: Dict, bias_analysis: Dict) -> str:
+
+    def _generate_comprehensive_recommendation(self, scout_score: float, news_analysis: dict, quality_analysis: dict, sentiment_analysis: dict, bias_analysis: dict) -> str:
         """Generate recommendation based on comprehensive analysis"""
-        
+
         # Get key indicators
         is_news = news_analysis.get("is_news", False)
         quality_level = quality_analysis.get("quality_rating", "low")
         sentiment = sentiment_analysis.get("dominant_sentiment", "neutral")
         sentiment_intensity = sentiment_analysis.get("intensity", "mild")
         bias_level = bias_analysis.get("bias_level", "minimal")
-        
+
         # Generate context-aware recommendation
         if scout_score >= 0.8:
             context = []
@@ -1210,19 +1215,19 @@ class NextGenGPUScoutEngine:
                 context.append("neutral tone")
             if bias_level == "minimal":
                 context.append("minimal bias")
-            
+
             return f"🔥 HIGH_PRIORITY: Excellent content ({', '.join(context)})"
-            
+
         elif scout_score >= 0.6:
             context = []
             if sentiment != "neutral" and sentiment_intensity != "weak":
                 context.append(f"{sentiment_intensity} {sentiment}")
             if bias_level != "minimal":
                 context.append(f"{bias_level} bias")
-            
+
             context_str = f" ({', '.join(context)})" if context else ""
             return f"👍 MEDIUM_PRIORITY: Good quality news content{context_str}"
-            
+
         elif scout_score >= 0.4:
             issues = []
             if not is_news:
@@ -1233,7 +1238,7 @@ class NextGenGPUScoutEngine:
                 issues.append(f"strong {sentiment} sentiment")
             if bias_level in ["high", "medium"]:
                 issues.append(f"{bias_level} bias detected")
-            
+
             issues_str = f" ({', '.join(issues)})" if issues else ""
             return f"⚠️ LOW_PRIORITY: Borderline content{issues_str}, manual review recommended"
         else:
@@ -1246,19 +1251,19 @@ class NextGenGPUScoutEngine:
                 problems.append("high bias")
             if sentiment == "negative" and sentiment_intensity == "strong":
                 problems.append("strongly negative")
-            
+
             problems_str = f" ({', '.join(problems)})" if problems else ""
             return f"❌ REJECT: Poor quality or problematic content{problems_str}, exclude from pipeline"
-    
-    def _emergency_fallback(self, text: str, url: str) -> Dict:
+
+    def _emergency_fallback(self, text: str, url: str) -> dict:
         """Emergency fallback when AI models fail"""
         # Simple keyword-based fallback
         news_keywords = ['breaking', 'news', 'reported', 'announced', 'according', 'sources']
         news_count = sum(1 for keyword in news_keywords if keyword.lower() in text.lower())
-        
+
         is_news = news_count >= 2 or len(text.split()) > 100
         confidence = min(0.6, news_count * 0.15 + 0.3)
-        
+
         return {
             "is_news": is_news,
             "confidence": confidence,
@@ -1266,14 +1271,14 @@ class NextGenGPUScoutEngine:
             "reasoning": f"Emergency fallback classification (keywords: {news_count})",
             "method": "emergency_fallback",
             "url": url,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
-    
-    def _heuristic_quality_assessment(self, text: str, url: str) -> Dict:
+
+    def _heuristic_quality_assessment(self, text: str, url: str) -> dict:
         """Heuristic quality assessment fallback"""
         word_count = len(text.split())
         sentence_count = len([s for s in text.split('.') if s.strip()])
-        
+
         # Simple quality heuristics
         if word_count > 300 and sentence_count > 5:
             quality = 0.8
@@ -1284,7 +1289,7 @@ class NextGenGPUScoutEngine:
         else:
             quality = 0.4
             rating = "low"
-        
+
         return {
             "overall_quality": quality,
             "quality_rating": rating,
@@ -1292,14 +1297,14 @@ class NextGenGPUScoutEngine:
             "reasoning": f"Heuristic assessment based on length (words: {word_count})",
             "method": "heuristic_fallback"
         }
-    
-    def _heuristic_bias_detection(self, text: str, url: str) -> Dict:
+
+    def _heuristic_bias_detection(self, text: str, url: str) -> dict:
         """Heuristic bias detection fallback"""
         bias_keywords = ['always', 'never', 'all', 'everyone', 'nobody', 'terrible', 'amazing', 'best', 'worst']
         bias_count = sum(1 for keyword in bias_keywords if keyword.lower() in text.lower())
-        
+
         bias_score = min(bias_count * 0.1, 1.0)
-        
+
         return {
             "has_bias": bias_score > 0.3,
             "bias_score": bias_score,
@@ -1308,16 +1313,16 @@ class NextGenGPUScoutEngine:
             "reasoning": f"Heuristic bias detection (bias indicators: {bias_count})",
             "method": "heuristic_fallback"
         }
-    
-    def _heuristic_sentiment_analysis(self, text: str, url: str) -> Dict:
+
+    def _heuristic_sentiment_analysis(self, text: str, url: str) -> dict:
         """Heuristic sentiment analysis fallback"""
         positive_words = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'positive', 'success', 'win', 'happy', 'pleased']
         negative_words = ['bad', 'terrible', 'awful', 'horrible', 'negative', 'fail', 'loss', 'sad', 'angry', 'disappointed']
-        
+
         text_lower = text.lower()
         positive_count = sum(1 for word in positive_words if word in text_lower)
         negative_count = sum(1 for word in negative_words if word in text_lower)
-        
+
         # Calculate sentiment scores
         total_sentiment_words = positive_count + negative_count
         if total_sentiment_words == 0:
@@ -1336,7 +1341,7 @@ class NextGenGPUScoutEngine:
             dominant_sentiment = "neutral"
             confidence = 0.6
             sentiment_scores = {'positive': 0.2, 'negative': 0.2, 'neutral': 0.6}
-        
+
         # Determine intensity
         if confidence > 0.8:
             intensity = "strong"
@@ -1344,7 +1349,7 @@ class NextGenGPUScoutEngine:
             intensity = "moderate"
         else:
             intensity = "mild"
-        
+
         return {
             "dominant_sentiment": dominant_sentiment,
             "confidence": float(confidence),
@@ -1353,11 +1358,11 @@ class NextGenGPUScoutEngine:
             "method": "heuristic_fallback",
             "model_name": "heuristic_keywords",
             "url": url,
-            "analysis_timestamp": datetime.now(timezone.utc).isoformat(),
+            "analysis_timestamp": datetime.now(UTC).isoformat(),
             "reasoning": f"Heuristic sentiment analysis (positive: {positive_count}, negative: {negative_count})"
         }
 
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> dict[str, Any]:
         """Get information about loaded models"""
         model_info = {}
         for task, config in self.model_configs.items():
@@ -1370,7 +1375,7 @@ class NextGenGPUScoutEngine:
                 "training_examples": len(self.training_data.get(config["task"], {}).get("texts", [])) if self.enable_training else "N/A"
             }
         return model_info
-    
+
     def cleanup(self):
         """Clean up GPU memory and resources"""
         # Release GPU allocation
@@ -1395,9 +1400,9 @@ class NextGenGPUScoutEngine:
         self.tokenizers.clear()
 
         logger.info("🧹 Scout model cleanup completed")
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.cleanup()

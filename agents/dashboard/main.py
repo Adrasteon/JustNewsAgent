@@ -3,15 +3,16 @@ Main file for the Dashboard Agent.
 """
 
 
+import os
+import sys
+import time
+from contextlib import asynccontextmanager
+
+import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import requests
-from contextlib import asynccontextmanager
-import sys
-import os
+
 from common.observability import get_logger
-import time
-from typing import Dict, List, Optional
 
 # Ensure the current package directory is on sys.path so sibling modules can be imported
 # This makes `from config import load_config` work when running the FastAPI app directly.
@@ -65,7 +66,7 @@ class EnhancedGPUMonitor:
         self.max_history_size = 100
         self.gpu_manager = get_gpu_manager() if GPU_MANAGER_AVAILABLE else None
 
-    def get_gpu_info(self) -> Dict:
+    def get_gpu_info(self) -> dict:
         """Get current GPU information using production GPU manager."""
         try:
             if self.gpu_manager:
@@ -126,7 +127,7 @@ class EnhancedGPUMonitor:
                 'timestamp': time.time()
             }
 
-    def _get_nvidia_smi_fallback(self) -> Dict:
+    def _get_nvidia_smi_fallback(self) -> dict:
         """Fallback GPU monitoring using nvidia-smi."""
         try:
             import subprocess
@@ -195,12 +196,12 @@ class EnhancedGPUMonitor:
                 'timestamp': time.time()
             }
 
-    def get_gpu_history(self, hours: int = 1) -> List[Dict]:
+    def get_gpu_history(self, hours: int = 1) -> list[dict]:
         """Get GPU history for the specified number of hours."""
         cutoff_time = time.time() - (hours * 3600)
         return [entry for entry in self.gpu_history if entry['timestamp'] >= cutoff_time]
 
-    def get_agent_gpu_usage(self) -> Dict:
+    def get_agent_gpu_usage(self) -> dict:
         """Get GPU usage statistics per agent using production GPU manager."""
         try:
             if self.gpu_manager:
@@ -285,7 +286,7 @@ class EnhancedGPUMonitor:
                 'timestamp': time.time()
             }
 
-    def _get_agent_gpu_usage_fallback(self) -> Dict:
+    def _get_agent_gpu_usage_fallback(self) -> dict:
         """Fallback agent GPU usage when GPU manager not available."""
         try:
             agent_ports = {
@@ -495,7 +496,7 @@ def get_gpu_config():
         }
 
 @app.post("/gpu/config")
-def update_gpu_config(new_config: Dict):
+def update_gpu_config(new_config: dict):
     """Update GPU configuration."""
     try:
         # Try to update via GPU manager
@@ -659,7 +660,7 @@ def get_gpu_dashboard_data():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/gpu/history/db")
-def get_gpu_history_from_db(hours: int = 24, gpu_index: Optional[int] = None, metric: str = "utilization"):
+def get_gpu_history_from_db(hours: int = 24, gpu_index: int | None = None, metric: str = "utilization"):
     """Get GPU metrics history from database."""
     try:
         if metric == "utilization":
@@ -707,7 +708,7 @@ def get_gpu_history_from_db(hours: int = 24, gpu_index: Optional[int] = None, me
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/gpu/allocations/history")
-def get_allocation_history(hours: int = 24, agent_name: Optional[str] = None):
+def get_allocation_history(hours: int = 24, agent_name: str | None = None):
     """Get agent allocation history from database."""
     try:
         history = storage.get_agent_allocation_history(hours, agent_name)

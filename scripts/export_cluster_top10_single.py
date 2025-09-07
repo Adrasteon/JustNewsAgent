@@ -4,9 +4,10 @@ Usage: python3 scripts/export_cluster_top10_single.py <cluster_id> [count] [outp
 """
 import csv
 import sys
+from pathlib import Path
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from pathlib import Path
 
 DB = dict(dbname='justnews', user='justnews_user', password='password123', host='localhost')
 CSV_PATH = Path('logs/crawl/dedup_review.csv')

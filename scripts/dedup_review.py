@@ -9,11 +9,12 @@ Queries Postgres for up to 5 titles per cluster member and writes CSV:
 Columns: cluster_id,size,representative_id,representative_title,member_ids,sample_member_titles
 """
 from __future__ import annotations
+
 import csv
 import os
 import sys
+
 import psycopg2
-from typing import List
 
 CLUSTERS = 'logs/crawl/dedup_clusters.tsv'
 OUT = 'logs/crawl/dedup_review.csv'
@@ -31,7 +32,7 @@ if not os.path.exists(CLUSTERS):
 
 # load clusters
 clusters = []
-with open(CLUSTERS, 'r', encoding='utf-8') as f:
+with open(CLUSTERS, encoding='utf-8') as f:
     header = f.readline()
     for line in f:
         line = line.rstrip('\n')
@@ -54,7 +55,7 @@ with open(OUT, 'w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(['cluster_id','size','representative_id','representative_title','member_ids','sample_member_titles'])
     for cluster_id, size, rep_id, rep_title, ids in clusters:
-        sample_titles: List[str] = []
+        sample_titles: list[str] = []
         # sample up to 5 member titles
         sample_ids = ids[:5]
         if sample_ids:

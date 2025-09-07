@@ -12,11 +12,11 @@ Provides sophisticated optimization recommendations based on:
 
 
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
 from collections import defaultdict, deque
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -48,12 +48,12 @@ class OptimizationRecommendation:
     confidence_score: float  # Confidence in recommendation (0-100)
     implementation_complexity: str  # "low", "medium", "high"
     estimated_time_savings: float  # Expected time savings in seconds per operation
-    affected_agents: List[str]
-    prerequisites: List[str]
-    implementation_steps: List[str]
-    rollback_steps: List[str]
+    affected_agents: list[str]
+    prerequisites: list[str]
+    implementation_steps: list[str]
+    rollback_steps: list[str]
     created_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
 @dataclass
 class PerformancePattern:
@@ -79,8 +79,8 @@ class AdvancedOptimizationEngine:
 
     def __init__(self, analytics_engine=None):
         self.analytics_engine = analytics_engine
-        self.recommendations: Dict[str, OptimizationRecommendation] = {}
-        self.performance_patterns: Dict[str, PerformancePattern] = {}
+        self.recommendations: dict[str, OptimizationRecommendation] = {}
+        self.performance_patterns: dict[str, PerformancePattern] = {}
         self.optimization_history: deque = deque(maxlen=1000)
 
         # Analysis parameters
@@ -94,7 +94,7 @@ class AdvancedOptimizationEngine:
 
         logger.info("🚀 Advanced Optimization Engine initialized")
 
-    def analyze_and_recommend(self, hours: int = 24) -> List[OptimizationRecommendation]:
+    def analyze_and_recommend(self, hours: int = 24) -> list[OptimizationRecommendation]:
         """
         Perform comprehensive analysis and generate optimization recommendations
 
@@ -156,7 +156,7 @@ class AdvancedOptimizationEngine:
             logger.error(f"Error in optimization analysis: {e}")
             return []
 
-    def _analyze_memory_optimization(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_memory_optimization(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze memory usage patterns and generate optimization recommendations"""
         recommendations = []
 
@@ -222,7 +222,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _analyze_compute_optimization(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_compute_optimization(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze compute utilization and generate optimization recommendations"""
         recommendations = []
 
@@ -287,7 +287,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _analyze_batch_size_optimization(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_batch_size_optimization(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze batch size efficiency and generate optimization recommendations"""
         recommendations = []
 
@@ -328,7 +328,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _analyze_model_optimization(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_model_optimization(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze model performance and generate optimization recommendations"""
         recommendations = []
 
@@ -367,7 +367,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _analyze_resource_allocation(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_resource_allocation(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze resource allocation patterns and generate optimization recommendations"""
         recommendations = []
 
@@ -410,7 +410,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _analyze_system_configuration(self, analytics, agent_profiles) -> List[OptimizationRecommendation]:
+    def _analyze_system_configuration(self, analytics, agent_profiles) -> list[OptimizationRecommendation]:
         """Analyze system configuration and generate optimization recommendations"""
         recommendations = []
 
@@ -448,7 +448,7 @@ class AdvancedOptimizationEngine:
 
         return recommendations
 
-    def _filter_and_prioritize(self, recommendations: List[OptimizationRecommendation]) -> List[OptimizationRecommendation]:
+    def _filter_and_prioritize(self, recommendations: list[OptimizationRecommendation]) -> list[OptimizationRecommendation]:
         """Filter and prioritize optimization recommendations"""
         try:
             # Remove duplicates based on category and affected agents
@@ -482,7 +482,7 @@ class AdvancedOptimizationEngine:
             logger.error(f"Error in recommendation filtering: {e}")
             return recommendations[:5] if recommendations else []
 
-    def get_recommendation_history(self, hours: int = 24) -> List[Dict[str, Any]]:
+    def get_recommendation_history(self, hours: int = 24) -> list[dict[str, Any]]:
         """Get historical optimization recommendations"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         return [
@@ -498,7 +498,7 @@ class AdvancedOptimizationEngine:
                 'timestamp': datetime.now()
             })
 
-    def get_optimization_insights(self) -> Dict[str, Any]:
+    def get_optimization_insights(self) -> dict[str, Any]:
         """Get comprehensive optimization insights"""
         try:
             recent_recommendations = self.get_recommendation_history(24)
@@ -532,7 +532,7 @@ class AdvancedOptimizationEngine:
             return {'error': str(e)}
 
 # Global optimization engine instance
-_optimization_engine: Optional[AdvancedOptimizationEngine] = None
+_optimization_engine: AdvancedOptimizationEngine | None = None
 
 def get_optimization_engine(analytics_engine=None) -> AdvancedOptimizationEngine:
     """Get the global optimization engine instance"""
@@ -541,7 +541,7 @@ def get_optimization_engine(analytics_engine=None) -> AdvancedOptimizationEngine
         _optimization_engine = AdvancedOptimizationEngine(analytics_engine)
     return _optimization_engine
 
-def generate_optimization_recommendations(hours: int = 24) -> List[OptimizationRecommendation]:
+def generate_optimization_recommendations(hours: int = 24) -> list[OptimizationRecommendation]:
     """Generate optimization recommendations for the specified time period"""
     from ..common.advanced_analytics import get_analytics_engine
 
@@ -550,7 +550,7 @@ def generate_optimization_recommendations(hours: int = 24) -> List[OptimizationR
 
     return optimization_engine.analyze_and_recommend(hours)
 
-def get_optimization_insights() -> Dict[str, Any]:
+def get_optimization_insights() -> dict[str, Any]:
     """Get comprehensive optimization insights"""
     optimization_engine = get_optimization_engine()
     return optimization_engine.get_optimization_insights()

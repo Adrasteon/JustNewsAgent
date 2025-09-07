@@ -2,27 +2,34 @@
 Main file for the Analyst Agent.
 """
 
-from common.observability import get_logger
 import os
 from contextlib import asynccontextmanager
 
+import requests
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
-import requests
+
+from common.observability import get_logger
 
 from .tools import (
-    identify_entities,
+    analyze_content_trends,
     analyze_text_statistics,
     extract_key_metrics,
-    analyze_content_trends,
+    identify_entities,
     log_feedback,
 )
 
 # Import security utilities
 try:
-    from ..scout.security_utils import validate_content_size, sanitize_content, rate_limit, log_security_event, security_wrapper
+    from ..scout.security_utils import (
+        log_security_event,
+        rate_limit,
+        sanitize_content,
+        security_wrapper,
+        validate_content_size,
+    )
     SECURITY_AVAILABLE = True
 except ImportError:
     SECURITY_AVAILABLE = False
@@ -329,13 +336,13 @@ def log_feedback_endpoint(call: ToolCall):
 
 # REMOVED ENDPOINTS - All sentiment and bias analysis centralized in Scout V2 Agent
 # Use Scout V2 for all sentiment and bias analysis (including batch operations):
-# - POST /comprehensive_content_analysis (includes sentiment + bias)  
+# - POST /comprehensive_content_analysis (includes sentiment + bias)
 # - POST /analyze_sentiment (dedicated sentiment analysis)
 # - POST /detect_bias (dedicated bias detection)
 
 # The following TensorRT batch endpoints have been removed from Analyst:
 # - POST /score_bias_batch - REMOVED (use Scout V2 batch analysis)
-# - POST /score_sentiment_batch - REMOVED (use Scout V2 batch analysis) 
+# - POST /score_sentiment_batch - REMOVED (use Scout V2 batch analysis)
 # - POST /analyze_article - REMOVED (use Scout V2 comprehensive analysis)
 # - POST /analyze_articles_batch - REMOVED (use Scout V2 batch analysis)
 

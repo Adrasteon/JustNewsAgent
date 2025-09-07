@@ -10,16 +10,17 @@ Features:
 - Backup and restore capabilities
 """
 
-import os
-from common.observability import get_logger
 import json
-
+import os
 import socket
-from datetime import datetime
-from typing import Dict, List, Optional, Any
-from pathlib import Path
-import yaml
 import threading
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -234,11 +235,11 @@ class GPUConfigManager:
         self.model_config = self._load_config_file(self.model_config_file, self.default_model_config)
         self.profiles_config = self._load_config_file(self.profiles_config_file, self.default_profiles_config)
 
-    def _load_config_file(self, file_path: Path, default_config: Dict[str, Any]) -> Dict[str, Any]:
+    def _load_config_file(self, file_path: Path, default_config: dict[str, Any]) -> dict[str, Any]:
         """Load a configuration file with fallback to defaults"""
         if file_path.exists():
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     if file_path.suffix == '.json':
                         loaded_config = json.load(f)
                     elif file_path.suffix in ['.yaml', '.yml']:
@@ -258,7 +259,7 @@ class GPUConfigManager:
             self._save_config_file(file_path, default_config)
             return default_config
 
-    def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_configs(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
         """Recursively merge configuration dictionaries"""
         result = base.copy()
 
@@ -270,7 +271,7 @@ class GPUConfigManager:
 
         return result
 
-    def _save_config_file(self, file_path: Path, config: Dict[str, Any]):
+    def _save_config_file(self, file_path: Path, config: dict[str, Any]):
         """Save configuration to file"""
         try:
             # Create backup if file exists
@@ -311,7 +312,7 @@ class GPUConfigManager:
         except Exception as e:
             logger.warning(f"Failed to create backup for {file_path}: {e}")
 
-    def get_config(self, environment: str = None, profile: str = None) -> Dict[str, Any]:
+    def get_config(self, environment: str = None, profile: str = None) -> dict[str, Any]:
         """Get the effective configuration for the current environment and profile"""
         # Start with main config
         config = self.main_config.copy()
@@ -344,7 +345,7 @@ class GPUConfigManager:
 
         return config
 
-    def _detect_environment(self) -> Optional[str]:
+    def _detect_environment(self) -> str | None:
         """Detect the current environment with enhanced detection methods"""
         # Check environment variables (highest priority)
         env_var = os.environ.get('JUSTNEWS_ENV', os.environ.get('ENV', '')).lower()
@@ -386,7 +387,7 @@ class GPUConfigManager:
 
         return None
 
-    def get_model_config(self, model_name: str = None) -> Dict[str, Any]:
+    def get_model_config(self, model_name: str = None) -> dict[str, Any]:
         """Get model-specific configuration"""
         if model_name and model_name in self.model_config['model_specific']:
             # Merge model-specific config with defaults
@@ -396,11 +397,11 @@ class GPUConfigManager:
         else:
             return self.model_config['model_defaults'].copy()
 
-    def get_agent_models(self, agent_name: str) -> List[str]:
+    def get_agent_models(self, agent_name: str) -> list[str]:
         """Get recommended models for an agent"""
         return self.model_config['agent_model_assignments'].get(agent_name, [])
 
-    def update_config(self, updates: Dict[str, Any], environment: str = None):
+    def update_config(self, updates: dict[str, Any], environment: str = None):
         """Update configuration with validation"""
         if not self._validate_config_updates(updates):
             raise ValueError("Invalid configuration updates")
@@ -420,7 +421,7 @@ class GPUConfigManager:
 
         logger.info(f"Configuration updated for environment: {environment or 'main'}")
 
-    def _validate_config_updates(self, updates: Dict[str, Any]) -> bool:
+    def _validate_config_updates(self, updates: dict[str, Any]) -> bool:
         """Validate configuration updates"""
         try:
             # Basic validation rules
@@ -467,7 +468,7 @@ class GPUConfigManager:
     def import_config(self, file_path: str, environment: str = None):
         """Import configuration from file"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 imported_config = json.load(f)
 
             self.update_config(imported_config, environment)
@@ -488,7 +489,7 @@ class GPUConfigManager:
         # Reload configurations to apply new environment
         self._load_configs()
 
-    def get_environment_info(self) -> Dict[str, Any]:
+    def get_environment_info(self) -> dict[str, Any]:
         """Get detailed information about the current environment"""
         current_env = self._detect_environment()
         runtime_env = os.environ.get('JUSTNEWS_ENV')
@@ -537,7 +538,7 @@ class GPUConfigManager:
         os.environ['GPU_CONFIG_PROFILE'] = profile_name
         logger.info(f"Active configuration profile set to: {profile_name}")
 
-    def get_available_profiles(self) -> List[Dict[str, Any]]:
+    def get_available_profiles(self) -> list[dict[str, Any]]:
         """Get list of available configuration profiles"""
         profiles = []
         for name, config in self.profiles_config.items():
@@ -549,7 +550,7 @@ class GPUConfigManager:
             profiles.append(profile_info)
         return profiles
 
-    def create_profile(self, name: str, config: Dict[str, Any], description: str = ""):
+    def create_profile(self, name: str, config: dict[str, Any], description: str = ""):
         """Create a new configuration profile"""
         if name in self.profiles_config:
             raise ValueError(f"Profile '{name}' already exists")
@@ -561,7 +562,7 @@ class GPUConfigManager:
         self._save_config_file(self.profiles_config_file, self.profiles_config)
         logger.info(f"Configuration profile '{name}' created")
 
-    def update_profile(self, name: str, config: Dict[str, Any], description: str = None):
+    def update_profile(self, name: str, config: dict[str, Any], description: str = None):
         """Update an existing configuration profile"""
         if name not in self.profiles_config:
             raise ValueError(f"Profile '{name}' not found")
@@ -615,7 +616,7 @@ class GPUConfigManager:
         logger.info(f"Configuration restored from backup: {backup_filename}")
 
 # Global configuration manager instance
-_config_manager: Optional[GPUConfigManager] = None
+_config_manager: GPUConfigManager | None = None
 _manager_lock = threading.Lock()
 
 def get_config_manager() -> GPUConfigManager:
@@ -626,22 +627,22 @@ def get_config_manager() -> GPUConfigManager:
             _config_manager = GPUConfigManager()
         return _config_manager
 
-def get_gpu_config(environment: str = None, profile: str = None) -> Dict[str, Any]:
+def get_gpu_config(environment: str = None, profile: str = None) -> dict[str, Any]:
     """Get GPU configuration for the current environment and profile"""
     manager = get_config_manager()
     return manager.get_config(environment, profile)
 
-def get_model_config(model_name: str = None) -> Dict[str, Any]:
+def get_model_config(model_name: str = None) -> dict[str, Any]:
     """Get model-specific configuration"""
     manager = get_config_manager()
     return manager.get_model_config(model_name)
 
-def get_agent_models(agent_name: str) -> List[str]:
+def get_agent_models(agent_name: str) -> list[str]:
     """Get recommended models for an agent"""
     manager = get_config_manager()
     return manager.get_agent_models(agent_name)
 
-def update_gpu_config(updates: Dict[str, Any], environment: str = None, profile: str = None):
+def update_gpu_config(updates: dict[str, Any], environment: str = None, profile: str = None):
     """Update GPU configuration"""
     manager = get_config_manager()
     if profile:

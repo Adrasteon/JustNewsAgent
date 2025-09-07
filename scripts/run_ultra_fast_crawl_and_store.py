@@ -5,8 +5,11 @@ import json
 import os
 import sys
 import time
-from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
+
 import requests
+
+from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
+
 # Ensure repository root is on sys.path so `agents` packages can be imported when running as a script
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:

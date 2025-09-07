@@ -12,35 +12,41 @@ Features:
 - Legacy compatibility with existing endpoints
 """
 
-from common.observability import get_logger
-from typing import Dict, List, Optional, Any, Union
 import os
-from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any
 
+import torch
 import uvicorn
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, Field
-import torch
+
+from common.observability import get_logger
 
 # Import V2 tools for core processing
 from .tools import (
-    process_article_content,
     analyze_content_structure,
+    analyze_image_with_llava,
+    capture_webpage_screenshot,
+    clear_engine,
     extract_multimedia_content,
     extract_news_from_url,
-    capture_webpage_screenshot,
-    analyze_image_with_llava,
-    health_check,
     get_engine,
-    clear_engine
+    health_check,
+    process_article_content,
 )
 
 # Import security utilities (following Scout Agent pattern)
 try:
-    from ..scout.security_utils import validate_url, sanitize_content, rate_limit, security_wrapper
+    from ..scout.security_utils import (
+        rate_limit,
+        sanitize_content,
+        security_wrapper,
+        validate_url,
+    )
     SECURITY_AVAILABLE = True
 except ImportError:
     SECURITY_AVAILABLE = False
@@ -60,8 +66,8 @@ try:
 except ImportError:
     try:
         # Try alternative import path
-        import sys
         import os
+        import sys
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from mcp_bus.main import MCPBusClient
         MCP_AVAILABLE = True
@@ -83,11 +89,11 @@ logger = get_logger(__name__)
 # Modern datetime utility
 def utc_now() -> datetime:
     """Get current UTC datetime using timezone-aware approach"""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 # Pydantic models for API
 class ContentRequest(BaseModel):
-    content: Union[str, Dict[str, Any]]
+    content: str | dict[str, Any]
     content_type: str = Field(default="article", description="Type of content (article, image, pdf, webpage)")
     processing_mode: str = Field(default="comprehensive", description="Processing mode (comprehensive, fast, basic)")
     include_visual_analysis: bool = Field(default=True, description="Include visual analysis")
@@ -95,7 +101,7 @@ class ContentRequest(BaseModel):
 
 class URLRequest(BaseModel):
     url: str = Field(..., description="URL to process")
-    screenshot_path: Optional[str] = Field(default=None, description="Path to save screenshot")
+    screenshot_path: str | None = Field(default=None, description="Path to save screenshot")
 
 class ImageRequest(BaseModel):
     image_path: str = Field(..., description="Path to image file")
@@ -105,15 +111,15 @@ class StructureRequest(BaseModel):
     analysis_depth: str = Field(default="comprehensive", description="Analysis depth")
 
 class MultimediaRequest(BaseModel):
-    content: Union[str, bytes, Dict[str, Any]]
-    extraction_types: List[str] = Field(default=["images", "text", "layout", "metadata"])
+    content: str | bytes | dict[str, Any]
+    extraction_types: list[str] = Field(default=["images", "text", "layout", "metadata"])
 
 class ToolCall(BaseModel):
-    args: List[Any]
-    kwargs: Dict[str, Any]
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 # Global variables
-mcp_client: Optional[MCPBusClient] = None
+mcp_client: MCPBusClient | None = None
 ready = False
 
 # Environment variables
@@ -475,12 +481,12 @@ async def clear_cache(background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Tool functions for direct import (legacy compatibility)
-async def extract_news_content(url: str, screenshot_path: str = None) -> Dict[str, Any]:
+async def extract_news_content(url: str, screenshot_path: str = None) -> dict[str, Any]:
     """Extract news content from URL"""
     result = await extract_news_from_url(url=url, screenshot_path=screenshot_path)
     return result
 
-def analyze_image_content(image_path: str) -> Dict[str, str]:
+def analyze_image_content(image_path: str) -> dict[str, str]:
     """Analyze image content with LLaVA"""
     return analyze_image_with_llava(image_path=image_path)
 

@@ -4,10 +4,10 @@ Provides async database operations using asyncpg for non-blocking operations
 """
 
 import os
-from common.observability import get_logger
-
-from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
+from typing import Any
+
+from common.observability import get_logger
 
 try:
     import asyncpg
@@ -25,7 +25,7 @@ POSTGRES_USER = os.environ.get("POSTGRES_USER")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 
 # Global async connection pool
-_async_pool: Optional[Any] = None
+_async_pool: Any | None = None
 
 async def initialize_async_pool():
     """
@@ -79,7 +79,7 @@ async def get_async_connection():
     finally:
         await pool.release(conn)
 
-async def execute_async_query(query: str, *args, fetch: bool = True) -> Optional[List[Dict[str, Any]]]:
+async def execute_async_query(query: str, *args, fetch: bool = True) -> list[dict[str, Any]] | None:
     """
     Execute an async database query.
 
@@ -98,7 +98,7 @@ async def execute_async_query(query: str, *args, fetch: bool = True) -> Optional
             await conn.execute(query, *args)
             return None
 
-async def execute_async_query_single(query: str, *args) -> Optional[Dict[str, Any]]:
+async def execute_async_query_single(query: str, *args) -> dict[str, Any] | None:
     """
     Execute a query and return a single result row.
 
@@ -127,7 +127,7 @@ async def async_health_check() -> bool:
         logger.error(f"Async database health check failed: {e}")
         return False
 
-async def save_article_async(content: str, metadata: Dict[str, Any], embedding: List[float]) -> Dict[str, Any]:
+async def save_article_async(content: str, metadata: dict[str, Any], embedding: list[float]) -> dict[str, Any]:
     """
     Async version of save_article for high-throughput scenarios.
 
@@ -161,7 +161,7 @@ async def save_article_async(content: str, metadata: Dict[str, Any], embedding: 
         logger.error(f"Error saving article async: {e}")
         return {"error": str(e)}
 
-async def vector_search_async(query_embedding: List[float], top_k: int = 5) -> List[Dict[str, Any]]:
+async def vector_search_async(query_embedding: list[float], top_k: int = 5) -> list[dict[str, Any]]:
     """
     Async vector search using pre-computed query embedding.
 

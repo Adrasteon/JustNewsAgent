@@ -3,12 +3,11 @@ Historical data storage for GPU monitoring dashboard.
 Provides SQLite-based storage for metrics, allocations, and performance trends.
 """
 
-import sqlite3
-
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from contextlib import contextmanager
 import os
+import sqlite3
+from contextlib import contextmanager
+from datetime import datetime, timedelta
+
 from common.observability import get_logger
 
 logger = get_logger(__name__)
@@ -113,7 +112,7 @@ class DashboardStorage:
         finally:
             conn.close()
 
-    def store_gpu_metrics(self, metrics_data: Dict):
+    def store_gpu_metrics(self, metrics_data: dict):
         """Store GPU metrics data."""
         try:
             with self._get_connection() as conn:
@@ -150,7 +149,7 @@ class DashboardStorage:
         except Exception as e:
             logger.error(f"Error storing GPU metrics: {e}")
 
-    def store_agent_allocations(self, allocations_data: List[Dict]):
+    def store_agent_allocations(self, allocations_data: list[dict]):
         """Store agent allocation data."""
         try:
             with self._get_connection() as conn:
@@ -178,7 +177,7 @@ class DashboardStorage:
         except Exception as e:
             logger.error(f"Error storing agent allocations: {e}")
 
-    def store_performance_metrics(self, metrics: Dict):
+    def store_performance_metrics(self, metrics: dict):
         """Store performance metrics."""
         try:
             with self._get_connection() as conn:
@@ -200,7 +199,7 @@ class DashboardStorage:
         except Exception as e:
             logger.error(f"Error storing performance metrics: {e}")
 
-    def store_alert(self, alert_data: Dict):
+    def store_alert(self, alert_data: dict):
         """Store an alert."""
         try:
             with self._get_connection() as conn:
@@ -228,7 +227,7 @@ class DashboardStorage:
         except Exception as e:
             logger.error(f"Error storing alert: {e}")
 
-    def get_gpu_metrics_history(self, hours: int = 24, gpu_index: Optional[int] = None, metric_type: str = "all") -> List[Dict]:
+    def get_gpu_metrics_history(self, hours: int = 24, gpu_index: int | None = None, metric_type: str = "all") -> list[dict]:
         """Get GPU metrics history."""
         try:
             with self._get_connection() as conn:
@@ -288,13 +287,13 @@ class DashboardStorage:
                 columns = [desc[0] for desc in cursor.description]
                 rows = cursor.fetchall()
 
-                return [dict(zip(columns, row)) for row in rows]
+                return [dict(zip(columns, row, strict=False)) for row in rows]
 
         except Exception as e:
             logger.error(f"Error retrieving GPU metrics history: {e}")
             return []
 
-    def get_agent_allocation_history(self, hours: int = 24, agent_name: Optional[str] = None) -> List[Dict]:
+    def get_agent_allocation_history(self, hours: int = 24, agent_name: str | None = None) -> list[dict]:
         """Get agent allocation history."""
         try:
             with self._get_connection() as conn:
@@ -320,13 +319,13 @@ class DashboardStorage:
                 columns = [desc[0] for desc in cursor.description]
                 rows = cursor.fetchall()
 
-                return [dict(zip(columns, row)) for row in rows]
+                return [dict(zip(columns, row, strict=False)) for row in rows]
 
         except Exception as e:
             logger.error(f"Error retrieving agent allocation history: {e}")
             return []
 
-    def get_performance_trends(self, hours: int = 24) -> Dict[str, List]:
+    def get_performance_trends(self, hours: int = 24) -> dict[str, list]:
         """Get performance trends data."""
         try:
             with self._get_connection() as conn:
@@ -376,7 +375,7 @@ class DashboardStorage:
             logger.error(f"Error retrieving performance trends: {e}")
             return {'timestamps': [], 'error': str(e)}
 
-    def get_recent_alerts(self, limit: int = 50) -> List[Dict]:
+    def get_recent_alerts(self, limit: int = 50) -> list[dict]:
         """Get recent alerts."""
         try:
             with self._get_connection() as conn:
@@ -392,7 +391,7 @@ class DashboardStorage:
                 columns = [desc[0] for desc in cursor.description]
                 rows = cursor.fetchall()
 
-                return [dict(zip(columns, row)) for row in rows]
+                return [dict(zip(columns, row, strict=False)) for row in rows]
 
         except Exception as e:
             logger.error(f"Error retrieving recent alerts: {e}")
@@ -440,7 +439,7 @@ class DashboardStorage:
         except Exception as e:
             logger.error(f"Error cleaning up old data: {e}")
 
-    def get_storage_stats(self) -> Dict:
+    def get_storage_stats(self) -> dict:
         """Get database storage statistics."""
         try:
             with self._get_connection() as conn:
@@ -466,7 +465,7 @@ class DashboardStorage:
             return {}
 
 # Global storage instance
-_storage_instance: Optional[DashboardStorage] = None
+_storage_instance: DashboardStorage | None = None
 
 def get_storage() -> DashboardStorage:
     """Get the global storage instance."""

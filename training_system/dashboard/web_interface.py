@@ -18,8 +18,7 @@ Framework: FastAPI + React/Vue.js frontend
 Status: Placeholder for future development
 """
 
-from typing import Dict, Any
-
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -27,12 +26,12 @@ class TrainingDashboard:
     """
     Web dashboard for online training system management
     """
-    
+
     def __init__(self):
         """Initialize dashboard components"""
         self.app = None
         logger.info("🎨 Training Dashboard initialized (placeholder)")
-    
+
     def create_dashboard_app(self):
         """Create FastAPI application for dashboard"""
         # Future implementation:
@@ -41,8 +40,8 @@ class TrainingDashboard:
         # - WebSocket for real-time updates
         # - Authentication and authorization
         pass
-    
-    def get_dashboard_data(self) -> Dict[str, Any]:
+
+    def get_dashboard_data(self) -> dict[str, Any]:
         """Get data for dashboard visualization"""
         # Future implementation:
         # - Real-time training metrics
@@ -50,7 +49,7 @@ class TrainingDashboard:
         # - Agent status summaries
         # - Training queue statistics
         pass
-    
+
     def render_dashboard(self) -> str:
         """Render dashboard HTML (placeholder)"""
         return """
@@ -99,8 +98,8 @@ def create_training_dashboard():
 def start_dashboard_server(port: int = 8080):
     """Start the dashboard web server"""
     logger.info(f"🎨 Dashboard server placeholder - would start on port {port}")
-    
-def get_dashboard_metrics() -> Dict[str, Any]:
+
+def get_dashboard_metrics() -> dict[str, Any]:
     """Get metrics for dashboard display"""
     return {
         "placeholder": "Dashboard metrics will be implemented here",

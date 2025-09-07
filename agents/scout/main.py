@@ -3,19 +3,20 @@ Main file for the Scout Agent.
 """
 # main.py for Scout Agent
 
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+import requests
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from datetime import datetime
-import os
-from common.observability import get_logger
-import requests
-from contextlib import asynccontextmanager
 
 # Import security utilities
 from agents.scout.security_utils import log_security_event, rate_limit, validate_url
+from common.observability import get_logger
 
 # Configure logging
 
@@ -58,7 +59,7 @@ async def lifespan(app: FastAPI):
             agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
             tools=[
                 "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
-                "intelligent_source_discovery", "intelligent_content_crawl", 
+                "intelligent_source_discovery", "intelligent_content_crawl",
                 "intelligent_batch_analysis", "enhanced_newsreader_crawl",
                 "production_crawl_ultra_fast", "get_production_crawler_info"
             ],
@@ -88,7 +89,7 @@ app.add_middleware(
 async def security_middleware(request: Request, call_next):
     """Security middleware for request validation and rate limiting."""
     client_ip = request.client.host if request.client else "unknown"
-    
+
     # Rate limiting per IP
     if not rate_limit(f"request_{client_ip}"):
         log_security_event('rate_limit_exceeded', {
@@ -100,7 +101,7 @@ async def security_middleware(request: Request, call_next):
             status_code=429,
             content={"error": "Rate limit exceeded", "retry_after": 60}
         )
-    
+
     # Log suspicious requests
     user_agent = request.headers.get("user-agent", "")
     if not user_agent or len(user_agent) < 10:
@@ -109,7 +110,7 @@ async def security_middleware(request: Request, call_next):
             'path': request.url.path,
             'user_agent': user_agent[:100]
         })
-    
+
     response = await call_next(request)
     return response
 
@@ -123,7 +124,7 @@ async def lifespan(app: FastAPI):
             agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
             tools=[
                 "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
-                "intelligent_source_discovery", "intelligent_content_crawl", 
+                "intelligent_source_discovery", "intelligent_content_crawl",
                 "intelligent_batch_analysis", "enhanced_newsreader_crawl",
                 "production_crawl_ultra_fast", "get_production_crawler_info"
             ],
@@ -171,7 +172,7 @@ def crawl_url(call: ToolCall):
     try:
         from agents.scout.tools import crawl_url
         logger.info(f"Calling crawl_url with args: {call.args} and kwargs: {call.kwargs}")
-        
+
         # Validate URL if provided
         url = call.kwargs.get("url") or (call.args[0] if call.args else None)
         if url and not validate_url(url):
@@ -180,7 +181,7 @@ def crawl_url(call: ToolCall):
                 'endpoint': '/crawl_url'
             })
             raise HTTPException(status_code=400, detail="Invalid or unsafe URL")
-        
+
         return crawl_url(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in crawl_url: {e}")
@@ -208,7 +209,7 @@ async def enhanced_deep_crawl_site_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import enhanced_deep_crawl_site
         logger.info(f"Calling enhanced_deep_crawl_site with args: {call.args} and kwargs: {call.kwargs}")
-        
+
         # Validate URL if provided
         url = call.kwargs.get("url") or (call.args[0] if call.args else None)
         if url and not validate_url(url):
@@ -217,7 +218,7 @@ async def enhanced_deep_crawl_site_endpoint(call: ToolCall):
                 'endpoint': '/enhanced_deep_crawl_site'
             })
             raise HTTPException(status_code=400, detail="Invalid or unsafe URL")
-        
+
         return await enhanced_deep_crawl_site(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in enhanced_deep_crawl_site: {e}")
@@ -301,7 +302,7 @@ async def production_crawl_ai_enhanced_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import production_crawl_ai_enhanced
         logger.info(f"Calling production_crawl_ai_enhanced with args: {call.args} and kwargs: {call.kwargs}")
-        
+
         # Validate site parameter
         site = call.kwargs.get("site") or (call.args[0] if call.args else None)
         if not site or not isinstance(site, str):
@@ -310,7 +311,7 @@ async def production_crawl_ai_enhanced_endpoint(call: ToolCall):
                 'site': str(site)[:50]
             })
             raise HTTPException(status_code=400, detail="Invalid site identifier")
-        
+
         return await production_crawl_ai_enhanced(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in production_crawl_ai_enhanced: {e}")
@@ -328,7 +329,7 @@ async def production_crawl_ultra_fast_endpoint(call: ToolCall):
     try:
         from agents.scout.tools import production_crawl_ultra_fast
         logger.info(f"Calling production_crawl_ultra_fast with args: {call.args} and kwargs: {call.kwargs}")
-        
+
         # Validate site parameter
         site = call.kwargs.get("site") or (call.args[0] if call.args else None)
         if not site or not isinstance(site, str):
@@ -337,7 +338,7 @@ async def production_crawl_ultra_fast_endpoint(call: ToolCall):
                 'site': str(site)[:50]
             })
             raise HTTPException(status_code=400, detail="Invalid site identifier")
-        
+
         return await production_crawl_ultra_fast(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in production_crawl_ultra_fast: {e}")

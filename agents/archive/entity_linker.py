@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Phase 3 Advanced Feature: Entity Linking with External Knowledge Bases
@@ -16,12 +17,12 @@ Features:
 """
 
 import asyncio
+import hashlib
 import json
-
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import hashlib
+from typing import Any
+
 import aiohttp
 
 logger = get_logger(__name__)
@@ -85,7 +86,7 @@ class ExternalKnowledgeBaseLinker:
         content = f"{entity_name}:{kb_name}"
         return hashlib.md5(content.encode()).hexdigest()
 
-    def _load_cache(self, cache_key: str) -> Optional[Dict[str, Any]]:
+    def _load_cache(self, cache_key: str) -> dict[str, Any] | None:
         """Load cached entity data"""
         if not self.enable_cache:
             return None
@@ -93,7 +94,7 @@ class ExternalKnowledgeBaseLinker:
         cache_file = self.cache_dir / f"{cache_key}.json"
         if cache_file.exists():
             try:
-                with open(cache_file, 'r', encoding='utf-8') as f:
+                with open(cache_file, encoding='utf-8') as f:
                     cached_data = json.load(f)
 
                 # Check if cache is still valid (24 hours)
@@ -106,7 +107,7 @@ class ExternalKnowledgeBaseLinker:
 
         return None
 
-    def _save_cache(self, cache_key: str, data: Dict[str, Any]):
+    def _save_cache(self, cache_key: str, data: dict[str, Any]):
         """Save entity data to cache"""
         if not self.enable_cache:
             return
@@ -123,7 +124,7 @@ class ExternalKnowledgeBaseLinker:
         except Exception as e:
             logger.debug(f"Cache save error for {cache_key}: {e}")
 
-    async def link_entity_wikidata(self, entity_name: str, entity_type: str = None) -> List[Dict[str, Any]]:
+    async def link_entity_wikidata(self, entity_name: str, entity_type: str = None) -> list[dict[str, Any]]:
         """
         Link entity to Wikidata knowledge base
 
@@ -200,7 +201,7 @@ class ExternalKnowledgeBaseLinker:
         self._save_cache(cache_key, results)
         return results
 
-    async def link_entity_dbpedia(self, entity_name: str, entity_type: str = None) -> List[Dict[str, Any]]:
+    async def link_entity_dbpedia(self, entity_name: str, entity_type: str = None) -> list[dict[str, Any]]:
         """
         Link entity to DBpedia knowledge base
 
@@ -314,7 +315,7 @@ class ExternalKnowledgeBaseLinker:
         # Normalize to 0-1 range
         return min(confidence, 1.0)
 
-    def _get_entity_type_keywords(self, entity_type: str) -> List[str]:
+    def _get_entity_type_keywords(self, entity_type: str) -> list[str]:
         """Get keywords associated with entity types for better matching"""
         type_keywords = {
             'PERSON': ['person', 'individual', 'human', 'politician', 'actor', 'artist', 'scientist'],
@@ -338,7 +339,7 @@ class ExternalKnowledgeBaseLinker:
         return type_mapping.get(entity_type.upper(), '')
 
     async def enrich_entity(self, entity_name: str, entity_type: str = None,
-                          knowledge_bases: List[str] = None) -> Dict[str, Any]:
+                          knowledge_bases: list[str] = None) -> dict[str, Any]:
         """
         Enrich entity with information from multiple knowledge bases
 
@@ -388,8 +389,8 @@ class ExternalKnowledgeBaseLinker:
 
         return enriched_data
 
-    async def batch_enrich_entities(self, entities: List[Dict[str, Any]],
-                                  knowledge_bases: List[str] = None) -> List[Dict[str, Any]]:
+    async def batch_enrich_entities(self, entities: list[dict[str, Any]],
+                                  knowledge_bases: list[str] = None) -> list[dict[str, Any]]:
         """
         Batch enrich multiple entities
 
@@ -405,7 +406,7 @@ class ExternalKnowledgeBaseLinker:
         # Process entities with concurrency control
         semaphore = asyncio.Semaphore(5)  # Limit concurrent requests
 
-        async def enrich_single_entity(entity_data: Dict[str, Any]):
+        async def enrich_single_entity(entity_data: dict[str, Any]):
             async with semaphore:
                 entity_name = entity_data.get('name', '')
                 entity_type = entity_data.get('entity_type')
@@ -443,7 +444,7 @@ class EntityLinkerManager:
 
         logger.info("🎯 Entity Linker Manager initialized")
 
-    async def enrich_knowledge_graph_entities(self, limit: int = 100) -> Dict[str, Any]:
+    async def enrich_knowledge_graph_entities(self, limit: int = 100) -> dict[str, Any]:
         """
         Enrich entities in the knowledge graph with external knowledge
 
@@ -511,7 +512,7 @@ class EntityLinkerManager:
         logger.info(f"✅ Entity enrichment complete: {updated_count}/{len(enriched_entities)} entities enriched")
         return result
 
-    async def get_entity_external_info(self, entity_name: str, entity_type: str = None) -> Dict[str, Any]:
+    async def get_entity_external_info(self, entity_name: str, entity_type: str = None) -> dict[str, Any]:
         """
         Get external information for a specific entity
 
@@ -525,7 +526,7 @@ class EntityLinkerManager:
         async with self.linker:
             return await self.linker.enrich_entity(entity_name, entity_type)
 
-    def get_enrichment_statistics(self) -> Dict[str, Any]:
+    def get_enrichment_statistics(self) -> dict[str, Any]:
         """Get entity enrichment statistics"""
         return {
             **self.enrichment_stats,
@@ -538,7 +539,7 @@ class EntityLinkerManager:
 
 # Standalone functions for easy integration
 async def enrich_entity_standalone(entity_name: str, entity_type: str = None,
-                                 knowledge_bases: List[str] = None) -> Dict[str, Any]:
+                                 knowledge_bases: list[str] = None) -> dict[str, Any]:
     """
     Standalone function to enrich a single entity
 

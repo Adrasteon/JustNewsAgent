@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Compliance Dashboard API
@@ -16,14 +17,15 @@ Features:
 
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from fastapi import APIRouter, HTTPException, Depends, Query
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
 
 from agents.common.auth_models import UserRole, get_current_user
-from agents.common.compliance_retention import DataRetentionManager
 from agents.common.compliance_audit import AuditLogAnalyzer, ComplianceAuditLogger
+from agents.common.compliance_retention import DataRetentionManager
 
 logger = get_logger(__name__)
 
@@ -51,8 +53,8 @@ class ComplianceMetrics(BaseModel):
 
 class DataRetentionStatus(BaseModel):
     """Data retention status"""
-    policies: Dict[str, Any]
-    last_cleanup: Optional[str]
+    policies: dict[str, Any]
+    last_cleanup: str | None
     next_scheduled_cleanup: str
     expired_records_pending: int
 
@@ -62,18 +64,18 @@ class UserRequestSummary(BaseModel):
     completed_exports: int
     pending_deletions: int
     completed_deletions: int
-    recent_requests: List[Dict[str, Any]]
+    recent_requests: list[dict[str, Any]]
 
 class AuditLogSummary(BaseModel):
     """Audit log summary"""
     total_events: int
     compliance_events: int
     security_events: int
-    recent_events: List[Dict[str, Any]]
-    severity_distribution: Dict[str, int]
+    recent_events: list[dict[str, Any]]
+    severity_distribution: dict[str, int]
 
 # Helper function for admin access
-async def get_admin_user(current_user: Dict[str, Any] = Depends(get_current_user)):
+async def get_admin_user(current_user: dict[str, Any] = Depends(get_current_user)):
     """Dependency to ensure admin access"""
     if current_user.get('role') != UserRole.ADMIN.value:
         raise HTTPException(
@@ -86,12 +88,12 @@ async def get_admin_user(current_user: Dict[str, Any] = Depends(get_current_user
 
 @router.get("/metrics", response_model=ComplianceMetrics)
 async def get_compliance_metrics(
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Get overall compliance metrics"""
     try:
         # Get user counts
-        from agents.common.auth_models import get_user_count, get_all_users
+        from agents.common.auth_models import get_all_users, get_user_count
 
         total_users = get_user_count()
         all_users = get_all_users(limit=1000)
@@ -138,7 +140,7 @@ async def get_compliance_metrics(
 
 @router.get("/retention-status", response_model=DataRetentionStatus)
 async def get_data_retention_status(
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Get data retention status and policies"""
     try:
@@ -188,7 +190,7 @@ async def get_data_retention_status(
 @router.get("/user-requests", response_model=UserRequestSummary)
 async def get_user_request_summary(
     limit: int = Query(10, ge=1, le=50),
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Get summary of user compliance requests"""
     try:
@@ -242,7 +244,7 @@ async def get_user_request_summary(
 @router.get("/audit-logs", response_model=AuditLogSummary)
 async def get_audit_log_summary(
     days: int = Query(7, ge=1, le=90),
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Get audit log summary and recent events"""
     try:
@@ -282,7 +284,7 @@ async def get_audit_log_summary(
 @router.get("/gdpr-report")
 async def get_gdpr_compliance_report(
     days: int = Query(90, ge=30, le=365),
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Generate comprehensive GDPR compliance report"""
     try:
@@ -320,7 +322,7 @@ async def get_gdpr_compliance_report(
 @router.post("/retention-cleanup")
 async def trigger_retention_cleanup(
     dry_run: bool = Query(True, description="Run in dry-run mode (no actual deletion)"),
-    current_user: Dict[str, Any] = Depends(get_admin_user)
+    current_user: dict[str, Any] = Depends(get_admin_user)
 ):
     """Manually trigger data retention cleanup"""
     try:

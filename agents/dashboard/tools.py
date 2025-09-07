@@ -5,7 +5,6 @@ Tools for the Dashboard Agent.
 
 
 import time
-from typing import Dict, List
 
 logger = get_logger(__name__)
 
@@ -27,7 +26,7 @@ def process_command_response(response: dict) -> dict:
         "details": response
     }
 
-def get_gpu_metrics() -> Dict:
+def get_gpu_metrics() -> dict:
     """Get current GPU metrics from nvidia-smi."""
     try:
         import subprocess
@@ -74,7 +73,7 @@ def get_gpu_metrics() -> Dict:
             'timestamp': time.time()
         }
 
-def format_gpu_dashboard_data(gpu_info: Dict, agent_usage: Dict) -> Dict:
+def format_gpu_dashboard_data(gpu_info: dict, agent_usage: dict) -> dict:
     """Format GPU data for dashboard display."""
     try:
         gpus = gpu_info.get('gpus', [])
@@ -116,7 +115,7 @@ def format_gpu_dashboard_data(gpu_info: Dict, agent_usage: Dict) -> Dict:
             'timestamp': time.time()
         }
 
-def generate_gpu_alerts(gpus: List[Dict], agents: Dict) -> List[Dict]:
+def generate_gpu_alerts(gpus: list[dict], agents: dict) -> list[dict]:
     """Generate alerts based on GPU metrics."""
     alerts = []
 
@@ -168,7 +167,7 @@ def generate_gpu_alerts(gpus: List[Dict], agents: Dict) -> List[Dict]:
 
     return alerts
 
-def get_performance_analytics(hours: int = 24) -> Dict:
+def get_performance_analytics(hours: int = 24) -> dict:
     """Get performance analytics for the specified time period."""
     try:
         # This would typically query a database or time-series storage

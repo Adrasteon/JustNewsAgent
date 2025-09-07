@@ -11,7 +11,7 @@ CONFIG_FILE_PATH = "dashboard_config.json"
 def load_config():
     """Load the configuration from a JSON file."""
     if os.path.exists(CONFIG_FILE_PATH):
-        with open(CONFIG_FILE_PATH, "r", encoding="utf-8") as file:
+        with open(CONFIG_FILE_PATH, encoding="utf-8") as file:
             return json.load(file)
     return {
     "dashboard_port": 8011,

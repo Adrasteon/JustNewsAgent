@@ -11,14 +11,17 @@ This module implements data minimization principles by:
 """
 
 import json
-
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Set, Any
-from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import Any
 
-from agents.common.compliance_audit import ComplianceAuditLogger, AuditEventType, AuditEventSeverity
+from agents.common.compliance_audit import (
+    AuditEventSeverity,
+    AuditEventType,
+    ComplianceAuditLogger,
+)
 
 
 class DataPurpose(Enum):
@@ -46,10 +49,10 @@ class DataCategory(Enum):
 class DataCollectionPolicy:
     """Policy defining what data can be collected and for what purposes"""
     purpose: DataPurpose
-    categories: List[DataCategory]
+    categories: list[DataCategory]
     retention_period_days: int
-    required_fields: List[str]
-    optional_fields: List[str]
+    required_fields: list[str]
+    optional_fields: list[str]
     justification: str
     legal_basis: str
     created_at: datetime
@@ -59,7 +62,7 @@ class DataCollectionPolicy:
         """Check if the policy has expired"""
         return datetime.now() > (self.created_at + timedelta(days=self.retention_period_days))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization"""
         data = asdict(self)
         data['purpose'] = self.purpose.value
@@ -72,10 +75,10 @@ class DataCollectionPolicy:
 class DataMinimizationManager:
     """Manages data minimization policies and enforcement"""
 
-    def __init__(self, audit_logger: Optional[ComplianceAuditLogger] = None):
+    def __init__(self, audit_logger: ComplianceAuditLogger | None = None):
         self.audit_logger = audit_logger or ComplianceAuditLogger()
-        self.policies: Dict[str, DataCollectionPolicy] = {}
-        self.data_usage_tracker: Dict[str, Set[str]] = {}  # user_id -> set of purposes
+        self.policies: dict[str, DataCollectionPolicy] = {}
+        self.data_usage_tracker: dict[str, set[str]] = {}  # user_id -> set of purposes
         self.logger = get_logger(__name__)
 
         # Load existing policies
@@ -86,7 +89,7 @@ class DataMinimizationManager:
         try:
             policy_file = Path("config/data_minimization_policies.json")
             if policy_file.exists():
-                with open(policy_file, 'r') as f:
+                with open(policy_file) as f:
                     data = json.load(f)
                     for policy_data in data.get('policies', []):
                         policy = self._deserialize_policy(policy_data)
@@ -142,7 +145,7 @@ class DataMinimizationManager:
         self._save_policies()
         self.logger.info("Created default data minimization policies")
 
-    def _deserialize_policy(self, data: Dict[str, Any]) -> DataCollectionPolicy:
+    def _deserialize_policy(self, data: dict[str, Any]) -> DataCollectionPolicy:
         """Deserialize policy from dictionary"""
         return DataCollectionPolicy(
             purpose=DataPurpose(data['purpose']),
@@ -173,8 +176,8 @@ class DataMinimizationManager:
         except Exception as e:
             self.logger.error(f"Failed to save policies: {e}")
 
-    def validate_data_collection(self, purpose: str, data_fields: List[str],
-                               user_id: str) -> Dict[str, Any]:
+    def validate_data_collection(self, purpose: str, data_fields: list[str],
+                               user_id: str) -> dict[str, Any]:
         """
         Validate if data collection is allowed under minimization principles
 
@@ -259,8 +262,8 @@ class DataMinimizationManager:
             "policy": policy.to_dict()
         }
 
-    def minimize_data_payload(self, data: Dict[str, Any], purpose: str,
-                            user_id: str) -> Dict[str, Any]:
+    def minimize_data_payload(self, data: dict[str, Any], purpose: str,
+                            user_id: str) -> dict[str, Any]:
         """
         Minimize data payload by removing unnecessary fields
 
@@ -309,7 +312,7 @@ class DataMinimizationManager:
 
         return minimized_data
 
-    def cleanup_expired_data(self, user_id: str) -> Dict[str, Any]:
+    def cleanup_expired_data(self, user_id: str) -> dict[str, Any]:
         """
         Clean up expired data for a user
 
@@ -359,7 +362,7 @@ class DataMinimizationManager:
             "message": f"Cleaned {len(expired_purposes)} expired data purposes"
         }
 
-    def get_data_usage_summary(self, user_id: str) -> Dict[str, Any]:
+    def get_data_usage_summary(self, user_id: str) -> dict[str, Any]:
         """Get data usage summary for a user"""
         if user_id not in self.data_usage_tracker:
             return {"purposes": [], "policies": []}
@@ -403,7 +406,7 @@ class DataMinimizationManager:
             self.logger.error(f"Failed to add policy: {e}")
             return False
 
-    def get_compliance_status(self) -> Dict[str, Any]:
+    def get_compliance_status(self) -> dict[str, Any]:
         """Get overall data minimization compliance status"""
         total_policies = len(self.policies)
         expired_policies = sum(1 for p in self.policies.values() if p.is_expired())

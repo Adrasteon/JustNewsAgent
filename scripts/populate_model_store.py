@@ -15,7 +15,6 @@ import json
 import os
 import shutil
 from pathlib import Path
-from typing import Dict, List
 
 ROOT = Path(__file__).resolve().parents[1]
 MAP_FILE = ROOT / "markdown_docs" / "agent_documentation" / "AGENT_MODEL_MAP.json"
@@ -23,7 +22,7 @@ MODEL_STORE_ROOT = Path(os.environ.get("MODEL_STORE_ROOT", "/media/adra/Data/jus
 VERSION_NAME = os.environ.get("MODEL_STORE_VERSION", "v1")
 
 
-def load_map() -> Dict[str, List[str]]:
+def load_map() -> dict[str, list[str]]:
     with MAP_FILE.open() as f:
         return json.load(f)
 
@@ -43,7 +42,7 @@ def snapshot_download(repo_id: str, target: Path):
         print(f"snapshot_download not available or failed for {repo_id}: {e}")
     # Fallback: try to import with transformers to force cache
     try:
-        from transformers import AutoTokenizer, AutoModel, AutoModelForCausalLM
+        from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
         print(f"Attempting transformers.from_pretrained for {repo_id}")
         # Try tokenizer + model
         AutoTokenizer.from_pretrained(repo_id, cache_dir=str(target))

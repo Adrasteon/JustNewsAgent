@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Generic Site Crawler for JustNewsAgent Production Crawlers
@@ -22,18 +23,22 @@ Key Features:
 
 import asyncio
 import json
-import time
-import re
 import random
+import re
+import time
 from datetime import datetime
-from playwright.async_api import async_playwright
-from typing import List, Dict, Optional, Any
+from typing import Any
+from urllib.parse import urljoin, urlparse
 
-from urllib.parse import urlparse, urljoin
+from playwright.async_api import async_playwright
 
 from ..crawler_utils import (
-    RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata,
-    get_active_sources, get_sources_by_domain
+    CanonicalMetadata,
+    ModalDismisser,
+    RateLimiter,
+    RobotsChecker,
+    get_active_sources,
+    get_sources_by_domain,
 )
 
 logger = get_logger(__name__)
@@ -42,7 +47,7 @@ logger = get_logger(__name__)
 class SiteConfig:
     """Configuration for a specific news site"""
 
-    def __init__(self, source_data: Dict[str, Any]):
+    def __init__(self, source_data: dict[str, Any]):
         self.source_id = source_data.get('id')
         self.url = source_data.get('url')
         self.domain = source_data.get('domain')
@@ -138,7 +143,7 @@ class GenericSiteCrawler:
         self.processed_urls = set()
         self.session_start_time = time.time()
 
-    async def get_article_urls(self, max_urls: int = 50) -> List[str]:
+    async def get_article_urls(self, max_urls: int = 50) -> list[str]:
         """Get article URLs from the site's main page"""
         browser = await async_playwright().start()
         browser_instance = await browser.chromium.launch(headless=True)
@@ -187,7 +192,7 @@ class GenericSiteCrawler:
             await browser_instance.close()
             return []
 
-    async def extract_content(self, page) -> Dict[str, Any]:
+    async def extract_content(self, page) -> dict[str, Any]:
         """Extract content using site-specific selectors"""
         try:
             # Get title
@@ -249,7 +254,7 @@ class GenericSiteCrawler:
                 "extraction_metadata": {"error": str(e)}
             }
 
-    async def process_single_url(self, browser, url: str) -> Optional[Dict]:
+    async def process_single_url(self, browser, url: str) -> dict | None:
         """Process a single URL from this site"""
         if url in self.processed_urls:
             return None
@@ -333,7 +338,7 @@ class GenericSiteCrawler:
                 error=str(e)
             )
 
-    async def crawl_site(self, max_articles: int = 25) -> List[Dict]:
+    async def crawl_site(self, max_articles: int = 25) -> list[dict]:
         """Crawl this site for articles"""
         logger.info(f"🚀 Starting generic crawl of {self.site_config.name} for {max_articles} articles")
 
@@ -406,7 +411,7 @@ class MultiSiteCrawler:
         self.articles_per_site = articles_per_site
         self.site_crawlers = {}
 
-    async def load_sources_from_db(self, domains: List[str] = None) -> List[SiteConfig]:
+    async def load_sources_from_db(self, domains: list[str] = None) -> list[SiteConfig]:
         """Load site configurations from database"""
         if domains:
             sources = get_sources_by_domain(domains)
@@ -425,8 +430,8 @@ class MultiSiteCrawler:
         logger.info(f"✅ Loaded {len(site_configs)} site configurations")
         return site_configs
 
-    async def crawl_multiple_sites(self, site_configs: List[SiteConfig],
-                                 max_total_articles: int = 100) -> Dict[str, List[Dict]]:
+    async def crawl_multiple_sites(self, site_configs: list[SiteConfig],
+                                 max_total_articles: int = 100) -> dict[str, list[dict]]:
         """Crawl multiple sites concurrently"""
         logger.info(f"🚀 Starting multi-site crawl of {len(site_configs)} sites")
 
@@ -454,8 +459,8 @@ class MultiSiteCrawler:
 
         return results
 
-    async def run_multi_site_crawl(self, domains: List[str] = None,
-                                 max_total_articles: int = 100) -> Dict[str, Any]:
+    async def run_multi_site_crawl(self, domains: list[str] = None,
+                                 max_total_articles: int = 100) -> dict[str, Any]:
         """Main entry point for multi-site crawling"""
         start_time = time.time()
 

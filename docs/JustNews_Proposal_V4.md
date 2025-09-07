@@ -1,6 +1,6 @@
 # JustNews V4: Hybrid Architecture Proposal
 
-**Last Updated**: 2025-08-21
+**Last Updated**: 2025-09-07
 
 ## **Current Environment Setup**
 

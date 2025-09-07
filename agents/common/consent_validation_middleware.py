@@ -14,12 +14,16 @@ Features:
 """
 
 
-from typing import Dict, List, Optional
-from fastapi import Request, HTTPException, status
+
+from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
-from agents.common.consent_management import consent_manager, ConsentType
-from agents.common.compliance_audit import ComplianceAuditLogger, AuditEventType, AuditEventSeverity
+from agents.common.compliance_audit import (
+    AuditEventSeverity,
+    AuditEventType,
+    ComplianceAuditLogger,
+)
+from agents.common.consent_management import ConsentType, consent_manager
 
 logger = get_logger(__name__)
 
@@ -27,11 +31,11 @@ logger = get_logger(__name__)
 class ConsentValidationMiddleware:
     """Middleware for validating user consents before data processing"""
 
-    def __init__(self, audit_logger: Optional[ComplianceAuditLogger] = None):
+    def __init__(self, audit_logger: ComplianceAuditLogger | None = None):
         self.audit_logger = audit_logger or ComplianceAuditLogger()
         self.consent_requirements = self._load_consent_requirements()
 
-    def _load_consent_requirements(self) -> Dict[str, List[ConsentType]]:
+    def _load_consent_requirements(self) -> dict[str, list[ConsentType]]:
         """Load consent requirements for different endpoints/operations"""
         return {
             # Authentication endpoints
@@ -62,7 +66,7 @@ class ConsentValidationMiddleware:
             "/admin/*": [],  # Admin operations may not require user consent
         }
 
-    def _get_required_consents(self, path: str) -> List[ConsentType]:
+    def _get_required_consents(self, path: str) -> list[ConsentType]:
         """Get required consents for a given endpoint path"""
         # Check for exact matches first
         if path in self.consent_requirements:
@@ -81,7 +85,7 @@ class ConsentValidationMiddleware:
 
         return []
 
-    def _extract_user_id(self, request: Request) -> Optional[str]:
+    def _extract_user_id(self, request: Request) -> str | None:
         """Extract user ID from request (JWT token, session, etc.)"""
         try:
             # Try to get from Authorization header
@@ -267,7 +271,7 @@ class ConsentValidationMiddleware:
         # Fall back to direct client IP
         return getattr(request.client, 'host', 'unknown') if request.client else 'unknown'
 
-    def add_consent_requirement(self, path: str, consents: List[ConsentType]):
+    def add_consent_requirement(self, path: str, consents: list[ConsentType]):
         """Add consent requirements for a specific endpoint"""
         self.consent_requirements[path] = consents
         logger.info(f"Added consent requirements for {path}: {[c.value for c in consents]}")
@@ -278,7 +282,7 @@ class ConsentValidationMiddleware:
             del self.consent_requirements[path]
             logger.info(f"Removed consent requirements for {path}")
 
-    def get_consent_requirements(self) -> Dict[str, List[str]]:
+    def get_consent_requirements(self) -> dict[str, list[str]]:
         """Get all consent requirements (for debugging/admin purposes)"""
         return {
             path: [consent.value for consent in consents]

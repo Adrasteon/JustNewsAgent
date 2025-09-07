@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 try:
     # Optional runtime dependency for running the HTTP server
@@ -17,12 +17,12 @@ class ToolCall:  # lightweight Pydantic-like fallback for tests
         self.kwargs = kwargs or {}
 
 
-def health() -> Dict[str, Any]:
+def health() -> dict[str, Any]:
     """Health handler (callable directly from tests)."""
     return {"status": "ok", "agent": "balancer"}
 
 
-def call_tool(name: str, call: ToolCall) -> Dict[str, Any]:
+def call_tool(name: str, call: ToolCall) -> dict[str, Any]:
     """Call a tool implemented in agents.balancer.tools.<name>.
 
     When FastAPI is available, the same function is mounted as a route.

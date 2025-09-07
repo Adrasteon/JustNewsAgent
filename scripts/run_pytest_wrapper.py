@@ -2,6 +2,7 @@
 This avoids conda run subprocess buffering issues when launching pytest via shell wrappers.
 """
 import sys
+
 import pytest
 
 if __name__ == '__main__':

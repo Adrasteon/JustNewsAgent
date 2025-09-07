@@ -7,12 +7,12 @@ unit tests can focus on repo logic instead of infrastructure.
 from __future__ import annotations
 
 import os
-from common.observability import get_logger
-import types
 import sys
-
+import types
 
 import pytest
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -170,7 +170,7 @@ def mock_mcp_bus(monkeypatch):
 
         def json(self):
             return self._json
-        
+
         def raise_for_status(self):
             if not (200 <= int(self.status_code) < 300):
                 raise Exception(f"HTTP {self.status_code}: {self.text}")
@@ -328,19 +328,19 @@ def provide_pipeline_placeholder(monkeypatch):
         except Exception:
             continue
         if not hasattr(mod, 'pipeline'):
-            setattr(mod, 'pipeline', lambda *a, **kw: (lambda *args, **kws: []))
+            mod.pipeline = lambda *a, **kw: lambda *args, **kws: []
         # Provide lightweight shims for higher-level tool functions referenced by tests
         # so monkeypatch.setattr won't fail when tests expect these to exist.
         if not hasattr(mod, 'score_sentiment'):
-            setattr(mod, 'score_sentiment', lambda text: 0.5)
+            mod.score_sentiment = lambda text: 0.5
         if not hasattr(mod, 'score_bias'):
-            setattr(mod, 'score_bias', lambda text: 0.5)
+            mod.score_bias = lambda text: 0.5
         if not hasattr(mod, 'critique_synthesis'):
-            setattr(mod, 'critique_synthesis', lambda summary, refs: "Critique")
+            mod.critique_synthesis = lambda summary, refs: "Critique"
         if not hasattr(mod, 'critique_neutrality'):
-            setattr(mod, 'critique_neutrality', lambda original, neutralized: "NeutralityCritique")
+            mod.critique_neutrality = lambda original, neutralized: "NeutralityCritique"
         if not hasattr(mod, 'get_llama_model'):
-            setattr(mod, 'get_llama_model', lambda: (None, None))
+            mod.get_llama_model = lambda: (None, None)
 
     # Provide a compatibility wrapper for identify_entities in analyst.tools
     try:
@@ -379,9 +379,9 @@ def provide_pipeline_placeholder(monkeypatch):
                 return None
 
         if not hasattr(synth_tools, 'AutoModelForCausalLM') or synth_tools.AutoModelForCausalLM is None:
-            setattr(synth_tools, 'AutoModelForCausalLM', _FakeAutoModelForCausalLM)
+            synth_tools.AutoModelForCausalLM = _FakeAutoModelForCausalLM
         if not hasattr(synth_tools, 'AutoTokenizer') or synth_tools.AutoTokenizer is None:
-            setattr(synth_tools, 'AutoTokenizer', _FakeAutoTokenizer)
+            synth_tools.AutoTokenizer = _FakeAutoTokenizer
     except Exception:
         pass
 

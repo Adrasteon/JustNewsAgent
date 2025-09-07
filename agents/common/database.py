@@ -4,11 +4,12 @@ Provides connection pooling and async database operations
 """
 
 import os
-from common.observability import get_logger
 from contextlib import contextmanager
-from typing import Optional
+
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
+
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -24,7 +25,7 @@ POOL_MIN_CONNECTIONS = int(os.environ.get("DB_POOL_MIN_CONNECTIONS", "2"))
 POOL_MAX_CONNECTIONS = int(os.environ.get("DB_POOL_MAX_CONNECTIONS", "10"))
 
 # Global connection pool
-_connection_pool: Optional[pool.ThreadedConnectionPool] = None
+_connection_pool: pool.ThreadedConnectionPool | None = None
 
 def initialize_connection_pool():
     """
@@ -99,7 +100,7 @@ def get_db_cursor(commit: bool = False):
         finally:
             cursor.close()
 
-def execute_query(query: str, params: tuple = None, fetch: bool = True) -> Optional[list]:
+def execute_query(query: str, params: tuple = None, fetch: bool = True) -> list | None:
     """
     Execute a database query with automatic connection management.
 
@@ -117,7 +118,7 @@ def execute_query(query: str, params: tuple = None, fetch: bool = True) -> Optio
             return cursor.fetchall()
         return None
 
-def execute_query_single(query: str, params: tuple = None) -> Optional[dict]:
+def execute_query_single(query: str, params: tuple = None) -> dict | None:
     """
     Execute a query and return a single result row.
 

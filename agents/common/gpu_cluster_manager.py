@@ -12,21 +12,21 @@ Provides comprehensive multi-GPU cluster management with:
 """
 
 import json
-
-import time
 import threading
-from datetime import datetime
-from typing import Dict, List, Any, Optional
+import time
 from collections import deque
-import numpy as np
-from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 # GPU and ML imports with graceful fallbacks
 try:
-    import torch
     import psutil
+    import torch
     GPU_AVAILABLE = torch.cuda.is_available()
     TORCH_AVAILABLE = True
 except ImportError:
@@ -83,10 +83,10 @@ class ClusterAllocation:
     allocation_id: str
     agent_name: str
     requested_memory_gb: float
-    allocated_gpus: List[int]
+    allocated_gpus: list[int]
     total_allocated_memory_gb: float
     allocation_time: datetime
-    expected_completion_time: Optional[datetime] = None
+    expected_completion_time: datetime | None = None
     status: str = "active"
 
 @dataclass
@@ -121,8 +121,8 @@ class GPUClusterManager:
 
         # Cluster state
         self.cluster_id = f"cluster_{int(time.time())}"
-        self.gpus: Dict[int, GPUInfo] = {}
-        self.allocations: Dict[str, ClusterAllocation] = {}
+        self.gpus: dict[int, GPUInfo] = {}
+        self.allocations: dict[str, ClusterAllocation] = {}
         self.cluster_metrics = ClusterMetrics(
             total_gpus=0,
             available_gpus=0,
@@ -207,7 +207,7 @@ class GPUClusterManager:
         self._update_cluster_metrics()
         logger.info("Simulated cluster initialized with 4 GPUs")
 
-    def _get_gpu_info(self, device_id: int) -> Optional[GPUInfo]:
+    def _get_gpu_info(self, device_id: int) -> GPUInfo | None:
         """Get detailed information about a specific GPU"""
         try:
             if not GPU_AVAILABLE:
@@ -265,7 +265,7 @@ class GPUClusterManager:
             return None
 
     def request_cluster_allocation(self, agent_name: str, requested_memory_gb: float,
-                                 model_type: str = "general", priority: str = "normal") -> Dict[str, Any]:
+                                 model_type: str = "general", priority: str = "normal") -> dict[str, Any]:
         """
         Request GPU allocation from the cluster
 
@@ -349,7 +349,7 @@ class GPUClusterManager:
             }
 
     def _find_optimal_allocation(self, requested_memory_gb: float, model_type: str,
-                               priority: str) -> Dict[str, Any]:
+                               priority: str) -> dict[str, Any]:
         """Find optimal GPU allocation for the request"""
         try:
             # Get available GPUs
@@ -589,7 +589,7 @@ class GPUClusterManager:
             # Trigger failover for affected allocations
             self._trigger_failover(failed_gpus)
 
-    def _trigger_failover(self, failed_gpus: List[int]):
+    def _trigger_failover(self, failed_gpus: list[int]):
         """Trigger failover for allocations affected by failed GPUs"""
         affected_allocations = []
 
@@ -618,7 +618,7 @@ class GPUClusterManager:
             logger.warning(f"Cleaning up expired allocation: {alloc_id}")
             self.release_cluster_allocation(alloc_id)
 
-    def get_cluster_report(self) -> Dict[str, Any]:
+    def get_cluster_report(self) -> dict[str, Any]:
         """Generate comprehensive cluster report"""
         try:
             metrics = self.get_cluster_metrics()
@@ -656,7 +656,7 @@ class GPUClusterManager:
         """Load cluster configuration"""
         try:
             if self.cluster_config_path.exists():
-                with open(self.cluster_config_path, 'r') as f:
+                with open(self.cluster_config_path) as f:
                     config = json.load(f)
 
                 self.max_allocation_time_hours = config.get('max_allocation_time_hours', 24)
@@ -691,7 +691,7 @@ class GPUClusterManager:
             logger.error(f"Failed to save cluster config: {e}")
 
 # Global cluster manager instance
-_cluster_manager: Optional[GPUClusterManager] = None
+_cluster_manager: GPUClusterManager | None = None
 _cluster_lock = threading.Lock()
 
 def get_gpu_cluster_manager() -> GPUClusterManager:
@@ -703,7 +703,7 @@ def get_gpu_cluster_manager() -> GPUClusterManager:
         return _cluster_manager
 
 def request_cluster_allocation(agent_name: str, memory_gb: float,
-                              model_type: str = "general", priority: str = "normal") -> Dict[str, Any]:
+                              model_type: str = "general", priority: str = "normal") -> dict[str, Any]:
     """Request GPU allocation from the cluster"""
     manager = get_gpu_cluster_manager()
     return manager.request_cluster_allocation(agent_name, memory_gb, model_type, priority)
@@ -713,7 +713,7 @@ def release_cluster_allocation(allocation_id: str) -> bool:
     manager = get_gpu_cluster_manager()
     return manager.release_cluster_allocation(allocation_id)
 
-def get_cluster_status() -> Dict[str, Any]:
+def get_cluster_status() -> dict[str, Any]:
     """Get cluster status and metrics"""
     manager = get_gpu_cluster_manager()
     metrics = manager.get_cluster_metrics()
@@ -724,7 +724,7 @@ def get_cluster_status() -> Dict[str, Any]:
         'available_gpus': sum(1 for gpu in manager.gpus.values() if gpu.status == GPUStatus.AVAILABLE)
     }
 
-def get_cluster_report() -> Dict[str, Any]:
+def get_cluster_report() -> dict[str, Any]:
     """Get comprehensive cluster report"""
     manager = get_gpu_cluster_manager()
     return manager.get_cluster_report()

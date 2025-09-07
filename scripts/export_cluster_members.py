@@ -6,8 +6,8 @@ This script reads logs/crawl/dedup_review.csv to locate the cluster and member i
 It imports the fetch_article/to_markdown logic from export_article_md.py by executing it as a module.
 """
 import csv
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 CSV_PATH = Path('logs/crawl/dedup_review.csv')

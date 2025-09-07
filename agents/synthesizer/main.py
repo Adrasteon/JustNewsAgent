@@ -2,13 +2,15 @@
 Main file for the Synthesizer Agent.
 """
 # main.py for Synthesizer Agent
-from common.observability import get_logger
+import os
+from contextlib import asynccontextmanager
+from datetime import datetime
+
+import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import os
-import requests
-from datetime import datetime
-from contextlib import asynccontextmanager
+
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -44,7 +46,7 @@ async def lifespan(app: FastAPI):
         mcp_bus_client.register_agent(
             agent_name="synthesizer",
             agent_address=f"http://localhost:{SYNTHESIZER_AGENT_PORT}",
-            tools=["cluster_articles", "neutralize_text", "aggregate_cluster", 
+            tools=["cluster_articles", "neutralize_text", "aggregate_cluster",
                    "synthesize_news_articles_gpu", "get_synthesizer_performance"],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -132,7 +134,7 @@ def neutralize_text_endpoint(call: ToolCall):
         logger.error(f"An error occurred in neutralize_text: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# GPU-accelerated endpoints (V4 performance implementation)  
+# GPU-accelerated endpoints (V4 performance implementation)
 @app.post("/synthesize_news_articles_gpu")
 def synthesize_news_articles_gpu_endpoint(call: ToolCall):
     """GPU-accelerated news article synthesis endpoint"""
@@ -140,19 +142,20 @@ def synthesize_news_articles_gpu_endpoint(call: ToolCall):
         from .gpu_tools import synthesize_news_articles_gpu
         logger.info(f"Calling GPU synthesize with {len(call.args[0]) if call.args else 0} articles")
         result = synthesize_news_articles_gpu(*call.args, **call.kwargs)
-        
+
         # Log performance for monitoring
         if result.get('success') and 'performance' in result:
             perf = result['performance']
             logger.info(f"✅ GPU synthesis: {perf['articles_per_sec']:.1f} articles/sec")
-        
+
         return result
     except Exception as e:
         logger.error(f"❌ GPU synthesis error: {e}")
         # Graceful fallback to CPU implementation
         try:
             # Use relative import to resolve the agent-local tools module
-            from .tools import cluster_articles as _cluster_articles, aggregate_cluster as _aggregate_cluster
+            from .tools import aggregate_cluster as _aggregate_cluster
+            from .tools import cluster_articles as _cluster_articles
             logger.info("🔄 Falling back to CPU synthesis")
             # Simple fallback implementation
             articles = call.args[0] if call.args else []

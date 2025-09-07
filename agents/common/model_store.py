@@ -11,14 +11,14 @@ Design goals:
 """
 from __future__ import annotations
 
-import json
-import shutil
 import hashlib
+import json
 import os
+import shutil
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, Optional
 
 
 @dataclass
@@ -179,7 +179,7 @@ class ModelStore:
                 pass
             raise ModelStoreError(f"Failed to update symlink: {e}")
 
-    def get_current(self, agent: str) -> Optional[Path]:
+    def get_current(self, agent: str) -> Path | None:
         """Return the resolved current path or None if not found."""
         current = self.current_path(agent)
         if not current.exists():
@@ -200,7 +200,7 @@ class ModelStore:
         mf = vp / self.manifest_name
         if not mf.exists():
             return False
-        with open(mf, "r", encoding="utf-8") as fh:
+        with open(mf, encoding="utf-8") as fh:
             data = json.load(fh)
         expected = data.get("checksum", "")
         actual = self.compute_checksum(vp)

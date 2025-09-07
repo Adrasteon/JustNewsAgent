@@ -31,13 +31,13 @@ Complete demonstration of Phase 3 research-scale archiving capabil    # Phase 3:
 
 import asyncio
 import json
-from common.observability import get_logger
 from datetime import datetime, timedelta
 from pathlib import Path
 
 # Phase 3 Components
 from agents.archive.archive_manager import ArchiveManager
 from agents.archive.knowledge_graph import KnowledgeGraphManager
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)

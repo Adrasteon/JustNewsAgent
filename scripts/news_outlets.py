@@ -12,7 +12,7 @@ import argparse
 import os
 import re
 import sys
-from typing import Iterable, List, Optional, Tuple
+from collections.abc import Iterable
 
 import psycopg2
 import psycopg2.extras
@@ -20,7 +20,7 @@ import psycopg2.extras
 from scripts.db_config import get_db_conn
 
 
-def parse_markdown_table_rows(md: str) -> Iterable[Tuple[str, str, str]]:
+def parse_markdown_table_rows(md: str) -> Iterable[tuple[str, str, str]]:
     """Yield (url, name, description) tuples by scanning markdown tables in the file.
 
     The file contains many tables with header: | URL | Name | Description |
@@ -87,7 +87,7 @@ SELECT id FROM inserted;
 """
 
 
-def upsert_outlets(rows: Iterable[Tuple[str, str, str]], conn) -> List[int]:
+def upsert_outlets(rows: Iterable[tuple[str, str, str]], conn) -> list[int]:
     ids = []
     with conn.cursor() as cur:
         for url, name, desc in rows:
@@ -105,7 +105,7 @@ def upsert_outlets(rows: Iterable[Tuple[str, str, str]], conn) -> List[int]:
     return ids
 
 
-def create_provenance_mappings(conn, source_rows: List[Tuple[str, str, str]]):
+def create_provenance_mappings(conn, source_rows: list[tuple[str, str, str]]):
     """Attempt to map existing articles to sources by domain and insert into article_source_map.
 
     This is best-effort and should be run after articles table and sources table exist.
@@ -132,7 +132,7 @@ def create_provenance_mappings(conn, source_rows: List[Tuple[str, str, str]]):
         conn.commit()
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", "-f", required=True, help="Path to potential_news_sources.md")
     parser.add_argument("--map-articles", action="store_true", help="Attempt to map existing articles to sources by domain and insert into article_source_map and update articles.source_id")
@@ -144,7 +144,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(f"File not found: {path}", file=sys.stderr)
         return 2
 
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         md = fh.read()
 
     rows = list(parse_markdown_table_rows(md))

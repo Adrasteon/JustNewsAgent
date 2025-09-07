@@ -11,9 +11,8 @@ This implements native TensorRT acceleration with validated performance:
 """
 
 
-from datetime import datetime, timezone
-from typing import Optional, List
 import atexit
+from datetime import UTC, datetime
 
 # Configure logging
 
@@ -63,11 +62,11 @@ FEEDBACK_LOG = "feedback_analyst_tensorrt.log"
 
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file with timestamp."""
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
         f.write(f"{timestamp}\t{event}\t{details}\n")
 
-def score_sentiment(text: str) -> Optional[float]:
+def score_sentiment(text: str) -> float | None:
     """
     Score the sentiment of a text using native TensorRT acceleration.
     
@@ -79,9 +78,9 @@ def score_sentiment(text: str) -> Optional[float]:
     """
     if not text or not text.strip():
         return None
-        
+
     log_feedback("score_sentiment_request", {"text_length": len(text)})
-    
+
     if HAS_TENSORRT:
         try:
             engine = get_tensorrt_engine()
@@ -92,12 +91,12 @@ def score_sentiment(text: str) -> Optional[float]:
         except Exception as e:
             logger.error(f"Error in native sentiment scoring: {e}")
             log_feedback("score_sentiment_error", {"error": str(e)})
-    
+
     # Fallback to default value if TensorRT fails
     log_feedback("score_sentiment_fallback", {"reason": "TensorRT unavailable"})
     return 0.5
 
-def score_bias(text: str) -> Optional[float]:
+def score_bias(text: str) -> float | None:
     """
     Score the bias of a text using native TensorRT acceleration.
     
@@ -109,9 +108,9 @@ def score_bias(text: str) -> Optional[float]:
     """
     if not text or not text.strip():
         return None
-        
+
     log_feedback("score_bias_request", {"text_length": len(text)})
-    
+
     if HAS_TENSORRT:
         try:
             engine = get_tensorrt_engine()
@@ -122,12 +121,12 @@ def score_bias(text: str) -> Optional[float]:
         except Exception as e:
             logger.error(f"Error in native bias scoring: {e}")
             log_feedback("score_bias_error", {"error": str(e)})
-    
+
     # Fallback to default value if TensorRT fails
     log_feedback("score_bias_fallback", {"reason": "TensorRT unavailable"})
     return 0.5
 
-def score_sentiment_batch(texts: List[str]) -> List[Optional[float]]:
+def score_sentiment_batch(texts: list[str]) -> list[float | None]:
     """
     Score sentiment for a batch of texts using native TensorRT acceleration.
     
@@ -139,9 +138,9 @@ def score_sentiment_batch(texts: List[str]) -> List[Optional[float]]:
     """
     if not texts:
         return []
-        
+
     log_feedback("score_sentiment_batch_request", {"batch_size": len(texts)})
-    
+
     if HAS_TENSORRT:
         try:
             engine = get_tensorrt_engine()
@@ -152,12 +151,12 @@ def score_sentiment_batch(texts: List[str]) -> List[Optional[float]]:
         except Exception as e:
             logger.error(f"Error in native sentiment batch scoring: {e}")
             log_feedback("score_sentiment_batch_error", {"error": str(e)})
-    
+
     # Fallback to individual scoring
     log_feedback("score_sentiment_batch_fallback", {"reason": "TensorRT unavailable"})
     return [score_sentiment(text) for text in texts]
 
-def score_bias_batch(texts: List[str]) -> List[Optional[float]]:
+def score_bias_batch(texts: list[str]) -> list[float | None]:
     """
     Score bias for a batch of texts using native TensorRT acceleration.
     
@@ -169,9 +168,9 @@ def score_bias_batch(texts: List[str]) -> List[Optional[float]]:
     """
     if not texts:
         return []
-        
+
     log_feedback("score_bias_batch_request", {"batch_size": len(texts)})
-    
+
     if HAS_TENSORRT:
         try:
             engine = get_tensorrt_engine()
@@ -182,12 +181,12 @@ def score_bias_batch(texts: List[str]) -> List[Optional[float]]:
         except Exception as e:
             logger.error(f"Error in native bias batch scoring: {e}")
             log_feedback("score_bias_batch_error", {"error": str(e)})
-    
+
     # Fallback to individual scoring
     log_feedback("score_bias_batch_fallback", {"reason": "TensorRT unavailable"})
     return [score_bias(text) for text in texts]
 
-def identify_entities(text: str) -> List[str]:
+def identify_entities(text: str) -> list[str]:
     """
     Identify entities in text. Currently returns empty list as TensorRT engines
     are focused on sentiment/bias analysis. This can be expanded with NER models.
@@ -199,13 +198,13 @@ def identify_entities(text: str) -> List[str]:
         List[str]: List of identified entities (currently empty)
     """
     logger.info(f"Entity identification requested for text length: {len(text)}")
-    
+
     # Log the request for future implementation
     log_feedback("identify_entities_requested", {
         "text_length": len(text),
         "note": "TensorRT NER implementation pending"
     })
-    
+
     # TODO: Implement TensorRT-based NER when needed
     # For now, return empty list to maintain API compatibility
     return []
@@ -219,18 +218,18 @@ def get_engine_info() -> dict:
     """
     if not HAS_TENSORRT:
         return {"error": "Native TensorRT not available"}
-    
+
     try:
         with NativeTensorRTInferenceEngine(engines_dir="tensorrt_engines") as engine:
             info = engine.get_engine_info()
             performance_stats = engine.get_performance_stats()
-            
+
         return {
             "engines": info,
             "performance": performance_stats,
             "status": "operational"
         }
-        
+
     except Exception as e:
         logger.error(f"Error getting engine info: {e}")
         return {"error": str(e)}
@@ -249,12 +248,12 @@ def analyze_article(article_text: str, metadata: dict = None) -> dict:
     """
     if not article_text or not article_text.strip():
         return {"error": "Empty article text"}
-        
+
     log_feedback("analyze_article_request", {
         "text_length": len(article_text),
         "has_metadata": metadata is not None
     })
-    
+
     if HAS_TENSORRT:
         try:
             engine = get_tensorrt_engine()
@@ -262,7 +261,7 @@ def analyze_article(article_text: str, metadata: dict = None) -> dict:
                 # Use native TensorRT for analysis
                 sentiment_score = engine.score_sentiment_native(article_text)
                 bias_score = engine.score_bias_native(article_text)
-                
+
                 result = {
                     "sentiment_score": sentiment_score,
                     "bias_score": bias_score,
@@ -270,13 +269,13 @@ def analyze_article(article_text: str, metadata: dict = None) -> dict:
                     "performance": "high",
                     "metadata": metadata or {}
                 }
-                
+
                 log_feedback("analyze_article_success", {"method": "native_tensorrt"})
                 return result
         except Exception as e:
             logger.error(f"Error in native article analysis: {e}")
             log_feedback("analyze_article_error", {"error": str(e)})
-    
+
     # Fallback analysis
     log_feedback("analyze_article_fallback", {"reason": "TensorRT unavailable"})
     return {
@@ -287,7 +286,7 @@ def analyze_article(article_text: str, metadata: dict = None) -> dict:
         "metadata": metadata or {}
     }
 
-def analyze_articles_batch(texts: List[str]) -> List[dict]:
+def analyze_articles_batch(texts: list[str]) -> list[dict]:
     """
     Analyze multiple articles using native TensorRT batch processing.
     
@@ -297,23 +296,23 @@ def analyze_articles_batch(texts: List[str]) -> List[dict]:
     Returns:
         List[dict]: Analysis results for each article
     """
-    start_time = datetime.now(timezone.utc)
-    
+    start_time = datetime.now(UTC)
+
     sentiment_scores = score_sentiment_batch(texts)
     bias_scores = score_bias_batch(texts)
-    
-    end_time = datetime.now(timezone.utc)
+
+    end_time = datetime.now(UTC)
     total_processing_time = (end_time - start_time).total_seconds()
-    
+
     results = []
-    for i, (text, sentiment, bias) in enumerate(zip(texts, sentiment_scores, bias_scores)):
+    for i, (text, sentiment, bias) in enumerate(zip(texts, sentiment_scores, bias_scores, strict=False)):
         results.append({
             "sentiment": sentiment,
             "bias": bias,
             "text_length": len(text),
             "index": i
         })
-    
+
     # Log batch performance
     log_feedback("analyze_articles_batch", {
         "batch_size": len(texts),
@@ -322,5 +321,5 @@ def analyze_articles_batch(texts: List[str]) -> List[dict]:
         "avg_text_length": sum(len(t) for t in texts) / len(texts),
         "engine": "native_tensorrt"
     })
-    
+
     return results

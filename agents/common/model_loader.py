@@ -7,15 +7,14 @@ fall back to per-agent cache_dir behavior otherwise.
 from __future__ import annotations
 
 import os
-from common.observability import get_logger
-
 from pathlib import Path
-from typing import Optional, Tuple
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
 
-def _resolve_model_store_path(agent: Optional[str], model_id: Optional[str] = None) -> Optional[Path]:
+def _resolve_model_store_path(agent: str | None, model_id: str | None = None) -> Path | None:
     root = os.environ.get("MODEL_STORE_ROOT")
     if not root or not agent:
         return None
@@ -50,11 +49,11 @@ def _resolve_model_store_path(agent: Optional[str], model_id: Optional[str] = No
 
 def load_transformers_model(
     model_id_or_path: str,
-    agent: Optional[str] = None,
-    cache_dir: Optional[str] = None,
-    model_class: Optional[object] = None,
-    tokenizer_class: Optional[object] = None,
-) -> Tuple[object, object]:
+    agent: str | None = None,
+    cache_dir: str | None = None,
+    model_class: object | None = None,
+    tokenizer_class: object | None = None,
+) -> tuple[object, object]:
     """Load a transformers model + tokenizer with safe ModelStore support.
 
     Parameters:
@@ -100,7 +99,7 @@ def load_transformers_model(
     return model, tokenizer
 
 
-def load_sentence_transformer(model_name: str, agent: Optional[str] = None, cache_folder: Optional[str] = None):
+def load_sentence_transformer(model_name: str, agent: str | None = None, cache_folder: str | None = None):
     """Load a SentenceTransformer instance preferring ModelStore when configured."""
     try:
         from sentence_transformers import SentenceTransformer

@@ -10,8 +10,6 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import List, Optional
-
 
 REPO = Path.cwd()
 REQUIRED = Path('/tmp/required_files.txt')
@@ -27,14 +25,14 @@ PAT = re.compile(r'["\']([^"\'\n]{1,500})["\']', re.I)
 KEYWORD_RE = re.compile(r'(models|common|docs|markdown_docs|\\.json|\\.md|\\.txt|\\.pt|\\.onnx)', re.I)
 
 
-def gather_required_files() -> List[Path]:
+def gather_required_files() -> list[Path]:
     if not REQUIRED.exists():
         print('Missing /tmp/required_files.txt')
         return []
     return [REPO / p.strip() for p in REQUIRED.read_text().splitlines() if p.strip()]
 
 
-def resolve_candidate(s: str) -> Optional[Path]:
+def resolve_candidate(s: str) -> Path | None:
     # avoid extremely long strings which may be code blobs or accidental captures
     if len(s) > 260:
         return None

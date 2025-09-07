@@ -7,22 +7,24 @@ V4 Compliance: Designed for multi-agent orchestration, FastAPI, and MCP bus inte
 Dependencies: git, networkx, fastapi, pydantic, uvicorn
 """
 
-from common.observability import get_logger
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict, List, Any, Optional
-from agents.common.schemas import NeuralAssessment, ReasoningInput
-from contextlib import asynccontextmanager
 import asyncio
-import os
-import sys
-import subprocess
-import json
-import requests
 import importlib
 import importlib.util
-from datetime import datetime, timezone
+import json
+import os
+import subprocess
+import sys
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
+
+import requests
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+from agents.common.schemas import NeuralAssessment, ReasoningInput
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -52,22 +54,22 @@ class MCPBusClient:
 
 class SimpleNucleoidImplementation:
     """Simple fallback implementation of Nucleoid for basic reasoning."""
-    
+
     def __init__(self):
         self.facts = {}  # Store as key-value pairs
         self.rules = []
-        
+
     def execute(self, statement):
         """Execute a Nucleoid statement."""
         statement = statement.strip()
-        
+
         # Handle variable assignments (facts) - simple assignments only
         if "=" in statement and "==" not in statement and not any(op in statement for op in ["+", "-", "*", "/", "if", "then"]):
             parts = statement.split("=")
             if len(parts) == 2:
                 var_name = parts[0].strip()
                 value = parts[1].strip()
-                
+
                 # Try to convert to number if possible
                 try:
                     if "." in value:
@@ -77,21 +79,21 @@ class SimpleNucleoidImplementation:
                 except ValueError:
                     # Keep as string if not a number
                     value = value.strip("\"'")
-                
+
                 self.facts[var_name] = value
                 return {"success": True, "message": f"Variable {var_name} set to {value}"}
-        
+
         # Handle rule definitions (y = x + 10, if-then statements)
         if "=" in statement and (any(op in statement for op in ["+", "-", "*", "/"]) or "if" in statement or "then" in statement):
             self.rules.append(statement)
             return {"success": True, "message": "Rule added"}
-        
+
         # Handle queries (single variable)
         if statement.isalpha() or statement.replace("_", "").isalpha():
             # Check if it's a direct fact
             if statement in self.facts:
                 return self.facts[statement]
-            
+
             # Try to evaluate using rules
             for rule in self.rules:
                 if "=" in rule and rule.split("=")[0].strip() == statement:
@@ -103,31 +105,31 @@ class SimpleNucleoidImplementation:
                             return result
                     except Exception:
                         pass
-            
+
             return {"success": False, "message": f"Unknown variable: {statement}"}
-        
+
         # Handle boolean queries (==, !=, etc.)
         if any(op in statement for op in ["==", "!=", ">", "<", ">=", "<="]):
             try:
                 return self._evaluate_boolean(statement)
             except Exception:
                 return {"success": False, "message": "Could not evaluate boolean expression"}
-        
+
         return {"success": False, "message": "Unknown statement type"}
-    
+
     def _evaluate_expression(self, expression):
         """Evaluate a simple mathematical expression."""
         try:
             # Replace variables with their values
             for var, val in self.facts.items():
                 expression = expression.replace(var, str(val))
-            
+
             # Simple evaluation (be careful in production!)
             result = eval(expression)
             return result
         except Exception:
             return None
-    
+
     def _evaluate_boolean(self, statement):
         """Evaluate a boolean statement."""
         try:
@@ -137,17 +139,17 @@ class SimpleNucleoidImplementation:
                     statement = statement.replace(var, f"'{val}'")
                 else:
                     statement = statement.replace(var, str(val))
-            
+
             # Evaluate the boolean expression
             result = eval(statement)
             return result
         except Exception:
             return False
-    
+
     def run(self, statement):
         """Alias for execute method to match expected interface."""
         return self.execute(statement)
-    
+
     def clear(self):
         """Clear all facts and rules."""
         self.facts = {}
@@ -211,7 +213,7 @@ async def lifespan(app: FastAPI):
         else:
             logger.info(f"Loading preloaded rules from {preload_file}")
             try:
-                with open(preload_file, "r") as f:
+                with open(preload_file) as f:
                     for line in f:
                         line = line.strip()
                         if not line:
@@ -244,7 +246,7 @@ async def lifespan(app: FastAPI):
             state_data = {
                 "facts": engine.get_facts() if engine else {},
                 "rules": engine.get_rules() if engine else [],
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(UTC).isoformat()
             }
             with open(state_file, "w") as f:
                 json.dump(state_data, f, indent=2)
@@ -272,14 +274,14 @@ except Exception:
 # --- Nucleoid GitHub Integration ---
 class NucleoidEngine:
     """Wrapper for Nucleoid GitHub Python implementation."""
-    
+
     def __init__(self):
-        self.nucleoid: Optional[Any] = None
+        self.nucleoid: Any | None = None
         self.facts_store = {}  # Store facts for retrieval
         self.rules_store = []  # Store rules for retrieval
         self.session_id = "reasoning_session"
         self._setup_nucleoid()
-    
+
     def _setup_nucleoid(self):
         """Setup Nucleoid Python implementation from our local implementation."""
         try:
@@ -288,27 +290,27 @@ class NucleoidEngine:
             self.nucleoid = Nucleoid()
             logger.info("✅ Complete Nucleoid implementation loaded successfully")
             return
-            
+
         except ImportError as e:
             logger.warning(f"Local implementation failed: {e}, trying GitHub repository...")
-            
+
             # Fallback to GitHub repository approach
             nucleoid_dir = Path(__file__).parent / "nucleoid_repo"
-            
+
             if not nucleoid_dir.exists():
                 logger.info("Cloning Nucleoid repository...")
                 subprocess.run([
-                    "git", "clone", 
-                    "https://github.com/nucleoidai/nucleoid.git", 
+                    "git", "clone",
+                    "https://github.com/nucleoidai/nucleoid.git",
                     str(nucleoid_dir)
                 ], check=True, capture_output=True)
                 logger.info("✅ Nucleoid repository cloned successfully")
-            
+
             # Add Python path for the nucleoid module
             python_path = str(nucleoid_dir / "python")
             if python_path not in sys.path:
                 sys.path.insert(0, python_path)
-            
+
                 # Attempt a file-based import first to avoid static-analysis issues
                 module_file = None
                 candidate = Path(python_path) / "nucleoid" / "nucleoid.py"
@@ -344,11 +346,11 @@ class NucleoidEngine:
                         return
                 except Exception as e:
                     logger.warning(f"Package import of nucleoid.nucleoid failed: {e}, using fallback...")
-                
+
                 # Final fallback
                 self.nucleoid = SimpleNucleoidImplementation()
                 logger.info("✅ Simple Nucleoid fallback implementation loaded")
-                
+
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to clone Nucleoid repository: {e}")
             # Use fallback implementation
@@ -359,18 +361,18 @@ class NucleoidEngine:
             # Use fallback implementation
             self.nucleoid = SimpleNucleoidImplementation()
             logger.warning("Using fallback simple implementation")
-    
-    def add_fact(self, fact_data: Dict[str, Any]) -> Any:
+
+    def add_fact(self, fact_data: dict[str, Any]) -> Any:
         """Add a fact to the reasoning system."""
         if self.nucleoid is None:
             raise RuntimeError("Nucleoid engine not initialized")
         try:
             # Convert fact to Nucleoid statement
             fact_id = f"fact_{len(self.facts_store)}"
-            
+
             # Store fact for retrieval
             self.facts_store[fact_id] = fact_data
-            
+
             # Create Nucleoid statement
             if "statement" in fact_data:
                 # Direct statement execution
@@ -383,18 +385,18 @@ class NucleoidEngine:
                         statements.append(f'{key} = "{value}"')
                     else:
                         statements.append(f'{key} = {value}')
-                
+
                 result = None
                 for statement in statements:
                     result = self.nucleoid.run(statement)
-            
+
             logger.info(f"Added fact {fact_id}: {fact_data}")
             return result
-            
+
         except Exception as e:
             logger.error(f"Error adding fact: {e}")
             raise
-    
+
     def add_rule(self, rule: str) -> Any:
         """Add a logical rule."""
         if self.nucleoid is None:
@@ -402,17 +404,17 @@ class NucleoidEngine:
         try:
             # Store rule for retrieval
             self.rules_store.append(rule)
-            
+
             # Execute rule in Nucleoid
             result = self.nucleoid.run(rule)
-            
+
             logger.info(f"Added rule: {rule}")
             return result
-            
+
         except Exception as e:
             logger.error(f"Error adding rule: {e}")
             raise
-    
+
     def query(self, query_str: str) -> Any:
         """Execute a symbolic reasoning query."""
         if self.nucleoid is None:
@@ -421,27 +423,27 @@ class NucleoidEngine:
             result = self.nucleoid.run(query_str)
             logger.info(f"Executed query: {query_str} -> {result}")
             return result
-            
+
         except Exception as e:
             logger.error(f"Error executing query: {e}")
             raise
-    
-    def get_facts(self) -> Dict[str, Any]:
+
+    def get_facts(self) -> dict[str, Any]:
         """Retrieve all stored facts."""
         return self.facts_store
-    
-    def get_rules(self) -> List[str]:
+
+    def get_rules(self) -> list[str]:
         """Retrieve all stored rules."""
         return self.rules_store
-    
-    def evaluate_contradiction(self, statements: List[str]) -> Dict[str, Any]:
+
+    def evaluate_contradiction(self, statements: list[str]) -> dict[str, Any]:
         """Check for logical contradictions between statements."""
         try:
             contradictions = []
-            
+
             # Extract variable assignments and check for direct contradictions
             variable_assignments = {}
-            
+
             for stmt in statements:
                 # Check for direct variable assignments (x = 5, x = 10)
                 if "=" in stmt and "==" not in stmt and not any(op in stmt for op in ["+", "-", "*", "/", "if", "then", ">", "<"]):
@@ -449,7 +451,7 @@ class NucleoidEngine:
                     if len(parts) == 2:
                         var_name = parts[0].strip()
                         value = parts[1].strip()
-                        
+
                         # Try to convert to number for comparison
                         try:
                             if "." in value:
@@ -458,7 +460,7 @@ class NucleoidEngine:
                                 value = int(value)
                         except ValueError:
                             value = value.strip("\"'")
-                        
+
                         if var_name in variable_assignments:
                             if variable_assignments[var_name] != value:
                                 contradictions.append({
@@ -468,10 +470,10 @@ class NucleoidEngine:
                                 })
                         else:
                             variable_assignments[var_name] = value
-            
+
             # Check for boolean contradictions (x == 5 vs x == 10)
             boolean_statements = [stmt for stmt in statements if any(op in stmt for op in ["==", "!=", ">", "<", ">=", "<="])]
-            
+
             for i, stmt1 in enumerate(boolean_statements):
                 for j, stmt2 in enumerate(boolean_statements[i+1:], i+1):
                     # Extract variable and values from boolean statements
@@ -484,13 +486,13 @@ class NucleoidEngine:
                             })
                     except Exception:
                         pass  # Skip if can't parse
-            
+
             return {
                 "has_contradictions": len(contradictions) > 0,
                 "contradictions": contradictions,
                 "total_statements": len(statements)
             }
-            
+
         except Exception as e:
             logger.error(f"Error evaluating contradictions: {e}")
             return {
@@ -498,36 +500,36 @@ class NucleoidEngine:
                 "contradictions": [],
                 "total_statements": len(statements)
             }
-    
+
     def _are_contradictory_booleans(self, stmt1: str, stmt2: str) -> bool:
         """Check if two boolean statements are contradictory."""
         # Simple check for directly contradictory statements
         # e.g., "temperature == 25" vs "temperature == 30"
-        
+
         # Extract variable and operator for each statement
         for op in ["==", "!=", ">=", "<=", ">", "<"]:
             if op in stmt1 and op in stmt2:
                 parts1 = stmt1.split(op)
                 parts2 = stmt2.split(op)
-                
+
                 if len(parts1) == 2 and len(parts2) == 2:
                     var1, val1 = parts1[0].strip(), parts1[1].strip()
                     var2, val2 = parts2[0].strip(), parts2[1].strip()
-                    
+
                     # Same variable, same operator, different values
                     if var1 == var2 and op == "==" and val1 != val2:
                         return True
-        
+
         return False
 
 # Initialize Nucleoid engine (deferred to the FastAPI lifespan startup)
 # Use runtime-safe accessors so other modules can obtain the engine without
 # causing heavy import-time initialization.
-engine: Optional[Any] = None
-enhanced_engine: Optional[Any] = None
+engine: Any | None = None
+enhanced_engine: Any | None = None
 
 
-def get_engine(block: bool = False, timeout: Optional[float] = None) -> Optional[Any]:
+def get_engine(block: bool = False, timeout: float | None = None) -> Any | None:
     """Return the global Nucleoid engine instance if available.
 
     Args:
@@ -553,7 +555,7 @@ def get_engine(block: bool = False, timeout: Optional[float] = None) -> Optional
         time.sleep(0.1)
 
 
-def get_enhanced_engine(block: bool = False, timeout: Optional[float] = None) -> Optional[Any]:
+def get_enhanced_engine(block: bool = False, timeout: float | None = None) -> Any | None:
     """Return the global EnhancedReasoningEngine if available.
 
     Same semantics as get_engine().
@@ -575,14 +577,14 @@ def get_enhanced_engine(block: bool = False, timeout: Optional[float] = None) ->
 
 # --- Pydantic Models ---
 class ToolCall(BaseModel):
-    args: List[Any] = []
-    kwargs: Dict[str, Any] = {}
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
 
 class Fact(BaseModel):
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 class Facts(BaseModel):
-    facts: List[Dict[str, Any]]
+    facts: list[dict[str, Any]]
 
 class Rule(BaseModel):
     rule: str
@@ -594,30 +596,30 @@ class Evaluate(BaseModel):
     expression: str
 
 class ContradictionCheck(BaseModel):
-    statements: List[str]
+    statements: list[str]
 
 class FactValidation(BaseModel):
     claim: str
-    context: Optional[Dict[str, Any]] = None
+    context: dict[str, Any] | None = None
 
 # --- Utility Functions ---
-def log_feedback(event: str, details: Dict[str, Any]):
+def log_feedback(event: str, details: dict[str, Any]):
     """Log feedback for debugging and improvement."""
     feedback_log = Path(__file__).parent / "feedback_reasoning.log"
     try:
         with open(feedback_log, "a", encoding="utf-8") as f:
-            timestamp = datetime.now(timezone.utc).isoformat()
+            timestamp = datetime.now(UTC).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")
 
 
-def _ingest_neural_assessment(assessment: NeuralAssessment) -> List[str]:
+def _ingest_neural_assessment(assessment: NeuralAssessment) -> list[str]:
     """Convert a NeuralAssessment into a list of statements/facts for Nucleoid.
 
     This centralizes mapping logic so it's easy to test and evolve.
     """
-    stmts: List[str] = []
+    stmts: list[str] = []
     # Map extracted claims directly as statements
     for claim in assessment.extracted_claims:
         stmts.append(str(claim))
@@ -638,7 +640,7 @@ def _ingest_neural_assessment(assessment: NeuralAssessment) -> List[str]:
 
 
 @app.post("/pipeline/validate")
-def pipeline_validate(payload: ReasoningInput) -> Dict[str, Any]:
+def pipeline_validate(payload: ReasoningInput) -> dict[str, Any]:
     """Run the three-stage pipeline: fact checker (neural) -> reasoning -> integrated decision.
 
     This endpoint accepts a standardized NeuralAssessment payload so other agents
@@ -969,16 +971,16 @@ def ready_endpoint():
 
 # --- MCP Bus Integration ---
 @app.post("/call")
-def call_tool(request: Dict[str, Any]):
+def call_tool(request: dict[str, Any]):
     """MCP bus integration - handles tool calls from other agents."""
     try:
         tool = request.get("tool", "")
         args = request.get("args", [])
         kwargs = request.get("kwargs", {})
-        
+
         # Create ToolCall object
         call = ToolCall(args=args, kwargs=kwargs)
-        
+
         # Route to appropriate endpoint
         if tool == "add_fact":
             return add_fact_endpoint(call)
@@ -993,10 +995,10 @@ def call_tool(request: Dict[str, Any]):
         else:
             available_tools = ["add_fact", "add_facts", "add_rule", "query", "evaluate"]
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail=f"Unknown tool: {tool}. Available tools: {available_tools}"
             )
-    
+
     except Exception as e:
         log_feedback("mcp_call_error", {
             "request": request,
@@ -1011,7 +1013,7 @@ def validate_claim(call: ToolCall):
     eng = get_engine()
     if not eng:
         raise HTTPException(status_code=503, detail="Nucleoid engine not available")
-    
+
     try:
         # Extract claim
         if call.args:
@@ -1020,10 +1022,10 @@ def validate_claim(call: ToolCall):
         else:
             claim = call.kwargs.get("claim", "")
             context = call.kwargs.get("context", {})
-        
+
         if not claim:
             raise ValueError("Claim cannot be empty")
-        
+
         # Add claim as temporary fact and check for contradictions
         # Get existing statements
         existing_statements = []
@@ -1045,7 +1047,7 @@ def validate_claim(call: ToolCall):
             # Add the claim and check for contradictions using legacy engine
             test_statements = existing_statements + [claim]
             contradiction_result = eng.evaluate_contradiction(test_statements)
-            
+
             # Determine validation result
             validation_result = {
                 "claim": claim,
@@ -1054,7 +1056,7 @@ def validate_claim(call: ToolCall):
                 "contradictions": contradiction_result["contradictions"],
                 "confidence": 1.0 - (len(contradiction_result["contradictions"]) * 0.2)
             }
-        
+
         # Log feedback
         log_feedback("validate_claim", {
             "claim": claim,
@@ -1062,9 +1064,9 @@ def validate_claim(call: ToolCall):
             "contradictions_count": len(contradiction_result["contradictions"]),
             "confidence": validation_result["confidence"]
         })
-        
+
         return {"success": True, "result": validation_result}
-        
+
     except Exception as e:
         error_msg = str(e)
         log_feedback("validate_claim_error", {

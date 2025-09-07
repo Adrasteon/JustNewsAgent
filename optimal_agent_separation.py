@@ -18,21 +18,21 @@ class FactCheckerOptimalScope:
     Focus: Neural network-based assessment and pattern recognition
     Strength: Large-scale training data, probabilistic scoring
     """
-    
+
     CORE_FUNCTIONS = [
         "neural_fact_plausibility_assessment",    # DistilBERT factual/questionable classification
-        "source_credibility_scoring",             # RoBERTa-based domain reliability assessment  
+        "source_credibility_scoring",             # RoBERTa-based domain reliability assessment
         "semantic_evidence_retrieval",            # SentenceTransformers similarity search
         "automated_claim_extraction",             # spaCy NER for verifiable claims identification
     ]
-    
+
     NEURAL_STRENGTHS = [
         "Pattern recognition from massive datasets",
-        "Probabilistic confidence scoring (0.0-1.0)", 
+        "Probabilistic confidence scoring (0.0-1.0)",
         "Handling ambiguous language and context",
         "Fast batch processing of multiple claims"
     ]
-    
+
     def process_article(self, article_text: str, source_url: str):
         # If a live production engine is available, delegate to it
         if get_fact_checker_engine is not None:
@@ -78,13 +78,13 @@ class FactCheckerOptimalScope:
         )
         return illustrative.model_dump() if hasattr(illustrative, 'model_dump') else illustrative.dict()
 
-## **REASONING AGENT** - Logic Validation & Rule-Based Analysis  
+## **REASONING AGENT** - Logic Validation & Rule-Based Analysis
 class ReasoningAgentOptimalScope:
     """
     Focus: Symbolic logic, rule-based validation, and explainable reasoning
     Strength: Precise logical operations, rule consistency, explainability
     """
-    
+
     CORE_FUNCTIONS = [
         "logical_consistency_validation",         # Nucleoid contradiction detection
         "rule_based_fact_checking",              # Domain-specific news rules
@@ -92,19 +92,21 @@ class ReasoningAgentOptimalScope:
         "temporal_reasoning_validation",          # Time-based logic rules
         "explainable_reasoning_chains",          # Clear decision explanations
     ]
-    
+
     SYMBOLIC_STRENGTHS = [
         "Precise logical operations (no false positives)",
         "Explainable decision chains",
-        "Complex rule evaluation and composition", 
+        "Complex rule evaluation and composition",
         "Temporal and contextual reasoning",
         "Multi-agent orchestration logic"
     ]
-    
+
     def validate_with_logic(self, neural_assessment: dict, context: dict):
         # Prefer the enhanced reasoning engine when available
         try:
-            from agents.reasoning.enhanced_reasoning_architecture import EnhancedReasoningEngine
+            from agents.reasoning.enhanced_reasoning_architecture import (
+                EnhancedReasoningEngine,
+            )
             enhanced = EnhancedReasoningEngine()
             # Map neural assessment into the engine's expected context
             try:
@@ -166,7 +168,7 @@ class OptimalNewsValidationPipeline:
     Stage 2: Reasoning Agent (Logic Validation) 
     Stage 3: Integrated Decision
     """
-    
+
     def comprehensive_validation(self, article_text: str, metadata: dict):
         # Stage 1: Neural Assessment
         # Instantiate FactChecker (delegates to live engine when available)
@@ -186,14 +188,14 @@ class OptimalNewsValidationPipeline:
                 neural_assessment = NeuralAssessment(**neural_assessment_raw.model_dump())
             except Exception:
                 neural_assessment = NeuralAssessment(confidence=0.5)
-        
-        # Stage 2: Logic Validation  
+
+        # Stage 2: Logic Validation
         reasoning_agent = ReasoningAgentOptimalScope()
         logic_results = reasoning_agent.validate_with_logic(
             neural_assessment.model_dump() if hasattr(neural_assessment, 'model_dump') else neural_assessment.dict(),
             metadata,
         )
-        
+
         # Stage 3: Integrated Decision
         pipeline_result = PipelineResult(
             overall_confidence=self._calculate_consensus_confidence(
@@ -249,12 +251,12 @@ class OptimalNewsValidationPipeline:
 
 ## **ELIMINATES OVERLAP** ✅
 # - Fact Checker: Neural pattern recognition (probabilistic)
-# - Reasoning Agent: Logic validation (deterministic)  
+# - Reasoning Agent: Logic validation (deterministic)
 # - No duplicate functionality
 # - Each agent leverages its core strength
 # - Clear integration points
 
-## **MAXIMIZES NUCLEOID POTENTIAL** ✅  
+## **MAXIMIZES NUCLEOID POTENTIAL** ✅
 # - Complex news domain rules
 # - Multi-agent orchestration logic
 # - Temporal reasoning capabilities

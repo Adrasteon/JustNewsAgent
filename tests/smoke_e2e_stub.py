@@ -11,11 +11,11 @@ No external packages required; uses built-in http.server and urllib.
 """
 import json
 import os
+import sqlite3
 import sys
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import sqlite3
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.request import Request, urlopen
 
 # Ensure repository root is on sys.path so imports like `agents.*` resolve
@@ -117,7 +117,10 @@ def main():
     time.sleep(0.2)
 
     # Build sample article and statements using the repo helpers
-    from agents.common.ingest import build_source_upsert, build_article_source_map_insert
+    from agents.common.ingest import (
+        build_article_source_map_insert,
+        build_source_upsert,
+    )
 
     article = {
         'url': 'https://example.com/article/42',

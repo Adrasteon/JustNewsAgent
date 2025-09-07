@@ -9,13 +9,14 @@ error message explaining the missing dependency.
 """
 
 import os
-from common.observability import get_logger
+from contextlib import asynccontextmanager
+from typing import Any
 
-from typing import Any, Dict, List
 import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from contextlib import asynccontextmanager
+
+from common.observability import get_logger
 
 try:
     import psycopg2
@@ -31,9 +32,9 @@ DB_DSN = os.environ.get('POSTGRES_DSN') or os.environ.get('DATABASE_URL')
 
 
 class IngestRequest(BaseModel):
-    article_payload: Dict[str, Any]
+    article_payload: dict[str, Any]
     # statements should be list of [sql, params]
-    statements: List[List[Any]] = []
+    statements: list[list[Any]] = []
 
 
 def register_with_mcp_bus(port: int = 0):

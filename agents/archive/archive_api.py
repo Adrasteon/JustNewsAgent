@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: RESTful Archive API
@@ -17,25 +18,25 @@ API Endpoints:
 - GET /health - API health check
 """
 
+import hashlib
 import json
-
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import hashlib
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Query, Depends, BackgroundTasks, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
-from pydantic import BaseModel, Field
+from typing import Any
+
 import uvicorn
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
+from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
 
-from agents.archive.knowledge_graph import KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
+from agents.archive.knowledge_graph import KnowledgeGraphManager
 from agents.common.auth_api import router as auth_router
 
 logger = get_logger(__name__)
@@ -46,38 +47,38 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 # Pydantic models for request/response
 class ArticleFilter(BaseModel):
     """Filter parameters for article queries"""
-    domain: Optional[str] = None
-    published_after: Optional[datetime] = None
-    published_before: Optional[datetime] = None
-    news_score_min: Optional[float] = Field(None, ge=0.0, le=1.0)
-    news_score_max: Optional[float] = Field(None, ge=0.0, le=1.0)
-    has_entities: Optional[bool] = None
-    entity_type: Optional[str] = None
-    search_query: Optional[str] = None
+    domain: str | None = None
+    published_after: datetime | None = None
+    published_before: datetime | None = None
+    news_score_min: float | None = Field(None, ge=0.0, le=1.0)
+    news_score_max: float | None = Field(None, ge=0.0, le=1.0)
+    has_entities: bool | None = None
+    entity_type: str | None = None
+    search_query: str | None = None
 
 class EntityFilter(BaseModel):
     """Filter parameters for entity queries"""
-    entity_type: Optional[str] = None
-    mention_count_min: Optional[int] = Field(None, ge=0)
-    mention_count_max: Optional[int] = Field(None, ge=0)
-    first_seen_after: Optional[datetime] = None
-    last_seen_before: Optional[datetime] = None
-    search_query: Optional[str] = None
+    entity_type: str | None = None
+    mention_count_min: int | None = Field(None, ge=0)
+    mention_count_max: int | None = Field(None, ge=0)
+    first_seen_after: datetime | None = None
+    last_seen_before: datetime | None = None
+    search_query: str | None = None
 
 class RelationshipFilter(BaseModel):
     """Filter parameters for relationship queries"""
-    source_entity: Optional[str] = None
-    target_entity: Optional[str] = None
-    relationship_type: Optional[str] = None
-    strength_min: Optional[float] = Field(None, ge=0.0, le=1.0)
-    confidence_min: Optional[float] = Field(None, ge=0.0, le=1.0)
-    time_window: Optional[str] = None
+    source_entity: str | None = None
+    target_entity: str | None = None
+    relationship_type: str | None = None
+    strength_min: float | None = Field(None, ge=0.0, le=1.0)
+    confidence_min: float | None = Field(None, ge=0.0, le=1.0)
+    time_window: str | None = None
 
 class SearchRequest(BaseModel):
     """Advanced search request"""
     query: str = Field(..., min_length=1, max_length=500)
     search_type: str = Field("articles", pattern="^(articles|entities|both)$")
-    filters: Optional[Dict[str, Any]] = None
+    filters: dict[str, Any] | None = None
     limit: int = Field(50, ge=1, le=1000)
     offset: int = Field(0, ge=0)
 
@@ -87,8 +88,8 @@ class ArticleResponse(BaseModel):
     url: str
     title: str
     domain: str
-    published_date: Optional[str]
-    entities: Dict[str, List[str]]
+    published_date: str | None
+    entities: dict[str, list[str]]
     news_score: float
     extraction_method: str
     total_entities: int
@@ -102,7 +103,7 @@ class EntityResponse(BaseModel):
     mention_count: int
     first_seen: str
     last_seen: str
-    aliases: List[str]
+    aliases: list[str]
     cluster_size: int
     confidence_score: float
 
@@ -125,11 +126,11 @@ class SearchResult(BaseModel):
     title: str
     content: str
     score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 class PaginatedResponse(BaseModel):
     """Paginated response wrapper"""
-    items: List[Any]
+    items: list[Any]
     total: int
     page: int
     page_size: int
@@ -140,7 +141,7 @@ class APIResponse(BaseModel):
     """Generic API response"""
     success: bool
     data: Any
-    message: Optional[str] = None
+    message: str | None = None
     timestamp: str
 
 # Lifespan context manager for startup/shutdown events
@@ -237,12 +238,12 @@ async def list_articles(
     request: Request,
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    domain: Optional[str] = Query(None, description="Filter by domain"),
-    published_after: Optional[datetime] = Query(None, description="Published after date"),
-    published_before: Optional[datetime] = Query(None, description="Published before date"),
-    news_score_min: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum news score"),
-    entity_type: Optional[str] = Query(None, description="Filter by entity type presence"),
-    search_query: Optional[str] = Query(None, description="Search in title/content"),
+    domain: str | None = Query(None, description="Filter by domain"),
+    published_after: datetime | None = Query(None, description="Published after date"),
+    published_before: datetime | None = Query(None, description="Published before date"),
+    news_score_min: float | None = Query(None, ge=0.0, le=1.0, description="Minimum news score"),
+    entity_type: str | None = Query(None, description="Filter by entity type presence"),
+    search_query: str | None = Query(None, description="Search in title/content"),
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
     """
@@ -403,9 +404,9 @@ async def list_entities(
     request: Request,
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
-    entity_type: Optional[str] = Query(None, description="Filter by entity type"),
-    mention_count_min: Optional[int] = Query(None, ge=0, description="Minimum mention count"),
-    search_query: Optional[str] = Query(None, description="Search in entity name"),
+    entity_type: str | None = Query(None, description="Filter by entity type"),
+    mention_count_min: int | None = Query(None, ge=0, description="Minimum mention count"),
+    search_query: str | None = Query(None, description="Search in entity name"),
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
     """List entities with filtering and pagination"""
@@ -654,11 +655,11 @@ async def get_graph_statistics(request: Request, kg_manager: KnowledgeGraphManag
 @limiter.limit("15/minute")  # Relationship queries are complex
 async def get_relationships(
     request: Request,
-    source_entity: Optional[str] = Query(None, description="Source entity name"),
-    target_entity: Optional[str] = Query(None, description="Target entity name"),
-    relationship_type: Optional[str] = Query(None, description="Relationship type"),
-    strength_min: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum relationship strength"),
-    confidence_min: Optional[float] = Query(None, ge=0.0, le=1.0, description="Minimum confidence score"),
+    source_entity: str | None = Query(None, description="Source entity name"),
+    target_entity: str | None = Query(None, description="Target entity name"),
+    relationship_type: str | None = Query(None, description="Relationship type"),
+    strength_min: float | None = Query(None, ge=0.0, le=1.0, description="Minimum relationship strength"),
+    confidence_min: float | None = Query(None, ge=0.0, le=1.0, description="Minimum confidence score"),
     limit: int = Query(50, ge=1, le=500, description="Maximum number of relationships"),
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
@@ -846,7 +847,7 @@ async def get_entity_enrichment_statistics(request: Request, kg_manager: Knowled
 @limiter.limit("3/minute")  # Bulk exports are resource intensive
 async def export_articles(
     request: Request,
-    export_request: Dict[str, Any],
+    export_request: dict[str, Any],
     background_tasks: BackgroundTasks,
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
@@ -905,7 +906,7 @@ async def export_articles(
 @limiter.limit("3/minute")  # Bulk exports are resource intensive
 async def export_entities(
     request: Request,
-    export_request: Dict[str, Any],
+    export_request: dict[str, Any],
     background_tasks: BackgroundTasks,
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
@@ -964,7 +965,7 @@ async def export_entities(
 @limiter.limit("3/minute")  # Bulk exports are resource intensive
 async def export_relationships(
     request: Request,
-    export_request: Dict[str, Any],
+    export_request: dict[str, Any],
     background_tasks: BackgroundTasks,
     kg_manager: KnowledgeGraphManager = Depends(get_kg_manager)
 ):
@@ -1064,7 +1065,7 @@ async def download_export(request: Request, job_id: str):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # Background export functions
-async def _perform_articles_export(job_id: str, filters: Dict[str, Any], format_type: str,
+async def _perform_articles_export(job_id: str, filters: dict[str, Any], format_type: str,
                                  limit: int, include_content: bool, include_entities: bool,
                                  kg_manager: KnowledgeGraphManager):
     """Perform articles export in background"""
@@ -1120,7 +1121,7 @@ async def _perform_articles_export(job_id: str, filters: Dict[str, Any], format_
         logger.error(f"Articles export failed for job {job_id}: {e}")
         _update_export_status(job_id, "failed", 0, error=str(e))
 
-async def _perform_entities_export(job_id: str, filters: Dict[str, Any], format_type: str,
+async def _perform_entities_export(job_id: str, filters: dict[str, Any], format_type: str,
                                  limit: int, include_relationships: bool, include_external_info: bool,
                                  kg_manager: KnowledgeGraphManager):
     """Perform entities export in background"""
@@ -1189,7 +1190,7 @@ async def _perform_entities_export(job_id: str, filters: Dict[str, Any], format_
         logger.error(f"Entities export failed for job {job_id}: {e}")
         _update_export_status(job_id, "failed", 0, error=str(e))
 
-async def _perform_relationships_export(job_id: str, filters: Dict[str, Any], format_type: str,
+async def _perform_relationships_export(job_id: str, filters: dict[str, Any], format_type: str,
                                       limit: int, kg_manager: KnowledgeGraphManager):
     """Perform relationships export in background"""
     try:
@@ -1252,7 +1253,7 @@ async def _perform_relationships_export(job_id: str, filters: Dict[str, Any], fo
         _update_export_status(job_id, "failed", 0, error=str(e))
 
 # Helper functions for export operations
-def _matches_article_filters(article_data: Dict[str, Any], filters: Dict[str, Any]) -> bool:
+def _matches_article_filters(article_data: dict[str, Any], filters: dict[str, Any]) -> bool:
     """Check if article matches export filters"""
     # Domain filter
     if "domain" in filters and article_data.get("domain") != filters["domain"]:
@@ -1285,7 +1286,7 @@ def _matches_article_filters(article_data: Dict[str, Any], filters: Dict[str, An
 
     return True
 
-def _matches_entity_filters(entity: Dict[str, Any], filters: Dict[str, Any]) -> bool:
+def _matches_entity_filters(entity: dict[str, Any], filters: dict[str, Any]) -> bool:
     """Check if entity matches export filters"""
     # Entity type filter
     if "entity_type" in filters and entity.get("entity_type") != filters["entity_type"]:
@@ -1301,7 +1302,7 @@ def _matches_entity_filters(entity: Dict[str, Any], filters: Dict[str, Any]) -> 
 
     return True
 
-def _matches_relationship_filters(edge_data: Dict[str, Any], filters: Dict[str, Any]) -> bool:
+def _matches_relationship_filters(edge_data: dict[str, Any], filters: dict[str, Any]) -> bool:
     """Check if relationship matches export filters"""
     # Relationship type filter
     if "relationship_type" in filters and edge_data.get("relationship_type") != filters["relationship_type"]:
@@ -1317,7 +1318,7 @@ def _matches_relationship_filters(edge_data: Dict[str, Any], filters: Dict[str, 
 
     return True
 
-async def _export_to_file(job_id: str, data: List[Dict[str, Any]], format_type: str, data_type: str):
+async def _export_to_file(job_id: str, data: list[dict[str, Any]], format_type: str, data_type: str):
     """Export data to file in specified format"""
     export_dir = Path("./exports")
     export_dir.mkdir(exist_ok=True)
@@ -1391,11 +1392,11 @@ def _update_export_status(job_id: str, status: str, progress: float, items_proce
         "updated_at": datetime.now().isoformat()
     }
 
-def _get_export_job_status(job_id: str) -> Optional[Dict[str, Any]]:
+def _get_export_job_status(job_id: str) -> dict[str, Any] | None:
     """Get export job status"""
     return _export_jobs.get(job_id)
 
-def _get_export_file_path(job_id: str) -> Optional[Path]:
+def _get_export_file_path(job_id: str) -> Path | None:
     """Get export file path"""
     export_dir = Path("./exports")
     # Try different formats

@@ -14,24 +14,27 @@ Target: 1000+ articles/day = ~0.7 articles/second sustained
 
 import asyncio
 import json
-import time
-import re
-import random
-from datetime import datetime
-from playwright.async_api import async_playwright
-from typing import List, Dict, Optional
-
-from urllib.parse import urlparse
 import os
-from common.observability import get_logger
-import requests
+import random
+import re
+import time
+from datetime import datetime
+from urllib.parse import urlparse
 
-from agents.common.ingest import build_source_upsert, build_article_source_map_insert
-from agents.common.evidence import snapshot_paywalled_page, enqueue_human_review
+import requests
+from playwright.async_api import async_playwright
+
+from agents.common.evidence import enqueue_human_review, snapshot_paywalled_page
+from agents.common.ingest import build_article_source_map_insert, build_source_upsert
+from common.observability import get_logger
 
 # Import shared utilities
-from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
-
+from ..crawler_utils import (
+    CanonicalMetadata,
+    ModalDismisser,
+    RateLimiter,
+    RobotsChecker,
+)
 
 logger = get_logger(__name__)
 
@@ -51,7 +54,7 @@ class UltraFastBBCCrawler:
             'location_indicators': ['england', 'uk', 'britain', 'london', 'manchester',
                                   'birmingham', 'leeds', 'liverpool', 'bristol']
         }
-    
+
     def fast_modal_dismissal_script(self) -> str:
         """Enhanced JavaScript to instantly dismiss all modals/overlays"""
         return """
@@ -127,28 +130,28 @@ class UltraFastBBCCrawler:
             });
         })();
         """
-    
+
     def calculate_news_score(self, title: str, content: str) -> float:
         """Fast heuristic news scoring (no AI needed)"""
-        
+
         text = (title + " " + content).lower()
         score = 0.0
-        
+
         # High-value news indicators
         for keyword in self.news_keywords['high_value']:
             if keyword in text:
                 score += 0.3
-        
+
         # Medium-value indicators
         for keyword in self.news_keywords['medium_value']:
             if keyword in text:
                 score += 0.15
-        
+
         # Location relevance
         for location in self.news_keywords['location_indicators']:
             if location in text:
                 score += 0.1
-        
+
         # Structure indicators
         if len(content) > 200:
             score += 0.2
@@ -156,22 +159,22 @@ class UltraFastBBCCrawler:
             score += 0.1
         if 'bbc' in text:
             score += 0.1
-        
+
         return min(score, 1.0)
-    
-    async def ultra_fast_extract(self, page) -> Dict[str, str]:
+
+    async def ultra_fast_extract(self, page) -> dict[str, str]:
         """Ultra-fast content extraction optimized for speed"""
-        
+
         try:
             # Inject modal dismissal script immediately
             await page.evaluate(self.fast_modal_dismissal_script())
-            
+
             # Also use shared modal dismisser
             await ModalDismisser.dismiss_modals(page)
-            
+
             # Get title (fast)
             title = await page.title()
-            
+
             # Fast content extraction with timeout
             content = ""
             try:
@@ -185,7 +188,7 @@ class UltraFastBBCCrawler:
                     content = " ".join(paragraphs[:3])  # First 3 paragraphs only
                 except Exception:
                     content = ""
-            
+
             # Attempt to quickly extract canonical link and paywall signals
             canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)
 
@@ -202,17 +205,17 @@ class UltraFastBBCCrawler:
                 "paywall_flag": paywall_flag,
                 "extraction_metadata": extraction_metadata
             }
-            
+
         except Exception as e:
             return {
                 "title": "Error",
                 "content": f"Extraction failed: {e}",
                 "extraction_time": time.time()
             }
-    
-    async def process_url_ultra_fast(self, browser, url: str) -> Optional[Dict]:
+
+    async def process_url_ultra_fast(self, browser, url: str) -> dict | None:
         """Ultra-fast single URL processing"""
-        
+
         try:
             # Check robots.txt compliance first
             if not self.robots_checker.check_robots_txt(url):
@@ -230,40 +233,40 @@ class UltraFastBBCCrawler:
                     news_score=0.0,
                     error="robots_disallowed"
                 )
-            
+
             # Apply rate limiting
             domain = urlparse(url).netloc
             await self.rate_limiter.wait_if_needed(domain)
-            
+
             # Fast context creation
             context = await browser.new_context(
                 viewport={'width': 1024, 'height': 768},
                 java_script_enabled=True
             )
             page = await context.new_page()
-            
+
             # Navigate with aggressive timeout
             await page.goto(url, wait_until='domcontentloaded', timeout=8000)
-            
+
             # Ultra-fast content extraction
             content_data = await self.ultra_fast_extract(page)
-            
+
             # Close immediately
             await context.close()
-            
+
             # Throttle per-article to reduce crawling speed: random sleep 1-3 seconds
             try:
                 delay = random.uniform(1.0, 3.0)
                 await asyncio.sleep(delay)
             except Exception:
                 pass
-            
+
             # Fast news scoring
             news_score = self.calculate_news_score(content_data["title"], content_data["content"])
-            
+
             # Only keep high-quality news (threshold for speed)
             if news_score >= 0.4 and len(content_data["content"]) > 100:
-                
+
                 # Enrichment: url_hash, domain, canonical, publisher_meta (minimal), paywall flag
                 domain = urlparse(url).netloc
                 canonical = content_data.get('canonical')
@@ -282,9 +285,9 @@ class UltraFastBBCCrawler:
                     news_score=news_score,
                     canonical=canonical
                 )
-            
+
             return None  # Filtered out
-            
+
         except Exception as e:
             return CanonicalMetadata.generate_metadata(
                 url=url,
@@ -299,24 +302,24 @@ class UltraFastBBCCrawler:
                 news_score=0.0,
                 error=str(e)
             )
-    
-    async def get_urls_ultra_fast(self, max_urls: int = 200) -> List[str]:
+
+    async def get_urls_ultra_fast(self, max_urls: int = 200) -> list[str]:
         """Get URLs as fast as possible"""
-        
+
         browser = await async_playwright().start()
         browser_instance = await browser.chromium.launch(headless=True)
-        
+
         try:
             context = await browser_instance.new_context()
             page = await context.new_page()
-            
+
             # Navigate with timeout
             await page.goto("https://www.bbc.co.uk/news/england", timeout=10000)
-            
+
             # Dismiss modals
             await page.evaluate(self.fast_modal_dismissal_script())
             await asyncio.sleep(1)
-            
+
             # Extract links fast
             links = await page.evaluate("""
                 () => {
@@ -326,92 +329,92 @@ class UltraFastBBCCrawler:
                         .slice(0, 200);
                 }
             """)
-            
+
             await browser_instance.close()
-            
+
             logger.info(f"⚡ Found {len(links)} URLs in record time")
             return links
-            
+
         except Exception as e:
             logger.error(f"URL extraction failed: {e}")
             await browser_instance.close()
             return []
-    
-    async def process_ultra_fast_batch(self, urls: List[str]) -> List[Dict]:
+
+    async def process_ultra_fast_batch(self, urls: list[str]) -> list[dict]:
         """Process batches with maximum parallelization"""
-        
+
         # Create multiple browser instances for parallel processing
         playwright = await async_playwright().start()
         browsers = []
-        
+
         try:
             # Launch multiple browsers
             for _ in range(self.concurrent_browsers):
                 browser = await playwright.chromium.launch(headless=True)
                 browsers.append(browser)
-            
+
             logger.info(f"🚀 Processing {len(urls)} URLs with {len(browsers)} concurrent browsers")
-            
+
             results = []
             browser_index = 0
-            
+
             # Process in aggressive batches
             for i in range(0, len(urls), self.batch_size):
                 batch_urls = urls[i:i + self.batch_size]
                 batch_start = time.time()
-                
+
                 # Distribute URLs across browsers
                 tasks = []
                 for url in batch_urls:
                     browser = browsers[browser_index % len(browsers)]
                     browser_index += 1
                     tasks.append(self.process_url_ultra_fast(browser, url))
-                
+
                 # Process batch concurrently
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-                
+
                 # Collect successful results
                 successful_in_batch = 0
                 for result in batch_results:
                     if isinstance(result, dict) and result.get("status") == "success":
                         results.append(result)
                         successful_in_batch += 1
-                
+
                 batch_time = time.time() - batch_start
                 rate = len(batch_urls) / batch_time if batch_time > 0 else 0
-                
+
                 logger.info(f"⚡ Batch {i//self.batch_size + 1}: {successful_in_batch}/{len(batch_urls)} success, {rate:.1f} URLs/sec")
-                
+
                 # Minimal delay between batches
                 await asyncio.sleep(0.1)
-            
+
             return results
-            
+
         finally:
             # Close all browsers
             for browser in browsers:
                 await browser.close()
-    
+
     async def run_ultra_fast_crawl(self, target_articles: int = 200):
         """Main ultra-fast crawling function"""
-        
+
         start_time = time.time()
         logger.info(f"🚀 Ultra-Fast BBC Crawl: Target {target_articles} articles")
-        
+
         # Get URLs fast
         urls = await self.get_urls_ultra_fast(max_urls=target_articles * 2)  # Get extra for filtering
-        
+
         if not urls:
             logger.error("❌ No URLs found!")
             return []
-        
+
         # Process ultra-fast
         results = await self.process_ultra_fast_batch(urls)
-        
+
         # Save results
         total_time = time.time() - start_time
         output_file = f"ultra_fast_bbc_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        
+
         summary = {
             "ultra_fast_crawl": True,
             "target_articles": target_articles,
@@ -424,23 +427,23 @@ class UltraFastBBCCrawler:
             "timestamp": datetime.now().isoformat(),
             "articles": results  # Use 'articles' key to match orchestrator expectation
         }
-        
+
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.warning(f"Could not save results file: {e}")
-        
+
         logger.info("🎉 Ultra-Fast Crawl Complete!")
         logger.info(f"📊 {len(results)} articles in {total_time:.1f}s")
         logger.info(f"⚡ Rate: {len(results) / total_time:.2f} articles/second")
         logger.info(f"✅ Success Rate: {len(results) / len(urls) * 100:.1f}%")
         logger.info(f"Daily capacity: {(len(results) / total_time) * 86400:.0f} articles/day")
-        
+
         # Dispatch ingest requests to DB worker via MCP Bus (best-effort).
         MCP_BUS_URL = os.environ.get('MCP_BUS_URL', 'http://localhost:8000')
 
-        async def dispatch_ingest(article: Dict):
+        async def dispatch_ingest(article: dict):
             # Build article payload and DB statements
             # If article is paywalled, snapshot and enqueue for human review instead of ingesting
             if article.get('paywall_flag'):

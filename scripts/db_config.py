@@ -5,6 +5,7 @@ Usage: from scripts.db_config import get_db_conn
 from __future__ import annotations
 
 import os
+
 import psycopg2
 
 
@@ -25,7 +26,7 @@ def get_db_conn():
         try:
             pgpass_path = os.path.expanduser("~/.pgpass")
             if os.path.exists(pgpass_path):
-                with open(pgpass_path, "r", encoding="utf-8") as fh:
+                with open(pgpass_path, encoding="utf-8") as fh:
                     for ln in fh:
                         ln = ln.strip()
                         if not ln or ln.startswith("#"):

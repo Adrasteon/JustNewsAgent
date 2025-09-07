@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Scout Agent Production Crawler Orchestrator
@@ -23,16 +24,18 @@ Capabilities:
 """
 
 import asyncio
-
-from datetime import datetime
-from typing import List, Dict, Any
-from pathlib import Path
 import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # Import database utilities and generic crawler
-from .crawler_utils import get_active_sources, get_sources_by_domain, initialize_connection_pool
+from .crawler_utils import (
+    get_active_sources,
+    get_sources_by_domain,
+    initialize_connection_pool,
+)
 from .sites.generic_site_crawler import MultiSiteCrawler, SiteConfig
-
 
 logger = get_logger(__name__)
 
@@ -52,13 +55,17 @@ def _load_legacy_crawlers():
 
             # Import the crawler classes
             try:
-                from .sites.bbc_crawler import UltraFastBBCCrawler as _UltraFastBBCCrawler
+                from .sites.bbc_crawler import (
+                    UltraFastBBCCrawler as _UltraFastBBCCrawler,
+                )
                 UltraFastBBCCrawler = _UltraFastBBCCrawler
             except ImportError:
                 logger.warning("⚠️ Could not import UltraFastBBCCrawler")
 
             try:
-                from .sites.bbc_ai_crawler import ProductionBBCCrawler as _ProductionBBCCrawler
+                from .sites.bbc_ai_crawler import (
+                    ProductionBBCCrawler as _ProductionBBCCrawler,
+                )
                 ProductionBBCCrawler = _ProductionBBCCrawler
             except ImportError:
                 logger.warning("⚠️ Could not import ProductionBBCCrawler")
@@ -108,8 +115,8 @@ class ProductionCrawlerOrchestrator:
             }
         else:
             logger.warning("⚠️ Legacy site crawlers not available - running in dynamic mode only")
-        
-    async def load_dynamic_sources(self, domains: List[str] = None) -> List[SiteConfig]:
+
+    async def load_dynamic_sources(self, domains: list[str] = None) -> list[SiteConfig]:
         """Load site configurations dynamically from database"""
         try:
             if domains:
@@ -132,10 +139,10 @@ class ProductionCrawlerOrchestrator:
             logger.error(f"❌ Failed to load dynamic sources: {e}")
             return []
 
-    async def crawl_multi_site_dynamic(self, domains: List[str] = None,
+    async def crawl_multi_site_dynamic(self, domains: list[str] = None,
                                      max_total_articles: int = 100,
                                      concurrent_sites: int = 3,
-                                     articles_per_site: int = 25) -> Dict[str, Any]:
+                                     articles_per_site: int = 25) -> dict[str, Any]:
         """
         Crawl multiple sites dynamically loaded from database
 
@@ -183,7 +190,7 @@ class ProductionCrawlerOrchestrator:
 
         return results
 
-    async def get_available_sources(self) -> List[Dict[str, Any]]:
+    async def get_available_sources(self) -> list[dict[str, Any]]:
         """Get all available sources from database"""
         try:
             sources = get_active_sources()
@@ -199,8 +206,8 @@ class ProductionCrawlerOrchestrator:
             logger.error(f"❌ Failed to get available sources: {e}")
             return []
 
-    async def crawl_sources_by_domain(self, domains: List[str],
-                                    articles_per_site: int = 25) -> Dict[str, Any]:
+    async def crawl_sources_by_domain(self, domains: list[str],
+                                    articles_per_site: int = 25) -> dict[str, Any]:
         """Crawl specific domains loaded from database"""
         logger.info(f"🎯 Crawling specific domains: {domains}")
 
@@ -224,8 +231,8 @@ class ProductionCrawlerOrchestrator:
             "results": results,
             "timestamp": datetime.now().isoformat()
         }
-    
-    async def get_source_statistics(self) -> Dict[str, Any]:
+
+    async def get_source_statistics(self) -> dict[str, Any]:
         """Get statistics about available sources"""
         try:
             sources = get_active_sources()
@@ -244,17 +251,17 @@ class ProductionCrawlerOrchestrator:
             logger.error(f"❌ Failed to get source statistics: {e}")
             return {"error": str(e)}
 
-    def get_available_sites(self) -> List[str]:
+    def get_available_sites(self) -> list[str]:
         """Get list of sites available for production crawling (legacy + dynamic)"""
         sites = list(self.sites.keys())
         # Note: Dynamic sites are loaded on demand
         return sites
 
-    def get_supported_modes(self) -> List[str]:
+    def get_supported_modes(self) -> list[str]:
         """Get all supported crawling modes"""
         return ['ultra_fast', 'ai_enhanced', 'generic_site', 'multi_site_dynamic']
-    
-    async def crawl_site_ultra_fast(self, site: str, target_articles: int = 100) -> Dict[str, Any]:
+
+    async def crawl_site_ultra_fast(self, site: str, target_articles: int = 100) -> dict[str, Any]:
         """
         High-speed crawling for maximum throughput (8.14+ articles/second)
         
@@ -267,19 +274,19 @@ class ProductionCrawlerOrchestrator:
         """
         if site not in self.sites:
             raise ValueError(f"Site '{site}' not supported. Available: {list(self.sites.keys())}")
-            
+
         crawler = self.sites[site]['ultra_fast']
         start_time = datetime.now()
-        
+
         logger.info(f"Starting ultra-fast crawl of {site} for {target_articles} articles")
-        
+
         try:
             results = await crawler.run_ultra_fast_crawl(target_articles)
-            
+
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             articles_per_second = len(results.get('articles', [])) / duration if duration > 0 else 0
-            
+
             return {
                 'site': site,
                 'mode': 'ultra_fast',
@@ -290,7 +297,7 @@ class ProductionCrawlerOrchestrator:
                 'success_rate': results.get('success_rate', 0.0),
                 'timestamp': start_time.isoformat()
             }
-            
+
         except Exception as e:
             logger.error(f"Ultra-fast crawl failed for {site}: {e}")
             return {
@@ -301,8 +308,8 @@ class ProductionCrawlerOrchestrator:
                 'count': 0,
                 'timestamp': start_time.isoformat()
             }
-    
-    async def crawl_site_ai_enhanced(self, site: str, target_articles: int = 50) -> Dict[str, Any]:
+
+    async def crawl_site_ai_enhanced(self, site: str, target_articles: int = 50) -> dict[str, Any]:
         """
         AI-enhanced crawling with NewsReader integration (0.86+ articles/second)
         
@@ -315,19 +322,19 @@ class ProductionCrawlerOrchestrator:
         """
         if site not in self.sites:
             raise ValueError(f"Site '{site}' not supported. Available: {list(self.sites.keys())}")
-            
+
         crawler = self.sites[site]['ai_enhanced']
         start_time = datetime.now()
-        
+
         logger.info(f"Starting AI-enhanced crawl of {site} for {target_articles} articles")
-        
+
         try:
             results = await crawler.run_production_crawl(target_articles)
-            
+
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             articles_per_second = len(results.get('articles', [])) / duration if duration > 0 else 0
-            
+
             return {
                 'site': site,
                 'mode': 'ai_enhanced',
@@ -339,7 +346,7 @@ class ProductionCrawlerOrchestrator:
                 'ai_analysis_count': sum(1 for a in results.get('articles', []) if 'ai_analysis' in a),
                 'timestamp': start_time.isoformat()
             }
-            
+
         except Exception as e:
             logger.error(f"AI-enhanced crawl failed for {site}: {e}")
             return {
@@ -350,8 +357,8 @@ class ProductionCrawlerOrchestrator:
                 'count': 0,
                 'timestamp': start_time.isoformat()
             }
-    
-    async def crawl_multi_site(self, sites: List[str], mode: str = 'ultra_fast', articles_per_site: int = 50) -> List[Dict[str, Any]]:
+
+    async def crawl_multi_site(self, sites: list[str], mode: str = 'ultra_fast', articles_per_site: int = 50) -> list[dict[str, Any]]:
         """
         Crawl multiple sites concurrently for maximum efficiency
         
@@ -364,7 +371,7 @@ class ProductionCrawlerOrchestrator:
             List of crawl results for each site
         """
         logger.info(f"Starting multi-site {mode} crawl: {sites}")
-        
+
         tasks = []
         for site in sites:
             if mode == 'ultra_fast':
@@ -373,11 +380,11 @@ class ProductionCrawlerOrchestrator:
                 task = self.crawl_site_ai_enhanced(site, articles_per_site)
             else:
                 raise ValueError(f"Invalid mode: {mode}. Use 'ultra_fast' or 'ai_enhanced'")
-            
+
             tasks.append(task)
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Handle any exceptions
         processed_results = []
         for i, result in enumerate(results):
@@ -392,10 +399,10 @@ class ProductionCrawlerOrchestrator:
                 })
             else:
                 processed_results.append(result)
-        
+
         return processed_results
-    
-    async def crawl_all_sources(self, max_articles: int = 50) -> Dict[str, Any]:
+
+    async def crawl_all_sources(self, max_articles: int = 50) -> dict[str, Any]:
         """Convenience method to crawl all available sources"""
         return await self.crawl_multi_site_dynamic(
             domains=None,
@@ -404,7 +411,7 @@ class ProductionCrawlerOrchestrator:
             articles_per_site=max(10, max_articles // 10)  # Distribute articles
         )
 
-    async def crawl_top_sources(self, count: int = 5, articles_per_site: int = 25) -> Dict[str, Any]:
+    async def crawl_top_sources(self, count: int = 5, articles_per_site: int = 25) -> dict[str, Any]:
         """Crawl the top N most recently verified sources"""
         try:
             sources = get_active_sources()

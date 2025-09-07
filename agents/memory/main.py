@@ -1,10 +1,12 @@
 """
 Main file for the Memory Agent.
 """
-from common.observability import get_logger
 import os
-import requests
 from contextlib import asynccontextmanager
+
+import requests
+
+from common.observability import get_logger
 
 try:
     # Optional import for Hugging Face hub login and snapshot_download
@@ -12,20 +14,21 @@ try:
 except Exception:
     huggingface_hub = None
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+# Import database utilities
+from agents.common.database import close_connection_pool, initialize_connection_pool
+from agents.common.database import get_db_connection as get_pooled_connection
 from agents.memory.tools import (
     get_embedding_model,
     log_training_example,
     save_article,
     vector_search_articles_local,
 )
-
-# Import database utilities
-from agents.common.database import initialize_connection_pool, close_connection_pool, get_db_connection as get_pooled_connection
 
 # Configure centralized logging
 logger = get_logger(__name__)

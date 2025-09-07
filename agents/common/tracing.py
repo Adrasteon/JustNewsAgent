@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Distributed Tracing Module for JustNewsAgent
@@ -8,29 +9,29 @@ Provides tracing functionality for distributed operations across agents
 
 import time
 import uuid
-from typing import Dict, Any, Optional
 from contextvars import ContextVar
 from dataclasses import dataclass, field
+from typing import Any
 
 logger = get_logger(__name__)
 
 # Context variables for trace propagation
-current_trace_id: ContextVar[Optional[str]] = ContextVar('trace_id', default=None)
-current_span_id: ContextVar[Optional[str]] = ContextVar('span_id', default=None)
-current_parent_span_id: ContextVar[Optional[str]] = ContextVar('parent_span_id', default=None)
+current_trace_id: ContextVar[str | None] = ContextVar('trace_id', default=None)
+current_span_id: ContextVar[str | None] = ContextVar('span_id', default=None)
+current_parent_span_id: ContextVar[str | None] = ContextVar('parent_span_id', default=None)
 
 @dataclass
 class TraceSpan:
     """Represents a single trace span"""
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str]
+    parent_span_id: str | None
     operation_name: str
     start_time: float
-    end_time: Optional[float] = None
-    duration_ms: Optional[float] = None
-    tags: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    end_time: float | None = None
+    duration_ms: float | None = None
+    tags: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     status: str = "started"
 
     def finish(self, status: str = "completed"):
@@ -50,12 +51,12 @@ class TraceSpan:
 class TraceContext:
     """Manages trace context for distributed operations"""
 
-    def __init__(self, trace_id: Optional[str] = None):
+    def __init__(self, trace_id: str | None = None):
         self.trace_id = trace_id or str(uuid.uuid4())
-        self.spans: Dict[str, TraceSpan] = {}
+        self.spans: dict[str, TraceSpan] = {}
         self.active_spans: list = []
 
-    def start_span(self, operation_name: str, parent_span_id: Optional[str] = None) -> TraceSpan:
+    def start_span(self, operation_name: str, parent_span_id: str | None = None) -> TraceSpan:
         """Start a new span"""
         span_id = str(uuid.uuid4())
         span = TraceSpan(
@@ -80,11 +81,11 @@ class TraceContext:
             if self.active_spans and self.active_spans[-1].span_id == span_id:
                 self.active_spans.pop()
 
-    def get_active_span(self) -> Optional[TraceSpan]:
+    def get_active_span(self) -> TraceSpan | None:
         """Get the currently active span"""
         return self.active_spans[-1] if self.active_spans else None
 
-    def get_trace_summary(self) -> Dict[str, Any]:
+    def get_trace_summary(self) -> dict[str, Any]:
         """Get a summary of the trace"""
         total_spans = len(self.spans)
         completed_spans = sum(1 for span in self.spans.values() if span.status == "completed")
@@ -115,9 +116,9 @@ class TraceContext:
         }
 
 # Global trace context
-_current_trace_context: Optional[TraceContext] = None
+_current_trace_context: TraceContext | None = None
 
-def start_trace(operation_name: str, trace_id: Optional[str] = None) -> TraceSpan:
+def start_trace(operation_name: str, trace_id: str | None = None) -> TraceSpan:
     """Start a new trace"""
     global _current_trace_context
     _current_trace_context = TraceContext(trace_id)
@@ -130,11 +131,11 @@ def start_trace(operation_name: str, trace_id: Optional[str] = None) -> TraceSpa
     logger.debug(f"Started trace {span.trace_id} with span {span.span_id} for operation '{operation_name}'")
     return span
 
-def get_current_trace_context() -> Optional[TraceContext]:
+def get_current_trace_context() -> TraceContext | None:
     """Get the current trace context"""
     return _current_trace_context
 
-def get_trace_context() -> Dict[str, Any]:
+def get_trace_context() -> dict[str, Any]:
     """Get current trace context information"""
     trace_id = current_trace_id.get()
     span_id = current_span_id.get()
@@ -147,7 +148,7 @@ def get_trace_context() -> Dict[str, Any]:
         "has_active_trace": trace_id is not None
     }
 
-def create_child_span(operation_name: str) -> Optional[TraceSpan]:
+def create_child_span(operation_name: str) -> TraceSpan | None:
     """Create a child span in the current trace"""
     global _current_trace_context
     if _current_trace_context is None:
@@ -176,7 +177,7 @@ def finish_current_span(status: str = "completed"):
         else:
             current_span_id.set(None)
 
-def finish_trace() -> Optional[Dict[str, Any]]:
+def finish_trace() -> dict[str, Any] | None:
     """Finish the current trace and return summary"""
     global _current_trace_context
 
@@ -250,7 +251,7 @@ class trace_span:
             finish_current_span("completed")
 
 # Decorator for automatic function tracing
-def traced(operation_name: Optional[str] = None):
+def traced(operation_name: str | None = None):
     """Decorator to automatically trace function calls"""
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -269,7 +270,7 @@ def traced(operation_name: Optional[str] = None):
 # Integration with logging
 def setup_tracing_logging():
     """Set up logging integration with tracing"""
-    
+
 
     class TracingLogFilter(logging.Filter):
         def filter(self, record):

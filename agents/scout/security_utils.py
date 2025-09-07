@@ -2,14 +2,14 @@
 Security utilities for Scout Agent - Input validation, sanitization, and security measures.
 """
 
-from common.observability import get_logger
+import hashlib
 import re
-
-from urllib.parse import urlparse
-from typing import Dict, Any, List
 import time
 from functools import wraps
-import hashlib
+from typing import Any
+from urllib.parse import urlparse
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
@@ -26,7 +26,7 @@ BLOCKED_DOMAINS = {
 }
 
 # Rate limiting storage (in production, use Redis or similar)
-rate_limit_store: Dict[str, List[float]] = {}
+rate_limit_store: dict[str, list[float]] = {}
 
 def validate_url(url: str) -> bool:
     """
@@ -227,7 +227,7 @@ def validate_content_size(content: str, max_size: int = MAX_CONTENT_LENGTH) -> b
 
     return True
 
-def secure_request_params(url: str, **kwargs) -> Dict[str, Any]:
+def secure_request_params(url: str, **kwargs) -> dict[str, Any]:
     """
     Create secure request parameters with timeouts and security headers.
 
@@ -256,7 +256,7 @@ def secure_request_params(url: str, **kwargs) -> Dict[str, Any]:
 
     return secure_params
 
-def log_security_event(event_type: str, details: Dict[str, Any], level: str = 'warning'):
+def log_security_event(event_type: str, details: dict[str, Any], level: str = 'warning'):
     """
     Log security-related events.
 
@@ -291,7 +291,7 @@ def hash_content(content: str) -> str:
 
     return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
-def validate_batch_urls(urls: List[str]) -> List[str]:
+def validate_batch_urls(urls: list[str]) -> list[str]:
     """
     Validate a batch of URLs and return only the valid ones.
 

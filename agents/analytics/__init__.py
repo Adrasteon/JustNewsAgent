@@ -10,10 +10,11 @@ import threading
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from ..common.advanced_analytics import get_analytics_engine, PerformanceMetrics
-from ..common.gpu_metrics import start_event, end_event
+from ..common.advanced_analytics import PerformanceMetrics, get_analytics_engine
+from ..common.gpu_metrics import end_event, start_event
+
 
 class AnalyticsIntegration:
     """
@@ -57,7 +58,7 @@ class AnalyticsIntegration:
         while self.integration_active:
             try:
                 if gpu_events_file.exists():
-                    with open(gpu_events_file, 'r') as f:
+                    with open(gpu_events_file) as f:
                         f.seek(last_position)
                         new_lines = f.readlines()
                         last_position = f.tell()
@@ -76,7 +77,7 @@ class AnalyticsIntegration:
                 print(f"Error syncing GPU events: {e}")
                 time.sleep(10)
 
-    def _process_gpu_event(self, event_data: Dict[str, Any]):
+    def _process_gpu_event(self, event_data: dict[str, Any]):
         """Process a GPU event and convert to analytics metric"""
         try:
             meta = event_data.get('meta', {})
