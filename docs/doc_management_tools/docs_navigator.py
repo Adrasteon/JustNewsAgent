@@ -33,7 +33,7 @@ from datetime import datetime
 class DocsNavigator:
     """Documentation catalogue navigator and search tool."""
 
-    def __init__(self, catalogue_path: str = "docs/docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = catalogue_path
         self.catalogue = self._load_catalogue()
 

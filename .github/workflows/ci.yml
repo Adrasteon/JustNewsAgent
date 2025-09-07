@@ -1,56 +1,72 @@
-name: CI - Manual (tests)
+name: CI - JustNewsAgent Tests
 
+# Run on manual dispatch and pull requests to main/dev branches
 on:
   workflow_dispatch: {}
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-activate-base: false
-          mamba-version: '1.6.0'
-      - name: Create environment
-        run: |
-          mamba env create -f environment.yml -n justnews-upgrade-test
-          mamba activate justnews-upgrade-test
-      - name: Run tests (non-integration)
-        run: |
-          pytest -q -m "not integration"
-name: CI - Pytest (conda)
-
-# NOTE: This workflow has been switched to manual dispatch only while testing
-# and dependency-upgrade work is paused. Use the 'Run workflow' button in
-# the Actions tab to execute it on-demand.
-on:
-  workflow_dispatch: {}
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ main, dev ]
 
 jobs:
   test:
     name: Run tests (conda environment)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Miniconda and create environment
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.11
+          python-version: 3.12
           auto-update-conda: true
-          activate-environment: justnews-pinned
+          activate-environment: justnews-v2-py312
           environment-file: environment.yml
           use-mamba: true
 
-      - name: Activate environment and run pytest (unit-only)
+      - name: Install additional dependencies
         shell: bash -l {0}
         run: |
-          conda activate justnews-pinned
-          # Upgrade pip/tools just in case and ensure pytest is available
+          # Ensure we're in the activated environment
+          conda activate justnews-v2-py312
+
+          # Upgrade pip and install any additional requirements
           pip install -U pip setuptools wheel
-          pip install pytest
-          # Run collection-only unit tests (integration tests are gated by marker/environment)
-          pytest -q -k "not integration" --maxfail=1
+
+          # Install requirements.txt dependencies (if not already covered by environment.yml)
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          # Run unit tests only (exclude integration tests)
+          pytest -v -k "not integration" --tb=short --maxfail=5
+
+      - name: Run integration tests (optional)
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          # Run integration tests if they exist
+          pytest -v -k "integration" --tb=short --maxfail=3 || echo "No integration tests found or failed"
+        continue-on-error: true
+
+      - name: Generate test coverage report
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          # Install coverage tools if not present
+          pip install pytest-cov coverage
+
+          # Run tests with coverage
+          pytest --cov=. --cov-report=xml --cov-report=term -k "not integration"
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true

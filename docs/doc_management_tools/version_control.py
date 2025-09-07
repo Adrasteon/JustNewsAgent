@@ -50,7 +50,7 @@ class ChangeRecord:
 class DocumentationVersionControl:
     """Version control system for documentation"""
 
-    def __init__(self, catalogue_path: str = "docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
         self.versions_dir = Path("doc_versions")
         self.changes_dir = Path("doc_changes")

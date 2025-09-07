@@ -11,7 +11,7 @@ from typing import Dict, List, Set, Tuple
 from datetime import datetime
 
 class CrossReferenceRepair:
-    def __init__(self, catalogue_path: str = "docs/docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
         with open(self.catalogue_path, 'r') as f:
             self.catalogue = json.load(f)

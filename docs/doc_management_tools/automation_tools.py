@@ -10,7 +10,7 @@ This script provides automated tools for ongoing documentation maintenance:
 4. Maintenance scheduling and reporting
 
 Usage:
-    python docs/automation_tools.py
+    python doc_management_tools/automation_tools.py
 
 Author: GitHub Copilot
 Date: September 7, 2025
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class DocumentationAutomation:
     """Automated documentation maintenance system"""
 
-    def __init__(self, catalogue_path: str = "docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
         self.catalogue = None
         self.automation_results = {}

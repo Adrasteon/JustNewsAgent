@@ -15,11 +15,11 @@ Features:
 - Search index generation and optimization
 
 Usage:
-    python docs/catalogue_expansion.py --phase development_reports
-    python docs/catalogue_expansion.py --phase agents
-    python docs/catalogue_expansion.py --phase scripts_tools
-    python docs/catalogue_expansion.py --phase all
-    python docs/catalogue_expansion.py --validate
+    python doc_management_tools/catalogue_expansion.py --phase development_reports
+    python doc_management_tools/catalogue_expansion.py --phase agents
+    python doc_management_tools/catalogue_expansion.py --phase scripts_tools
+    python doc_management_tools/catalogue_expansion.py --phase all
+    python doc_management_tools/catalogue_expansion.py --validate
 """
 
 import os

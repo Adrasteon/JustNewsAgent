@@ -14,25 +14,24 @@ Additional issues identified:
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set
 from datetime import datetime
+from pathlib import Path
+
 
 class CatalogueMaintenanceActions:
-    def __init__(self, catalogue_path: str = "docs/docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
-        with open(self.catalogue_path, 'r') as f:
+        with open(self.catalogue_path) as f:
             self.catalogue = json.load(f)
 
-    def analyze_category_distribution(self) -> Dict[str, int]:
+    def analyze_category_distribution(self) -> dict[str, int]:
         """Analyze document distribution across categories"""
         distribution = {}
         for category in self.catalogue['categories']:
             distribution[category['name']] = len(category['documents'])
         return distribution
 
-    def identify_large_categories(self) -> List[str]:
+    def identify_large_categories(self) -> list[str]:
         """Identify categories with above-average document counts"""
         distribution = self.analyze_category_distribution()
         total_docs = sum(distribution.values())
@@ -45,7 +44,7 @@ class CatalogueMaintenanceActions:
 
         return large_categories
 
-    def analyze_orphaned_documents(self) -> Dict[str, List[str]]:
+    def analyze_orphaned_documents(self) -> dict[str, list[str]]:
         """Analyze orphaned documents and suggest cross-references"""
         all_docs = set()
         referenced_docs = set()
@@ -71,7 +70,7 @@ class CatalogueMaintenanceActions:
             'broken_refs_sample': list(broken_refs)[:10]
         }
 
-    def suggest_category_reorganization(self) -> List[str]:
+    def suggest_category_reorganization(self) -> list[str]:
         """Suggest reorganization for large categories"""
         suggestions = []
 
@@ -242,7 +241,7 @@ def main():
     report = maintainer.generate_maintenance_report()
 
     # Save to file
-    report_path = Path("docs/MAINTENANCE_ACTION_PLAN.md")
+    report_path = Path("../MAINTENANCE_ACTION_PLAN.md")
     with open(report_path, 'w') as f:
         f.write(report)
 
@@ -251,5 +250,4 @@ def main():
     print(report)
 
 if __name__ == "__main__":
-    main()</content>
-<parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/docs/maintenance_action_plan.py
+    main()

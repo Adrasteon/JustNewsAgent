@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 class QualityEnhancer:
     """Quality enhancement system for documentation catalogue"""
 
-    def __init__(self, catalogue_path: str = "docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
         self.catalogue = None
         self.backup_path = None

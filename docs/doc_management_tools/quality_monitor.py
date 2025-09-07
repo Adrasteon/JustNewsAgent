@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 class DocumentationQualityMonitor:
     """Automated quality monitoring system for documentation"""
 
-    def __init__(self, catalogue_path: str = "docs_catalogue_v2.json"):
+    def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
         self.target_score = 90.0
         self.alert_threshold = 85.0
@@ -260,7 +260,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Documentation Quality Monitor")
-    parser.add_argument("--catalogue", default="docs_catalogue_v2.json",
+    parser.add_argument("--catalogue", default="../docs_catalogue_v2.json",
                        help="Path to documentation catalogue")
     parser.add_argument("--continuous", action="store_true",
                        help="Run continuous monitoring")

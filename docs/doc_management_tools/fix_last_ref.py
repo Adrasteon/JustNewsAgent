@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 def fix_last_broken_ref():
-    catalogue_path = Path("docs/docs_catalogue_v2.json")
+    catalogue_path = Path("../docs_catalogue_v2.json")
     with open(catalogue_path, 'r') as f:
         catalogue = json.load(f)
 

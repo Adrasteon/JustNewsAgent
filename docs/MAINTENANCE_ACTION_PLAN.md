@@ -1,93 +1,101 @@
-# JustNewsAgent Documentation Catalogue - Maintenance Action Plan
-**Generated:** September 7, 2025
+============================================================
+JUSTNEWSAGENT DOCUMENTATION CATALOGUE
+MAINTENANCE ACTION PLAN
+============================================================
+Generated: 2025-09-07 14:02:25
 
-## Current Status
-- **Total Documents:** 140
-- **Total Categories:** 14
-- **Last Updated:** 2025-09-07
+CURRENT STATUS:
+- Total Documents: 265
+- Total Categories: 28
+- Last Updated: 2025-09-07
 
-## Issues Identified
+CATEGORY DISTRIBUTION:
+------------------------------
+Development Reports: 69 documents
+Agent Documentation: 53 documents
+Implementation Reports: 20 documents
+Production & Deployment: 17 documents
+Architecture & Design Reports: 17 documents
+Model Integration Documentation: 17 documents
+Core Agent Documentation: 10 documents
+General Documentation: 9 documents
+Specialized Agent Documentation: 8 documents
+Performance & Optimization Reports: 5 documents
+Training & Learning Reports: 5 documents
+Architecture & Design: 4 documents
+GPU Setup & Configuration: 4 documents
+Scripts Tools: 4 documents
+API & Integration: 3 documents
+Deployment System: 3 documents
+Performance Optimization: 3 documents
+Main Documentation: 2 documents
+Training & Learning: 2 documents
+Monitoring & Analytics: 2 documents
+Testing & Quality Assurance Reports: 2 documents
+Deployment & Operations Reports: 2 documents
+Maintenance & Housekeeping Reports: 2 documents
+Compliance & Security: 1 documents
+Agent Management & Tools: 1 documents
+Integration & Workflow Reports: 0 documents
+Deprecated Agent Documentation: 0 documents
+Crawling & Data Collection: 0 documents
 
-### 1. Cross-Reference Problems
-- **Orphaned Documents:** 129 (documents not referenced by others)
-- **Broken References:** 16 (references to non-existent documents)
+CATEGORIES ABOVE AVERAGE SIZE:
+-----------------------------------
+Agent Documentation: 53 documents
+Production & Deployment: 17 documents
+Development Reports: 69 documents
+Architecture & Design Reports: 17 documents
+Implementation Reports: 20 documents
+Model Integration Documentation: 17 documents
 
-### 2. Category Distribution Issues
-- **Agent Documentation:** 36 documents (above average)
-- **Development Reports:** 53 documents (above average)
+CROSS-REFERENCE ANALYSIS:
+------------------------------
+Orphaned Documents: 149
+Broken References: 0
 
-### 3. Document Quality Issues
-- **Short Descriptions:** 79 documents need better descriptions
-- **Missing Tags:** Some documents lack proper tagging
+SAMPLE ORPHANED DOCUMENTS:
+------------------------------
+- markdown_docs_production_status_newsreader_training_integration_success
+- markdown_docs_development_reports_system_v2_upgrade_plan
+- markdown_docs_agent_documentation_system_decisions
+- markdown_docs_housekeeping_complete_summary
+- markdown_docs_agent_documentation_model_store_guidelines
+- markdown_docs_agent_documentation_data_pipeline_documentation
+- markdown_docs_agent_documentation_readme
+- markdown_docs_development_reports_full_gpu_implementation_action_plan
+- markdown_docs_agent_documentation_training_system_api
+- markdown_docs_agent_documentation_model_usage
 
-## Recommended Actions
+REORGANIZATION SUGGESTIONS:
+--------------------------------
+Agent Documentation Category Reorganization:
+  - General Agent Docs: 44 documents - Consider separate subcategory
+  - Scout Agent: 4 documents - Consider separate subcategory
 
-### Immediate Actions (High Priority)
-1. **Fix Broken Cross-References**
-   - Identify and repair 16 broken references
-   - Add cross-references to key orphaned documents
+Development Reports Category Reorganization:
+  - General Development Reports: 46 documents - Consider separate subcategory
+  - Agent Development Reports: 8 documents - Consider separate subcategory
+  - Training System Reports: 8 documents - Consider separate subcategory
 
-2. **Category Reorganization**
-   - Split "Agent Documentation" into agent-specific subcategories:
-     - Scout Agent Documentation
-     - Analyst Agent Documentation
-     - Synthesizer Agent Documentation
-     - Other Agent Documentation
-   - Split "Development Reports" by type:
-     - GPU/TensorRT Reports
-     - Training System Reports
-     - MCP Bus Reports
-     - General Development Reports
+RECOMMENDED ACTIONS:
+----------------------
+1. Fix Broken Cross-References:
+   - Review and repair 16 broken references
+   - Add cross-references to 129 orphaned documents
 
-### Medium Priority Actions
-3. **Enhance Document Quality**
-   - Review and expand short descriptions
-   - Add missing tags for better searchability
-   - Update cross-reference sections in key documents
+2. Category Reorganization:
+   - Split 'Agent Documentation' into agent-specific subcategories
+   - Split 'Development Reports' by report type
 
-4. **Review Oldest Documents**
-   - `agents/scout/README.md` - Already reviewed and current
-   - Check other old documents for updates needed
+3. Documentation Enhancement:
+   - Add cross-reference sections to key documents
+   - Update oldest documents with current information
 
-### Long-term Maintenance
-5. **Automation Improvements**
+4. Quality Improvements:
+   - Review documents with short descriptions
+   - Add missing tags to improve searchability
+
+5. Maintenance Automation:
    - Schedule regular cross-reference validation
    - Monitor category sizes for optimal organization
-   - Implement automated quality checks
-
-## Implementation Plan
-
-### Phase 1: Critical Fixes (Week 1)
-- Fix all 16 broken cross-references
-- Add cross-references to 20 most important orphaned documents
-- Update catalogue validation to catch these issues automatically
-
-### Phase 2: Reorganization (Week 2)
-- Implement category sub-structure for Agent Documentation
-- Reorganize Development Reports by type
-- Update navigation and search systems
-
-### Phase 3: Quality Enhancement (Week 3)
-- Review and improve document descriptions
-- Add comprehensive tagging system
-- Enhance cross-reference network
-
-### Phase 4: Automation (Week 4)
-- Implement automated maintenance checks
-- Create monitoring dashboard
-- Establish regular maintenance schedule
-
-## Success Metrics
-- **Cross-reference completeness:** 95% of documents properly linked
-- **Category balance:** No category with 2x average document count
-- **Search effectiveness:** 95% of searches return relevant results
-- **Maintenance automation:** 80% of maintenance tasks automated
-
-## Next Steps
-1. Run automated cross-reference repair script
-2. Implement category reorganization
-3. Schedule regular maintenance reviews
-4. Monitor system health metrics
-
----
-*This maintenance plan addresses all performance report recommendations and identified issues.*
