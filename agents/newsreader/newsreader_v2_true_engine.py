@@ -8,7 +8,8 @@ import json
 from PIL import Image
 from playwright.async_api import async_playwright
 import os
-import logging
+from common.observability import get_logger
+
 import asyncio
 import warnings
 
@@ -35,8 +36,8 @@ warnings.filterwarnings("ignore", message=".*use_fast.*slow processor.*")
 warnings.filterwarnings("ignore", message=".*slow image processor.*")
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("newsreader.v2_engine")
+
+logger = get_logger(__name__)
 
 # Model availability checks with fallback system
 try:

@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Consent Validation Middleware for GDPR Compliance
 
 This middleware validates user consents before allowing data processing operations.
@@ -12,7 +13,7 @@ Features:
 - Configurable consent enforcement levels
 """
 
-import logging
+
 from typing import Dict, List, Optional
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
@@ -20,7 +21,7 @@ from fastapi.responses import JSONResponse
 from agents.common.consent_management import consent_manager, ConsentType
 from agents.common.compliance_audit import ComplianceAuditLogger, AuditEventType, AuditEventSeverity
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ConsentValidationMiddleware:

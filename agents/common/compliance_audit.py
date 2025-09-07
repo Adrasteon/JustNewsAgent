@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Compliance Audit Logging System
@@ -16,7 +17,7 @@ Features:
 
 import asyncio
 import json
-import logging
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -24,7 +25,7 @@ import uuid
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-logger = logging.getLogger("compliance_audit")
+logger = get_logger(__name__)
 
 class AuditEventType(Enum):
     """Types of audit events"""

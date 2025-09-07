@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 GPU Accelerated Analyst - Standalone Module
@@ -7,13 +8,13 @@ This module contains the GPUAcceleratedAnalyst class that was previously
 in hybrid_tools_v4.py to break the circular import with native_tensorrt_engine.py
 """
 
-import logging
+
 import time
 from typing import List, Optional
 import torch
 from transformers import pipeline
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Check for required dependencies
 try:

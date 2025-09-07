@@ -16,8 +16,9 @@ Expected Performance:
 """
 
 import os
+from common.observability import get_logger
 import json
-import logging
+
 import time
 from typing import List, Dict, Any, TYPE_CHECKING
 from datetime import datetime, timezone
@@ -50,8 +51,8 @@ except ImportError:
     GPU_MANAGER_AVAILABLE = False
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("justnews.synthesizer.gpu")
+
+logger = get_logger(__name__)
 
 # Feedback logging (universal pattern)
 FEEDBACK_LOG = os.path.join(os.path.dirname(__file__), "synthesizer_gpu_feedback.log")

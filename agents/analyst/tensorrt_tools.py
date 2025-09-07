@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Native TensorRT Tools for the Analyst Agent - Production Ready
 
 This implements native TensorRT acceleration with validated performance:
@@ -9,14 +10,14 @@ This implements native TensorRT acceleration with validated performance:
 ✅ System Stability: Zero crashes, zero warnings, completely clean operation
 """
 
-import logging
+
 from datetime import datetime, timezone
 from typing import Optional, List
 import atexit
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("analyst.tensorrt_tools")
+
+logger = get_logger(__name__)
 
 # Import native TensorRT engine
 try:

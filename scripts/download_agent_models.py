@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Download selected HF models into agent-specific model folders under agents/*/models.
@@ -10,10 +11,10 @@ By default this downloads a conservative set of small/medium models. Use --only 
 from pathlib import Path
 import argparse
 import sys
-import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logger = logging.getLogger("download_agent_models")
+
+s %(levelname)s %(message)s")
+logger = get_logger(__name__)
 
 # Mapping of agents -> list of model ids to download. The value is a list of tuples (type, hf_id, prefer_sentence_transformers_bool)
 # type: 'transformers' or 'sentence-transformers'

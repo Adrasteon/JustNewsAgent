@@ -1,6 +1,7 @@
 # Model loading for Scout Agent (Llama-3-8B-Instruct)
 import os
-import logging
+from common.observability import get_logger
+
 import requests
 from datetime import datetime, timezone
 import time
@@ -16,8 +17,8 @@ from agents.scout.security_utils import (
 
 FEEDBACK_LOG = os.environ.get("SCOUT_FEEDBACK_LOG", "./feedback_scout.log")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("scout.tools")
+
+logger = get_logger(__name__)
 
 # Online Training Integration
 try:

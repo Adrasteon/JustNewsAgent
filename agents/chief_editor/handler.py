@@ -4,14 +4,15 @@ This module is intentionally lightweight and imports no FastAPI or Pydantic so
 it can be used from unit tests and from the FastAPI endpoint.
 """
 import os
+from common.observability import get_logger
 import json
-import logging
+
 from datetime import datetime, timezone
 from typing import Dict, Any
 
 from agents.common.notifications import notify_slack, notify_email
 
-logger = logging.getLogger('chief_editor.handler')
+logger = get_logger(__name__)
 
 
 def handle_review_request(kwargs: Dict[str, Any]) -> Dict[str, Any]:

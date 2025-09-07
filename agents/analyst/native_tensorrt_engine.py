@@ -12,13 +12,14 @@ Performance Targets:
 Status: PRODUCTION READY - Native TensorRT execution
 """
 
-import logging
+
 import time
 import numpy as np
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 import json
 import os
+from common.observability import get_logger
 import sys
 
 # Add parent directory for imports
@@ -28,8 +29,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from transformers import AutoTokenizer
 from agents.common.model_loader import load_transformers_model
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 # Environment validation
 def _validate_environment():
@@ -87,8 +88,8 @@ except ImportError:
 # Add parent directory for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 # Export availability flag
 NATIVE_TENSORRT_AVAILABLE = TENSORRT_AVAILABLE

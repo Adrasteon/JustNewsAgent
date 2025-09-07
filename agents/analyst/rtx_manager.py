@@ -4,15 +4,16 @@ Handles NVIDIA RTX AI Toolkit integration with TensorRT-LLM optimization
 Provides professional GPU memory management and crash-free operation
 """
 
-import logging
+
 import os
+from common.observability import get_logger
 import time
 from typing import Optional, Dict, Any, Tuple
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("analyst.rtx_manager")
+
+logger = get_logger(__name__)
 
 class RTXManager:
     """

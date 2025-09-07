@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Phase 3: Knowledge Graph Foundation
@@ -14,7 +15,7 @@ PHASE 3 GOALS:
 
 import asyncio
 import json
-import logging
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -26,7 +27,7 @@ from difflib import SequenceMatcher
 
 from agents.archive.entity_linker import EntityLinkerManager
 
-logger = logging.getLogger("phase3_kg")
+logger = get_logger(__name__)
 
 class AdvancedEntityExtractor:
     """

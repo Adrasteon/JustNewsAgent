@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Multi-GPU Cluster Support for JustNewsAgent
 
 Provides comprehensive multi-GPU cluster management with:
@@ -11,7 +12,7 @@ Provides comprehensive multi-GPU cluster management with:
 """
 
 import json
-import logging
+
 import time
 import threading
 from datetime import datetime
@@ -43,7 +44,7 @@ try:
 except ImportError:
     pass
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ClusterStatus(Enum):
     """Cluster operational status"""

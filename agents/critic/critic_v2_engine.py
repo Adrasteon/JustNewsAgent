@@ -16,7 +16,8 @@ Models:
 Status: V2 Production Ready - Phase 2 Implementation
 """
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from typing import List, Dict, Optional, Any, Union
 from datetime import datetime, timezone
@@ -67,8 +68,8 @@ except ImportError:
 FEEDBACK_LOG = os.environ.get("CRITIC_V2_FEEDBACK_LOG", "./feedback_critic_v2.log")
 MODEL_CACHE_DIR = os.environ.get("CRITIC_V2_CACHE", "./models/critic_v2")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("critic.v2_engine")
+
+logger = get_logger(__name__)
 
 class ReviewScore(Enum):
     """Review score levels"""

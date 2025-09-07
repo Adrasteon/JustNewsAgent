@@ -2,17 +2,18 @@
 Main file for the Fact-Checker Agent.
 """
 # main.py for Fact-Checker Agent
-import logging
+
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from datetime import datetime
 import os
+from common.observability import get_logger
 import requests
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 ready = False
 

@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Scout Agent Production Crawler Orchestrator
@@ -22,7 +23,7 @@ Capabilities:
 """
 
 import asyncio
-import logging
+
 from datetime import datetime
 from typing import List, Dict, Any
 from pathlib import Path
@@ -32,8 +33,8 @@ import sys
 from .crawler_utils import get_active_sources, get_sources_by_domain, initialize_connection_pool
 from .sites.generic_site_crawler import MultiSiteCrawler, SiteConfig
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("scout.production_crawlers")
+
+logger = get_logger(__name__)
 
 # Legacy crawler imports (for backward compatibility)
 UltraFastBBCCrawler = None

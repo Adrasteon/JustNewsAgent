@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Production Multi-Agent GPU Manager for JustNewsAgent
 Replaces the shim implementation with production-ready GPU resource management
 
@@ -12,7 +13,7 @@ Features:
 - Atomic allocation operations
 """
 
-import logging
+
 import time
 import threading
 from datetime import datetime
@@ -33,7 +34,7 @@ except ImportError:
     torch = None
     np = None
 
-logger = logging.getLogger("gpu_manager.production")
+logger = get_logger(__name__)
 
 @dataclass
 class GPUAllocation:

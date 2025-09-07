@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Enhanced GPU Resource Allocation Optimizer
 Advanced performance optimization for GPU resource allocation with learning capabilities
 
@@ -11,7 +12,7 @@ Features:
 """
 
 import json
-import logging
+
 import time
 import threading
 from datetime import datetime
@@ -32,7 +33,7 @@ except ImportError:
     torch = None
     psutil = None
 
-logger = logging.getLogger("gpu_optimizer.enhanced")
+logger = get_logger(__name__)
 
 class PerformanceRecord(NamedTuple):
     """Record of performance metrics for optimization learning"""

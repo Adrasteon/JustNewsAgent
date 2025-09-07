@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Online Learning Integration for justnewsagent
 Demonstrates practical "training on the fly" implementation
 """
@@ -7,11 +8,11 @@ import torch
 import numpy as np
 from collections import deque
 from datetime import datetime
-import logging
+
 import json
 from typing import Dict, List, Any, Tuple, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class OnlineNERTrainer:
     """

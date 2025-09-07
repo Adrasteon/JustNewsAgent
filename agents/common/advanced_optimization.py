@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Advanced Performance Optimization Recommendation Engine
 
 Provides sophisticated optimization recommendations based on:
@@ -9,7 +10,7 @@ Provides sophisticated optimization recommendations based on:
 - Real-time adaptation recommendations
 """
 
-import logging
+
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
@@ -17,7 +18,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class OptimizationPriority(Enum):
     """Priority levels for optimization recommendations"""

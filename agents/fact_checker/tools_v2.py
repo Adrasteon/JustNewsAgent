@@ -15,7 +15,8 @@ Dependencies: transformers, sentence-transformers, spacy, torch, numpy
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import json
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -46,8 +47,8 @@ MODEL_PATH = os.environ.get("MODEL_PATH", "./models/" + MODEL_NAME.replace('/', 
 OPTIMIZED_MAX_LENGTH = 1512
 OPTIMIZED_BATCH_SIZE = 16
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fact_checker.tools")
+
+logger = get_logger(__name__)
 
 # Initialize V2 Engine on module load
 if FACT_CHECKER_V2_AVAILABLE:

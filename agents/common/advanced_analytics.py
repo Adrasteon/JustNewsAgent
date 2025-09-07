@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Advanced Performance Analytics Engine for JustNewsAgent
 
 Provides comprehensive performance monitoring, trend analysis, bottleneck detection,
@@ -23,12 +24,12 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from dataclasses import dataclass, asdict
 from collections import defaultdict, deque
-import logging
+
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 @dataclass
 class PerformanceMetrics:

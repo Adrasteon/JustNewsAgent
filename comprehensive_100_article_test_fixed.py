@@ -28,22 +28,14 @@ import asyncio
 import json
 import requests
 import time
-import logging
+from common.observability import get_logger
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass
 import sys
 
-# Configure logging for comprehensive monitoring
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(f'comprehensive_test_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
-    ]
-)
-logger = logging.getLogger("comprehensive_test")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Configuration
 MCP_BUS_URL = "http://localhost:8000"

@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Phase 3: Comprehensive Archive Integration - Archive Storage Setup
@@ -14,7 +15,7 @@ PHASE 3 GOALS:
 
 import asyncio
 import json
-import logging
+
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -25,7 +26,7 @@ import hashlib
 # Phase 3 Knowledge Graph Integration
 from .knowledge_graph import KnowledgeGraphManager
 
-logger = logging.getLogger("phase3_archive")
+logger = get_logger(__name__)
 
 class ArchiveStorageManager:
     """

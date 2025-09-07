@@ -2,13 +2,14 @@
 Main file for the Dashboard Agent.
 """
 
-import logging
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests
 from contextlib import asynccontextmanager
 import sys
 import os
+from common.observability import get_logger
 import time
 from typing import Dict, List, Optional
 
@@ -30,8 +31,8 @@ except ImportError:
 from .storage import get_storage
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("dashboard_agent")
+
+logger = get_logger(__name__)
 
 # Load configuration
 config = load_config()

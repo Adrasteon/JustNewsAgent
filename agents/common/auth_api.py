@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Researcher Authentication API Endpoints
@@ -18,7 +19,7 @@ Endpoints:
 - PUT /auth/users/{user_id}/deactivate - Admin endpoint to deactivate user
 """
 
-import logging
+
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -42,7 +43,7 @@ from agents.common.auth_models import (
 from agents.common.consent_management import consent_manager, ConsentType
 from agents.common.data_minimization import DataMinimizationManager, DataPurpose
 
-logger = logging.getLogger("auth_api")
+logger = get_logger(__name__)
 
 # Security scheme
 security = HTTPBearer()

@@ -2,7 +2,7 @@
 Main file for the Analyst Agent.
 """
 
-import logging
+from common.observability import get_logger
 import os
 from contextlib import asynccontextmanager
 
@@ -37,9 +37,8 @@ except ImportError:
     def security_wrapper(func):
         return func
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Readiness flag
 ready = False

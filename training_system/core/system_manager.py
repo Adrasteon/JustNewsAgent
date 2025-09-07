@@ -16,7 +16,9 @@ Features:
 - Training status dashboard and admin controls
 """
 
-import logging
+from common.observability import get_logger
+
+
 from datetime import datetime, timezone
 from typing import Dict, List, Any
 from dataclasses import asdict
@@ -29,7 +31,7 @@ from .training_coordinator import (
     get_online_training_status
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class SystemWideTrainingManager:
     """

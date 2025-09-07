@@ -31,7 +31,7 @@ Complete demonstration of Phase 3 research-scale archiving capabil    # Phase 3:
 
 import asyncio
 import json
-import logging
+from common.observability import get_logger
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -39,9 +39,8 @@ from pathlib import Path
 from agents.archive.archive_manager import ArchiveManager
 from agents.archive.knowledge_graph import KnowledgeGraphManager
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("phase3_demo")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 async def run_phase3_comprehensive_demo():
     """Run comprehensive Phase 3 demonstration"""

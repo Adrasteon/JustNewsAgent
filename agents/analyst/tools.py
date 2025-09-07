@@ -13,7 +13,7 @@ NOTE: Sentiment and bias analysis has been centralized in Scout V2 Agent
 Use Scout V2 endpoints for sentiment/bias analysis.
 """
 
-import logging
+from common.observability import get_logger
 import os
 import json
 import re
@@ -24,12 +24,8 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any
 from collections import Counter, defaultdict
 
-# Configure logging with production standards
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger("analyst.tools")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Online Training Integration (deferred)
 try:

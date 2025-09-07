@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Enhanced GPU Monitoring Dashboard for JustNewsAgent
 Provides comprehensive real-time GPU health monitoring and performance analytics
 
@@ -11,7 +12,7 @@ Features:
 - Alert system for GPU issues
 """
 
-import logging
+
 import time
 import threading
 from datetime import datetime, timedelta
@@ -32,7 +33,7 @@ except ImportError:
     torch = None
     np = None
 
-logger = logging.getLogger("gpu_monitoring.enhanced")
+logger = get_logger(__name__)
 
 class GPUMetricsCollector:
     """Collects comprehensive GPU metrics over time"""

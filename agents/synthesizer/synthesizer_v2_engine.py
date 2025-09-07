@@ -17,7 +17,8 @@ Status: V2 Production Ready - Phase 1 Implementation
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timezone
@@ -72,8 +73,8 @@ except ImportError:
 FEEDBACK_LOG = os.environ.get("SYNTHESIZER_V2_FEEDBACK_LOG", "./feedback_synthesizer_v2.log")
 MODEL_CACHE_DIR = os.environ.get("SYNTHESIZER_V2_CACHE", "./models/synthesizer_v2")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("synthesizer.v2_engine")
+
+logger = get_logger(__name__)
 
 @dataclass
 class SynthesizerV2Config:

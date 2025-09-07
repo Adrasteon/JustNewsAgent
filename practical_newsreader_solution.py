@@ -9,7 +9,7 @@ Key Insight: Use smaller, quantizable models instead of forcing large models to 
 """
 
 import asyncio
-import logging
+from common.observability import get_logger
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 import torch
@@ -25,9 +25,8 @@ import requests
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 class ToolCall(BaseModel):
     args: list

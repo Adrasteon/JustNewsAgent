@@ -8,12 +8,13 @@ about configuration issues, missing values, and optimization suggestions.
 
 import json
 import os
+from common.observability import get_logger
 import sys
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
-import logging
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 class ConfigValidator:
     """Configuration validator with comprehensive checks"""

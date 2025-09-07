@@ -2,7 +2,7 @@
 Main file for the Scout Agent.
 """
 # main.py for Scout Agent
-import logging
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +10,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 import os
+from common.observability import get_logger
 import requests
 from contextlib import asynccontextmanager
 
@@ -17,8 +18,8 @@ from contextlib import asynccontextmanager
 from agents.scout.security_utils import log_security_event, rate_limit, validate_url
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 ready = False
 

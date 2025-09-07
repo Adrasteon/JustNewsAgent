@@ -13,15 +13,16 @@ Usage:
 The endpoint accepts JSON: {"handlers": ["embedding_model"]} or {"all": true}
 and returns per-handler success/failure details.
 """
+from common.observability import get_logger
 from __future__ import annotations
 
-import logging
+
 import traceback
 from typing import Callable, Dict, Any, List
 
 from fastapi import FastAPI, HTTPException, Request
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Simple in-process registry of reload handlers
 _RELOAD_HANDLERS: Dict[str, Callable[[], Any]] = {}

@@ -14,17 +14,18 @@ For bias detection, use Scout V2 Agent endpoints:
 - POST /detect_bias (dedicated bias detection)
 """
 # main.py for Critic Agent
-import logging
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 import os
+from common.observability import get_logger
 import requests
 from contextlib import asynccontextmanager
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 ready = False
 

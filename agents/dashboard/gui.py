@@ -1,3 +1,4 @@
+from common.observability import get_logger
 import sys
 from typing import Dict, List, Optional
 from PyQt5.QtWidgets import (
@@ -8,11 +9,11 @@ import subprocess
 import threading
 import requests
 import json
-import logging
+
 import time
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class DynamicResourceAllocator:
     """Dynamic GPU memory allocation manager for JustNewsAgent"""
@@ -28,7 +29,7 @@ class DynamicResourceAllocator:
             "buffer": 3.0      # Safety buffer
         }
         self.current_usage: Dict[str, float] = {}
-        self.logger = logging.getLogger(f"{__name__}.DynamicResourceAllocator")
+        self.logger = get_logger(__name__)
     
     def optimize_allocation(self, current_usage: Dict[str, float]) -> Dict[str, float]:
         """Dynamically adjust allocations based on real-time usage"""
@@ -97,8 +98,8 @@ class DashboardGUI(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
 
         # Robust error logging setup
-        import logging
-        self.logger = logging.getLogger("DashboardGUI")
+        
+        self.logger = get_logger(__name__)
         handler = logging.FileHandler("dashboard_gui_error.log", encoding="utf-8")
         formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
         handler.setFormatter(formatter)

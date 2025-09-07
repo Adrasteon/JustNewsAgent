@@ -10,7 +10,7 @@ V2 Standards:
 - Zero deprecation warnings
 """
 
-import logging
+from common.observability import get_logger
 import asyncio
 from typing import Dict, List, Optional, Any, Union
 import json
@@ -25,8 +25,7 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 # Configure logging first
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("newsreader.v2_tools")
+logger = get_logger(__name__)
 
 try:
     from .newsreader_v2_true_engine import (

@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 GPU Cleanup Utilities for PyTorch Models
         try:
             logger.info("🧹 Starting GPU model cleanup...")
@@ -17,14 +18,14 @@ GPU Cleanup Utilities for PyTorch Models
             # Clear the models dictionary
             self._models.clear() during shutdown by proper GPU memory management
 """
-import logging
+
 import signal
 import sys
 import gc
 import atexit
 from typing import Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class GPUModelManager:
     """

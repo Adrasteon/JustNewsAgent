@@ -2,7 +2,7 @@
 Main file for the Synthesizer Agent.
 """
 # main.py for Synthesizer Agent
-import logging
+from common.observability import get_logger
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
@@ -10,9 +10,8 @@ import requests
 from datetime import datetime
 from contextlib import asynccontextmanager
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 ready = False
 

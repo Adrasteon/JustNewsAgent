@@ -14,14 +14,15 @@ The endpoint is POST /shutdown and returns 202 immediately.
 from __future__ import annotations
 
 import os
+from common.observability import get_logger
 import signal
 import threading
 import time
-import logging
+
 
 from fastapi import FastAPI, Request, HTTPException
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _send_sigint_after_delay(delay: float = 0.5) -> None:

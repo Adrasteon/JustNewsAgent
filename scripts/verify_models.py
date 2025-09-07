@@ -1,13 +1,14 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Verify downloaded agent models: check folders, sizes, and attempt lightweight load for transformers/sentence-transformers.
 """
 from pathlib import Path
-import logging
+
 import sys
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logger = logging.getLogger("verify_models")
+s %(levelname)s %(message)s")
+logger = get_logger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 AGENTS_DIR = REPO_ROOT / "agents"

@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: RESTful Archive API
@@ -17,7 +18,7 @@ API Endpoints:
 """
 
 import json
-import logging
+
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -37,7 +38,7 @@ from agents.archive.knowledge_graph import KnowledgeGraphManager
 from agents.archive.archive_manager import ArchiveManager
 from agents.common.auth_api import router as auth_router
 
-logger = logging.getLogger("phase3_api")
+logger = get_logger(__name__)
 
 # Rate Limiting Configuration
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])

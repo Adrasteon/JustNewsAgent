@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import os
+from common.observability import get_logger
 import sys
-import logging
+
 from pathlib import Path
 from agents.common.database import execute_query, initialize_connection_pool
 from agents.common.auth_models import create_user_tables
@@ -18,11 +19,9 @@ Run this script once to set up the authentication database schema.
 """
 
 # Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 def create_initial_admin_user():
     """Create an initial admin user for testing"""

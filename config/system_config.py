@@ -19,11 +19,12 @@ Usage:
 
 import json
 import os
-import logging
+from common.observability import get_logger
+
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class ConfigManager:
     """Centralized configuration manager with environment overrides"""

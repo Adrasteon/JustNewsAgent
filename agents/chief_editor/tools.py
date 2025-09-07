@@ -2,7 +2,8 @@
 # Phase 1 Memory Optimization: Context and batch size optimization for orchestration
 
 import os
-import logging
+from common.observability import get_logger
+
 import requests
 from datetime import datetime, timezone
 
@@ -21,8 +22,8 @@ OPTIMIZED_BATCH_SIZE = 4     # Small batches for orchestration efficiency
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://mcp_bus:8000")
 FEEDBACK_LOG = os.environ.get("CHIEF_EDITOR_FEEDBACK_LOG", "./feedback_chief_editor.log")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("chief_editor.tools")
+
+logger = get_logger(__name__)
 
 def get_llama_model():
     """Load optimized DialoGPT (deprecated)-medium model for orchestration tasks."""

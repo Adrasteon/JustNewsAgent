@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Production-Scale BBC AI-Enhanced Crawler - Integrated Version
@@ -19,7 +20,7 @@ import torch
 from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
-import logging
+
 from urllib.parse import urlparse
 
 # Import NewsReader from Scout agent directory
@@ -28,8 +29,8 @@ from practical_newsreader_solution import PracticalNewsReader
 # Import shared utilities
 from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("production_bbc_ai_crawler")
+
+logger = get_logger(__name__)
 
 class ProductionBBCCrawler:
     """Fast, production-scale BBC crawler that handles root causes"""

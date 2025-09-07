@@ -1,17 +1,18 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Distributed Tracing Module for JustNewsAgent
 Provides tracing functionality for distributed operations across agents
 """
 
-import logging
+
 import time
 import uuid
 from typing import Dict, Any, Optional
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 
-logger = logging.getLogger("agents.common.tracing")
+logger = get_logger(__name__)
 
 # Context variables for trace propagation
 current_trace_id: ContextVar[Optional[str]] = ContextVar('trace_id', default=None)
@@ -268,7 +269,7 @@ def traced(operation_name: Optional[str] = None):
 # Integration with logging
 def setup_tracing_logging():
     """Set up logging integration with tracing"""
-    import logging
+    
 
     class TracingLogFilter(logging.Filter):
         def filter(self, record):
@@ -283,7 +284,7 @@ def setup_tracing_logging():
             return True
 
     # Add filter to root logger
-    root_logger = logging.getLogger()
+    root_logger = get_logger(__name__)
     root_logger.addFilter(TracingLogFilter())
 
 # Initialize tracing logging on import

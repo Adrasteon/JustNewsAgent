@@ -3,7 +3,8 @@
 # Expected Performance: 5-10x improvement with GPT-2 Medium (355M params) - Modern replacement for deprecated DialoGPT
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from datetime import datetime, timezone
 from typing import Dict, List, Any
@@ -26,8 +27,8 @@ MODEL_PATH = os.environ.get("FACT_CHECKER_MODEL_PATH", "./models/" + MODEL_NAME.
 FEEDBACK_LOG = os.environ.get("FACT_CHECKER_FEEDBACK_LOG", "./feedback_fact_checker.log")
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fact_checker.gpu_tools")
+
+logger = get_logger(__name__)
 
 class GPUAcceleratedFactChecker:
     """

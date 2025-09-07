@@ -26,7 +26,8 @@ GPU Management:
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
@@ -35,8 +36,8 @@ from datetime import datetime, timezone
 import json
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("newsreader.v2_engine")
+
+logger = get_logger(__name__)
 
 # Model availability checks
 try:

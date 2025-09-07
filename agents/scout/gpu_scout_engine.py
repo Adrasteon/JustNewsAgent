@@ -4,7 +4,8 @@ Production-ready content pre-filtering and classification system
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from transformers import (
     AutoTokenizer, 
@@ -17,7 +18,7 @@ import json
 from datetime import datetime, timezone
 import re
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class GPUScoutInferenceEngine:
     """

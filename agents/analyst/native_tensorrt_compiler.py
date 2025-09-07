@@ -7,16 +7,17 @@ and exercise ModelStore publishing behavior without requiring TensorRT.
 from __future__ import annotations
 
 import json
-import logging
+
 import os
+from common.observability import get_logger
 import shutil
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logger = get_logger(__name__)
+
 
 # Expose lightweight placeholders so unit tests can monkeypatch heavy deps
 # (transformers, torch, etc.) at runtime without importing them here.

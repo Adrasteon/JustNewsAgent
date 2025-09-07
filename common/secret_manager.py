@@ -21,6 +21,7 @@ Usage:
 """
 
 import os
+from common.observability import get_logger
 import json
 import base64
 from pathlib import Path
@@ -28,9 +29,9 @@ from typing import Dict, Any, Optional
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import logging
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 class SecretManager:
     """Enterprise-grade secret management system"""

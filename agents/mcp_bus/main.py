@@ -2,21 +2,20 @@
 Main file for the MCP Bus.
 """
 # main.py for MCP Message Bus
+from common.observability import get_logger
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import requests
 import time
 import atexit
-import logging
 from contextlib import asynccontextmanager
 
 app = FastAPI()
 
 ready = False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Register common shutdown endpoint (after logger is configured)
 try:

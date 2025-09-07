@@ -12,7 +12,7 @@ Features:
 - Legacy compatibility with existing endpoints
 """
 
-import logging
+from common.observability import get_logger
 from typing import Dict, List, Optional, Any, Union
 import os
 from datetime import datetime, timezone
@@ -55,7 +55,7 @@ except ImportError:
 
 # Import MCP Bus client
 try:
-    from ..common.mcp_bus import MCPBusClient
+    from ..mcp_bus.main import MCPBusClient
     MCP_AVAILABLE = True
 except ImportError:
     try:
@@ -63,7 +63,7 @@ except ImportError:
         import sys
         import os
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from common.mcp_bus import MCPBusClient
+        from mcp_bus.main import MCPBusClient
         MCP_AVAILABLE = True
     except ImportError:
         MCP_AVAILABLE = False
@@ -77,12 +77,8 @@ except ImportError:
             async def send_message(self, message_type: str, payload: dict):
                 pass  # Placeholder
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger("newsreader.unified")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Modern datetime utility
 def utc_now() -> datetime:

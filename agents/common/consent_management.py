@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Consent Management System
@@ -13,7 +14,7 @@ Features:
 - Consent policy management
 """
 
-import logging
+
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, asdict
@@ -22,7 +23,7 @@ import json
 
 from agents.common.auth_models import auth_execute_query, auth_execute_query_single
 
-logger = logging.getLogger("consent_management")
+logger = get_logger(__name__)
 
 class ConsentType(Enum):
     """Types of user consent"""

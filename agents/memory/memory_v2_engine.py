@@ -17,7 +17,8 @@ Status: V2 Production Ready - Phase 2 Implementation
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 import json
 import pickle
@@ -103,8 +104,8 @@ FORCE_POSTGRES = os.environ.get("MEMORY_V2_FORCE_POSTGRES", "true").lower() in (
 
 SQLITE_DB_PATH = os.environ.get("MEMORY_V2_SQLITE", "./memory_v2.db")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("memory.v2_engine")
+
+logger = get_logger(__name__)
 
 class ContentType(Enum):
     """Content types for memory storage"""

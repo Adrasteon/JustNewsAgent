@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Legal Compliance Framework - Data Retention Policies
@@ -15,14 +16,14 @@ Features:
 
 import asyncio
 import json
-import logging
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-logger = logging.getLogger("compliance_retention")
+logger = get_logger(__name__)
 
 class DataType(Enum):
     """Types of data subject to retention policies"""

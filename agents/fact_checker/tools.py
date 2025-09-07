@@ -15,7 +15,8 @@ Dependencies: transformers, sentence-transformers, spacy, torch, numpy
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import json
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -45,8 +46,8 @@ OPTIMIZED_BATCH_SIZE = 16
 # Environment configuration
 FEEDBACK_LOG = os.environ.get("FACT_CHECKER_FEEDBACK_LOG", "./feedback_fact_checker.log")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("fact_checker.tools")
+
+logger = get_logger(__name__)
 
 # Online Training Integration (deferred)
 try:

@@ -34,8 +34,9 @@ Expected Performance on RTX 3090:
 - 24GB VRAM efficient utilization with quantized models
 """
 
-import logging
+
 import os
+from common.observability import get_logger
 import json
 import subprocess
 import time
@@ -44,8 +45,8 @@ import re
 from typing import Optional, Dict, List, Tuple, Any
 
 # Configure logging first
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("analyst.hybrid_tools_v4")
+
+logger = get_logger(__name__)
 # Docker Model Runner configuration
 DOCKER_MODEL_MISTRAL = "ai/mistral"
 DOCKER_MODEL_LLAMA = "ai/llama3.2:latest"
@@ -726,6 +727,7 @@ def get_system_status() -> Dict[str, Any]:
         try:
             # Attempt to discover engine files without instantiating full loader
             import os
+from common.observability import get_logger
 
             engines_dir = os.path.join(os.path.dirname(__file__), "tensorrt_engines")
             engines = (

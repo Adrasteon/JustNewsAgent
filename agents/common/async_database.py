@@ -4,7 +4,8 @@ Provides async database operations using asyncpg for non-blocking operations
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 from typing import Optional, List, Dict, Any
 from contextlib import asynccontextmanager
 
@@ -15,7 +16,7 @@ except ImportError:
     asyncpg = None
     ASYNCPG_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Environment variables
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST")

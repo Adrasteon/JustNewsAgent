@@ -2,17 +2,18 @@
 Main file for the Chief Editor Agent.
 """
 # main.py for Chief Editor Agent
-import logging
+
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 import os
+from common.observability import get_logger
 import requests
 from agents.chief_editor.handler import handle_review_request
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 ready = False
 

@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Complete Nucleoid Implementation for JustNews V4 Reasoning Agent
 Based on the official Nucleoid GitHub repository with adaptations for production use.
 Repository: https://github.com/nucleoidai/nucleoid
@@ -7,9 +8,9 @@ Repository: https://github.com/nucleoidai/nucleoid
 import ast
 import networkx as nx
 from typing import Dict, Any
-import logging
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 class NucleoidState:
     """Global state management for variables and their values."""

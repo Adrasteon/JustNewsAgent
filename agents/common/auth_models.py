@@ -4,9 +4,10 @@ Provides JWT-based authentication with role-based access control
 """
 
 import os
+from common.observability import get_logger
 import hashlib
 import secrets
-import logging
+
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Optional, List
@@ -29,7 +30,7 @@ AUTH_POOL_MAX_CONNECTIONS = int(os.environ.get("AUTH_DB_POOL_MAX_CONNECTIONS", "
 # Authentication connection pool (separate from main app pool)
 _auth_connection_pool: Optional[pool.ThreadedConnectionPool] = None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 def initialize_auth_connection_pool():
     """

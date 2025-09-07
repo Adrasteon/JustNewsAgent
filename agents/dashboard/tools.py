@@ -1,12 +1,13 @@
 """
+from common.observability import get_logger
 Tools for the Dashboard Agent.
 """
 
-import logging
+
 import time
 from typing import Dict, List
 
-logger = logging.getLogger("dashboard_tools")
+logger = get_logger(__name__)
 
 def log_event(event: str, details: dict):
     """Logs an event for the dashboard agent."""

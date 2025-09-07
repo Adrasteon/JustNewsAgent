@@ -20,9 +20,10 @@ import random
 from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional
-import logging
+
 from urllib.parse import urlparse
 import os
+from common.observability import get_logger
 import requests
 
 from agents.common.ingest import build_source_upsert, build_article_source_map_insert
@@ -31,8 +32,8 @@ from agents.common.evidence import snapshot_paywalled_page, enqueue_human_review
 # Import shared utilities
 from ..crawler_utils import RateLimiter, RobotsChecker, ModalDismisser, CanonicalMetadata
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("ultra_fast_bbc")
+
+logger = get_logger(__name__)
 
 class UltraFastBBCCrawler:
     """Ultra-fast crawler optimized for 1000+ articles/day processing"""

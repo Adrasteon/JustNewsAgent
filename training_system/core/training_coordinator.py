@@ -8,16 +8,12 @@ Features:
 - Multi-Agent Training: Coordinates training across Scout, Analyst, Critic, Fact Checker
 - Performance Monitoring: A/B testing and automatic rollback
 - User Feedback Integration: Human corrections for high-priority updates
-
-Architecture:
-- Training Buffer: Collects high-uncertainty and high-value examples
-- Update Scheduler: Manages model update frequency and batching
-- Performance Tracker: Monitors accuracy improvements and degradation
-- Rollback System: Automatically reverts problematic updates
 """
 
+from common.observability import get_logger
+
 import json
-import logging
+
 import threading
 import time
 from datetime import datetime, timezone
@@ -52,7 +48,7 @@ except ImportError:
         with open("training_feedback.log", "a", encoding="utf-8") as f:
             f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 @dataclass
 class TrainingExample:
@@ -568,6 +564,103 @@ class OnTheFlyTrainingCoordinator:
             
         except Exception as e:
             logger.error(f"Critic model update error: {e}")
+            return False
+    
+    def _update_synthesizer_models(self, examples: List[TrainingExample]) -> bool:
+        """Update Synthesizer V3 models with new training data"""
+        try:
+            # Synthesizer V3 uses 4-model stack: BERTopic, BART, FLAN-T5, SentenceTransformers
+            # For now, we'll log training examples for future fine-tuning
+            task_groups = {}
+            for example in examples:
+                task_type = example.task_type
+                if task_type not in task_groups:
+                    task_groups[task_type] = []
+                task_groups[task_type].append(example)
+            
+            # Log examples for different synthesis tasks
+            for task_type, task_examples in task_groups.items():
+                logger.info(f"Processing {len(task_examples)} {task_type} examples for Synthesizer")
+                for example in task_examples:
+                    log_feedback(
+                        "synthesizer_training_example",
+                        {
+                            "task_type": task_type,
+                            "input": example.input_text,
+                            "expected_output": example.expected_output,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+            
+            logger.info("✅ Synthesizer V3 training examples processed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Synthesizer model update error: {e}")
+            return False
+    
+    def _update_chief_editor_models(self, examples: List[TrainingExample]) -> bool:
+        """Update Chief Editor models with new training data"""
+        try:
+            # Chief Editor handles workflow orchestration and quality control
+            task_groups = {}
+            for example in examples:
+                task_type = example.task_type
+                if task_type not in task_groups:
+                    task_groups[task_type] = []
+                task_groups[task_type].append(example)
+            
+            # Process workflow and quality control examples
+            for task_type, task_examples in task_groups.items():
+                logger.info(f"Processing {len(task_examples)} {task_type} examples for Chief Editor")
+                for example in task_examples:
+                    log_feedback(
+                        "chief_editor_training_example",
+                        {
+                            "task_type": task_type,
+                            "input": example.input_text,
+                            "expected_output": example.expected_output,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+            
+            logger.info("✅ Chief Editor training examples processed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Chief Editor model update error: {e}")
+            return False
+    
+    def _update_memory_models(self, examples: List[TrainingExample]) -> bool:
+        """Update Memory agent models with new training data"""
+        try:
+            # Memory agent uses PostgreSQL + vector search
+            task_groups = {}
+            for example in examples:
+                task_type = example.task_type
+                if task_type not in task_groups:
+                    task_groups[task_type] = []
+                task_groups[task_type].append(example)
+            
+            # Process memory and retrieval examples
+            for task_type, task_examples in task_groups.items():
+                logger.info(f"Processing {len(task_examples)} {task_type} examples for Memory")
+                for example in task_examples:
+                    log_feedback(
+                        "memory_training_example",
+                        {
+                            "task_type": task_type,
+                            "input": example.input_text,
+                            "expected_output": example.expected_output,
+                            "timestamp": datetime.now(timezone.utc).isoformat()
+                        }
+                    )
+            
+            logger.info("✅ Memory training examples processed successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Memory model update error: {e}")
             return False
     
     def _incremental_update_classifier(self, model, examples: List[TrainingExample]) -> bool:

@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Compliance Dashboard API
@@ -13,7 +14,7 @@ Features:
 - Compliance reporting
 """
 
-import logging
+
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
@@ -24,7 +25,7 @@ from agents.common.auth_models import UserRole, get_current_user
 from agents.common.compliance_retention import DataRetentionManager
 from agents.common.compliance_audit import AuditLogAnalyzer, ComplianceAuditLogger
 
-logger = logging.getLogger("compliance_dashboard")
+logger = get_logger(__name__)
 
 # Security scheme
 security = HTTPBearer()

@@ -22,8 +22,9 @@ Expected Performance:
 """
 
 import os
+from common.observability import get_logger
 import json
-import logging
+
 import time
 from typing import List, Dict, Any
 from datetime import datetime, timezone
@@ -48,8 +49,8 @@ except ImportError:
     GPU_MANAGER_AVAILABLE = False
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("justnews.critic.gpu")
+
+logger = get_logger(__name__)
 
 # Feedback logging (universal pattern)
 FEEDBACK_LOG = os.path.join(os.path.dirname(__file__), "critic_gpu_feedback.log")

@@ -13,7 +13,8 @@ Features:
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 import warnings
 from datetime import datetime, timezone
@@ -73,7 +74,7 @@ try:
 except ImportError:
     PRODUCTION_GPU_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class OptimizedNewsDataset(Dataset):
     """Custom dataset for fine-tuning news classification models"""

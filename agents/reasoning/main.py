@@ -7,6 +7,7 @@ V4 Compliance: Designed for multi-agent orchestration, FastAPI, and MCP bus inte
 Dependencies: git, networkx, fastapi, pydantic, uvicorn
 """
 
+from common.observability import get_logger
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
@@ -17,16 +18,14 @@ import os
 import sys
 import subprocess
 import json
-import logging
 import requests
 import importlib
 import importlib.util
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 ready = False
 

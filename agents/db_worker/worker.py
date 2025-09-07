@@ -9,7 +9,8 @@ error message explaining the missing dependency.
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 from typing import Any, Dict, List
 import requests
 from fastapi import FastAPI, HTTPException
@@ -22,8 +23,8 @@ try:
 except Exception:
     psycopg2 = None
 
-logger = logging.getLogger("db_worker")
-logging.basicConfig(level=logging.INFO)
+logger = get_logger(__name__)
+
 
 MCP_BUS_URL = os.environ.get('MCP_BUS_URL', 'http://localhost:8000')
 DB_DSN = os.environ.get('POSTGRES_DSN') or os.environ.get('DATABASE_URL')

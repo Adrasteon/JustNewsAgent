@@ -12,16 +12,17 @@ NOTE: Sentiment and bias analysis have been centralized in Scout V2 Agent.
 Use Scout V2 for all sentiment/bias analysis.
 """
 
-import logging
+
 import re
 import os
+from common.observability import get_logger
 from typing import Dict, List, Any
 from datetime import datetime
 import statistics
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("critic.tools")
+
+logger = get_logger(__name__)
 
 # Feedback logging pattern
 FEEDBACK_LOG = os.path.join(os.path.dirname(__file__), "critic_feedback.log")

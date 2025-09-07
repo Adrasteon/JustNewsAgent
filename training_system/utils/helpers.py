@@ -1,15 +1,16 @@
 """
+from common.observability import get_logger
 Training System Utilities
 Helper functions and tools for the online training system
 """
 
 import json
-import logging
+
 from datetime import datetime
 from typing import Dict, List, Any
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 def export_training_data_to_csv(training_data: List[Dict], filename: str = None) -> str:
     """

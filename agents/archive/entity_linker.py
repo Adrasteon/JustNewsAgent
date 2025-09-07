@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Phase 3 Advanced Feature: Entity Linking with External Knowledge Bases
@@ -16,14 +17,14 @@ Features:
 
 import asyncio
 import json
-import logging
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 import hashlib
 import aiohttp
 
-logger = logging.getLogger("entity_linker")
+logger = get_logger(__name__)
 
 class ExternalKnowledgeBaseLinker:
     """

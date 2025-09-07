@@ -1,7 +1,7 @@
 """
 Main file for the Memory Agent.
 """
-import logging
+from common.observability import get_logger
 import os
 import requests
 from contextlib import asynccontextmanager
@@ -27,9 +27,8 @@ from agents.memory.tools import (
 # Import database utilities
 from agents.common.database import initialize_connection_pool, close_connection_pool, get_db_connection as get_pooled_connection
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Readiness flag
 ready = False

@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Practical NewsReader Solution - Implementing User's Insight on INT8 Quantization
@@ -9,7 +10,7 @@ Key Insight: Use smaller, quantizable models instead of forcing large models to 
 """
 
 import asyncio
-import logging
+
 from contextlib import asynccontextmanager
 from typing import Dict, Any, cast, Optional
 import torch
@@ -26,8 +27,8 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 
 class ToolCall(BaseModel):

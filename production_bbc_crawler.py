@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Production BBC NewsReader Crawler - Robust Implementation
@@ -14,7 +15,7 @@ Features:
 
 import asyncio
 import json
-import logging
+
 from typing import List, Dict, Optional
 import time
 from datetime import datetime
@@ -30,11 +31,9 @@ from PIL import Image
 import io
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger("bbc_production_crawler")
+logger = get_logger(__name__)
 
 class ProductionBBCNewsReaderCrawler:
     """

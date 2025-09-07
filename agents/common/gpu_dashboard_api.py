@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 GPU Monitoring Dashboard API
 Provides REST API endpoints for GPU monitoring and dashboard data
 
@@ -9,7 +10,7 @@ Features:
 - Web dashboard interface
 """
 
-import logging
+
 from datetime import datetime
 import contextlib
 from fastapi import FastAPI, HTTPException
@@ -26,7 +27,7 @@ from .gpu_monitoring_enhanced import (
 )
 from .gpu_manager_production import get_gpu_manager
 
-logger = logging.getLogger("gpu_dashboard.api")
+logger = get_logger(__name__)
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):

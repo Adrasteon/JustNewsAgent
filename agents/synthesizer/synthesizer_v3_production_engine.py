@@ -16,7 +16,8 @@ Integration: V2 API compatibility with enhanced reliability
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from typing import List, Dict, Optional, Any
 from datetime import datetime
@@ -64,8 +65,8 @@ except ImportError:
 FEEDBACK_LOG = os.environ.get("SYNTHESIZER_V3_FEEDBACK_LOG", "./feedback_synthesizer_v3.log")
 MODEL_CACHE_DIR = os.environ.get("SYNTHESIZER_V3_CACHE", "./models/synthesizer_v3")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("synthesizer.v3_production")
+
+logger = get_logger(__name__)
 
 @dataclass
 class SynthesizerV3Config:

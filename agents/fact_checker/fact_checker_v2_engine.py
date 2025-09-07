@@ -27,7 +27,8 @@ Performance: Production-ready with GPU acceleration
 """
 
 import os
-import logging
+from common.observability import get_logger
+
 import warnings
 from typing import Dict, List, Any
 from datetime import datetime, timezone
@@ -47,7 +48,7 @@ def _import_transformers_module():
             pass
         return mod
     except Exception as e:
-        logger = logging.getLogger(__name__)
+        logger = get_logger(__name__)
         logger.warning(f"Transformers not available at import time: {e}")
         return None
 
@@ -57,7 +58,7 @@ def _import_sentence_transformer_class():
         mod = importlib.import_module("sentence_transformers")
         return getattr(mod, "SentenceTransformer", None)
     except Exception as e:
-        logger = logging.getLogger(__name__)
+        logger = get_logger(__name__)
         logger.warning(f"sentence_transformers not available at import time: {e}")
         return None
 
@@ -75,7 +76,7 @@ try:
 except ImportError:
     PRODUCTION_GPU_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class FactCheckerV2Engine:
     """

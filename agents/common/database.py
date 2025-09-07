@@ -4,13 +4,14 @@ Provides connection pooling and async database operations
 """
 
 import os
-import logging
+from common.observability import get_logger
 from contextlib import contextmanager
 from typing import Optional
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 
-logger = logging.getLogger(__name__)
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Environment variables
 POSTGRES_HOST = os.environ.get("POSTGRES_HOST")

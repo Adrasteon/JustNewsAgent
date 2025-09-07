@@ -11,8 +11,9 @@ Features:
 """
 
 import os
+from common.observability import get_logger
 import json
-import logging
+
 import socket
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -20,7 +21,7 @@ from pathlib import Path
 import yaml
 import threading
 
-logger = logging.getLogger("gpu_config.manager")
+logger = get_logger(__name__)
 
 class GPUConfigManager:
     """

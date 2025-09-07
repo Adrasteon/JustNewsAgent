@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Generic Site Crawler for JustNewsAgent Production Crawlers
@@ -27,7 +28,7 @@ import random
 from datetime import datetime
 from playwright.async_api import async_playwright
 from typing import List, Dict, Optional, Any
-import logging
+
 from urllib.parse import urlparse, urljoin
 
 from ..crawler_utils import (
@@ -35,7 +36,7 @@ from ..crawler_utils import (
     get_active_sources, get_sources_by_domain
 )
 
-logger = logging.getLogger("generic_site_crawler")
+logger = get_logger(__name__)
 
 
 class SiteConfig:

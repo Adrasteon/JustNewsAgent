@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Data Minimization Module for GDPR Compliance
 
 This module implements data minimization principles by:
@@ -10,7 +11,7 @@ This module implements data minimization principles by:
 """
 
 import json
-import logging
+
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Set, Any
@@ -75,7 +76,7 @@ class DataMinimizationManager:
         self.audit_logger = audit_logger or ComplianceAuditLogger()
         self.policies: Dict[str, DataCollectionPolicy] = {}
         self.data_usage_tracker: Dict[str, Set[str]] = {}  # user_id -> set of purposes
-        self.logger = logging.getLogger(__name__)
+        self.logger = get_logger(__name__)
 
         # Load existing policies
         self._load_policies()

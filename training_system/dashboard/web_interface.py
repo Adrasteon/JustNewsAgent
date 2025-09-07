@@ -1,4 +1,5 @@
 """
+from common.observability import get_logger
 Online Training Dashboard - Web Interface (Future Implementation)
 
 This module will provide a web-based dashboard for monitoring and managing 
@@ -18,9 +19,9 @@ Status: Placeholder for future development
 """
 
 from typing import Dict, Any
-import logging
 
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 class TrainingDashboard:
     """

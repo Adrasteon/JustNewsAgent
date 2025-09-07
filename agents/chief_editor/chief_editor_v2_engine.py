@@ -1,7 +1,8 @@
 
 
 import os
-import logging
+from common.observability import get_logger
+
 import torch
 from typing import List, Dict, Optional, Any
 from datetime import datetime, timezone
@@ -44,8 +45,8 @@ except ImportError:
 FEEDBACK_LOG = os.environ.get("CHIEF_EDITOR_V2_FEEDBACK_LOG", "./feedback_chief_editor_v2.log")
 MODEL_CACHE_DIR = os.environ.get("CHIEF_EDITOR_V2_CACHE", "./models/chief_editor_v2")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("chief_editor.v2_engine")
+
+logger = get_logger(__name__)
 
 class EditorialPriority(Enum):
     """Editorial priority levels"""

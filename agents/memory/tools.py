@@ -1,5 +1,5 @@
 from pathlib import Path
-import logging
+from common.observability import get_logger
 import os
 from datetime import datetime, timezone
 import json
@@ -39,8 +39,8 @@ POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 # Canonical cache folder for memory agent: prefer agent-local models directory
 DEFAULT_MODEL_CACHE = os.environ.get("MEMORY_V2_CACHE") or os.environ.get('MEMORY_MODEL_CACHE') or str(Path('./agents/memory/models').resolve())
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("memory.tools")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 def get_db_connection():
     """Establishes a connection to the PostgreSQL database using connection pooling."""

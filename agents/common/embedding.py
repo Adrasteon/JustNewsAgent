@@ -5,8 +5,9 @@ model downloads / loads and reduce GPU memory churn. Callers should prefer
 this helper when they need a SentenceTransformer instance.
 """
 from typing import Optional, Tuple, Dict, Any
-import logging
+
 import os
+from common.observability import get_logger
 import threading
 from pathlib import Path
 import inspect
@@ -42,7 +43,7 @@ def _detect_caller_agent() -> Optional[str]:
         return None
     return None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 _MODEL_CACHE = {}
 _MODEL_CACHE_LOCKS = {}

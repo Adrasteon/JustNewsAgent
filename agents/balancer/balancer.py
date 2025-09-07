@@ -21,6 +21,7 @@ except Exception:
     structlog = None
 
 import os
+from common.observability import get_logger
 from typing import List, Dict, Any
 import torch
 from transformers import pipeline
@@ -52,9 +53,9 @@ MCP_BUS_URL = "http://localhost:8000"  # Update as needed
 if structlog is not None:
     logger = structlog.get_logger("balancer_agent")
 else:
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger("balancer_agent")
+    
+    
+    logger = get_logger(__name__)
 
 def get_device() -> int:
     return 0 if torch.cuda.is_available() else -1

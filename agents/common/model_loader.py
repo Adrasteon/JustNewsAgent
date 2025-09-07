@@ -7,11 +7,12 @@ fall back to per-agent cache_dir behavior otherwise.
 from __future__ import annotations
 
 import os
-import logging
+from common.observability import get_logger
+
 from pathlib import Path
 from typing import Optional, Tuple
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _resolve_model_store_path(agent: Optional[str], model_id: Optional[str] = None) -> Optional[Path]:

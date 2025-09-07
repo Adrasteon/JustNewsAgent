@@ -1,15 +1,17 @@
 """
 Security utilities for Scout Agent - Input validation, sanitization, and security measures.
 """
+
+from common.observability import get_logger
 import re
-import logging
+
 from urllib.parse import urlparse
 from typing import Dict, Any, List
 import time
 from functools import wraps
 import hashlib
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Security configuration
 MAX_URL_LENGTH = 2048

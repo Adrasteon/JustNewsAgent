@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Database migration script for JustNewsAgent
@@ -5,7 +6,7 @@ Applies performance improvements and indexes to the database
 """
 
 import sys
-import logging
+
 from pathlib import Path
 
 # Add the project root to the Python path
@@ -13,8 +14,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.database import execute_query
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+
+logger = get_logger(__name__)
 
 def apply_migration(migration_file: str):
     """Apply a database migration from SQL file"""

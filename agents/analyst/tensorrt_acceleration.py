@@ -6,9 +6,10 @@ Status: DEVELOPMENT - Using direct TensorRT integration
 Target: 300-600 articles/sec from current 151.4 articles/sec
 """
 
-import logging
+
 import time
 import os
+from common.observability import get_logger
 import sys
 import numpy as np
 from typing import List, Optional, Dict, Any
@@ -17,7 +18,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 class TensorRTAnalyst:
     """
@@ -199,6 +200,7 @@ class TensorRTAnalyst:
             # Import the working GPU analyst directly
             import sys
             import os
+from common.observability import get_logger
             
             # Add the analyst directory to path
             analyst_dir = os.path.dirname(os.path.abspath(__file__))

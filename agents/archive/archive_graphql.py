@@ -1,3 +1,4 @@
+from common.observability import get_logger
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: GraphQL Query Interface
@@ -14,7 +15,7 @@ GraphQL Schema:
 - SearchResult: Search results with metadata
 """
 
-import logging
+
 import hashlib
 from datetime import datetime
 import contextlib
@@ -36,7 +37,7 @@ from agents.archive.archive_manager import ArchiveManager
 # Import graphql function
 from graphql import graphql
 
-logger = logging.getLogger("phase3_graphql")
+logger = get_logger(__name__)
 
 # Rate Limiting Configuration
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])

@@ -19,7 +19,7 @@ support database-driven multi-site clustering operations.
 
 import asyncio
 import hashlib
-import logging
+
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -29,12 +29,13 @@ from urllib.robotparser import RobotFileParser
 
 # Database utilities for source management
 import os
+from common.observability import get_logger
 from contextlib import contextmanager
 from typing import List, Any
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 
-logger = logging.getLogger("crawler_utils")
+logger = get_logger(__name__)
 
 
 class RateLimiter:

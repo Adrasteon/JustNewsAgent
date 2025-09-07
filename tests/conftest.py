@@ -7,13 +7,14 @@ unit tests can focus on repo logic instead of infrastructure.
 from __future__ import annotations
 
 import os
+from common.observability import get_logger
 import types
 import sys
-import logging
+
 
 import pytest
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Reusable DummyResponse used by multiple fixtures
 class DummyResponse:

@@ -1,11 +1,14 @@
 # Optimized Synthesizer Configuration  
 # Phase 1 Memory Optimization: Context reduction + Lightweight embeddings
 
+from common.observability import get_logger
 import os
-import logging
 from typing import List, Dict, Any
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Import Synthesizer V2 Engine
 try:
@@ -13,7 +16,7 @@ try:
     SYNTHESIZER_V2_AVAILABLE = True
 except ImportError as e:
     SYNTHESIZER_V2_AVAILABLE = False
-    logging.error(f"❌ Synthesizer V2 Engine not available: {e}")
+    logger.error(f"❌ Synthesizer V2 Engine not available: {e}")
 
 # Import Synthesizer V3 Production Engine
 try:
@@ -21,7 +24,7 @@ try:
     SYNTHESIZER_V3_AVAILABLE = True
 except ImportError as e:
     SYNTHESIZER_V3_AVAILABLE = False
-    logging.error(f"❌ Synthesizer V3 Production Engine not available: {e}")
+    logger.error(f"❌ Synthesizer V3 Production Engine not available: {e}")
 
 try:
     from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
@@ -60,7 +63,7 @@ try:
     GPU_TOOLS_AVAILABLE = True
 except ImportError as e:
     GPU_TOOLS_AVAILABLE = False
-    logging.error(f"❌ GPU tools not available: {e}")
+    logger.error(f"❌ GPU tools not available: {e}")
     _gpu_synthesize = None
     _gpu_performance = None
 
@@ -150,8 +153,8 @@ OPTIMIZED_BATCH_SIZE = 4     # Memory-efficient for embeddings processing
 
 FEEDBACK_LOG = os.environ.get("SYNTHESIZER_FEEDBACK_LOG", "./feedback_synthesizer.log")
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("synthesizer.tools")
+# Configure centralized logging
+logger = get_logger(__name__)
 
 # Online Training Integration
 # Import training symbols but defer initialization until runtime to avoid

@@ -4,13 +4,14 @@ Provides SQLite-based storage for metrics, allocations, and performance trends.
 """
 
 import sqlite3
-import logging
+
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from contextlib import contextmanager
 import os
+from common.observability import get_logger
 
-logger = logging.getLogger("dashboard.storage")
+logger = get_logger(__name__)
 
 class DashboardStorage:
     """SQLite-based storage for dashboard historical data."""
