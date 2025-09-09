@@ -1,0 +1,72 @@
+{
+  "data": [
+    {
+      "entity_id": "Q84",
+      "name": "London",
+      "description": "capital and largest city of England and the United Kingdom",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q84",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q23939248",
+      "name": "London",
+      "description": "region of England containing City of London and Greater London",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q23939248",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q20003780",
+      "name": "London",
+      "description": "unisex given name",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q20003780",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q92561",
+      "name": "London",
+      "description": "city in Southwestern Ontario, Canada",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q92561",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q1137581",
+      "name": "The London Gazette",
+      "description": "journal of record of the British government",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1137581",
+      "confidence": 0.6,
+      "aliases": [
+        "London Gazette"
+      ],
+      "metadata": {
+        "match_type": "alias",
+        "language": "en"
+      }
+    }
+  ],
+  "cached_at": "2025-09-08T11:48:03.257602"
+}

@@ -1,4 +1,4 @@
 """DB Worker package entrypoint."""
-from .worker import run_worker
+from .worker import app
 
-__all__ = ['run_worker']
+__all__ = ['app']

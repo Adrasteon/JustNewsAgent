@@ -113,12 +113,6 @@ def ready_endpoint():
 @asynccontextmanager
 async def lifespan(app):
     logger.info("MCP_Bus is starting up.")
-    try:
-        response = requests.get("http://localhost:8000/register", timeout=(2, 5))
-        response.raise_for_status()
-        logger.info("MCP Bus connected successfully.")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to connect to MCP Bus: {e}")
     global ready
     ready = True
     yield
@@ -134,3 +128,13 @@ try:
 except Exception:
     # If assigning fails, the module will still run with a default no-op lifespan
     logger.debug("Could not attach custom lifespan to MCP Bus router; continuing without it.")
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("MCP_BUS_HOST", "0.0.0.0")
+    port = int(os.environ.get("MCP_BUS_PORT", 8000))
+
+    logger.info(f"Starting MCP Bus on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

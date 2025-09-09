@@ -96,7 +96,7 @@
       "chief_editor": 8001,
       "memory": 8007,
       "reasoning": 8008,
-      "dashboard": 8011,
+      "dashboard": 8013,
       "db_worker": 8010
     },
     "timeouts": {

@@ -125,6 +125,7 @@ ready = False
 # Environment variables
 NEWSREADER_AGENT_PORT = int(os.environ.get("NEWSREADER_AGENT_PORT", 8009))
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
+RELOAD_ENABLED = os.environ.get("RELOAD", "false").lower() == "true"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -492,9 +493,9 @@ def analyze_image_content(image_path: str) -> dict[str, str]:
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "agents.newsreader.main:app",
         host="0.0.0.0",
         port=NEWSREADER_AGENT_PORT,
-        reload=True,
+        reload=RELOAD_ENABLED,
         log_level="info"
     )

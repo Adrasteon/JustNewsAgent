@@ -27,7 +27,13 @@ AGENTS=(
   "critic|agents.critic.main:app|8006"
   "memory|agents.memory.main:app|8007"
   "reasoning|agents.reasoning.main:app|8008"
+  "newsreader|agents.newsreader.main:app|8009"
+  "db_worker|agents.db_worker.worker:app|8010"
+  "dashboard|agents.dashboard.main:app|8011"
+  "analytics|agents.analytics.dashboard:analytics_app|8012"
   "balancer|agents.balancer.main:app|8013"
+  "archive_graphql|agents.archive.archive_graphql:app|8020"
+  "archive_api|agents.archive.archive_api:app|8021"
 )
 
 PIDS=()
@@ -143,8 +149,8 @@ else
   # the BASE_MODEL_DIR/MODEL_STORE_ROOT env vars before invoking the script.
   DEFAULT_BASE_MODELS_DIR="${HOME}/.local/share/justnews"
 fi
-export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-$DEFAULT_BASE_MODELS_DIR/model_store}"
-export BASE_MODEL_DIR="${BASE_MODEL_DIR:-$DEFAULT_BASE_MODELS_DIR/agents}"
+export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-"$DEFAULT_BASE_MODELS_DIR/model_store"}"
+export BASE_MODEL_DIR="${BASE_MODEL_DIR:-"$DEFAULT_BASE_MODELS_DIR/agents"}"
 
 # Enforce strict ModelStore usage by default for production runs started via this script.
 # Set STRICT_MODEL_STORE=0 to allow fallbacks for development/testing.
@@ -158,15 +164,15 @@ export POSTGRES_USER="${POSTGRES_USER:-justnews_user}"
 export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password123}"
 
 # Per-agent cache envs (only set if not already set)
-export SYNTHESIZER_MODEL_CACHE="${SYNTHESIZER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/synthesizer/models}"
-export MEMORY_MODEL_CACHE="${MEMORY_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/memory/models}"
-export CHIEF_EDITOR_MODEL_CACHE="${CHIEF_EDITOR_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/chief_editor/models}"
-export FACT_CHECKER_MODEL_CACHE="${FACT_CHECKER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/fact_checker/models}"
-export CRITIC_MODEL_CACHE="${CRITIC_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/critic/models}"
-export ANALYST_MODEL_CACHE="${ANALYST_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/analyst/models}"
-export BALANCER_MODEL_CACHE="${BALANCER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/balancer/models}"
-export SCOUT_MODEL_CACHE="${SCOUT_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/scout/models}"
-export REASONING_MODEL_CACHE="${REASONING_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/reasoning/models}"
+export SYNTHESIZER_MODEL_CACHE="${SYNTHESIZER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/synthesizer/models"}"
+export MEMORY_MODEL_CACHE="${MEMORY_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/memory/models"}"
+export CHIEF_EDITOR_MODEL_CACHE="${CHIEF_EDITOR_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/chief_editor/models"}"
+export FACT_CHECKER_MODEL_CACHE="${FACT_CHECKER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/fact_checker/models"}"
+export CRITIC_MODEL_CACHE="${CRITIC_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/critic/models"}"
+export ANALYST_MODEL_CACHE="${ANALYST_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/analyst/models"}"
+export BALANCER_MODEL_CACHE="${BALANCER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/balancer/models"}"
+export SCOUT_MODEL_CACHE="${SCOUT_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/scout/models"}"
+export REASONING_MODEL_CACHE="${REASONING_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/reasoning/models"}"
 
 # Ensure directories exist (no sudo) and warn about permissions if not writable by current user
 mkdir -p "$MODEL_STORE_ROOT" || true
@@ -179,8 +185,8 @@ for d in "$BASE_MODEL_DIR" "$SYNTHESIZER_MODEL_CACHE" "$MEMORY_MODEL_CACHE" "$CH
   fi
 done
 
-echo "Checking ports 8000..8013 for running agents..."
-for port in $(seq 8000 8013); do
+echo "Checking ports 8000..8021 for running agents..."
+for port in $(seq 8000 8021); do
   if is_port_in_use "$port"; then
     echo "Port $port is currently in use. Attempting graceful shutdown..."
     if attempt_shutdown_port "$port"; then

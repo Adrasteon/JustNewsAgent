@@ -180,3 +180,13 @@ def log_feedback(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("FACT_CHECKER_HOST", "0.0.0.0")
+    port = int(os.environ.get("FACT_CHECKER_PORT", 8003))
+
+    logger.info(f"Starting Fact Checker Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

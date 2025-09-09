@@ -42,7 +42,8 @@ class MCPBusClient:
             "address": agent_address,
         }
         try:
-            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
+            # Use shorter timeout to prevent hanging
+            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(1, 2))
             response.raise_for_status()
             logger.info(f"Successfully registered {agent_name} with MCP Bus.")
         except requests.exceptions.RequestException as e:
@@ -54,6 +55,7 @@ async def lifespan(app: FastAPI):
     logger.info("Scout agent is starting up.")
     mcp_bus_client = MCPBusClient()
     try:
+        # Try to register with MCP Bus with shorter timeout
         mcp_bus_client.register_agent(
             agent_name="scout",
             agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
@@ -113,31 +115,6 @@ async def security_middleware(request: Request, call_next):
 
     response = await call_next(request)
     return response
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("Scout agent is starting up.")
-    mcp_bus_client = MCPBusClient()
-    try:
-        mcp_bus_client.register_agent(
-            agent_name="scout",
-            agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
-            tools=[
-                "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
-                "intelligent_source_discovery", "intelligent_content_crawl",
-                "intelligent_batch_analysis", "enhanced_newsreader_crawl",
-                "production_crawl_ultra_fast", "get_production_crawler_info"
-            ],
-        )
-        logger.info("Registered tools with MCP Bus.")
-    except Exception as e:
-        logger.warning(f"MCP Bus unavailable: {e}. Running in standalone mode.")
-    global ready
-    ready = True
-    yield
-    logger.info("Scout agent is shutting down.")
-
-app = FastAPI(lifespan=lifespan)
 
 # Register shutdown endpoint if available
 try:
@@ -360,3 +337,18 @@ def get_production_crawler_info_endpoint(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred in get_production_crawler_info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# =============================================================================
+# SERVER STARTUP
+# =============================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    logger.info(f"Starting Scout Agent on port {SCOUT_AGENT_PORT}")
+    uvicorn.run(
+        "agents.scout.main:app",
+        host="0.0.0.0",
+        port=SCOUT_AGENT_PORT,
+        reload=False,
+        log_level="info"
+    )

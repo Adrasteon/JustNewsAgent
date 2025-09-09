@@ -970,13 +970,13 @@ try:
         production_crawler = ProductionCrawlerOrchestrator()
         supported_sites = []
         try:
-            supported_sites = production_crawler.get_supported_sites()
+            supported_sites = production_crawler.get_available_sites()
         except Exception as site_e:
-            logger.error(f"❌ Exception calling get_supported_sites: {site_e}")
+            logger.error(f"❌ Exception calling get_available_sites: {site_e}")
             logger.error(traceback.format_exc())
-            log_feedback("production_crawler_supported_sites_error", {"error": str(site_e), "traceback": traceback.format_exc()})
-        logger.info(f"[DIAG] ProductionCrawlerOrchestrator supported_sites at startup: {supported_sites}")
-        log_feedback("production_crawler_supported_sites", {"supported_sites": supported_sites})
+            log_feedback("production_crawler_available_sites_error", {"error": str(site_e), "traceback": traceback.format_exc()})
+        logger.info(f"[DIAG] ProductionCrawlerOrchestrator available_sites at startup: {supported_sites}")
+        log_feedback("production_crawler_available_sites", {"available_sites": supported_sites})
         if production_crawler and supported_sites:
             PRODUCTION_CRAWLERS_AVAILABLE = True
             logger.info("✅ Production crawlers initialized successfully")
@@ -1127,13 +1127,13 @@ def get_production_crawler_info():
         }
 
     try:
-        supported_sites = production_crawler.get_supported_sites()
-        site_info = {site: production_crawler.get_site_info(site) for site in supported_sites}
+        supported_sites = production_crawler.get_available_sites()
+        supported_modes = production_crawler.get_supported_modes()
 
         result = {
             "available": True,
             "supported_sites": supported_sites,
-            "site_details": site_info,
+            "supported_modes": supported_modes,
             "capabilities": ["ultra_fast", "ai_enhanced", "multi_site"],
             "performance_targets": {
                 "ultra_fast": "8+ articles/second",

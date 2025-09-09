@@ -351,3 +351,13 @@ def store_article_endpoint(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred in store_article: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("MEMORY_HOST", "0.0.0.0")
+    port = int(os.environ.get("MEMORY_PORT", 8007))
+
+    logger.info(f"Starting Memory Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

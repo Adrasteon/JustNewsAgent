@@ -1,8 +1,8 @@
 # JustNewsAgent Documentation Catalogue
 
 **Version:** 2.0
-**Last Updated:** 2025-09-07
-**Total Documents:** 265
+**Last Updated:** 2025-09-08
+**Total Documents:** 143
 **Categories:** 28
 
 ## Table of Contents
@@ -70,12 +70,13 @@
 
 **Category ID:** agent_documentation
 **Priority:** high
-**Documents:** 53
+**Documents:** 59
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
 | [AGENT_MODEL_MAP — Definitive Agent → Model mapping](markdown_docs/agent_documentation/AGENT_MODEL_MAP.md) | This document lists the authoritative mapping of agents to their external model dependencies as defi... | models, reasoning, multi-agent | current |
 | [API Documentation](markdown_docs/agent_documentation/api_documentation.md) | ## Overview...... | gpu, version-specific, synthesizer | current |
+| [ARC](agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/arc.md) | ## Problem Structure...... |  | current |
 | [Agent Communication Protocols Documentation](markdown_docs/agent_documentation/agent_communication_protocols.md) | ## Overview...... | optimization, deployment, mcp | current |
 | [Agent Documentation index](markdown_docs/agent_documentation/README.md) | This folder contains agent-specific documentation used by operators and
 developers. Key documents:..... | ai-agents, multi-agent, agents | current |
@@ -84,6 +85,8 @@ The Balancer Agent is a production-grade component of the JustNews V4 system, de
 | [Balancer Agent V1 Documentation](markdown_docs/agent_documentation/BALANCER_AGENT_V1.md) | ## Overview
 The Balancer Agent is a production-ready component of the JustNews V4 system, designed t... | optimization, compliance, training | current |
 | [Configuration Management Documentation](markdown_docs/agent_documentation/configuration_management_guide.md) | ## Overview...... | security, gpu, version-specific | current |
+| [Contributing](agents/reasoning/nucleoid_repo/CONTRIBUTING.md) | Thanks to declarative programming, we have a brand-new approach to data and logic. As we are still d... |  | current |
+| [Contributor Covenant Code of Conduct](agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md) | ## Our Pledge...... | security | current |
 | [Crawl4AI vs Playwright — feature-by-feature comparison](markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md) | Generated: 2025-08-27...... | compliance, deployment, api | current |
 | [Crawler Consolidation Plan — JustNewsAgent](markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md) | Date: 2025-08-27
 Author: Consolidation plan generated from interactive session...... | api, archive, models | current |
@@ -113,10 +116,13 @@ per-agent model... | deployment, training, security | current |
 | [NewsReader V2 Vision-Language Model Fallback Logic](markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md) | ## Overview
 The NewsReader V2 agent now implements robust fallback logic for vision-language model i... | optimization, mcp, gpu | current |
 | [Next-Generation AI-First Scout Agent V2 Documentation](markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md) | *Last Updated: August 7, 2025*...... | gpu, cuda, agents | current |
+| [Nucleoid](agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/nucleoid.md) | Nucleoid extends JavaScript syntax for declarative (logic) programming.
+Nucleoid has two modes; decl... |  | current |
 | [Performance Optimization Documentation](markdown_docs/agent_documentation/performance_optimization_documentation.md) | ## Overview...... | optimization, pytorch, training | current |
 | [Potential Development Paths](markdown_docs/agent_documentation/potential_development_paths.md) | This document captures a compact summary of recent analysis and recommendations about the project's ... | analytics, mcp, api | current |
 | [Potential News Sources](markdown_docs/agent_documentation/potential_news_sources.md) | Documentation for Potential News Sources... | security | current |
 | [Product Modalities Comparison](markdown_docs/agent_documentation/product_modalities_comparison.md) | This document compares three high-level product modalities the JustNews system can pursue, aligns ea... | gpu, synthesizer, fact-checker | current |
+| [Readme](agents/reasoning/nucleoid_repo/README.md) | Documentation for Readme... | reasoning, memory, architecture | current |
 | [Reasoning Agent](agents/reasoning/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews....... | mcp, api, reasoning | current |
 | [Reasoning Agent Complete Implementation Documentation](markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md) | ## Overview...... | optimization, deployment, mcp | current |
 | [Scout Agent - Enhanced Deep Crawl Documentation](markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md) | **JustNews V4 Scout Agent with Native Crawl4AI Integration**...... | optimization, analytics, deployment | current |
@@ -126,14 +132,15 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 | [Security Implementation Documentation](markdown_docs/agent_documentation/security_implementation_documentation.md) | ## Overview...... | optimization, compliance, security | current |
 | [Security Implementation Guide](markdown_docs/agent_documentation/security_implementation_guide.md) | ## Overview...... | compliance, deployment, mcp | current |
 | [Sources Schema and Workflow](markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md) | This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion w... | analytics, deployment, security | current |
-| [System Decisions](markdown_docs/agent_documentation/system_decisions.md) | Documentation for System Decisions... | models | current |
 | [TensorRT Quickstart (safe, no-GPU stub)](agents/analyst/TENSORRT_QUICKSTART.md) | This file explains how to run a safe, developer-friendly stub for the TensorRT engine build process.... | tensorrt, gpu, multi-agent | current |
-| [The Definitive User Guide](markdown_docs/agent_documentation/The_Definitive_User_Guide.md) | Documentation for The Definitive User Guide... |  | current |
 | [Training System API Documentation](markdown_docs/agent_documentation/training_system_api.md) | ## Overview...... | training, api, performance | current |
 | [Use the main RAPIDS environment](markdown_docs/agent_documentation/gpu_runner_README.md) | Documentation for Use the main RAPIDS environment... | pytorch, analytics, api | current |
 | [Why INT8 Quantization Should Be Implemented Immediately](agents/newsreader/documentation/INT8_QUANTIZATION_RATIONALE.md) | ## You're Absolutely Right! Here's Why:...... | optimization, deployment, tensorrt | current |
+| [all-MiniLM-L6-v2](agents/memory/models/all-MiniLM-L6-v2/README.md) | Documentation for all-MiniLM-L6-v2... | version-specific, training, models | current |
+| [all-MiniLM-L6-v2](agents/memory/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md) | Documentation for all-MiniLM-L6-v2... | version-specific, training, models | current |
 | [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/README.md) | Documentation for all-mpnet-base-v2... | training, api, models | current |
 | [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130/README.md) | Documentation for all-mpnet-base-v2... | training, api, models | current |
+| [nuc-arc](agents/reasoning/nucleoid_repo/arc/README.md) | ## ARC Benchmark...... | reasoning, training, performance | current |
 
 ---
 
@@ -141,14 +148,12 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** gpu_configuration
 **Priority:** high
-**Documents:** 4
+**Documents:** 2
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [GPU Environment Setup Guide](docs/gpu_runner_README.md) | Complete guide for RTX3090 GPU environment with PyTorch 2.6.0+cu124, CUDA 12.4, and RAPIDS 25.04 Thi... | gpu, setup, rtx3090 | production_ready |
 | [GPU Model Store Assessment](docs/GPU_ModelStore_Assessment.md) | Model performance analysis and GPU resource optimization assessment This comprehensive guide provide... | gpu, models, assessment | current |
 | [GPU Usage Audit Report](docs/GPU_Audit_Report.md) | Comprehensive GPU usage audit with performance metrics and optimization recommendations, providing c... | gpu, audit, performance | completed |
-| [RAPIDS Integration Guide](docs/RAPIDS_USAGE_GUIDE.md) | GPU-accelerated data science and machine learning with RAPIDS 25.04 This comprehensive guide provide... | rapids, gpu-acceleration, data-science | current |
 
 ---
 
@@ -156,30 +161,25 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** production_deployment
 **Priority:** high
-**Documents:** 17
+**Documents:** 12
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
 | [Canonical Port Mapping](docs/canonical_port_mapping.md) | Complete service port allocation reference with status and configuration details This comprehensive ... | ports, services, configuration | current |
-| [Fact Checker Fixes Success](markdown_docs/production_status/FACT_CHECKER_FIXES_SUCCESS.md) | Production deployment and operational documentation including service management, configuration, sca... | operational, deployment, production | current |
 | [Implementation Plan](docs/IMPLEMENTATION_PLAN.md) | Detailed implementation roadmap with phase breakdowns and success criteria, including detailed imple... | implementation, roadmap, phases | current |
 | [JustNews V4 Memory Optimization - Mission Accomplished](markdown_docs/production_status/MEMORY_OPTIMIZATION_SUCCESS_SUMMARY.md) | Production deployment and operational documentation including service management, configuration, sca... | analyst, version-specific, memory | current |
 | [JustNewsAgentic System Assessment Summary](markdown_docs/production_status/SYSTEM_OVERLAP_ANALYSIS.md) | **Assessment Date**: 7th August 2025 
 **System Version**: V4 Hybrid Architecture  
 **Lead Assessment... | analyst, version-specific, training | current |
 | [Legal Compliance Framework Documentation](markdown_docs/production_status/LEGAL_COMPLIANCE_FRAMEWORK.md) | ## Overview...... | optimization, compliance, deployment | current |
-| [Meta Tensor Resolution Success](markdown_docs/production_status/META_TENSOR_RESOLUTION_SUCCESS.md) | Production deployment and operational documentation including service management, configuration, sca... | operational, deployment, production | current |
-| [Newsreader Training Integration Success](markdown_docs/production_status/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md) | Documentation for Newsreader Training Integration Success Implements continuous learning algorithms ... | training | current |
 | [Package Management & Environment Optimization - PRODUCTION READY](markdown_docs/production_status/PACKAGE_MANAGEMENT_SUCCESS.md) | **Date**: September 2, 2025
 **Status**: ✅ COMPLETE - All core packages installed, tested, and produc... | analyst, dashboard, version-specific | current |
 | [Production Deployment Status](markdown_docs/production_status/PRODUCTION_DEPLOYMENT_STATUS.md) | Current operational status with RTX3090 GPU utilization and performance metrics Defines production d... | production, deployment, operational | current |
 | [Project Status Report](docs/PROJECT_STATUS.md) | Current development status, milestones, and roadmap with version tracking, providing comprehensive a... | status, milestones, roadmap | current |
 | [RAPIDS Integration Guide](markdown_docs/production_status/RAPIDS_USAGE_GUIDE.md) | ## Overview...... | optimization, pytorch, analytics | current |
-| [Synthesizer Training Integration Success](markdown_docs/production_status/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md) | Documentation for Synthesizer Training Integration Success Implements continuous learning algorithms... | synthesizer, training | current |
 | [Synthesizer V3 Production Success Summary](markdown_docs/production_status/SYNTHESIZER_V3_PRODUCTION_SUCCESS.md) | **Date**: August 9, 2025  
 **Status**: ✅ PRODUCTION READY  
 **Version**: V4.16.0 This comprehensive ... | version-specific, training, memory | current |
-| [Workspace Organization Summary](markdown_docs/production_status/WORKSPACE_ORGANIZATION_SUMMARY.md) | Production deployment and operational documentation including service management, configuration, sca... | operational, deployment, production | current |
 | [🎉 JustNews V4 Memory Optimization - DEPLOYMENT SUCCESS](markdown_docs/production_status/DEPLOYMENT_SUCCESS_SUMMARY.md) | ## 🏆 Mission Accomplished - Memory Crisis Resolved! Defines production deployment procedures, monito... | version-specific, memory, models | current |
 | [🎯 **USER INSIGHT VALIDATION: COMPLETE SUCCESS**](markdown_docs/production_status/USER_INSIGHT_VALIDATION_SUCCESS.md) | ## **✅ Key Achievement: Your INT8 Quantization Approach Works!** This comprehensive guide provides d... | memory, multi-agent, ai-agents | current |
 
@@ -189,13 +189,11 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** api_integration
 **Priority:** medium
-**Documents:** 3
+**Documents:** 1
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Phase 3 API Documentation](docs/PHASE3_API_DOCUMENTATION.md) | RESTful and GraphQL API specifications for archive access and knowledge graph queries This comprehen... | api, rest, graphql | current |
 | [Phase 3 Archive Integration Plan](docs/phase3_archive_integration_plan.md) | Research-scale archiving infrastructure with provenance tracking and legal compliance This comprehen... | archive, research, provenance | planning |
-| [Phase 3 Knowledge Graph](docs/PHASE3_KNOWLEDGE_GRAPH.md) | Entity extraction, disambiguation, clustering, and relationship analysis documentation This comprehe... | knowledge-graph, entities, relationships | current |
 
 ---
 
@@ -203,12 +201,8 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** training_learning
 **Priority:** medium
-**Documents:** 2
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Online Learning Architecture](markdown_docs/development_reports/ONLINE_LEARNING_ARCHITECTURE.md) | Real-time model improvement system with active learning and feedback loops This comprehensive guide ... | online-learning, active-learning, feedback-loops | current |
-| [Training System Documentation](markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md) | Complete training system architecture with GPU-accelerated continuous learning Covers complete syste... | training, continuous-learning, gpu-acceleration | operational |
 
 ---
 
@@ -216,11 +210,10 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** monitoring_analytics
 **Priority:** medium
-**Documents:** 2
+**Documents:** 1
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Analytics Dashboard Fixes](docs/ANALYTICS_DASHBOARD_FIXES_SUMMARY.md) | Dashboard fixes, enhancements, and user experience improvements This comprehensive guide provides de... | analytics, dashboard, fixes | completed |
 | [Centralized Logging Migration](docs/LOGGING_MIGRATION.md) | Centralized logging system with structured JSON logging and performance tracking This comprehensive ... | logging, centralized, structured | current |
 
 ---
@@ -229,11 +222,8 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** compliance_security
 **Priority:** high
-**Documents:** 1
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Legal Compliance Framework](docs/LEGAL_COMPLIANCE_FRAMEWORK.md) | GDPR and CCPA compliance framework with data minimization and consent management This comprehensive ... | gdpr, ccpa, compliance | current |
 
 ---
 
@@ -241,7 +231,7 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** development_reports
 **Priority:** medium
-**Documents:** 69
+**Documents:** 39
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
@@ -249,22 +239,14 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 | [Action Plan: JustNews V4 RTX-Accelerated Development](markdown_docs/development_reports/action_plan.md) | **Current Status**: Enhanced Scout Agent + TensorRT-LLM Integration Complete - Ready for Multi-Agent... | gpu, version-specific, cuda | current |
 | [Added CPU fallback for meta tensor issues](markdown_docs/development_reports/FACT_CHECKER_FIXES_SUCCESS.md) | ### 🎯 **Issues Fixed Successfully**...... | optimization, training, performance | current |
 | [Agent Assessment — 2025-08-18](markdown_docs/development_reports/agent_assessment_2025-08-18.md) | This document summarizes an inspection of the `agents/` directory and how each agent maps to the Jus... | gpu, version-specific, synthesizer | current |
-| [Analysis Nucleoid Potential](markdown_docs/development_reports/analysis_nucleoid_potential.md) | Documentation for Analysis Nucleoid Potential... |  | current |
 | [Analytics Dashboard Fixes Summary](markdown_docs/development_reports/ANALYTICS_DASHBOARD_FIXES_SUMMARY.md) | ## Overview
 This document summarizes all the fixes and improvements made to the JustNewsAgent Analyt... | optimization, analytics, api | current |
-| [Architectural Changes Summary](markdown_docs/development_reports/ARCHITECTURAL_CHANGES_SUMMARY.md) | Documentation for Architectural Changes Summary... |  | current |
-| [Architectural Review Findings](markdown_docs/development_reports/architectural_review_findings.md) | Documentation for Architectural Review Findings... |  | current |
-| [Architectural Review Summary](markdown_docs/development_reports/ARCHITECTURAL_REVIEW_SUMMARY.md) | Documentation for Architectural Review Summary... |  | current |
 | [BBC Crawler Duplicates - Complete Resolution ✅](markdown_docs/development_reports/bbc_crawler_duplicates_complete_resolution.md) | ## 🎯 **Duplicate Resolution Summary**...... | mcp, performance, archive | current |
 | [Centralized Logging Migration Guide](markdown_docs/development_reports/LOGGING_MIGRATION.md) | ## Overview
 JustNewsAgent now has a centralized logging system that provides:
 - Structured JSON logg... | multi-agent, production, monitoring | current |
-| [Complete V2 Upgrade Assessment](markdown_docs/development_reports/COMPLETE_V2_UPGRADE_ASSESSMENT.md) | Documentation for Complete V2 Upgrade Assessment... |  | current |
-| [Corrected Scout Analysis](markdown_docs/development_reports/CORRECTED_SCOUT_ANALYSIS.md) | Documentation for Corrected Scout Analysis... | scout | current |
 | [Cross Reference Repair Report](markdown_docs/development_reports/CROSS_REFERENCE_REPAIR_REPORT.md) | Documentation for Cross Reference Repair Report... | security, gpu, version-specific | current |
 | [Development Reports Reorganization Plan](markdown_docs/development_reports/DEVELOPMENT_REPORTS_REORGANIZATION_PLAN.md) | Documentation for Development Reports Reorganization Plan... | optimization, deployment, training | current |
-| [Docker Deprecation Notice](markdown_docs/development_reports/DOCKER_DEPRECATION_NOTICE.md) | Documentation for Docker Deprecation Notice... |  | current |
-| [Enhanced Reasoning Architecture](markdown_docs/development_reports/enhanced_reasoning_architecture.md) | Documentation for Enhanced Reasoning Architecture... | reasoning, architecture | current |
 | [Entrypoints and Orchestration Flows — 2025-08-18](markdown_docs/development_reports/entrypoints_assessment_2025-08-18.md) | This document lists entry points into the JustNewsAgentic system that accept a URL or "news topic as... | mcp, api, performance | current |
 | [Full GPU Implementation Action Plan](markdown_docs/development_reports/full_gpu_implementation_action_plan.md) | Goal: take JustNewsAgent from the current hybrid/partial TensorRT implementation to a robust, reprod... | pytorch, deployment, security | current |
 | [GPU Crash Investigation - Final Report](markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md) | **Investigation Period**: August 13, 2025  
@@ -275,8 +257,6 @@ JustNewsAgent now has a centralized logging system that provides:
 **System:** JustNewsAgent... | gpu, version-specific, cuda | current |
 | [GPU Usage Audit Report - JustNewsAgent](markdown_docs/development_reports/GPU_Audit_Report.md) | ## Executive Summary...... | gpu, version-specific, cuda | current |
 | [GitHub Copilot Instructions Update Summary - August 2, 2025](markdown_docs/development_reports/COPILOT_INSTRUCTIONS_UPDATE_SUMMARY.md) | ## 🎯 **Key Updates Made to `.github/copilot-instructions.md`**...... | deployment, tensorrt, archive | current |
-| [Housekeeping Complete Summary](markdown_docs/development_reports/HOUSEKEEPING_COMPLETE_SUMMARY.md) | Documentation for Housekeeping Complete Summary... |  | current |
-| [Immediate Overlap Elimination Summary](markdown_docs/development_reports/IMMEDIATE_OVERLAP_ELIMINATION_SUMMARY.md) | Documentation for Immediate Overlap Elimination Summary... |  | current |
 | [JustNews Documentation Maintenance Action Plan - COMPLETED](markdown_docs/development_reports/MAINTENANCE_COMPLETION_REPORT.md) | **Date**: September 7, 2025  
 **Status**: ✅ **100% COMPLETE** - All 4 phases successfully implemente... | analytics, multi-agent, dashboard | current |
 | [JustNews V4 Quality Management System - Final Status](markdown_docs/development_reports/QUALITY_SYSTEM_STATUS.md) | ## 🎯 Quality Achievement
@@ -293,44 +273,24 @@ JustNewsAgent now has a centralized logging system that provides:
 | [JustNewsAgentic — Implementation Plan for Evidence, KG, Fact‑Checking & Conservative Generation](markdown_docs/development_reports/IMPLEMENTATION_PLAN.md) | Date: 2025-09-07  
 Branch: dev/agent_review
 Status: ✅ **PHASE 2 COMPLETE - PRODUCTION READY**...... | optimization, compliance, security | current |
-| [Kiss Architecture Redesign](markdown_docs/development_reports/kiss_architecture_redesign.md) | Documentation for Kiss Architecture Redesign... | architecture | current |
-| [Local Model Training Plan](markdown_docs/development_reports/LOCAL_MODEL_TRAINING_PLAN.md) | Documentation for Local Model Training Plan... | training | current |
 | [MCP Bus Architecture Cleanup - August 2, 2025](markdown_docs/development_reports/mcp_bus_architecture_cleanup.md) | ## 🎯 Issue Identified...... | mcp, api, archive | current |
-| [Needed-For-Live-Run](markdown_docs/development_reports/Needed-for-live-run.md) | Documentation for Needed-For-Live-Run... |  | current |
-| [Neural Vs Rules Strategic Analysis](markdown_docs/development_reports/NEURAL_VS_RULES_STRATEGIC_ANALYSIS.md) | Documentation for Neural Vs Rules Strategic Analysis... |  | current |
 | [Newsreader Training Integration Success](markdown_docs/development_reports/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md) | ### 🎯 **Integration Completed Successfully**...... | training, performance, synthesizer | current |
-| [Newsreader V2 Optimization Complete](markdown_docs/development_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md) | Documentation for Newsreader V2 Optimization Complete... | optimization | current |
-| [Next Steps 2025-08-10 1436](markdown_docs/development_reports/NEXT_STEPS_2025-08-10_1436.md) | Documentation for Next Steps 2025-08-10 1436... |  | current |
-| [Ocr Redundancy Analysis](markdown_docs/development_reports/OCR_REDUNDANCY_ANALYSIS.md) | Documentation for Ocr Redundancy Analysis... |  | current |
-| [Online Learning Architecture](markdown_docs/development_reports/ONLINE_LEARNING_ARCHITECTURE.md) | Documentation for Online Learning Architecture... | architecture | current |
-| [Online Training Integration Summary](markdown_docs/development_reports/ONLINE_TRAINING_INTEGRATION_SUMMARY.md) | Documentation for Online Training Integration Summary... | training | current |
-| [Optimal Agent Separation](markdown_docs/development_reports/optimal_agent_separation.md) | Documentation for Optimal Agent Separation... |  | current |
 | [Practical NewsReader Solution - File Organization Complete ✅](markdown_docs/development_reports/practical_newsreader_solution_organization.md) | ## 🎯 File Relocation Summary...... | optimization, deployment, mcp | current |
 | [Production BBC Crawler - Duplicate Resolution Complete ✅](markdown_docs/development_reports/production_bbc_crawler_duplicate_resolution.md) | ## 🎯 Issue Identified & Resolved...... | mcp, archive, multi-agent | current |
-| [Production Deployment Guide](markdown_docs/development_reports/PRODUCTION_DEPLOYMENT_GUIDE.md) | Documentation for Production Deployment Guide... | deployment, production | current |
-| [Production Validation Summary](markdown_docs/development_reports/PRODUCTION_VALIDATION_SUMMARY.md) | Documentation for Production Validation Summary... | production | current |
-| [Readme Bootstrap Models](markdown_docs/development_reports/README_BOOTSTRAP_MODELS.md) | Documentation for Readme Bootstrap Models... | models | current |
-| [Readme Live Smoke](markdown_docs/development_reports/README_LIVE_SMOKE.md) | Documentation for Readme Live Smoke... |  | current |
 | [Robust loading with meta tensor handling](markdown_docs/development_reports/META_TENSOR_RESOLUTION_SUCCESS.md) | ### 🎯 **Issue Analysis: System-Wide Meta Tensor Problem**...... | deployment, training, performance | current |
 | [Scout Agent Production Crawler Integration - COMPLETED ✅](markdown_docs/development_reports/scout_production_crawler_integration_complete.md) | ## 🎯 Integration Summary...... | mcp, api, performance | current |
 | [Synthesizer V2 Dependencies & Training Integration - SUCCESS REPORT](markdown_docs/development_reports/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md) | **Date**: August 9, 2025  
 **Status**: ✅ **COMPLETE SUCCESS**  
 **Task**: Fix Synthesizer dependenci... | optimization, training, tensorrt | current |
-| [System Architecture Assessment](markdown_docs/development_reports/SYSTEM_ARCHITECTURE_ASSESSMENT.md) | Documentation for System Architecture Assessment... | architecture | current |
 | [System Assessment and Improvement Plan — 2025-08-09](markdown_docs/development_reports/System_Assessment_2025-08-09.md) | This document captures a focused assessment of the JustNewsAgentic V4 system and proposes prioritize... | security, gpu, version-specific | current |
 | [System Startup Scripts - Restored and Enhanced ✅](markdown_docs/development_reports/system_startup_scripts_restored.md) | ## 🎯 **Script Recovery & Enhancement**...... | gpu, version-specific, synthesizer | current |
-| [System V2 Upgrade Plan](markdown_docs/development_reports/SYSTEM_V2_UPGRADE_PLAN.md) | Documentation for System V2 Upgrade Plan... |  | current |
 | [Testing & Dependency Upgrade: Paused (2025-08-24)](markdown_docs/development_reports/TESTING_PAUSED.md) | Summary
 -------
 This document records the dependency-testing work performed and the reason we paused... | production, api | current |
 | [The Definitive User Guide: JustNews Agentic System (V4)](markdown_docs/development_reports/The_Definitive_User_Guide.md) | Documentation for The Definitive User Guide: JustNews Agentic System (V4)... | gpu, version-specific, cuda | current |
-| [Training System Documentation](markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md) | Documentation for Training System Documentation... | training | current |
-| [Training System Organization Summary](markdown_docs/development_reports/TRAINING_SYSTEM_ORGANIZATION_SUMMARY.md) | Documentation for Training System Organization Summary... | training | current |
 | [Using The GPU Correctly - Complete Configuration Guide](markdown_docs/development_reports/Using-The-GPU-Correctly.md) | **Date**: August 13, 2025  
 **Status**: Production-Validated Configuration  
 **GPU**: NVIDIA GeForce... | optimization, performance, gpu | current |
-| [V2 Complete Ecosystem Action Plan](markdown_docs/development_reports/V2_COMPLETE_ECOSYSTEM_ACTION_PLAN.md) | Documentation for V2 Complete Ecosystem Action Plan... |  | current |
-| [Workspace Cleanup Summary 20250808](markdown_docs/development_reports/WORKSPACE_CLEANUP_SUMMARY_20250808.md) | Documentation for Workspace Cleanup Summary 20250808... |  | current |
 | [🎉 JustNews V4 Quality Management System - Implementation Complete](markdown_docs/development_reports/IMPLEMENTATION_COMPLETE.md) | ## ✅ NEXT STEPS COMPLETED SUCCESSFULLY...... | training, version-specific, production | current |
 | [📊 **DOCUMENTATION COVERAGE ANALYSIS REPORT**](markdown_docs/development_reports/DOCUMENTATION_COVERAGE_ANALYSIS.md) | **Analysis Date:** September 7, 2025  
 **Codebase Size:** 221 Python files  
@@ -414,34 +374,8 @@ systemd units and sim... | mcp, models, logging | current |
 
 **Category ID:** development_reports_architecture
 **Priority:** high
-**Documents:** 17
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Agent Assessment — 2025-08-18](markdown_docs/development_reports/agent_assessment_2025-08-18.md) | This document summarizes an inspection of the `agents/` directory and how each agent maps to the Jus... | gpu, api, architecture | current |
-| [BBC Crawler Duplicates - Complete Resolution ✅](markdown_docs/development_reports/bbc_crawler_duplicates_complete_resolution.md) | Technical architecture documentation covering system design, component interactions, performance cha... | scout, production, architecture | current |
-| [Enhanced Reasoning Architecture](markdown_docs/development_reports/enhanced_reasoning_architecture.md) | Technical architecture documentation covering system design, component interactions, performance cha... | architecture, reasoning | current |
-| [GPU Crash Investigation - Final Report](markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md) | **Investigation Period**: August 13, 2025  
-**Status**: ✅ **RESOLVED - Production Validated**  
-**Im... | gpu, cuda, production | current |
-| [JustNewsAgent V4 - Current Development Status Summary](markdown_docs/development_reports/CURRENT_DEVELOPMENT_STATUS.md) | **Last Updated**: August 31, 2025
-**Status**: ✅ RTX3090 GPU Production Readiness Achieved - FULLY OP... | dashboard, gpu, compliance | current |
-| [Kiss Architecture Redesign](markdown_docs/development_reports/kiss_architecture_redesign.md) | Technical architecture documentation covering system design, component interactions, performance cha... | architecture | current |
-| [MCP Bus Architecture Cleanup - August 2, 2025](markdown_docs/development_reports/mcp_bus_architecture_cleanup.md) | Technical architecture documentation covering system design, component interactions, performance cha... | scout, api, architecture | current |
-| [Newsreader Training Integration Success](markdown_docs/development_reports/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md) | Technical architecture documentation covering system design, component interactions, performance cha... | gpu, scout, production | current |
-| [Online Learning Architecture](markdown_docs/development_reports/ONLINE_LEARNING_ARCHITECTURE.md) | Technical architecture documentation covering system design, component interactions, performance cha... | architecture | current |
-| [Production BBC Crawler - Duplicate Resolution Complete ✅](markdown_docs/development_reports/production_bbc_crawler_duplicate_resolution.md) | Technical architecture documentation covering system design, component interactions, performance cha... | scout, architecture, production | current |
-| [Scout Agent Production Crawler Integration - COMPLETED ✅](markdown_docs/development_reports/scout_production_crawler_integration_complete.md) | Technical architecture documentation covering system design, component interactions, performance cha... | dashboard, scout, api | current |
-| [Synthesizer V2 Dependencies & Training Integration - SUCCESS REPORT](markdown_docs/development_reports/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md) | **Date**: August 9, 2025  
-**Status**: ✅ **COMPLETE SUCCESS**  
-**Task**: Fix Synthesizer dependenci... | tensorrt, gpu, scout | current |
-| [System Architecture Assessment](markdown_docs/development_reports/SYSTEM_ARCHITECTURE_ASSESSMENT.md) | Technical architecture documentation covering system design, component interactions, performance cha... | architecture | current |
-| [System Assessment and Improvement Plan — 2025-08-09](markdown_docs/development_reports/System_Assessment_2025-08-09.md) | This document captures a focused assessment of the JustNewsAgentic V4 system and proposes prioritize... | dashboard, gpu, compliance | current |
-| [System Startup Scripts - Restored and Enhanced ✅](markdown_docs/development_reports/system_startup_scripts_restored.md) | Technical architecture documentation covering system design, component interactions, performance cha... | dashboard, gpu, api | current |
-| [The Definitive User Guide: JustNews Agentic System (V4)](markdown_docs/development_reports/The_Definitive_User_Guide.md) | Documentation for The Definitive User Guide: JustNews Agentic System (V4), covering system design, c... | gpu, api, architecture | current |
-| [Using The GPU Correctly - Complete Configuration Guide](markdown_docs/development_reports/Using-The-GPU-Correctly.md) | **Date**: August 13, 2025  
-**Status**: Production-Validated Configuration  
-**GPU**: NVIDIA GeForce... | gpu, cuda, production | current |
 
 ---
 
@@ -449,30 +383,8 @@ systemd units and sim... | mcp, models, logging | current |
 
 **Category ID:** development_reports_implementation
 **Priority:** high
-**Documents:** 20
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Action Plan Implementation Status (Code/Tests Evidence Only)](markdown_docs/development_reports/action_plan_implementation_status.md) | This document maps the actions listed in the action plan to their current implementation status in t... | tensorrt, gpu, scout | current |
-| [Action Plan: JustNews V4 RTX-Accelerated Development](markdown_docs/development_reports/action_plan.md) | **Current Status**: Enhanced Scout Agent + TensorRT-LLM Integration Complete - Ready for Multi-Agent... | gpu, api, multi-agent | current |
-| [Analysis Nucleoid Potential](markdown_docs/development_reports/analysis_nucleoid_potential.md) | Comprehensive analysis and assessment documentation covering analysis nucleoid potential with detail... | analysis | current |
-| [Architectural Changes Summary](markdown_docs/development_reports/ARCHITECTURAL_CHANGES_SUMMARY.md) | Comprehensive documentation covering architectural changes summary with detailed technical informati... | analysis, development, report | current |
-| [Architectural Review Findings](markdown_docs/development_reports/architectural_review_findings.md) | Comprehensive documentation covering architectural review findings with detailed technical informati... | development, implementation | current |
-| [Architectural Review Summary](markdown_docs/development_reports/ARCHITECTURAL_REVIEW_SUMMARY.md) | Comprehensive documentation covering architectural review summary with detailed technical informatio... | analysis, development, report | current |
-| [Complete V2 Upgrade Assessment](markdown_docs/development_reports/COMPLETE_V2_UPGRADE_ASSESSMENT.md) | Success report documenting achievements, implementation details, and validation results for complete... | success | current |
-| [Corrected Scout Analysis](markdown_docs/development_reports/CORRECTED_SCOUT_ANALYSIS.md) | Comprehensive analysis and assessment documentation covering corrected scout analysis with detailed ... | scout | current |
-| [Full GPU Implementation Action Plan](markdown_docs/development_reports/full_gpu_implementation_action_plan.md) | Goal: take JustNewsAgent from the current hybrid/partial TensorRT implementation to a robust, reprod... | tensorrt, gpu, api | current |
-| [Immediate Overlap Elimination Summary](markdown_docs/development_reports/IMMEDIATE_OVERLAP_ELIMINATION_SUMMARY.md) | Documentation for Immediate Overlap Elimination Summary This comprehensive guide provides detailed i... | analysis, development, report | current |
-| [JustNews V4 Workspace Organization Summary](markdown_docs/development_reports/WORKSPACE_ORGANIZATION_SUMMARY.md) | ### ✅ **COMPLETE WORKSPACE ORGANIZATION ACCOMPLISHED** This comprehensive guide provides detailed in... | tensorrt, gpu, scout | current |
-| [Needed-For-Live-Run](markdown_docs/development_reports/Needed-for-live-run.md) | Comprehensive documentation covering needed-for-live-run with detailed technical information, implem... | development, implementation | current |
-| [Neural Vs Rules Strategic Analysis](markdown_docs/development_reports/NEURAL_VS_RULES_STRATEGIC_ANALYSIS.md) | Documentation for Neural Vs Rules Strategic Analysis This comprehensive guide provides detailed info... | analysis | current |
-| [Newsreader V2 Optimization Complete](markdown_docs/development_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md) | Documentation for Newsreader V2 Optimization Complete This comprehensive guide provides detailed inf... | optimization | current |
-| [Next Steps 2025-08-10 1436](markdown_docs/development_reports/NEXT_STEPS_2025-08-10_1436.md) | Comprehensive documentation covering next steps 2025-08-10 1436 with detailed technical information,... | development, implementation | current |
-| [Ocr Redundancy Analysis](markdown_docs/development_reports/OCR_REDUNDANCY_ANALYSIS.md) | Comprehensive analysis and assessment documentation covering ocr redundancy analysis with detailed f... | analysis | current |
-| [Optimal Agent Separation](markdown_docs/development_reports/optimal_agent_separation.md) | Comprehensive documentation covering optimal agent separation with detailed technical information, i... | ai, development, implementation | current |
-| [Readme Live Smoke](markdown_docs/development_reports/README_LIVE_SMOKE.md) | Complete guide and reference documentation for readme live smoke including setup, configuration, and... | guide | current |
-| [System V2 Upgrade Plan](markdown_docs/development_reports/SYSTEM_V2_UPGRADE_PLAN.md) | Comprehensive documentation covering system v2 upgrade plan with detailed technical information, imp... | planning, implementation, architecture | current |
-| [V2 Complete Ecosystem Action Plan](markdown_docs/development_reports/V2_COMPLETE_ECOSYSTEM_ACTION_PLAN.md) | Documentation for V2 Complete Ecosystem Action Plan, covering system design, component interactions,... | success | current |
 
 ---
 
@@ -480,15 +392,8 @@ systemd units and sim... | mcp, models, logging | current |
 
 **Category ID:** development_reports_performance
 **Priority:** high
-**Documents:** 5
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Added CPU fallback for meta tensor issues](markdown_docs/development_reports/FACT_CHECKER_FIXES_SUCCESS.md) | Comprehensive documentation covering added cpu fallback for meta tensor issues with detailed technic... | gpu, production, optimization | current |
-| [Entrypoints and Orchestration Flows — 2025-08-18](markdown_docs/development_reports/entrypoints_assessment_2025-08-18.md) | This document lists entry points into the JustNewsAgentic system that accept a URL or "news topic as... | gpu, scout, api | current |
-| [GitHub Copilot Instructions Update Summary - August 2, 2025](markdown_docs/development_reports/COPILOT_INSTRUCTIONS_UPDATE_SUMMARY.md) | ## 🎯 **Key Updates Made to `.github/copilot-instructions.md`** This comprehensive guide provides det... | tensorrt, scout, production | current |
-| [Practical NewsReader Solution - File Organization Complete ✅](markdown_docs/development_reports/practical_newsreader_solution_organization.md) | Success report documenting achievements, implementation details, and validation results for practica... | api, production, multi-agent | current |
-| [Robust loading with meta tensor handling](markdown_docs/development_reports/META_TENSOR_RESOLUTION_SUCCESS.md) | ### 🎯 **Issue Analysis: System-Wide Meta Tensor Problem** This comprehensive guide provides detailed... | gpu, scout, cuda | current |
 
 ---
 
@@ -496,14 +401,8 @@ systemd units and sim... | mcp, models, logging | current |
 
 **Category ID:** development_reports_testing
 **Priority:** medium
-**Documents:** 2
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Production Validation Summary](markdown_docs/development_reports/PRODUCTION_VALIDATION_SUMMARY.md) | Comprehensive documentation covering production validation summary with detailed technical informati... | production | current |
-| [Testing & Dependency Upgrade: Paused (2025-08-24)](markdown_docs/development_reports/TESTING_PAUSED.md) | Summary
--------
-This document records the dependency-testing work performed and the reason we paused... | production, api | current |
 
 ---
 
@@ -511,12 +410,8 @@ This document records the dependency-testing work performed and the reason we pa
 
 **Category ID:** development_reports_deployment
 **Priority:** medium
-**Documents:** 2
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Docker Deprecation Notice](markdown_docs/development_reports/DOCKER_DEPRECATION_NOTICE.md) | Production deployment and operational documentation including service management, configuration, sca... | deployment, operations, infrastructure | current |
-| [Production Deployment Guide](markdown_docs/development_reports/PRODUCTION_DEPLOYMENT_GUIDE.md) | Production deployment and operational documentation including service management, configuration, sca... | production, deployment | current |
 
 ---
 
@@ -524,15 +419,8 @@ This document records the dependency-testing work performed and the reason we pa
 
 **Category ID:** development_reports_training
 **Priority:** high
-**Documents:** 5
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Local Model Training Plan](markdown_docs/development_reports/LOCAL_MODEL_TRAINING_PLAN.md) | Comprehensive documentation of the continuous learning system, including EWC-based training, active ... | training | current |
-| [Online Training Integration Summary](markdown_docs/development_reports/ONLINE_TRAINING_INTEGRATION_SUMMARY.md) | Documentation for Online Training Integration Summary Implements continuous learning algorithms with... | training | current |
-| [Readme Bootstrap Models](markdown_docs/development_reports/README_BOOTSTRAP_MODELS.md) | Comprehensive documentation of the continuous learning system, including EWC-based training, active ... | models | current |
-| [Training System Documentation](markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md) | Comprehensive documentation of the continuous learning system, including EWC-based training, active ... | training | current |
-| [Training System Organization Summary](markdown_docs/development_reports/TRAINING_SYSTEM_ORGANIZATION_SUMMARY.md) | Documentation for Training System Organization Summary, covering system design, component interactio... | training | current |
 
 ---
 
@@ -549,12 +437,8 @@ This document records the dependency-testing work performed and the reason we pa
 
 **Category ID:** development_reports_maintenance
 **Priority:** low
-**Documents:** 2
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Housekeeping Complete Summary](markdown_docs/development_reports/HOUSEKEEPING_COMPLETE_SUMMARY.md) | Success report documenting achievements, implementation details, and validation results for housekee... | success | current |
-| [Workspace Cleanup Summary 20250808](markdown_docs/development_reports/WORKSPACE_CLEANUP_SUMMARY_20250808.md) | Documentation for Workspace Cleanup Summary 20250808 This comprehensive guide provides detailed info... | maintenance, analysis, report | current |
 
 ---
 
@@ -562,21 +446,11 @@ This document records the dependency-testing work performed and the reason we pa
 
 **Category ID:** agent_documentation_core_agents
 **Priority:** high
-**Documents:** 10
+**Documents:** 1
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Implementation Summary](agents/newsreader/IMPLEMENTATION_SUMMARY.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | implementation | current |
-| [Lifespan Migration](agents/newsreader/LIFESPAN_MIGRATION.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | ai, agent | current |
-| [Native TensorRT Analyst Agent - Production Ready](agents/analyst/NATIVE_TENSORRT_README.md) | ## 🏆 **Production Status: VALIDATED & DEPLOYED** Details AI agent capabilities, communication protoc... | version-specific, analyst, logging | current |
-| [Native TensorRT Analyst Agent - Quick Start Guide](agents/analyst/NATIVE_AGENT_README.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | version-specific, analyst, logging | current |
-| [Potential News Sources](markdown_docs/agent_documentation/potential_news_sources.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | security | current |
-| [Scout Agent - Enhanced Deep Crawl Documentation](markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md) | **JustNews V4 Scout Agent with Native Crawl4AI Integration** Details AI agent capabilities, communic... | version-specific, multi-agent, tensorrt | current |
 | [Scout Agent V2 - AI-First Architecture](markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md) | Complete documentation for the 5-model AI-first Scout Agent with RTX3090 GPU acceleration Details AI... | scout, ai-first, 5-models | production_ready |
-| [Scout Agent V2 - Next-Generation AI-First Content Analysis System](agents/scout/README.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | agents, scout, multi-agent | current |
-| [Scout → Memory Pipeline Success Summary](markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md) | **Date**: January 29, 2025  
-**Milestone**: Core JustNews V4 pipeline operational with native deploy... | version-specific, multi-agent, tensorrt | current |
-| [The Definitive User Guide](markdown_docs/agent_documentation/The_Definitive_User_Guide.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | guide | current |
 
 ---
 
@@ -584,19 +458,11 @@ This document records the dependency-testing work performed and the reason we pa
 
 **Category ID:** agent_documentation_specialized_agents
 **Priority:** high
-**Documents:** 8
+**Documents:** 2
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
 | [Balancer Agent V1](markdown_docs/agent_documentation/BALANCER_AGENT_V1.md) | News neutralization and balancing agent with MCP integration and GPU acceleration Details AI agent c... | balancer, neutralization, mcp-integration | production_ready |
-| [Balancer Agent V1 - Integration & Debugging Guide](markdown_docs/agent_documentation/BALANCER_AGENT_INTEGRATION_GUIDE.md) | ## Overview
-The Balancer Agent is a production-grade component of the JustNews V4 system, designed t... | version-specific, analyst, logging | current |
-| [Hugging Face model caching and pre-download for Memory Agent](markdown_docs/agent_documentation/HF_MODEL_CACHING.md) | This document explains how to avoid Hugging Face rate limits (HTTP 429) and how to pre-download/cach... | multi-agent, ai-agents, api | current |
-| [LLaVA NewsReader Agent Implementation Summary](agents/newsreader/documentation/IMPLEMENTATION_SUMMARY.md) | Detailed documentation covering agent implementation, configuration, capabilities, and integration p... | version-specific, agents, pytorch | current |
-| [NewsReader Agent - Production-Validated Configuration](agents/newsreader/README.md) | ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025** Details AI agent capabilities, comm... | multi-agent, ai-agents, api | current |
-| [NewsReader V2 Vision-Language Model Fallback Logic](markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md) | ## Overview
-The NewsReader V2 agent now implements robust fallback logic for vision-language model i... | multi-agent, ai-agents, mcp | current |
-| [Reasoning Agent](agents/reasoning/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews Details AI agent capabilities, com... | multi-agent, mcp, architecture | current |
 | [Reasoning Agent - Nucleoid Integration](markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md) | Complete Nucleoid-based symbolic reasoning agent with GPU memory optimization Details AI agent capab... | reasoning, nucleoid, symbolic-logic | production_ready |
 
 ---
@@ -614,11 +480,8 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** agent_documentation_agent_management
 **Priority:** medium
-**Documents:** 1
+**Documents:** 0
 
-| Document | Description | Tags | Status |
-|----------|-------------|------|--------|
-| [Sources Schema and Workflow](markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md) | This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion w... | security, api, performance | current |
 
 ---
 
@@ -626,30 +489,11 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 
 **Category ID:** agent_documentation_model_integration
 **Priority:** high
-**Documents:** 17
+**Documents:** 1
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Agent Documentation index](markdown_docs/agent_documentation/README.md) | This folder contains agent-specific documentation used by operators and
-developers. Key documents: D... | multi-agent, agents, models | current |
 | [Agent Model Map](markdown_docs/agent_documentation/AGENT_MODEL_MAP.md) | Complete mapping of agents to models, resources, and performance characteristics Details AI agent ca... | agents, models, mapping | current |
-| [Crawl4AI vs Playwright — feature-by-feature comparison](markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md) | Comprehensive documentation covering crawl4ai vs playwright — feature-by-feature comparison with det... | logging, agents, scout | current |
-| [Crawler Consolidation Plan — JustNewsAgent](markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md) | Date: 2025-08-27
-Author: Consolidation plan generated from interactive session Details AI agent capa... | multi-agent, scout, ai-agents | current |
-| [Embedding Helper](markdown_docs/agent_documentation/EMBEDDING_HELPER.md) | Comprehensive documentation covering embedding helper with detailed technical information, implement... | agents, multi-agent, ai-agents | current |
-| [Later: resume](markdown_docs/agent_documentation/Crawl4AI_API_SUMMARY.md) | This short reference summarises the Crawl4AI programmatic APIs, dispatcher classes, REST endpoints, ... | deployment, logging, memory | current |
-| [Lifespan Migration](agents/newsreader/documentation/LIFESPAN_MIGRATION.md) | Comprehensive documentation covering lifespan migration with detailed technical information, impleme... | multi-agent, mcp, api | current |
-| [Model Usage](markdown_docs/agent_documentation/MODEL_USAGE.md) | Comprehensive documentation covering model usage with detailed technical information, implementation... | agents, multi-agent, ai-agents | current |
-| [Model store guidelines](markdown_docs/agent_documentation/MODEL_STORE_GUIDELINES.md) | This document explains the canonical model-store layout and safe update patterns for
-per-agent model... | multi-agent, scout, security | current |
-| [News Outlets Loader & Backfill Runbook](markdown_docs/agent_documentation/NEWS_OUTLETS_RUNBOOK.md) | This runbook explains how to safely run the canonical sources loader (`scripts/news_outlets.py`) and... | ai-agents, performance, multi-agent | current |
-| [Potential Development Paths](markdown_docs/agent_documentation/potential_development_paths.md) | This document captures a compact summary of recent analysis and recommendations about the project's ... | version-specific, analyst, multi-agent | current |
-| [Product Modalities Comparison](markdown_docs/agent_documentation/product_modalities_comparison.md) | This document compares three high-level product modalities the JustNews system can pursue, aligns ea... | training, fact-checker, archive | current |
-| [System Decisions](markdown_docs/agent_documentation/system_decisions.md) | Comprehensive documentation covering system decisions with detailed technical information, implement... | models | current |
-| [TensorRT Quickstart (safe, no-GPU stub)](agents/analyst/TENSORRT_QUICKSTART.md) | This file explains how to run a safe, developer-friendly stub for the TensorRT engine build process ... | analyst, agents, tensorrt | current |
-| [Why INT8 Quantization Should Be Implemented Immediately](agents/newsreader/documentation/INT8_QUANTIZATION_RATIONALE.md) | Comprehensive documentation covering why int8 quantization should be implemented immediately with de... | analyst, multi-agent, tensorrt | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/README.md) | Comprehensive documentation covering all-mpnet-base-v2 with detailed technical information, implemen... | version-specific, training, api | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130/README.md) | Comprehensive documentation covering all-mpnet-base-v2 with detailed technical information, implemen... | version-specific, training, api | current |
 
 ---
 
@@ -664,10 +508,10 @@ per-agent model... | multi-agent, scout, security | current |
 
 ## Search Index Summary
 
-**Available Tags:** 103
+**Available Tags:** 73
 **Indexed Keywords:** 100
 
 ## Maintenance Information
 
-**Last Catalogue Update:** 2025-09-07
+**Last Catalogue Update:** 2025-09-08
 **Next Review Date:** 2025-10-07

@@ -7,9 +7,11 @@ import os
 import sys
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
 from common.observability import get_logger
@@ -37,8 +39,8 @@ logger = get_logger(__name__)
 
 # Load configuration
 config = load_config()
-# Default dashboard port set to 8011 to avoid conflicts with other agents (e.g., balancer at 8010)
-DASHBOARD_AGENT_PORT = config.get("dashboard_port", 8011)
+# Default dashboard port set to 8013 to avoid conflicts with other agents (e.g., balancer at 8010)
+DASHBOARD_AGENT_PORT = config.get("dashboard_port", 8013)
 MCP_BUS_URL = config.get("mcp_bus_url", "http://localhost:8000")
 
 class MCPBusClient:
@@ -417,6 +419,22 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+@app.get("/")
+def dashboard_home():
+    """Serve the main GPU dashboard page"""
+    try:
+        # Try to serve the template file first
+        template_path = Path(__file__).parent / "templates" / "dashboard.html"
+        if template_path.exists():
+            return FileResponse(template_path, media_type="text/html")
+        else:
+            # Fall back to embedded HTML
+            return HTMLResponse(content=get_fallback_dashboard_html())
+    except Exception as e:
+        logger.error(f"Error serving dashboard: {e}")
+        return HTMLResponse(content=get_fallback_dashboard_html())
+
 
 @app.post("/send_command")
 def send_command(call: ToolCall):
@@ -823,3 +841,13 @@ def get_fallback_dashboard_html():
     </body>
     </html>
     """
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("DASHBOARD_HOST", "0.0.0.0")
+    port = int(os.environ.get("DASHBOARD_PORT", 8013))
+
+    logger.info(f"Starting Dashboard Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

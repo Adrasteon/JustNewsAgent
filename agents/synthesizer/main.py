@@ -189,3 +189,13 @@ def get_synthesizer_performance_endpoint(call: ToolCall):
             "models_loaded": False,
             "error": str(e)
         }
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("SYNTHESIZER_HOST", "0.0.0.0")
+    port = int(os.environ.get("SYNTHESIZER_PORT", 8005))
+
+    logger.info(f"Starting Synthesizer Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)
