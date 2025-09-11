@@ -314,6 +314,23 @@ pip install -r agents/analyst/requirements_v4.txt
 conda activate justnews-v2-prod  # Python 3.11 environment
 ```
 
+### Git Hooks (Repository Safety Guards)
+
+Enable local pre-commit hooks for file size and lightweight secret scanning (prevents >20MB accidental commits + obvious secret patterns). These are local-only and won't affect CI unless configured.
+
+```bash
+git config core.hooksPath .githooks
+chmod +x .githooks/pre-commit
+```
+
+To bypass (e.g., false positive) once:
+
+```bash
+git commit -m "message" --no-verify
+```
+
+Adjust size limit by editing `MAX_FILE_SIZE_MB` in `.githooks/pre-commit`.
+
 4. **GPU and RAPIDS Configuration**
 
 The automated setup configures everything optimally, but you can also configure manually:

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Size & secret guard pre-commit hook for JustNewsAgent
+# Abort on error
+set -euo pipefail
+
+MAX_FILE_SIZE_MB=20
+MAX_BYTES=$(( MAX_FILE_SIZE_MB * 1024 * 1024 ))
+
+# Collect staged files (added or modified)
+STAGED=$(git diff --cached --name-only --diff-filter=AM)
+
+large_files=()
+for f in $STAGED; do
+  if [ -f "$f" ]; then
+    sz=$(stat -c%s "$f" 2>/dev/null || echo 0)
+    if [ "$sz" -gt $MAX_BYTES ]; then
+      large_files+=("$f:$((sz/1024/1024))MB")
+    fi
+  fi
+done
+
+if [ ${#large_files[@]} -gt 0 ]; then
+  echo "❌ Commit blocked: files exceed ${MAX_FILE_SIZE_MB}MB limit:" >&2
+  for lf in "${large_files[@]}"; do
+    echo "  - $lf" >&2
+  done
+  echo "Add them to .gitignore or use an artifact store instead." >&2
+  exit 1
+fi
+
+# Lightweight secret scan (additive to existing tooling) – simple patterns
+SECRET_PATTERNS='(?i)(api[_-]?key|secret|password|token)[^\n]{0,40}(=|:)' 
+if git diff --cached -U0 | grep -E "$SECRET_PATTERNS" >/dev/null 2>&1; then
+  echo "❌ Potential secret detected in staged changes." >&2
+  echo "Review the diff. Use --no-verify only if it's a false positive." >&2
+  exit 1
+fi
+
+exit 0

@@ -199,4 +199,20 @@ agents/reasoning/nucleoid_repo/
 .cache/
 
 # HuggingFace/Xet model cache artifacts (accidentally committed previously)
-$MODEL_CACHE_DIR/
+# Expanded model/cache ignore rules (prevent accidental large cache commits)
+# Prior placeholder "$MODEL_CACHE_DIR/" removed (not effective in gitignore)
+# Common HuggingFace cache directories & chunk cache shards
+**/huggingface/cache/**
+**/huggingface/hub/**
+**/huggingface/xet/**
+**/chunk-cache/**
+**/models--*/snapshots/**
+**/models--*/refs/**
+**/models--*/blobs/**
+
+# Generic deep nested binary shard patterns (NN/NN style) under cache trees
+**/cache/*/*/*/*/*.json
+**/cache/*/*/*/*/*.lock
+
+# Safety: keep source code if any directory legitimately named huggingface contains .py files
+!**/huggingface/**/*.py
