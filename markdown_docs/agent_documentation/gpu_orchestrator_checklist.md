@@ -13,20 +13,20 @@ Last Updated: 2025-09-11
 
 ### 🟡 Pending (Required for E2E Validation)
 1. Install production env file: `/etc/justnews/gpu_orchestrator.env` (copy from example)
-2. (DONE) Lightweight client SDK: `agents/common/gpu_orchestrator_client.py`
+2. Lightweight client SDK: `agents/common/gpu_orchestrator_client.py` ✅
    - `get_gpu_info()` (timeout 2s, fallback `{available:false}`) ✅
    - `get_policy()` (cache 30s, SAFE_MODE flag) ✅
-3. Integrate SDK in GPU-capable agents (Analyst first) for read-only metrics & SAFE_MODE gating (IN PROGRESS ✅ Analyst gating added to `gpu_analyst.py`)
-4. Remove or disable any legacy per-agent GPU watchdog logic (centralize through orchestrator + existing watcher) ✅ Disabled auto-start in `gpu_monitoring_enhanced.py` when orchestrator detected
-5. Dashboard ingestion (optional but recommended): add orchestrator metrics panel or link ✅ `/orchestrator/gpu/info`, `/orchestrator/gpu/policy` proxies + integration in `/gpu/dashboard`
-6. Add orchestrator to any global readiness gate (if a script enforces minimal healthy core set)
-7. Tests (progress ✅):
-   - Unit: orchestrator endpoint responses (mock nvidia-smi) ✅ `test_gpu_orchestrator_endpoints.py`
-   - Integration: SDK fallback when service down ✅
-   - Analyst gating test ✅ `test_analyst_gpu_gating.py`
-   - E2E: orchestrator up + Analyst GPU on + others CPU; verify no CUDA crashes and metrics accessible (PENDING)
-   - Smoke harness: `orchestrator_analyst_smoke_test.py` added
-   - Automated validation script: `e2e_orchestrator_analyst_run.py` added
+3. Integrate SDK in GPU-capable agents (Analyst first) ✅ (baseline gating logic present; extend to others later)
+4. Remove or disable any legacy per-agent GPU watchdog logic ✅ (auto-start disabled in `gpu_monitoring_enhanced.py` when orchestrator detected)
+5. Dashboard ingestion (optional) ✅ basic proxy endpoints wired
+6. Add orchestrator to any global readiness gate (script update) – PENDING
+7. Tests:
+   - Unit: orchestrator endpoints ✅ `test_gpu_orchestrator_endpoints.py`
+   - Client fallback & caching ✅ `test_gpu_orchestrator_client.py`
+   - Analyst gating ✅ `test_analyst_gpu_gating.py`
+   - E2E: orchestrator up + Analyst GPU + others CPU (run & capture log) – PENDING
+   - Smoke harness ✅ `orchestrator_analyst_smoke_test.py`
+   - Automated validation script ✅ `e2e_orchestrator_analyst_run.py`
 
 ### 🔵 Nice-to-Have (Post E2E)
 - Lease / allocation endpoints (`/lease`, `/release`) with token-based session

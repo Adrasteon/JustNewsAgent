@@ -75,8 +75,12 @@ ultra_fast_*.json
 
 # Development and Debug Files
 debug_*.py
+# Broad ignore of ad-hoc test scripts, but allow curated orchestrator tests
 test_*.py
 *_test.py
+!test_gpu_orchestrator_endpoints.py
+!test_analyst_gpu_gating.py
+!test_gpu_orchestrator_client.py
 inspect_*.py
 investigate_*.py
 simple_*.py
