@@ -24,7 +24,7 @@ Last Updated: 2025-09-11
    - Unit: orchestrator endpoints ✅ `test_gpu_orchestrator_endpoints.py`
    - Client fallback & caching ✅ `test_gpu_orchestrator_client.py`
    - Analyst gating ✅ `test_analyst_gpu_gating.py`
-   - E2E: orchestrator up + Analyst GPU + others CPU (run & capture log) – PENDING
+   - E2E: orchestrator up + Analyst GPU + others CPU (run & capture log) – PENDING (`e2e_orchestrator_validation.py`)
    - Smoke harness ✅ `orchestrator_analyst_smoke_test.py`
    - Automated validation script ✅ `e2e_orchestrator_analyst_run.py`
 
