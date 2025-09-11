@@ -3,7 +3,7 @@
 Last Updated: 2025-09-11
 
 ### ✅ Completed
-- Service created: `agents/gpu_orchestrator/main.py` with endpoints `/health`, `/ready`, `/gpu/info`, `/policy` (GET/POST, SAFE_MODE read-only), `/allocations` (placeholder)
+- Service created: `agents/gpu_orchestrator/main.py` with endpoints `/health`, `/ready`, `/gpu/info`, `/policy` (GET/POST, SAFE_MODE read-only), `/allocations` (placeholder), `/lease`, `/release`, `/metrics`
 - Port assigned & documented: 8014 (added to canonical mapping)
 - Systemd startup script support: `justnews-start-agent.sh` includes `gpu_orchestrator`
 - Example env file: `deploy/systemd/examples/gpu_orchestrator.env.example`
@@ -29,11 +29,10 @@ Last Updated: 2025-09-11
    - Automated validation script ✅ `e2e_orchestrator_analyst_run.py`
 
 ### 🔵 Nice-to-Have (Post E2E)
-- Lease / allocation endpoints (`/lease`, `/release`) with token-based session
 - NVML-based metrics (granular utilization, PCIe throughput) when out of SAFE_MODE
-- Policy mutation (POST /policy) when SAFE_MODE=false with strict validation
+- Policy mutation (POST /policy) when SAFE_MODE=false with strict validation (baseline validation present)
 - Event streaming (Server-Sent Events or WebSocket) for dashboard live updates
-- Prometheus exporter `/metrics`
+- Advanced allocation strategy (priority queues, fractional memory accounting)
 
 ### ❗ Risks / Watchpoints
 - Avoid accidental GPU initialization in orchestrator when SAFE_MODE=true
@@ -49,14 +48,15 @@ Last Updated: 2025-09-11
 | Agents respect SAFE_MODE | Analyst uses GPU, others CPU, no stray allocs | Pending integration
 | Fallback path | Killing orchestrator causes agents to continue on CPU | Pending test
 | E2E run stable | Full small pipeline run w/out GPU crash | Pending test
+| Lease SAFE_MODE behavior | `/lease` returns note and no GPU index when SAFE_MODE=true | Pending test
 
 ### 📌 Next Action (Recommended Order)
-1. Implement client SDK
-2. Wire Analyst to read orchestrator metrics (log receipt)
-3. Add simple unit tests (mock subprocess for nvidia-smi)
-4. Deploy env + start systemd instance
-5. Run mini E2E (5–10 articles) with SAFE_MODE=true
-6. Expand to full E2E with Analyst GPU path
+1. Add orchestrator to global readiness gate script (Pending item 6)
+2. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note
+3. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment
+4. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference
+5. Implement NVML enrichment (guarded by SAFE_MODE & availability)
+6. Optional: add SSE/WebSocket event streaming prototype (low-frequency state push)
 
 ---
 Authoritative tracking document for GPU Orchestrator readiness.
