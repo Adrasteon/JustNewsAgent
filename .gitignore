@@ -81,6 +81,10 @@ test_*.py
 !test_gpu_orchestrator_endpoints.py
 !test_analyst_gpu_gating.py
 !test_gpu_orchestrator_client.py
+!test_gpu_orchestrator_leasing.py
+!test_memory_management.py
+!test_metrics.py
+!test_production_crawler_direct.py
 inspect_*.py
 investigate_*.py
 simple_*.py

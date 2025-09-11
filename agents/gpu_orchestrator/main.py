@@ -11,8 +11,11 @@ import os
 import subprocess
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
+import time
+import uuid
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from common.observability import get_logger
@@ -35,6 +38,22 @@ POLICY: Dict[str, Any] = {
 	"safe_mode_read_only": SAFE_MODE,
 }
 ALLOCATIONS: Dict[str, Dict[str, Any]] = {}
+
+# Simple in-process metrics (avoid external deps). Prometheus exposition via /metrics.
+_METRICS_COUNTERS: Dict[str, int] = {
+	"requests_total": 0,
+	"gpu_info_requests_total": 0,
+	"policy_get_requests_total": 0,
+	"policy_post_requests_total": 0,
+	"lease_requests_total": 0,
+	"release_requests_total": 0,
+}
+_START_TIME = time.time()
+
+
+def _inc(metric: str) -> None:
+	_METRICS_COUNTERS[metric] = _METRICS_COUNTERS.get(metric, 0) + 1
+	_METRICS_COUNTERS["requests_total"] = _METRICS_COUNTERS.get("requests_total", 0) + 1
 
 
 class MCPBusClient:
@@ -114,6 +133,15 @@ class PolicyUpdate(BaseModel):
 	kill_on_oom: Optional[bool] = None
 
 
+class LeaseRequest(BaseModel):
+	agent: str
+	min_memory_mb: Optional[int] = Field(0, ge=0)
+
+
+class ReleaseRequest(BaseModel):
+	token: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	global READINESS
@@ -125,7 +153,15 @@ async def lifespan(app: FastAPI):
 		client.register_agent(
 			agent_name="gpu_orchestrator",
 			agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
-			tools=["health", "gpu_info", "get_policy", "set_policy", "get_allocations"],
+			tools=[
+				"health",
+				"gpu_info",
+				"get_policy",
+				"set_policy",
+				"get_allocations",
+				"lease",
+				"release",
+			],
 		)
 	except Exception:
 		pass
@@ -156,11 +192,13 @@ except Exception:
 
 @app.get("/health")
 def health():
+	_inc("policy_get_requests_total")  # reuse counter group for simplicity
 	return {"status": "ok", "safe_mode": SAFE_MODE}
 
 
 @app.get("/ready")
 def ready():
+	_inc("policy_get_requests_total")
 	return {"ready": READINESS}
 
 
@@ -168,6 +206,7 @@ def ready():
 def gpu_info():
 	"""Return current GPU telemetry (read-only)."""
 	try:
+		_inc("gpu_info_requests_total")
 		return get_gpu_snapshot()
 	except Exception as e:
 		logger.error(f"Failed to get GPU snapshot: {e}")
@@ -176,6 +215,7 @@ def gpu_info():
 
 @app.get("/policy")
 def get_policy():
+	_inc("policy_get_requests_total")
 	return POLICY
 
 
@@ -183,6 +223,7 @@ def get_policy():
 def set_policy(update: PolicyUpdate):
 	if SAFE_MODE:
 		# In SAFE_MODE, accept but do not enact changes (read-only posture)
+		_inc("policy_post_requests_total")
 		return {
 			**POLICY,
 			"note": "SAFE_MODE enabled: policy updates accepted but not enacted",
@@ -201,13 +242,75 @@ def set_policy(update: PolicyUpdate):
 
 	if changed:
 		logger.info(f"Updated GPU policy: {POLICY}")
+	_inc("policy_post_requests_total")
 	return POLICY
 
 
 @app.get("/allocations")
 def get_allocations():
 	"""Return current agent→GPU allocation view (placeholder)."""
+	_inc("policy_get_requests_total")
 	return {"allocations": ALLOCATIONS}
+
+
+@app.post("/lease")
+def lease(req: LeaseRequest):
+	"""Obtain a simple ephemeral GPU lease. SAFE_MODE returns note only.
+
+	Strategy: first-fit; if no GPU info or none available, return cpu fallback.
+	NOT a hard guarantee—placeholder for future sophisticated allocator.
+	"""
+	_inc("lease_requests_total")
+	if SAFE_MODE:
+		return {"granted": False, "note": "SAFE_MODE", "agent": req.agent}
+
+	snapshot = get_gpu_snapshot()
+	gpu_index: Optional[int] = None
+	if snapshot.get("available") and snapshot.get("gpus"):
+		# naive: choose lowest used memory GPU meeting minimum
+		candidates = []
+		for g in snapshot["gpus"]:
+			if req.min_memory_mb and (g["memory_total_mb"] - g["memory_used_mb"]) < req.min_memory_mb:
+				continue
+			candidates.append(g)
+		if candidates:
+			gpu_index = sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
+
+	token = str(uuid.uuid4())
+	allocation = {
+		"agent": req.agent,
+		"gpu": gpu_index if gpu_index is not None else "cpu",
+		"token": token,
+		"timestamp": time.time(),
+	}
+	ALLOCATIONS[token] = allocation
+	return {"granted": True, **allocation}
+
+
+@app.post("/release")
+def release(req: ReleaseRequest):
+	_inc("release_requests_total")
+	alloc = ALLOCATIONS.pop(req.token, None)
+	if not alloc:
+		raise HTTPException(status_code=404, detail="unknown_token")
+	return {"released": True, "token": req.token}
+
+
+@app.get("/metrics")
+def metrics():  # pragma: no cover - simple string builder
+	# Prometheus exposition format
+	uptime = time.time() - _START_TIME
+	lines = [
+		"# HELP gpu_orchestrator_uptime_seconds Process uptime in seconds",
+		"# TYPE gpu_orchestrator_uptime_seconds counter",
+		f"gpu_orchestrator_uptime_seconds {uptime:.0f}",
+	]
+	for k, v in sorted(_METRICS_COUNTERS.items()):
+		name = f"gpu_orchestrator_{k}"
+		lines.append(f"# HELP {name} {k.replace('_', ' ')}")
+		lines.append(f"# TYPE {name} counter")
+		lines.append(f"{name} {v}")
+	return PlainTextResponse("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

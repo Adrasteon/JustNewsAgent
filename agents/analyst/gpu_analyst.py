@@ -20,20 +20,24 @@ try:
 except Exception:
     _orchestrator_client = None
 
-import torch
-from transformers import pipeline
-
 logger = get_logger(__name__)
 
-# Check for required dependencies
-try:
-    import torch
-    from transformers import pipeline
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    torch = None
-    pipeline = None
+# Dependency probing (transformers optional in minimal test env)
+try:  # pragma: no cover - environment dependent
+    import torch  # type: ignore
+    TORCH_BASE_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    torch = None  # type: ignore
+    TORCH_BASE_AVAILABLE = False
+
+try:  # pragma: no cover - environment dependent
+    from transformers import pipeline  # type: ignore
+    TRANSFORMERS_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    pipeline = None  # type: ignore
+    TRANSFORMERS_AVAILABLE = False
+
+TORCH_AVAILABLE = TORCH_BASE_AVAILABLE and TRANSFORMERS_AVAILABLE
 
 try:
     from agents.common.gpu_manager import release_agent_gpu, request_agent_gpu
@@ -136,7 +140,7 @@ class GPUAcceleratedAnalyst:
     def _initialize_gpu_models(self):
         """Initialize GPU-accelerated models with professional memory management"""
         try:
-            if TORCH_AVAILABLE and torch.cuda.is_available() and self.gpu_device >= 0:  # type: ignore
+            if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available() and self.gpu_device >= 0:  # type: ignore
                 # Set CUDA device to allocated device
                 torch.cuda.set_device(self.gpu_device)  # type: ignore
                 gpu_name = torch.cuda.get_device_name(self.gpu_device)  # type: ignore
