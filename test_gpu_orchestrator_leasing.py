@@ -39,6 +39,17 @@ def test_lease_cpu_fallback(monkeypatch):
     assert data["token"] in ALLOCATIONS
 
 
+def test_lease_safe_mode_denied(monkeypatch):
+    # Force SAFE_MODE=True temporarily by monkeypatching module constant
+    import agents.gpu_orchestrator.main as mod
+    monkeypatch.setattr(mod, "SAFE_MODE", True)
+    r = client.post("/lease", json={"agent": "analyst", "min_memory_mb": 128})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["granted"] is False
+    assert data.get("note") == "SAFE_MODE"
+
+
 def test_lease_with_gpu(monkeypatch):
     monkeypatch.setattr(
         "agents.gpu_orchestrator.main.get_gpu_snapshot",

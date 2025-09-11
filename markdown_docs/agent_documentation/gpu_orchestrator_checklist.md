@@ -48,13 +48,13 @@ Last Updated: 2025-09-11
 | Agents respect SAFE_MODE | Analyst uses GPU, others CPU, no stray allocs | Pending integration
 | Fallback path | Killing orchestrator causes agents to continue on CPU | Pending test
 | E2E run stable | Full small pipeline run w/out GPU crash | Pending test
-| Lease SAFE_MODE behavior | `/lease` returns note and no GPU index when SAFE_MODE=true | Pending test
+| Lease SAFE_MODE behavior | `/lease` returns note and no GPU index when SAFE_MODE=true | ✅ Tested (`test_gpu_orchestrator_leasing.py`)
 
 ### 📌 Next Action (Recommended Order)
 1. Add orchestrator to global readiness gate script (Pending item 6)
-2. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note
-3. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment
-4. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference
+2. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note (test-level validated)
+3. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment (runtime)
+4. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference (include active_leases gauge)
 5. Implement NVML enrichment (guarded by SAFE_MODE & availability)
 6. Optional: add SSE/WebSocket event streaming prototype (low-frequency state push)
 

@@ -304,6 +304,9 @@ def metrics():  # pragma: no cover - simple string builder
 		"# HELP gpu_orchestrator_uptime_seconds Process uptime in seconds",
 		"# TYPE gpu_orchestrator_uptime_seconds counter",
 		f"gpu_orchestrator_uptime_seconds {uptime:.0f}",
+		"# HELP gpu_orchestrator_active_leases Current active GPU (or CPU placeholder) leases",
+		"# TYPE gpu_orchestrator_active_leases gauge",
+		f"gpu_orchestrator_active_leases {len(ALLOCATIONS)}",
 	]
 	for k, v in sorted(_METRICS_COUNTERS.items()):
 		name = f"gpu_orchestrator_{k}"
