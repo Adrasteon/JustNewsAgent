@@ -74,7 +74,7 @@ class CrawlConfig:
     enable_knowledge_graph: bool = True
     test_mode: bool = False
     output_dir: str = "./large_scale_crawl_results"
-    archive_port: int = 8014
+    archive_port: int = 8012
 
     @staticmethod
     def _load_sites_from_database() -> List[str]:

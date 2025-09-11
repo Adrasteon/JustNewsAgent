@@ -1,11 +1,11 @@
-# JustNews AlertManager Configuration
-# Routes alerts to appropriate channels and teams
+# JustNews AlertManager Configuration Template
+# Copy this file to alertmanager.yml and configure with your actual credentials
 
 global:
   smtp_smarthost: 'smtp.gmail.com:587'
   smtp_from: 'alerts@justnews.internal'
   smtp_auth_username: 'alerts@justnews.internal'
-  smtp_auth_password: 'your-smtp-password'
+  smtp_auth_password: 'YOUR_SMTP_PASSWORD_HERE'
   smtp_require_tls: true
 
 templates:
@@ -60,14 +60,16 @@ receivers:
   - name: 'default'
     email_configs:
       - to: 'ops@justnews.internal'
-        html: '{{ template "email.default.html" . }}'
+        subject: '{{ template "email.default.subject" . }}'
+        body: '{{ template "email.default.html" . }}'
 
   - name: 'critical-alerts'
     email_configs:
       - to: 'critical@justnews.internal'
-        html: '{{ template "email.critical.html" . }}'
+        subject: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        body: '{{ template "email.critical.html" . }}'
     slack_configs:
-      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL_HERE'
         channel: '#alerts-critical'
         title: '🚨 {{ .GroupLabels.alertname }}'
         text: '{{ .CommonAnnotations.description }}'
@@ -76,9 +78,10 @@ receivers:
   - name: 'platform-team'
     email_configs:
       - to: 'platform@justnews.internal'
-        html: '{{ template "email.platform.html" . }}'
+        subject: 'Platform Alert: {{ .GroupLabels.alertname }}'
+        body: '{{ template "email.platform.html" . }}'
     slack_configs:
-      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL_HERE'
         channel: '#platform-alerts'
         title: 'Platform: {{ .GroupLabels.alertname }}'
         text: '{{ .CommonAnnotations.description }}'
@@ -86,9 +89,10 @@ receivers:
   - name: 'content-team'
     email_configs:
       - to: 'content@justnews.internal'
-        html: '{{ template "email.content.html" . }}'
+        subject: 'Content Alert: {{ .GroupLabels.alertname }}'
+        body: '{{ template "email.content.html" . }}'
     slack_configs:
-      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL_HERE'
         channel: '#content-alerts'
         title: 'Content: {{ .GroupLabels.alertname }}'
         text: '{{ .CommonAnnotations.description }}'
@@ -96,9 +100,10 @@ receivers:
   - name: 'infra-team'
     email_configs:
       - to: 'infra@justnews.internal'
-        html: '{{ template "email.infra.html" . }}'
+        subject: 'Infrastructure Alert: {{ .GroupLabels.alertname }}'
+        body: '{{ template "email.infra.html" . }}'
     slack_configs:
-      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL_HERE'
         channel: '#infra-alerts'
         title: 'Infra: {{ .GroupLabels.alertname }}'
         text: '{{ .CommonAnnotations.description }}'
@@ -106,9 +111,10 @@ receivers:
   - name: 'business-hours'
     email_configs:
       - to: 'oncall@justnews.internal'
-        html: '{{ template "email.business.html" . }}'
+        subject: 'Business Hours Alert: {{ .GroupLabels.alertname }}'
+        body: '{{ template "email.business.html" . }}'
     slack_configs:
-      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+      - api_url: 'YOUR_SLACK_WEBHOOK_URL_HERE'
         channel: '#business-hours-alerts'
         title: 'Business Hours: {{ .GroupLabels.alertname }}'
         text: '{{ .CommonAnnotations.description }}'

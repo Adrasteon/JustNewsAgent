@@ -423,30 +423,30 @@ curl -X POST http://localhost:8013/gpu/config \
 
 ```bash
 # Start analytics services
-python start_analytics_services.py --host 0.0.0.0 --port 8012
+python start_analytics_services.py --host 0.0.0.0 --port 8011
 
-# Access analytics dashboard at: http://localhost:8012
+# Access analytics dashboard at: http://localhost:8011
 
 # Get system health metrics
-curl http://localhost:8012/api/health
+curl http://localhost:8011/api/health
 
 # Get real-time analytics (last hour)
-curl http://localhost:8012/api/realtime/1
+curl http://localhost:8011/api/realtime/1
 
 # Get agent performance profile (scout agent, last 24 hours)
-curl http://localhost:8012/api/agent/scout/24
+curl http://localhost:8011/api/agent/scout/24
 
 # Get performance trends (last 24 hours)
-curl http://localhost:8012/api/trends/24
+curl http://localhost:8011/api/trends/24
 
 # Get comprehensive analytics report (last 24 hours)
-curl http://localhost:8012/api/report/24
+curl http://localhost:8011/api/report/24
 
 # Get current bottlenecks
-curl http://localhost:8012/api/bottlenecks
+curl http://localhost:8011/api/bottlenecks
 
 # Record custom performance metric
-curl -X POST http://localhost:8012/api/record-metric \
+curl -X POST http://localhost:8011/api/record-metric \
 	-H "Content-Type: application/json" \
 	-d '{
 		"agent_name": "scout",
@@ -518,7 +518,7 @@ export DASHBOARD_HOST=0.0.0.0                 # Dashboard host
 export DASHBOARD_GUI_ENABLED=true             # Enable GUI dashboard
 
 # Analytics Configuration
-export ANALYTICS_PORT=8012                    # Analytics dashboard port
+export ANALYTICS_PORT=8011                    # Analytics dashboard port
 export ANALYTICS_HOST=0.0.0.0                 # Analytics dashboard host
 export ANALYTICS_MAX_HISTORY_HOURS=24         # Analytics data retention (hours)
 export ANALYTICS_ANALYSIS_INTERVAL_S=60       # Analysis interval (seconds)
@@ -1073,13 +1073,25 @@ def call_agent_tool(agent: str, tool: str, *args, **kwargs) -> Any:
 curl http://localhost:8013/gpu/dashboard
 
 # Performance Analytics
-curl http://localhost:8012/api/realtime/1
+curl http://localhost:8011/api/realtime/1
 
 # System Health Metrics
-curl http://localhost:8012/api/health
+curl http://localhost:8011/api/health
 
 # Agent Performance Profile
-curl http://localhost:8012/api/agent/scout/24
+curl http://localhost:8011/api/agent/scout/24
+```
+
+#### GPU Orchestrator (SAFE_MODE default)
+```bash
+# Health
+curl http://localhost:8014/health
+
+# GPU info (inventory + metrics)
+curl http://localhost:8014/gpu/info
+
+# Current policy
+curl http://localhost:8014/policy
 ```
 
 #### **Analytics Features:**
@@ -1230,7 +1242,8 @@ python agents/dashboard/gui.py &
 # Access web interfaces:
 # - GPU Dashboard: http://localhost:8013
 # - Analytics: http://localhost:8011
-# - Archive API: http://localhost:8012
+# - Archive API: http://localhost:8021
+# - GPU Orchestrator: http://localhost:8014
 # - Dashboard: http://localhost:8013
 ```
 

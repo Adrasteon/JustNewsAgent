@@ -292,7 +292,7 @@ BASE_MODEL_DIR=/media/adra/Data/justnews/agents
 POSTGRES_HOST=localhost
 POSTGRES_DB=justnews
 POSTGRES_USER=justnews_user
-POSTGRES_PASSWORD=password123
+POSTGRES_PASSWORD=CHANGEME_DUMMY
 
 # GPU configuration
 USE_GPU=true

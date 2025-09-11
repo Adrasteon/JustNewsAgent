@@ -197,3 +197,6 @@ agents/reasoning/nucleoid_repo/
 
 # Cache directories
 .cache/
+
+# HuggingFace/Xet model cache artifacts (accidentally committed previously)
+$MODEL_CACHE_DIR/

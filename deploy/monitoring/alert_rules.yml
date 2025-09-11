@@ -94,6 +94,39 @@ groups:
           description: "Median quality score < 0.7 for {{ $labels.job }}"
           runbook_url: "https://justnews.internal/runbooks/low-quality"
 
+      - alert: JustNewsSourceReliabilityLow
+        expr: justnews_source_reliability_score < 0.6
+        for: 15m
+        labels:
+          severity: warning
+          team: content
+        annotations:
+          summary: "Low source reliability on {{ $labels.job }}"
+          description: "Source reliability score < 0.6 for {{ $labels.job }}"
+          runbook_url: "https://justnews.internal/runbooks/source-reliability"
+
+      - alert: JustNewsModelAccuracyDegraded
+        expr: justnews_model_accuracy < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          team: content
+        annotations:
+          summary: "Model accuracy degraded on {{ $labels.job }}"
+          description: "Model accuracy < 0.8 for {{ $labels.job }}"
+          runbook_url: "https://justnews.internal/runbooks/model-accuracy"
+
+      - alert: JustNewsDataIntegrityIssues
+        expr: increase(justnews_data_corruption_events_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: content
+        annotations:
+          summary: "Data integrity issues detected on {{ $labels.job }}"
+          description: "Data corruption events detected for {{ $labels.job }}"
+          runbook_url: "https://justnews.internal/runbooks/data-integrity"
+
       # Info Alerts - Monitoring Only
       - alert: JustNewsServiceRestart
         expr: increase(justnews_requests_total[1m]) > 0 and increase(justnews_requests_total[1m] offset 1m) == 0

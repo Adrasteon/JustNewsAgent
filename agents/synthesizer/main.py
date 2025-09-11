@@ -140,8 +140,16 @@ def synthesize_news_articles_gpu_endpoint(call: ToolCall):
     """GPU-accelerated news article synthesis endpoint"""
     try:
         from .gpu_tools import synthesize_news_articles_gpu
-        logger.info(f"Calling GPU synthesize with {len(call.args[0]) if call.args else 0} articles")
-        result = synthesize_news_articles_gpu(*call.args, **call.kwargs)
+        # Normalize input: support args[0] or kwargs['articles']
+        articles = []
+        if call.args and len(call.args) > 0 and isinstance(call.args[0], list):
+            articles = call.args[0]
+        elif isinstance(call.kwargs.get("articles"), list):
+            articles = call.kwargs.get("articles", [])
+
+        logger.info(f"Calling GPU synthesize with {len(articles)} articles")
+        # Only pass supported parameter to the tool to avoid unexpected kwargs errors
+        result = synthesize_news_articles_gpu(articles)
 
         # Log performance for monitoring
         if result.get('success') and 'performance' in result:
@@ -158,7 +166,11 @@ def synthesize_news_articles_gpu_endpoint(call: ToolCall):
             from .tools import cluster_articles as _cluster_articles
             logger.info("🔄 Falling back to CPU synthesis")
             # Simple fallback implementation
-            articles = call.args[0] if call.args else []
+            articles = []
+            if call.args and len(call.args) > 0 and isinstance(call.args[0], list):
+                articles = call.args[0]
+            elif isinstance(call.kwargs.get("articles"), list):
+                articles = call.kwargs.get("articles", [])
             clusters = _cluster_articles(articles)
             synthesis = _aggregate_cluster(clusters)
             return {
@@ -189,6 +201,17 @@ def get_synthesizer_performance_endpoint(call: ToolCall):
             "models_loaded": False,
             "error": str(e)
         }
+
+# MCP compatibility alias: older clients may call /synthesize_content
+@app.post("/synthesize_content")
+def synthesize_content_alias(call: ToolCall):
+    """Alias for compatibility with existing E2E tests; delegates to GPU implementation."""
+    try:
+        # Reuse GPU pathway for best performance; args/kwargs are identical
+        return synthesize_news_articles_gpu_endpoint(call)
+    except Exception as e:
+        logger.error(f"❌ synthesize_content alias failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

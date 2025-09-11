@@ -11,6 +11,14 @@ in hybrid_tools_v4.py to break the circular import with native_tensorrt_engine.p
 
 
 import time
+from typing import Optional
+
+try:
+    # Lightweight orchestrator client (Phase 1 integration)
+    from agents.common.gpu_orchestrator_client import GPUOrchestratorClient
+    _orchestrator_client: Optional[GPUOrchestratorClient] = GPUOrchestratorClient()
+except Exception:
+    _orchestrator_client = None
 
 import torch
 from transformers import pipeline
@@ -58,10 +66,35 @@ class GPUAcceleratedAnalyst:
             "average_time": 0.0,
         }
         logger.info("🚀 Initializing OPERATIONAL GPU-Accelerated Analyst")
-        # Initialize GPU allocation
-        self._initialize_gpu_allocation()
-        # Initialize GPU models
-        self._initialize_gpu_models()
+        # Phase 1 gating: consult orchestrator (fail closed to CPU if uncertain)
+        orchestrator_allows_gpu = False
+        orchestrator_safe_mode = True
+        if _orchestrator_client is not None:
+            try:
+                decision = _orchestrator_client.cpu_fallback_decision()
+                orchestrator_allows_gpu = bool(decision.get("use_gpu", False))
+                orchestrator_safe_mode = bool(decision.get("safe_mode", True))
+                logger.info(
+                    "🔐 Orchestrator decision: use_gpu=%s safe_mode=%s gpu_available=%s", 
+                    orchestrator_allows_gpu,
+                    orchestrator_safe_mode,
+                    decision.get("gpu_available")
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning(f"GPU Orchestrator decision fetch failed, enforcing CPU fallback: {e}")
+        else:
+            logger.info("GPU Orchestrator client not available - defaulting to conservative CPU-first init")
+
+        if orchestrator_allows_gpu:
+            # Initialize GPU allocation + models only if orchestrator permits
+            self._initialize_gpu_allocation()
+            self._initialize_gpu_models()
+        else:
+            logger.info(
+                "🛑 Skipping GPU initialization (safe_mode=%s, allows_gpu=%s). Using CPU paths only.",
+                orchestrator_safe_mode,
+                orchestrator_allows_gpu,
+            )
 
     def _initialize_gpu_allocation(self):
         """Initialize GPU allocation through production manager"""

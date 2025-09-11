@@ -169,6 +169,14 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("🛑 Shutting down NewsReader Agent")
+
+    # Stop memory monitor
+    try:
+        from .tools import stop_memory_monitor
+        stop_memory_monitor()
+    except Exception as e:
+        logger.warning(f"Error stopping memory monitor: {e}")
+
     clear_engine()
 
 app = FastAPI(
@@ -265,6 +273,21 @@ async def get_health():
             "engine_initialized": get_engine() is not None,
             "ready": ready
         })
+
+        # Add GPU memory information
+        if torch.cuda.is_available():
+            allocated_gb = torch.cuda.memory_allocated() / 1e9
+            total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+            utilization_percent = (allocated_gb / total_gb) * 100
+
+            health_data["gpu_memory"] = {
+                "allocated_gb": round(allocated_gb, 2),
+                "total_gb": round(total_gb, 2),
+                "utilization_percent": round(utilization_percent, 1),
+                "status": "healthy" if utilization_percent < 80 else "warning" if utilization_percent < 90 else "critical"
+            }
+        else:
+            health_data["gpu_memory"] = {"status": "not_available"}
 
         return health_data
 
@@ -456,6 +479,20 @@ async def extract_news_content_endpoint(call: ToolCall):
     except Exception as e:
         return {"error": str(e), "success": False}
 
+# MCP compatibility alias: some clients use /extract_news_from_url
+@app.post("/extract_news_from_url")
+async def extract_news_from_url_alias(call: ToolCall):
+    """Alias for compatibility with legacy callers; delegates to extract_news_from_url tool."""
+    try:
+        url = call.args[0] if call.args else call.kwargs.get("url")
+        screenshot_path = call.args[1] if call.args and len(call.args) > 1 else call.kwargs.get("screenshot_path")
+        if not url:
+            return {"error": "URL is required"}
+        result = await extract_news_from_url(url=url, screenshot_path=screenshot_path)
+        return result
+    except Exception as e:
+        return {"error": str(e), "success": False}
+
 @app.post("/analyze_screenshot")
 async def analyze_screenshot(call: ToolCall):
     """Analyze screenshot with LLaVA - MCP Bus compatible"""
@@ -479,6 +516,36 @@ async def clear_cache(background_tasks: BackgroundTasks):
         return {"status": "cache_clearing_scheduled"}
     except Exception as e:
         logger.error(f"Cache clearing failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/emergency_memory_cleanup")
+async def emergency_memory_cleanup():
+    """Emergency GPU memory cleanup - use when system is running low on memory"""
+    try:
+        from .tools import _force_memory_cleanup
+
+        logger.warning("🚨 EMERGENCY MEMORY CLEANUP initiated")
+        _force_memory_cleanup()
+
+        # Check memory after cleanup
+        if torch.cuda.is_available():
+            allocated_gb = torch.cuda.memory_allocated() / 1e9
+            total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+            utilization_percent = (allocated_gb / total_gb) * 100
+
+            return {
+                "status": "cleanup_completed",
+                "memory_after_cleanup": {
+                    "allocated_gb": round(allocated_gb, 2),
+                    "total_gb": round(total_gb, 2),
+                    "utilization_percent": round(utilization_percent, 1)
+                }
+            }
+        else:
+            return {"status": "cleanup_completed", "gpu_not_available": True}
+
+    except Exception as e:
+        logger.error(f"Emergency cleanup failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Tool functions for direct import (legacy compatibility)

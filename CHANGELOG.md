@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2025-09-09 - **SYSTEM STABILITY & GPU ACCELERATION RESTORATION**
 
-### 🚀 **GPU Acceleration Fully Restored - PRODUCTION READY**
+### � GPU Orchestrator Integration (In Progress)
+- ✅ Central GPU Orchestrator service (port 8014) with `/health`, `/policy`, `/gpu/info`, `/allocations`
+- ✅ Systemd onboarding (enable_all + health_check scripts updated)
+- ✅ Fault-tolerant client SDK (`GPUOrchestratorClient`) w/ TTL policy cache & fail-closed SAFE_MODE semantics
+- ✅ Analyst agent GPU init gating (prevents model load when SAFE_MODE or orchestrator denial)
+- ✅ Legacy enhanced GPU monitor auto-start suppression (avoids duplicate telemetry polling)
+- ✅ Dashboard unified view & proxy endpoints (`/orchestrator/gpu/info`, `/orchestrator/gpu/policy`)
+- ✅ E2E scripts: `orchestrator_analyst_smoke_test.py`, `e2e_orchestrator_analyst_run.py`
+- 🔄 Pending: small workload harness & metrics artifact, SAFE_MODE toggle demonstration run
+- 🔐 Safety: Unreachable orchestrator => conservative CPU fallback (assume SAFE_MODE active)
+- 📊 Next: Record workload JSON showing decision flip (SAFE_MODE=false) and update section to Completed
+
+### �🚀 **GPU Acceleration Fully Restored - PRODUCTION READY**
 - **✅ PyTorch CUDA Support**: Successfully upgraded to PyTorch 2.6.0+cu124 with CUDA 12.4 compatibility
 - **✅ GPU Manager Operational**: Real-time GPU monitoring with 24GB RTX 3090 detection and utilization tracking
 - **✅ GPU Memory Management**: Professional CUDA context management with 22.95GB available memory

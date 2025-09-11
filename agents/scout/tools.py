@@ -60,13 +60,19 @@ except ImportError as e:
 
 # Global Scout Intelligence Engine
 scout_engine = None
+intelligence_available = False
 
 def initialize_scout_intelligence():
     """Initialize Next-Generation GPU-accelerated Scout intelligence engine with AI-first approach"""
-    global scout_engine
+    global scout_engine, intelligence_available
+    
+    if scout_engine is not None:
+        return intelligence_available
+    
     try:
         from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
         scout_engine = NextGenGPUScoutEngine(enable_training=True)
+        intelligence_available = True
 
         model_info = scout_engine.get_model_info()
         logger.info("🚀 Next-Gen GPU Scout Intelligence Engine initialized")
@@ -79,10 +85,11 @@ def initialize_scout_intelligence():
     except Exception as e:
         logger.warning(f"⚠️ Next-Gen Scout Intelligence Engine initialization failed: {e}")
         logger.info("🔄 Running in web-crawling only mode")
+        intelligence_available = False
         return False
 
-# Initialize on module load
-intelligence_available = initialize_scout_intelligence()
+# Initialize on module load - DISABLED to prevent startup hangs
+# intelligence_available = initialize_scout_intelligence()
 
 def get_scout_engine():
     """Get the Scout intelligence engine instance"""
@@ -204,6 +211,10 @@ def intelligent_source_discovery(*args, **kwargs):
         logger.info(f"📡 Found {len(raw_sources)} raw sources")
 
         # Step 2: Apply ML intelligence if available
+        if not intelligence_available:
+            # Try to initialize intelligence engine
+            initialize_scout_intelligence()
+        
         if intelligence_available and scout_engine:
             filtered_sources = []
 
@@ -333,6 +344,10 @@ def intelligent_content_crawl(*args, **kwargs):
         }
 
         # Apply ML intelligence if available
+        if not intelligence_available:
+            # Try to initialize intelligence engine
+            initialize_scout_intelligence()
+        
         if intelligence_available and scout_engine and analyze_content and content_text:
             # Comprehensive analysis
             analysis = scout_engine.comprehensive_content_analysis(content_text, url)
@@ -961,40 +976,59 @@ def deep_crawl_site(*args, **kwargs):
 # =============================================================================
 
 
-# Initialize production crawlers with robust error handling
+# Initialize production crawlers with robust error handling - DISABLED for lazy loading
 production_crawler = None
 PRODUCTION_CRAWLERS_AVAILABLE = False
-try:
-    from agents.scout.production_crawlers import ProductionCrawlerOrchestrator
+
+def initialize_production_crawlers():
+    """Initialize production crawlers on demand"""
+    global production_crawler, PRODUCTION_CRAWLERS_AVAILABLE
+    
+    if production_crawler is not None:
+        return PRODUCTION_CRAWLERS_AVAILABLE
+    
     try:
+        from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
         production_crawler = ProductionCrawlerOrchestrator()
         supported_sites = []
         try:
-            supported_sites = production_crawler.get_available_sites()
+            # Use synchronous database call instead of async
+            from agents.scout.production_crawlers.crawler_utils import get_active_sources
+            sources = get_active_sources()
+            supported_sites = [{
+                'id': s['id'],
+                'name': s['name'],
+                'domain': s['domain'],
+                'url': s['url'],
+                'description': s['description'],
+                'last_verified': s['last_verified'].isoformat() if s.get('last_verified') else None
+            } for s in sources]
         except Exception as site_e:
-            logger.error(f"❌ Exception calling get_available_sites: {site_e}")
+            logger.error(f"❌ Exception calling get_active_sources: {site_e}")
             logger.error(traceback.format_exc())
             log_feedback("production_crawler_available_sites_error", {"error": str(site_e), "traceback": traceback.format_exc()})
-        logger.info(f"[DIAG] ProductionCrawlerOrchestrator available_sites at startup: {supported_sites}")
-        log_feedback("production_crawler_available_sites", {"available_sites": supported_sites})
+        logger.info(f"[DIAG] ProductionCrawlerOrchestrator available_sites at startup: {len(supported_sites)} sources")
+        log_feedback("production_crawler_available_sites", {"available_sites": len(supported_sites)})
         if production_crawler and supported_sites:
             PRODUCTION_CRAWLERS_AVAILABLE = True
             logger.info("✅ Production crawlers initialized successfully")
         else:
             logger.warning("⚠️ Production crawlers loaded but no supported sites detected.")
             PRODUCTION_CRAWLERS_AVAILABLE = False
+    except ImportError as import_e:
+        logger.error(f"❌ ImportError loading ProductionCrawlerOrchestrator: {import_e}")
+        logger.error(traceback.format_exc())
+        log_feedback("production_crawler_import_error", {"error": str(import_e), "traceback": traceback.format_exc()})
+        production_crawler = None
+        PRODUCTION_CRAWLERS_AVAILABLE = False
     except Exception as inst_e:
         logger.error(f"❌ Error initializing ProductionCrawlerOrchestrator: {inst_e}")
         logger.error(traceback.format_exc())
         log_feedback("production_crawler_init_error", {"error": str(inst_e), "traceback": traceback.format_exc()})
         production_crawler = None
         PRODUCTION_CRAWLERS_AVAILABLE = False
-except ImportError as import_e:
-    logger.error(f"❌ ImportError loading ProductionCrawlerOrchestrator: {import_e}")
-    logger.error(traceback.format_exc())
-    log_feedback("production_crawler_import_error", {"error": str(import_e), "traceback": traceback.format_exc()})
-    production_crawler = None
-    PRODUCTION_CRAWLERS_AVAILABLE = False
+    
+    return PRODUCTION_CRAWLERS_AVAILABLE
 
 async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     """
@@ -1028,6 +1062,10 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     if not rate_limit("production_crawl_ultra_fast"):
         log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ultra_fast'})
         return {"error": "Rate limit exceeded", "articles": []}
+
+    # Initialize production crawlers if not already done
+    if not PRODUCTION_CRAWLERS_AVAILABLE:
+        initialize_production_crawlers()
 
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         error_msg = "Production crawlers not available"
@@ -1081,6 +1119,10 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
         log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ai_enhanced'})
         return {"error": "Rate limit exceeded", "articles": []}
 
+    # Initialize production crawlers if not already done
+    if not PRODUCTION_CRAWLERS_AVAILABLE:
+        initialize_production_crawlers()
+
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         error_msg = "Production crawlers not available"
         logger.error(error_msg)
@@ -1119,6 +1161,10 @@ def get_production_crawler_info():
             "supported_sites": []
         }
 
+    # Initialize production crawlers if not already done
+    if not PRODUCTION_CRAWLERS_AVAILABLE:
+        initialize_production_crawlers()
+
     if not PRODUCTION_CRAWLERS_AVAILABLE:
         return {
             "available": False,
@@ -1127,7 +1173,18 @@ def get_production_crawler_info():
         }
 
     try:
-        supported_sites = production_crawler.get_available_sites()
+        # Use synchronous database call instead of async
+        from agents.scout.production_crawlers.crawler_utils import get_active_sources
+        sources = get_active_sources()
+        supported_sites = [{
+            'id': s['id'],
+            'name': s['name'],
+            'domain': s['domain'],
+            'url': s['url'],
+            'description': s['description'],
+            'last_verified': s['last_verified'].isoformat() if s.get('last_verified') else None
+        } for s in sources]
+        
         supported_modes = production_crawler.get_supported_modes()
 
         result = {

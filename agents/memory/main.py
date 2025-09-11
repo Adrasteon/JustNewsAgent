@@ -22,6 +22,7 @@ from pydantic import BaseModel
 
 # Import database utilities
 from agents.common.database import close_connection_pool, initialize_connection_pool
+from agents.common.database import execute_query
 from agents.common.database import get_db_connection as get_pooled_connection
 from agents.memory.tools import (
     get_embedding_model,
@@ -317,6 +318,45 @@ def vector_search_articles_endpoint(request: dict):
         return vector_search_articles_local(search.query, search.top_k)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error searching articles: {str(e)}")
+
+@app.post("/get_recent_articles")
+def get_recent_articles_endpoint(request: dict):
+    """Returns the most recent articles for synthesis/testing.
+
+    Accepts both direct calls ({"limit": 10}) and MCP-style calls
+    ({"args": [ {"limit": 10} ], "kwargs": {}}) or ({"args": [], "kwargs": {"limit": 10}}).
+    Falls back to a default limit of 10.
+    """
+    try:
+        # Normalize payload
+        limit = 10
+        if isinstance(request, dict) and "args" in request and "kwargs" in request:
+            if request.get("args"):
+                arg0 = request["args"][0]
+                if isinstance(arg0, dict) and "limit" in arg0:
+                    limit = int(arg0.get("limit", limit))
+            if "limit" in request.get("kwargs", {}):
+                limit = int(request["kwargs"].get("limit", limit))
+        elif isinstance(request, dict):
+            limit = int(request.get("limit", limit))
+
+        # Fetch most recent articles by id (no created_at column guaranteed)
+        rows = execute_query(
+            "SELECT id, content, metadata FROM articles ORDER BY id DESC LIMIT %s",
+            (limit,)
+        ) or []
+        # Ensure JSON-serializable metadata
+        for r in rows:
+            if isinstance(r.get("metadata"), str):
+                # some drivers already return dict, but if str, try to parse json
+                try:
+                    import json as _json
+                    r["metadata"] = _json.loads(r["metadata"])  # type: ignore[index]
+                except Exception:
+                    pass
+        return {"articles": rows}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving recent articles: {str(e)}")
 
 @app.post("/log_training_example")
 def log_training_example_endpoint(example: TrainingExample):

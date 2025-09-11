@@ -42,6 +42,7 @@ config = load_config()
 # Default dashboard port set to 8013 to avoid conflicts with other agents (e.g., balancer at 8010)
 DASHBOARD_AGENT_PORT = config.get("dashboard_port", 8013)
 MCP_BUS_URL = config.get("mcp_bus_url", "http://localhost:8000")
+GPU_ORCHESTRATOR_URL = os.environ.get("GPU_ORCHESTRATOR_URL", "http://localhost:8014").rstrip("/")
 
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
@@ -71,6 +72,13 @@ class EnhancedGPUMonitor:
     def get_gpu_info(self) -> dict:
         """Get current GPU information using production GPU manager."""
         try:
+            # If orchestrator present, prefer orchestrator snapshot for base telemetry
+            orchestrator_snapshot = None
+            try:
+                orchestrator_snapshot = fetch_orchestrator_gpu_info()
+            except Exception:
+                orchestrator_snapshot = None
+
             if self.gpu_manager:
                 # Use production GPU manager for comprehensive data
                 system_status = self.gpu_manager.get_system_status()
@@ -105,12 +113,15 @@ class EnhancedGPUMonitor:
                     if len(self.gpu_history) > self.max_history_size:
                         self.gpu_history.pop(0)
 
-                    return {
+                    response_payload = {
                         'status': 'success',
                         'gpu_count': len(gpus),
                         'gpus': gpus,
-                        'timestamp': time.time()
+                        'timestamp': time.time(),
                     }
+                    if orchestrator_snapshot is not None:
+                        response_payload['orchestrator'] = orchestrator_snapshot
+                    return response_payload
                 else:
                     return {
                         'status': 'error',
@@ -119,7 +130,10 @@ class EnhancedGPUMonitor:
                     }
             else:
                 # Fallback to nvidia-smi if manager not available
-                return self._get_nvidia_smi_fallback()
+                fallback = self._get_nvidia_smi_fallback()
+                if orchestrator_snapshot is not None:
+                    fallback['orchestrator'] = orchestrator_snapshot
+                return fallback
 
         except Exception as e:
             logger.error(f"Error getting GPU info from manager: {e}")
@@ -619,11 +633,196 @@ def get_gpu_metrics():
         logger.error(f"Error getting GPU metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+class IngestRequest(BaseModel):
+    """Request model for ingesting external GPU metrics JSONL."""
+    path: str
+    max_lines: int | None = 10000
+
+def _parse_iso8601_to_epoch(ts_str: str) -> float:
+    """Convert ISO8601 string to epoch seconds; fallback to time.time() on failure."""
+    try:
+        # Handle timezone-aware timestamps
+        from datetime import datetime
+        return datetime.fromisoformat(ts_str.replace("Z", "+00:00")).timestamp()
+    except Exception:
+        try:
+            import dateutil.parser  # type: ignore
+            return dateutil.parser.isoparse(ts_str).timestamp()
+        except Exception:
+            return time.time()
+
+@app.post("/gpu/ingest_jsonl")
+def ingest_gpu_jsonl(req: IngestRequest):
+    """Ingest GPU watcher JSONL into dashboard storage.
+
+    Supports records with shape:
+      {"time": "...", "gpus": [{"index": 0, "name": "RTX 3090", "memory_used_mib": 2333, "utilization_percent": 35, "temperature_c": 30, "power_watts": 36.2, ...}], ...}
+
+    Unknown fields are ignored. Units: *_mib are treated as MB.
+    """
+    try:
+        in_path = req.path
+        if not os.path.isabs(in_path):
+            # Resolve relative to project root
+            in_path = str((Path(__file__).resolve().parents[2] / req.path).resolve())
+
+        if not os.path.exists(in_path):
+            raise HTTPException(status_code=404, detail=f"File not found: {in_path}")
+
+        ingested_points = 0
+        max_lines = req.max_lines or 10000
+
+        with open(in_path, "r", encoding="utf-8", errors="ignore") as fh:
+            import json
+            # First attempt: line-by-line JSONL
+            any_line_parsed = False
+            for i, line in enumerate(fh):
+                if i >= max_lines:
+                    break
+                s = line.strip().rstrip(",")
+                if not s or s.startswith("#"):
+                    continue
+                try:
+                    record = json.loads(s)
+                    _ingest_single_gpu_record(record)
+                    ingested_points += 1
+                    any_line_parsed = True
+                except Exception:
+                    # Continue; we'll try a blob parse after the loop
+                    pass
+
+            if not any_line_parsed:
+                # Second attempt: parse entire blob (wrapped formats)
+                fh.seek(0)
+                blob = fh.read()
+                # Heuristic cleanup for known artifacts from older watcher: remove "[," after array openers
+                blob_clean = (
+                    blob.replace('gpus": [,', 'gpus": [')
+                        .replace('processes": [,', 'processes": [')
+                )
+                try:
+                    data = json.loads(blob_clean)
+                except Exception:
+                    # As a last resort, try to split by lines and parse portions that look like JSON
+                    data = None
+                    candidates = []
+                    for chunk in blob_clean.splitlines():
+                        t = chunk.strip().rstrip(",")
+                        if t.startswith("{") and t.endswith("}"):
+                            candidates.append(t)
+                    for t in candidates[:max_lines]:
+                        try:
+                            rec = json.loads(t)
+                            _ingest_single_gpu_record(rec)
+                            ingested_points += 1
+                        except Exception:
+                            continue
+
+                if isinstance(data, dict):
+                    # Support known containers: records, samples
+                    if "records" in data and isinstance(data["records"], list):
+                        for rec in data["records"][:max_lines]:
+                            _ingest_single_gpu_record(rec)
+                            ingested_points += 1
+                    elif "samples" in data and isinstance(data["samples"], list):
+                        for rec in data["samples"][:max_lines]:
+                            _ingest_single_gpu_record(rec)
+                            ingested_points += 1
+                elif isinstance(data, list):
+                    for rec in data[:max_lines]:
+                        _ingest_single_gpu_record(rec)
+                        ingested_points += 1
+
+        return {"status": "success", "ingested_records": ingested_points, "path": in_path, "timestamp": time.time()}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error ingesting GPU JSONL: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+def _ingest_single_gpu_record(record: dict) -> None:
+    """Normalize and store a single GPU watcher record into storage."""
+    try:
+        ts = record.get("time") or record.get("timestamp") or time.time()
+        if isinstance(ts, str):
+            epoch = _parse_iso8601_to_epoch(ts)
+        elif isinstance(ts, (int, float)):
+            epoch = float(ts)
+        else:
+            epoch = time.time()
+
+        gpus = []
+        for g in record.get("gpus", []):
+            # Map possible keys from watcher to dashboard schema
+            mem_used_mb = g.get("memory_used_mb")
+            if mem_used_mb is None:
+                mem_used_mb = g.get("memory_used_mib") or g.get("memory_used")
+            mem_total_mb = g.get("memory_total_mb")
+            if mem_total_mb is None:
+                mem_total_mb = g.get("memory_total_mib") or g.get("memory.total")
+            mem_free_mb = g.get("memory_free_mb")
+            if mem_free_mb is None:
+                mem_free_mb = g.get("memory_free_mib") or g.get("memory.free")
+
+            util = g.get("gpu_utilization_percent")
+            if util is None:
+                util = g.get("utilization_percent") or g.get("utilization.gpu")
+
+            temp_c = g.get("temperature_celsius")
+            if temp_c is None:
+                temp_c = g.get("temperature_c") or g.get("temperature.gpu")
+
+            power_w = g.get("power_draw_watts")
+            if power_w is None:
+                power_w = g.get("power_watts") or g.get("power.draw")
+
+            # Convert MiB to MB if needed (treat values as already MiB/MB; store as float)
+            def _to_float(v):
+                try:
+                    return float(v)
+                except Exception:
+                    return None
+
+            gpu_info = {
+                "index": g.get("index") or g.get("id") or 0,
+                "name": g.get("name") or f"GPU {g.get('index', 0)}",
+                "memory_used_mb": _to_float(mem_used_mb),
+                "memory_total_mb": _to_float(mem_total_mb),
+                "memory_free_mb": _to_float(mem_free_mb),
+                "gpu_utilization_percent": int(_to_float(util) or 0),
+                "memory_utilization_percent": None,
+                "temperature_celsius": int(_to_float(temp_c) or 0),
+                "fan_speed_percent": _to_float(g.get("fan_speed_percent") or g.get("fan.speed")) or 0,
+                "power_draw_watts": _to_float(power_w) or 0.0,
+                "power_limit_watts": _to_float(g.get("power_limit_watts") or g.get("power.limit")) or 0.0,
+                "is_healthy": True,
+                "timestamp": epoch,
+            }
+
+            # Compute memory utilization if possible
+            if gpu_info["memory_used_mb"] is not None and gpu_info["memory_total_mb"]:
+                try:
+                    gpu_info["memory_utilization_percent"] = int((gpu_info["memory_used_mb"] / gpu_info["memory_total_mb"]) * 100)
+                except Exception:
+                    gpu_info["memory_utilization_percent"] = None
+
+            gpus.append(gpu_info)
+
+        if gpus:
+            storage.store_gpu_metrics({"gpus": gpus})
+    except Exception as e:
+        logger.warning(f"Failed to ingest single GPU record: {e}")
+
 @app.get("/gpu/dashboard")
 def get_gpu_dashboard_data():
     """Get comprehensive GPU dashboard data including manager integration."""
     try:
         gpu_info = gpu_monitor.get_gpu_info()
+        orchestrator_policy = None
+        try:
+            orchestrator_policy = fetch_orchestrator_policy()
+        except Exception:
+            orchestrator_policy = None
         agent_usage = gpu_monitor.get_agent_gpu_usage()
         gpu_config = get_gpu_config()
 
@@ -671,6 +870,7 @@ def get_gpu_dashboard_data():
                 "allocations": allocations,
                 "metrics": metrics
             },
+            "orchestrator_policy": orchestrator_policy,
             "summary": summary
         }
     except Exception as e:
@@ -851,3 +1051,36 @@ if __name__ == "__main__":
 
     logger.info(f"Starting Dashboard Agent on {host}:{port}")
     uvicorn.run(app, host=host, port=port)
+
+# Orchestrator proxy helpers & endpoints (added after __main__ for clarity; executed on import)
+import requests as _requests  # noqa: E402
+
+def fetch_orchestrator_gpu_info():
+    """Fetch GPU info from orchestrator (fast timeout)."""
+    try:
+        r = _requests.get(f"{GPU_ORCHESTRATOR_URL}/gpu/info", timeout=(1.5, 3.0))
+        if r.status_code == 200:
+            return r.json()
+        return {"available": False, "error": f"unexpected_status:{r.status_code}"}
+    except Exception as e:  # noqa: BLE001
+        return {"available": False, "error": str(e)}
+
+def fetch_orchestrator_policy():
+    """Fetch policy from orchestrator (fast timeout)."""
+    try:
+        r = _requests.get(f"{GPU_ORCHESTRATOR_URL}/policy", timeout=(1.5, 3.0))
+        if r.status_code == 200:
+            return r.json()
+        return {"safe_mode_read_only": True, "error": f"unexpected_status:{r.status_code}"}
+    except Exception as e:  # noqa: BLE001
+        return {"safe_mode_read_only": True, "error": str(e)}
+
+@app.get("/orchestrator/gpu/info")
+def orchestrator_gpu_info_proxy():
+    """Proxy to orchestrator /gpu/info with fallback."""
+    return fetch_orchestrator_gpu_info()
+
+@app.get("/orchestrator/gpu/policy")
+def orchestrator_gpu_policy_proxy():
+    """Proxy to orchestrator /policy with fallback."""
+    return fetch_orchestrator_policy()
