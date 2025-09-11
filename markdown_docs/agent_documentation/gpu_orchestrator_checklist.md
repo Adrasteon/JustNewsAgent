@@ -57,6 +57,7 @@ Last Updated: 2025-09-11
 2. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment ✅ `cycle_off` shows `safe_mode:false`, `lease.granted:true`, active_leases=1
 3. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference (include active_leases gauge) ✅ `metrics_snapshot.json` & `metrics_snapshot.txt`
 4. In-memory analyst decision flip harness ✅ (`scripts/mini_orchestrator_analyst_flip.py`) now uses TestClient; artifact shows `use_gpu` flips (gpu_available true both states, SAFE_MODE gating)
+5. Mini fresh-start SAFE_MODE flip runner ✅ (`scripts/mini_e2e_runner.py`) produces metrics + lease artifacts (phase1 SAFE_MODE denial → phase2 allowance)
 5. (Optional) Enable NVML (`ENABLE_NVML=true`) and capture enriched `gpu_available` + utilization fields (pending live NVML test run)
 6. Execute E2E validation script (`e2e_orchestrator_validation.py`) once small live set confirmed
 7. (Optional) Add SSE/WebSocket state streaming prototype

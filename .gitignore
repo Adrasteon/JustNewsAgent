@@ -89,6 +89,7 @@ test_*.py
 !test_memory_management.py
 !test_metrics.py
 !test_production_crawler_direct.py
+!test_mini_e2e_runner_smoke.py
 inspect_*.py
 investigate_*.py
 simple_*.py
