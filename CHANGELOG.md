@@ -12,9 +12,16 @@ All notable changes to this project will be documented in this file.
 - ✅ Legacy enhanced GPU monitor auto-start suppression (avoids duplicate telemetry polling)
 - ✅ Dashboard unified view & proxy endpoints (`/orchestrator/gpu/info`, `/orchestrator/gpu/policy`)
 - ✅ E2E scripts: `orchestrator_analyst_smoke_test.py`, `e2e_orchestrator_analyst_run.py`
-- 🔄 Pending: small workload harness & metrics artifact, SAFE_MODE toggle demonstration run
+- ✅ SAFE_MODE toggle demonstration run (`run_safe_mode_demo.py`) with subprocess isolation (lease denial vs granted)
+- ✅ Metrics artifact generation (`generate_orchestrator_metrics_snapshot.py`) producing metrics_snapshot.json|txt
+- ✅ Active leases gauge validated across SAFE_MODE cycles (0 → 1 transition)
+- ✅ Global readiness integration: health_check.sh now queries orchestrator /ready
+- ✅ NVML enrichment scaffold (ENABLE_NVML=true + SAFE_MODE gating) adds optional per-GPU util & memory metrics
+- ✅ Lease TTL (env `GPU_ORCHESTRATOR_LEASE_TTL`) with opportunistic purge + `lease_expired_total` metric
+- ✅ Analyst decision flip harness (`scripts/mini_orchestrator_analyst_flip.py`) & NVML / TTL tests
+- 🔄 Pending: background NVML sampling & streaming (SSE/WebSocket) + workload JSON capturing analyst decision flip
 - 🔐 Safety: Unreachable orchestrator => conservative CPU fallback (assume SAFE_MODE active)
-- 📊 Next: Record workload JSON showing decision flip (SAFE_MODE=false) and update section to Completed
+- 📊 Next: Record workload JSON showing analyst orchestrator decision flip (SAFE_MODE=false) and update section to Completed
 
 ### �🚀 **GPU Acceleration Fully Restored - PRODUCTION READY**
 - **✅ PyTorch CUDA Support**: Successfully upgraded to PyTorch 2.6.0+cu124 with CUDA 12.4 compatibility

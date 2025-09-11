@@ -10,7 +10,7 @@ standard justnews-start-agent.sh launcher.
 import os
 import subprocess
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import time
 import uuid
 
@@ -27,6 +27,8 @@ logger = get_logger(__name__)
 GPU_ORCHESTRATOR_PORT = int(os.environ.get("GPU_ORCHESTRATOR_PORT", 8014))
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 SAFE_MODE = os.environ.get("SAFE_MODE", "false").lower() == "true"
+ENABLE_NVML = os.environ.get("ENABLE_NVML", "false").lower() == "true"
+LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))  # 1 hour default; 0 disables TTL
 
 
 # In-memory state (intentionally simple/minimal for safety)
@@ -47,13 +49,39 @@ _METRICS_COUNTERS: Dict[str, int] = {
 	"policy_post_requests_total": 0,
 	"lease_requests_total": 0,
 	"release_requests_total": 0,
+	"lease_expired_total": 0,
 }
 _START_TIME = time.time()
+_NVML_SUPPORTED = False
+_NVML_HANDLE_CACHE: Dict[int, Any] = {}
+_NVML_INIT_ERROR: Optional[str] = None
 
 
 def _inc(metric: str) -> None:
 	_METRICS_COUNTERS[metric] = _METRICS_COUNTERS.get(metric, 0) + 1
 	_METRICS_COUNTERS["requests_total"] = _METRICS_COUNTERS.get("requests_total", 0) + 1
+
+
+def _purge_expired_leases() -> None:
+	"""Remove expired leases based on LEASE_TTL_SECONDS.
+
+	Executed opportunistically at read/write endpoints to avoid background threads.
+	"""
+	if LEASE_TTL_SECONDS <= 0 or not ALLOCATIONS:
+		return
+	now = time.time()
+	expired: List[str] = []
+	for token, alloc in list(ALLOCATIONS.items()):
+		try:
+			started = float(alloc.get("timestamp", now))
+		except Exception:  # noqa: BLE001
+			started = now
+		if now - started > LEASE_TTL_SECONDS:
+			expired.append(token)
+	for token in expired:
+		ALLOCATIONS.pop(token, None)
+	if expired:
+		_METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get("lease_expired_total", 0) + len(expired)
 
 
 class MCPBusClient:
@@ -124,7 +152,22 @@ def get_gpu_snapshot() -> Dict[str, Any]:
 	if smi is None:
 		return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
 	gpus = _parse_nvidia_smi_csv(smi)
-	return {"gpus": gpus, "available": True}
+	# If NVML enrichment enabled and not SAFE_MODE, merge fields
+	if ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED:
+		for g in gpus:
+			idx = g.get("index")
+			if idx in _NVML_HANDLE_CACHE:
+				try:  # pragma: no cover - environment dependent
+					import pynvml  # type: ignore
+					util = pynvml.nvmlDeviceGetUtilizationRates(_NVML_HANDLE_CACHE[idx])
+					mem = pynvml.nvmlDeviceGetMemoryInfo(_NVML_HANDLE_CACHE[idx])
+					g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
+					g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
+					g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
+					g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
+				except Exception as e:  # noqa: BLE001
+					g["nvml_error"] = str(e)
+	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
 
 
 class PolicyUpdate(BaseModel):
@@ -145,7 +188,21 @@ class ReleaseRequest(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	global READINESS
+	global _NVML_SUPPORTED, _NVML_HANDLE_CACHE, _NVML_INIT_ERROR
 	logger.info("GPU Orchestrator starting up")
+	# Attempt NVML initialization (best-effort, gated by ENABLE_NVML & SAFE_MODE)
+	if ENABLE_NVML and not SAFE_MODE:
+		try:  # pragma: no cover - environment dependent
+			import pynvml  # type: ignore
+			pynvml.nvmlInit()
+			count = pynvml.nvmlDeviceGetCount()
+			for i in range(count):
+				_NVML_HANDLE_CACHE[i] = pynvml.nvmlDeviceGetHandleByIndex(i)
+			_NVML_SUPPORTED = True
+			logger.info(f"NVML initialized for {count} device(s)")
+		except Exception as e:  # noqa: BLE001
+			_NVML_INIT_ERROR = str(e)
+			logger.warning(f"NVML initialization failed: {e}")
 
 	# Try registering to MCP Bus (best-effort)
 	try:
@@ -207,7 +264,10 @@ def gpu_info():
 	"""Return current GPU telemetry (read-only)."""
 	try:
 		_inc("gpu_info_requests_total")
-		return get_gpu_snapshot()
+		data = get_gpu_snapshot()
+		if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
+			data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
+		return data
 	except Exception as e:
 		logger.error(f"Failed to get GPU snapshot: {e}")
 		raise HTTPException(status_code=500, detail=str(e))
@@ -250,6 +310,7 @@ def set_policy(update: PolicyUpdate):
 def get_allocations():
 	"""Return current agent→GPU allocation view (placeholder)."""
 	_inc("policy_get_requests_total")
+	_purge_expired_leases()
 	return {"allocations": ALLOCATIONS}
 
 
@@ -261,6 +322,7 @@ def lease(req: LeaseRequest):
 	NOT a hard guarantee—placeholder for future sophisticated allocator.
 	"""
 	_inc("lease_requests_total")
+	_purge_expired_leases()
 	if SAFE_MODE:
 		return {"granted": False, "note": "SAFE_MODE", "agent": req.agent}
 
@@ -290,6 +352,7 @@ def lease(req: LeaseRequest):
 @app.post("/release")
 def release(req: ReleaseRequest):
 	_inc("release_requests_total")
+	_purge_expired_leases()
 	alloc = ALLOCATIONS.pop(req.token, None)
 	if not alloc:
 		raise HTTPException(status_code=404, detail="unknown_token")
@@ -300,6 +363,7 @@ def release(req: ReleaseRequest):
 def metrics():  # pragma: no cover - simple string builder
 	# Prometheus exposition format
 	uptime = time.time() - _START_TIME
+	_purge_expired_leases()
 	lines = [
 		"# HELP gpu_orchestrator_uptime_seconds Process uptime in seconds",
 		"# TYPE gpu_orchestrator_uptime_seconds counter",
@@ -313,6 +377,16 @@ def metrics():  # pragma: no cover - simple string builder
 		lines.append(f"# HELP {name} {k.replace('_', ' ')}")
 		lines.append(f"# TYPE {name} counter")
 		lines.append(f"{name} {v}")
+	# NVML status gauges
+	if ENABLE_NVML and not SAFE_MODE:
+		lines.append("# HELP gpu_orchestrator_nvml_supported NVML initialization success flag")
+		lines.append("# TYPE gpu_orchestrator_nvml_supported gauge")
+		lines.append(f"gpu_orchestrator_nvml_supported {1 if _NVML_SUPPORTED else 0}")
+		if _NVML_INIT_ERROR and not _NVML_SUPPORTED:
+			lines.append("# HELP gpu_orchestrator_nvml_error_info Last NVML initialization error (label)")
+			lines.append("# TYPE gpu_orchestrator_nvml_error_info gauge")
+			# Represent error presence as gauge; message is not standard but kept minimal
+			lines.append("gpu_orchestrator_nvml_error_info 1")
 	return PlainTextResponse("\n".join(lines) + "\n")
 
 

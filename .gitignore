@@ -10,12 +10,13 @@ __pycache__/
 .Python
 
 # Environments
+# Keep .env ignored to avoid committing secrets; provide .env.example for reference.
 .env
 .venv
 venv/
 ENV/
 env/
-.env.example
+# allow tracking of sanitized example env
 
 # Docker
 docker-compose.override.yml
@@ -57,6 +58,7 @@ mcp_bus.log
 gpu_analyst.log
 scout.log
 newsreader_agent.log
+orchestrator_demo_results/
 
 # Test Results and Temporary Files
 *_test_results.json
@@ -82,6 +84,8 @@ test_*.py
 !test_analyst_gpu_gating.py
 !test_gpu_orchestrator_client.py
 !test_gpu_orchestrator_leasing.py
+!test_gpu_orchestrator_nvml_flags.py
+!test_gpu_orchestrator_lease_ttl.py
 !test_memory_management.py
 !test_metrics.py
 !test_production_crawler_direct.py
