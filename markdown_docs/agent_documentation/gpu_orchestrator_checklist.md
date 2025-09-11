@@ -19,7 +19,7 @@ Last Updated: 2025-09-11
 3. Integrate SDK in GPU-capable agents (Analyst first) ✅ (baseline gating logic present; extend to others later)
 4. Remove or disable any legacy per-agent GPU watchdog logic ✅ (auto-start disabled in `gpu_monitoring_enhanced.py` when orchestrator detected)
 5. Dashboard ingestion (optional) ✅ basic proxy endpoints wired
-6. Add orchestrator to any global readiness gate (script update) – PENDING
+6. Add orchestrator to any global readiness gate (script update) ✅ `health_check.sh` updated
 7. Tests:
    - Unit: orchestrator endpoints ✅ `test_gpu_orchestrator_endpoints.py`
    - Client fallback & caching ✅ `test_gpu_orchestrator_client.py`
@@ -27,6 +27,8 @@ Last Updated: 2025-09-11
    - E2E: orchestrator up + Analyst GPU + others CPU (run & capture log) – PENDING (`e2e_orchestrator_validation.py`)
    - Smoke harness ✅ `orchestrator_analyst_smoke_test.py`
    - Automated validation script ✅ `e2e_orchestrator_analyst_run.py`
+   - Lease TTL expiry ✅ `test_gpu_orchestrator_lease_ttl.py`
+   - NVML flags & gating ✅ `test_gpu_orchestrator_nvml_flags.py`
 
 ### 🔵 Nice-to-Have (Post E2E)
 - NVML-based metrics (granular utilization, PCIe throughput) when out of SAFE_MODE
@@ -51,13 +53,13 @@ Last Updated: 2025-09-11
 | Lease SAFE_MODE behavior | `/lease` returns note and no GPU index when SAFE_MODE=true | ✅ Tested (`test_gpu_orchestrator_leasing.py`)
 
 ### 📌 Next Action (Recommended Order)
- Add orchestrator to global readiness gate script (Pending item 6) ✅ `health_check.sh` now queries /ready
-2. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note (test-level validated) ✅ `run_safe_mode_demo.py` (cycle_on shows denied)
-3. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment (runtime) ✅ `cycle_off` shows `safe_mode:false`, `lease.granted:true`, active_leases=1
-4. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference (include active_leases gauge) ✅ `metrics_snapshot.json` & `metrics_snapshot.txt` generated via `generate_orchestrator_metrics_snapshot.py`
-5. Implement NVML enrichment (guarded by SAFE_MODE & availability)
-   - ✅ Scaffold added: optional `ENABLE_NVML=true` env initializes NVML in lifespan, enriches `/gpu/info` & `/metrics` with flags (only when SAFE_MODE=false)
-   - ✅ Lease TTL added (`GPU_ORCHESTRATOR_LEASE_TTL`, default 3600s) with opportunistic purge & `lease_expired_total` metric
+1. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note ✅ `run_safe_mode_demo.py` (cycle_on shows denied)
+2. Toggle SAFE_MODE=false; validate policy mutation & lease GPU assignment ✅ `cycle_off` shows `safe_mode:false`, `lease.granted:true`, active_leases=1
+3. Capture `/metrics` snapshot pre/post lease cycles for dashboard reference (include active_leases gauge) ✅ `metrics_snapshot.json` & `metrics_snapshot.txt`
+4. In-memory analyst decision flip harness ✅ (`scripts/mini_orchestrator_analyst_flip.py`) now uses TestClient; artifact shows `use_gpu` flips (gpu_available true both states, SAFE_MODE gating)
+5. (Optional) Enable NVML (`ENABLE_NVML=true`) and capture enriched `gpu_available` + utilization fields (pending live NVML test run)
+6. Execute E2E validation script (`e2e_orchestrator_validation.py`) once small live set confirmed
+7. (Optional) Add SSE/WebSocket state streaming prototype
 
 ## 🔄 Fresh Start + Mini E2E Procedure
 1. Stop all agents (`systemctl stop 'justnews@*'`) or use project stop script.
@@ -67,7 +69,7 @@ Last Updated: 2025-09-11
 5. Run `python run_safe_mode_demo.py` (captures safe-mode lease denial baseline).
 6. Edit env: set `SAFE_MODE=false` (and optionally `ENABLE_NVML=true`), restart orchestrator.
 7. Re-run `python run_safe_mode_demo.py` then `python generate_orchestrator_metrics_snapshot.py`.
-8. Run `python scripts/mini_orchestrator_analyst_flip.py` to capture analyst decision flip JSON.
+8. Run `python scripts/mini_orchestrator_analyst_flip.py --output orchestrator_demo_results/analyst_decision_flip_inmemory.json` (deterministic SAFE_MODE flip, no network fallback).
 9. (Optional) Execute `pytest -k nvml_flags` to validate NVML gauge exposure when enabled.
 10. Archive artifacts under `orchestrator_demo_results/` into documentation or release notes.
 11. (Optional) Adjust `GPU_ORCHESTRATOR_LEASE_TTL` in env (0 disables TTL) and confirm `lease_expired_total` metric after forced expiry (can monkeypatch timestamps in test).
