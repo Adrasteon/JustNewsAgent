@@ -1,3 +1,10 @@
+---
+title: 📊 Documentation Quality Report
+description: Auto-generated description for 📊 Documentation Quality Report
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
 
 # 📊 Documentation Quality Report
 **Generated:** 2025-09-08 13:23:24
@@ -50,3 +57,9 @@
 
 **⚠️ WARNING: Quality score approaching critical threshold.**
 Monitor closely and address issues promptly.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -1,3 +1,11 @@
+---
+title: NewsReader Agent - Production-Validated Configuration
+description: Auto-generated description for NewsReader Agent - Production-Validated Configuration
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # NewsReader Agent - Production-Validated Configuration
 
 ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025**
@@ -97,3 +105,9 @@ The practical approach implements user insight on INT8 quantization:
 
 *Last Updated: August 2, 2025*  
 *Organization: Clean structure for production deployment and development*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

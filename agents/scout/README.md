@@ -1,3 +1,11 @@
+---
+title: Scout Agent V2 - Next-Generation AI-First Content Analysis System
+description: Auto-generated description for Scout Agent V2 - Next-Generation AI-First Content Analysis System
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Scout Agent V2 - Next-Generation AI-First Content Analysis System
 
 ## 🎯 **Agent Overview**
@@ -313,3 +321,9 @@ result = await scout_agent.production_crawl_ai_enhanced("bbc", 50)
 *Production Status: ✅ Fully Operational*  
 *Performance: 3.77+ articles/second (Ultra-Fast) | 0.8+ articles/second (AI-Enhanced)*  
 *Architecture: Unified Production Crawler + GPU Intelligence + Graceful Fallbacks*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

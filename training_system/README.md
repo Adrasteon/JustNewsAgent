@@ -1,3 +1,11 @@
+---
+title: JustNews Online Training System
+description: Auto-generated description for JustNews Online Training System
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews Online Training System
 ## "Training On The Fly" - Continuous Model Improvement
 
@@ -302,3 +310,9 @@ For questions or issues:
 4. Refer to production deployment documentation
 
 The **"Training On The Fly"** system enables your AI agents to continuously improve from every news article processed, providing unprecedented adaptability and performance enhancement in production environments.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

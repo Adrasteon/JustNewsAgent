@@ -56,6 +56,16 @@ _NVML_SUPPORTED = False
 _NVML_HANDLE_CACHE: Dict[int, Any] = {}
 _NVML_INIT_ERROR: Optional[str] = None
 
+# Model preload state (single global job)
+_MODEL_PRELOAD_STATE: Dict[str, Any] = {
+	"started_at": None,
+	"completed_at": None,
+	"in_progress": False,
+	"summary": {"total": 0, "done": 0, "failed": 0},
+	"per_agent": {},  # { agent: { model_id: {status, error, duration_s} } }
+}
+_MODEL_PRELOAD_THREAD: Optional[object] = None
+
 
 def _inc(metric: str) -> None:
 	_METRICS_COUNTERS[metric] = _METRICS_COUNTERS.get(metric, 0) + 1
@@ -170,6 +180,33 @@ def get_gpu_snapshot() -> Dict[str, Any]:
 	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
 
 
+def _detect_mps() -> Dict[str, Any]:
+	"""Best-effort NVIDIA MPS detection.
+
+	Returns a dict with:
+	- enabled: bool
+	- pipe_dir: str | None
+	- control_process: bool (whether nvidia-cuda-mps-control appears active)
+	"""
+	pipe_dir = os.environ.get("CUDA_MPS_PIPE_DIRECTORY", "/tmp/nvidia-mps")
+	control_process = False
+	enabled = False
+	try:
+		out = subprocess.run([
+			"pgrep", "-x", "nvidia-cuda-mps-control"
+		], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1)
+		control_process = (out.returncode == 0)
+	except Exception:
+		control_process = False
+	try:
+		if pipe_dir and os.path.exists(pipe_dir):
+			enabled = True
+	except Exception:
+		enabled = False
+	enabled = enabled or control_process
+	return {"enabled": bool(enabled), "pipe_dir": pipe_dir, "control_process": bool(control_process)}
+
+
 class PolicyUpdate(BaseModel):
 	max_memory_per_agent_mb: Optional[int] = Field(None, ge=256, description="Per-agent memory cap in MB")
 	allow_fractional_shares: Optional[bool] = None
@@ -183,6 +220,12 @@ class LeaseRequest(BaseModel):
 
 class ReleaseRequest(BaseModel):
 	token: str
+
+
+class PreloadRequest(BaseModel):
+	agents: Optional[List[str]] = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
+	refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
+	strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
 
 
 @asynccontextmanager
@@ -218,6 +261,8 @@ async def lifespan(app: FastAPI):
 				"get_allocations",
 				"lease",
 				"release",
+				"models_preload",
+				"models_status",
 			],
 		)
 	except Exception:
@@ -267,6 +312,10 @@ def gpu_info():
 		data = get_gpu_snapshot()
 		if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
 			data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
+		# Include MPS status (best-effort)
+		mps = _detect_mps()
+		data["mps_enabled"] = bool(mps.get("enabled", False))
+		data["mps"] = mps
 		return data
 	except Exception as e:
 		logger.error(f"Failed to get GPU snapshot: {e}")
@@ -387,11 +436,224 @@ def metrics():  # pragma: no cover - simple string builder
 			lines.append("# TYPE gpu_orchestrator_nvml_error_info gauge")
 			# Represent error presence as gauge; message is not standard but kept minimal
 			lines.append("gpu_orchestrator_nvml_error_info 1")
+	# MPS status gauge
+	mps = _detect_mps()
+	lines.append("# HELP gpu_orchestrator_mps_enabled NVIDIA MPS enabled flag")
+	lines.append("# TYPE gpu_orchestrator_mps_enabled gauge")
+	lines.append(f"gpu_orchestrator_mps_enabled {1 if mps.get('enabled') else 0}")
 	return PlainTextResponse("\n".join(lines) + "\n")
+
+
+# ---------------------------
+# Model preload functionality
+# ---------------------------
+
+def _project_root() -> str:
+	try:
+		import pathlib
+		return str(pathlib.Path(__file__).resolve().parents[2])
+	except Exception:
+		return os.getcwd()
+
+
+def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+	"""Load a model on CPU to warm caches and validate availability.
+
+	Returns (ok, error_msg). Does not keep model in memory; frees immediately.
+	"""
+	start = time.time()
+	try:
+		# Ensure STRICT_MODEL_STORE respected for this call
+		prev_strict = os.environ.get("STRICT_MODEL_STORE")
+		if strict:
+			os.environ["STRICT_MODEL_STORE"] = "1"
+		elif strict is False:
+			os.environ["STRICT_MODEL_STORE"] = "0"
+
+		ok = False
+		err: Optional[str] = None
+
+		# Prefer sentence-transformers path when obvious
+		if model_id.startswith("sentence-transformers/"):
+			try:
+				# Use model-store aware loader with explicit agent to avoid caller detection issues
+				from agents.common.model_loader import load_sentence_transformer
+
+				m = load_sentence_transformer(model_id, agent=agent)
+				# Do a tiny encode to ensure all modules initialize
+				try:
+					_ = m.encode(["warmup"])  # type: ignore[attr-defined]
+				except Exception:
+					# Not all wrappers support encode at this point; ignore
+					pass
+				ok = True
+				del m
+			except Exception as e:  # noqa: BLE001
+				err = f"SentenceTransformer load failed: {e}"
+		else:
+			# Fallback to transformers
+			try:
+				from agents.common.model_loader import load_transformers_model
+				model, tokenizer = load_transformers_model(model_id, agent=agent, cache_dir=None, model_class=None, tokenizer_class=None)
+				# Touch a minimal tokenization to ensure files are present
+				try:
+					_ = tokenizer("warmup")  # type: ignore[operator]
+				except Exception:
+					pass
+				ok = True
+				# Release quickly
+				del model
+				del tokenizer
+			except Exception as e:  # noqa: BLE001
+				err = f"Transformers load failed: {e}"
+
+		# Restore STRICT_MODEL_STORE env
+		if prev_strict is None:
+			os.environ.pop("STRICT_MODEL_STORE", None)
+		else:
+			os.environ["STRICT_MODEL_STORE"] = prev_strict
+
+		# Force GC to reduce working set post-load
+		try:
+			import gc
+			gc.collect()
+		except Exception:
+			pass
+
+		duration = time.time() - start
+		if ok:
+			logger.info(f"Preloaded model for agent={agent} id={model_id} in {duration:.2f}s")
+			return True, None
+		else:
+			logger.warning(f"Failed to preload model for agent={agent} id={model_id}: {err}")
+			return False, err or "unknown_error"
+	except Exception as e:  # noqa: BLE001
+		return False, str(e)
+
+
+def _read_agent_model_map() -> Dict[str, List[str]]:
+	import json
+	from pathlib import Path
+
+	root = Path(_project_root())
+	map_path = root / "markdown_docs" / "agent_documentation" / "AGENT_MODEL_MAP.json"
+	if not map_path.exists():
+		raise FileNotFoundError(f"AGENT_MODEL_MAP.json not found at {map_path}")
+	with open(map_path, "r", encoding="utf-8") as f:
+		return json.load(f)
+
+
+def _start_preload_job(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
+	global _MODEL_PRELOAD_STATE, _MODEL_PRELOAD_THREAD
+
+	if _MODEL_PRELOAD_STATE.get("in_progress"):
+		return _MODEL_PRELOAD_STATE
+
+	# Initialize state
+	_MODEL_PRELOAD_STATE = {
+		"started_at": time.time(),
+		"completed_at": None,
+		"in_progress": True,
+		"summary": {"total": 0, "done": 0, "failed": 0},
+		"per_agent": {},
+	}
+
+	def _worker():
+		global _MODEL_PRELOAD_STATE
+		try:
+			model_map = _read_agent_model_map()
+			agents = selected_agents or list(model_map.keys())
+			# Prepare status entries
+			for a in agents:
+				models = model_map.get(a, [])
+				_MODEL_PRELOAD_STATE["per_agent"][a] = {}
+				for mid in models:
+					_MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
+			total = sum(len(model_map.get(a, [])) for a in agents)
+			_MODEL_PRELOAD_STATE["summary"]["total"] = total
+
+			strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
+			strict = strict_override if strict_override is not None else strict_env
+
+			# Iterate and preload each model on CPU
+			for a in agents:
+				for mid in model_map.get(a, []):
+					st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
+					st["status"] = "loading"
+					t0 = time.time()
+					ok, err = _load_agent_model(a, mid, strict)
+					if ok:
+						st["status"] = "ok"
+						st["duration_s"] = time.time() - t0
+						_MODEL_PRELOAD_STATE["summary"]["done"] += 1
+					else:
+						st["status"] = "error"
+						st["error"] = err
+						st["duration_s"] = time.time() - t0
+						_MODEL_PRELOAD_STATE["summary"]["failed"] += 1
+		except Exception as e:  # noqa: BLE001
+			logger.error(f"Model preload job crashed: {e}")
+		finally:
+			_MODEL_PRELOAD_STATE["in_progress"] = False
+			_MODEL_PRELOAD_STATE["completed_at"] = time.time()
+
+	import threading
+
+	_MODEL_PRELOAD_THREAD = threading.Thread(target=_worker, name="model-preloader", daemon=True)
+	_MODEL_PRELOAD_THREAD.start()
+	return _MODEL_PRELOAD_STATE
+
+
+@app.post("/models/preload")
+def models_preload(req: PreloadRequest):
+	"""Start a background model preload job (CPU warming) using AGENT_MODEL_MAP.json.
+
+	Returns current job state. If a job is already completed and refresh=false, returns that state.
+	"""
+	# If job completed and not refreshing, return existing state.
+	# If there were failures, return 503 to enforce a hard failure with clear reasons.
+	if _MODEL_PRELOAD_STATE.get("started_at") and not _MODEL_PRELOAD_STATE.get("in_progress") and not req.refresh:
+		failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
+		all_ready = (failed == 0 and _MODEL_PRELOAD_STATE["summary"].get("done", 0) == _MODEL_PRELOAD_STATE["summary"].get("total", 0))
+		state = {**_MODEL_PRELOAD_STATE, "all_ready": all_ready}
+		# Build a concise error list for clarity
+		errors: List[Dict[str, Any]] = []
+		for a, models in _MODEL_PRELOAD_STATE.get("per_agent", {}).items():
+			for mid, st in models.items():
+				if st.get("status") == "error":
+					errors.append({"agent": a, "model": mid, "error": st.get("error")})
+		state["errors"] = errors
+		if failed > 0:
+			raise HTTPException(status_code=503, detail=state)
+		return state
+
+	state = _start_preload_job(req.agents, req.strict)
+	return {
+		**state,
+		"all_ready": False,
+	}
+
+
+@app.get("/models/status")
+def models_status():
+	"""Return the current model preload status and readiness summary."""
+	state = _MODEL_PRELOAD_STATE
+	total = state.get("summary", {}).get("total", 0)
+	done = state.get("summary", {}).get("done", 0)
+	failed = state.get("summary", {}).get("failed", 0)
+	all_ready = (total > 0 and failed == 0 and done == total) and not state.get("in_progress", False)
+	# Build a concise error list for clarity
+	errors: List[Dict[str, Any]] = []
+	for a, models in state.get("per_agent", {}).items():
+		for mid, st in models.items():
+			if st.get("status") == "error":
+				errors.append({"agent": a, "model": mid, "error": st.get("error")})
+	return {**state, "all_ready": all_ready, "errors": errors}
 
 
 if __name__ == "__main__":
 	import uvicorn
 
+	# Place the runner at the very end so all endpoints above are registered
 	uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
 

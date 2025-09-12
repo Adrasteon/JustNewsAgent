@@ -65,6 +65,9 @@ orchestrator_demo_results/
 *_results.json
 *_results_*.json
 test_results/
+production_test_results/
+production_test_results_*/
+large_scale_crawl_results/
 temp/
 tmp/
 .tmp/
@@ -77,6 +80,7 @@ ultra_fast_*.json
 
 # Development and Debug Files
 debug_*.py
+common/dev_db_fallback.py
 # Broad ignore of ad-hoc test scripts, but allow curated orchestrator tests
 test_*.py
 *_test.py

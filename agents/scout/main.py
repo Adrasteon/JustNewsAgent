@@ -63,7 +63,8 @@ async def lifespan(app: FastAPI):
                 "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
                 "intelligent_source_discovery", "intelligent_content_crawl",
                 "intelligent_batch_analysis", "enhanced_newsreader_crawl",
-                "production_crawl_ultra_fast", "get_production_crawler_info"
+                "production_crawl_ultra_fast", "get_production_crawler_info",
+                "production_crawl_dynamic"
             ],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -336,6 +337,17 @@ def get_production_crawler_info_endpoint(call: ToolCall):
         return get_production_crawler_info(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in get_production_crawler_info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/production_crawl_dynamic")
+async def production_crawl_dynamic_endpoint(call: ToolCall):
+    try:
+        from agents.scout.tools import production_crawl_dynamic
+        logger.info(f"Calling production_crawl_dynamic with args: {call.args} and kwargs: {call.kwargs}")
+        # Expect kwargs: domains (list[str]|None), articles_per_site, concurrent_sites, max_total_articles
+        return await production_crawl_dynamic(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in production_crawl_dynamic: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # =============================================================================

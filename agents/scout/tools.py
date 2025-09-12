@@ -1204,3 +1204,89 @@ def get_production_crawler_info():
         logger.error(f"Failed to get production crawler info: {e}")
         log_feedback("get_production_crawler_info_error", {"error": str(e)})
         return {"available": False, "error": str(e), "supported_sites": []}
+
+
+# =============================================================================
+# DYNAMIC MULTI-SITE PRODUCTION CRAWL (Generic domains via DB-driven config)
+# =============================================================================
+async def production_crawl_dynamic(domains: list[str] | None = None,
+                                   articles_per_site: int = 25,
+                                   concurrent_sites: int = 3,
+                                   max_total_articles: int | None = None) -> dict:
+    """Dynamic multi-site crawl using generic site crawler.
+
+    Args:
+        domains: Optional explicit domain list. If None, all active sources.
+        articles_per_site: Target articles per domain.
+        concurrent_sites: Max concurrent domains processed.
+        max_total_articles: Optional cap across all domains (defaults to len(domains)*articles_per_site)
+
+    Returns:
+        Dict with per-domain article lists and aggregated stats.
+    """
+    logger.info(f"[ScoutAgent] Dynamic multi-site crawl request domains={domains} articles_per_site={articles_per_site} concurrent_sites={concurrent_sites}")
+
+    # Rate limiting
+    if not rate_limit("production_crawl_dynamic"):
+        log_security_event('rate_limit_exceeded', {'function': 'production_crawl_dynamic'})
+        return {"error": "Rate limit exceeded"}
+
+    # Initialize orchestrator lazily
+    if not PRODUCTION_CRAWLERS_AVAILABLE:
+        initialize_production_crawlers()
+
+    if not PRODUCTION_CRAWLERS_AVAILABLE:
+        return {"error": "Production crawlers not available"}
+
+    try:
+        # Access underlying orchestrator's multi-site crawler
+        orch = production_crawler  # ProductionCrawlerOrchestrator instance
+        orch.multi_site_crawler.concurrent_sites = concurrent_sites
+        orch.multi_site_crawler.articles_per_site = articles_per_site
+
+        # Determine max articles
+        if max_total_articles is None and domains:
+            max_total_articles = len(domains) * articles_per_site
+        if max_total_articles is None:
+            max_total_articles = articles_per_site * 10  # sensible default cap
+
+        raw_summary = await orch.crawl_multi_site_dynamic(
+            domains=domains,
+            max_total_articles=max_total_articles,
+            concurrent_sites=concurrent_sites,
+            articles_per_site=articles_per_site,
+        )
+
+        # raw_summary has keys: (from orchestrator) including articles list
+        articles = raw_summary.get("articles", [])
+        # Build domain_articles mapping
+        from urllib.parse import urlparse
+        domain_articles: dict[str, list] = {}
+        for art in articles:
+            url = art.get("url", "")
+            parsed = urlparse(url)
+            dom = parsed.netloc.replace("www.", "") if parsed.netloc else art.get("publisher") or "unknown"
+            domain_articles.setdefault(dom, []).append(art)
+
+        domain_breakdown = {k: len(v) for k, v in domain_articles.items()}
+        response = {
+            "dynamic": True,
+            "domains_requested": domains,
+            "sites_crawled": raw_summary.get("sites_crawled"),
+            "total_articles": raw_summary.get("total_articles"),
+            "processing_time_seconds": raw_summary.get("processing_time_seconds"),
+            "articles_per_second": raw_summary.get("articles_per_second"),
+            "domain_breakdown": domain_breakdown,
+            "domain_articles": domain_articles,
+            "timestamp": raw_summary.get("timestamp"),
+        }
+        log_feedback("production_crawl_dynamic", {
+            "domains": len(domain_breakdown),
+            "total_articles": response["total_articles"],
+            "aps": response.get("articles_per_second", 0)
+        })
+        return response
+    except Exception as e:
+        logger.error(f"Dynamic multi-site crawl failed: {e}")
+        log_feedback("production_crawl_dynamic_error", {"error": str(e)})
+        return {"error": str(e)}

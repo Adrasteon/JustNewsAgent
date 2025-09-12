@@ -4,6 +4,7 @@ Main file for the MCP Bus.
 # main.py for MCP Message Bus
 import atexit
 import time
+import os
 from contextlib import asynccontextmanager
 
 import requests
@@ -72,7 +73,10 @@ def call_tool(call: ToolCall):
 
     payload = {"args": call.args, "kwargs": call.kwargs}
     url = f"{agent_address}/{call.tool}"
-    timeout = (3, 10)  # (connect, read)
+    # Configurable timeouts via environment (defaults: connect 3s, read 120s for long-running tools)
+    connect_timeout = float(os.getenv("MCP_CALL_CONNECT_TIMEOUT", "3"))
+    read_timeout = float(os.getenv("MCP_CALL_READ_TIMEOUT", "120"))
+    timeout = (connect_timeout, read_timeout)
 
     # Simple retry with backoff
     last_error = None

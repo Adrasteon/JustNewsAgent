@@ -40,6 +40,7 @@ import asyncio
 import json
 import sys
 import time
+import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -49,10 +50,15 @@ import httpx
 from tqdm.asyncio import tqdm
 
 from common.observability import get_logger
+from common.dev_db_fallback import apply_test_db_env_fallback
 from agents.scout.production_crawlers.crawler_utils import get_active_sources
+from agents.common.gpu_orchestrator_client import GPUOrchestratorClient
 
 # Configure centralized logging
 logger = get_logger(__name__)
+
+# Apply development DB fallback (non-destructive) – temporary unblocker
+apply_test_db_env_fallback(logger)
 
 # Configuration
 MCP_BUS_URL = "http://localhost:8000"
@@ -60,6 +66,9 @@ DEFAULT_BATCH_SIZE = 10
 DEFAULT_CONCURRENT_SITES = 5
 DEFAULT_ARTICLES_PER_SITE = 50
 DEFAULT_QUALITY_THRESHOLD = 0.6
+# Agent call timeout configuration (seconds)
+AGENT_CONNECT_TIMEOUT = float(os.getenv("MCP_CALL_CONNECT_TIMEOUT", "3"))
+AGENT_READ_TIMEOUT = float(os.getenv("MCP_CLIENT_READ_TIMEOUT", "180"))
 
 @dataclass
 class CrawlConfig:
@@ -74,7 +83,7 @@ class CrawlConfig:
     enable_knowledge_graph: bool = True
     test_mode: bool = False
     output_dir: str = "./large_scale_crawl_results"
-    archive_port: int = 8012
+    archive_port: int = 8021  # Archive REST API port
 
     @staticmethod
     def _load_sites_from_database() -> List[str]:
@@ -155,9 +164,39 @@ class LargeScaleCrawler:
         self.config = config
         self.results = LargeScaleResult(config=config)
         self.start_time = None
+        # GPU orchestrator client (fail-safe wrapper; never raises)
+        try:
+            self.gpu_client = GPUOrchestratorClient()
+        except Exception:
+            self.gpu_client = None
 
         # Create output directory
         Path(config.output_dir).mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def _get_quality_score(article: Dict[str, Any]) -> float:
+        """Derive a quality score from available fields.
+
+        Preference order:
+        - scout_analysis.scout_score (if present)
+        - news_score (from ultra_fast crawlers)
+        - confidence (generic fallback)
+        - 0.0 as last resort
+        """
+        try:
+            scout = article.get("scout_analysis") or {}
+            if isinstance(scout, dict) and "scout_score" in scout:
+                return float(scout.get("scout_score") or 0.0)
+        except Exception:
+            pass
+
+        for key in ("news_score", "confidence"):
+            try:
+                if key in article and article[key] is not None:
+                    return float(article[key])
+            except Exception:
+                continue
+        return 0.0
 
     async def call_agent(self, agent: str, tool: str, args: list = None, kwargs: dict = None) -> dict:
         """Call agent through MCP bus with proper error handling"""
@@ -175,12 +214,83 @@ class LargeScaleCrawler:
 
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.post(f"{MCP_BUS_URL}/call", json=payload, timeout=60)
+                response = await client.post(
+                    f"{MCP_BUS_URL}/call",
+                    json=payload,
+                    timeout=httpx.Timeout(AGENT_READ_TIMEOUT, connect=AGENT_CONNECT_TIMEOUT, read=AGENT_READ_TIMEOUT, write=AGENT_CONNECT_TIMEOUT)
+                )
                 response.raise_for_status()
                 return response.json()
-            except httpx.RequestError as e:
-                logger.error(f"❌ Agent call failed - {agent}.{tool}: {e}")
-                return {"error": str(e), "success": False}
+            except httpx.HTTPError as e:
+                # Catches both HTTPStatusError and RequestError (connect/read timeouts)
+                detail = str(e)
+                if hasattr(e, "response") and e.response is not None:
+                    try:
+                        body_preview = e.response.text[:200]
+                        detail = f"{e} | body={body_preview}"
+                    except Exception:
+                        pass
+                logger.error(f"❌ Agent call failed - {agent}.{tool}: {detail}")
+                return {"error": detail, "success": False}
+
+    async def ensure_agents_registered(self, timeout_seconds: int = 20) -> None:
+        """Ensure core agents are registered with the MCP Bus, attempt auto-register if missing.
+
+        Best-effort: checks /agents until required names appear or timeout; if missing,
+        attempts to POST /register using known localhost ports.
+        """
+        required = {
+            "scout": "http://localhost:8002",
+            "newsreader": "http://localhost:8009",
+            "memory": "http://localhost:8007",
+            "archive_api": f"http://localhost:{self.config.archive_port}",
+            "gpu_orchestrator": "http://localhost:8014",
+        }
+
+        start = time.time()
+        seen: set[str] = set()
+
+        async with httpx.AsyncClient() as client:
+            while time.time() - start < timeout_seconds:
+                try:
+                    resp = await client.get(f"{MCP_BUS_URL}/agents", timeout=5)
+                    if resp.status_code in (200, 201):
+                        data = resp.json()
+                        # Bus may return a list of names OR a dict mapping name->address
+                        if isinstance(data, list):
+                            seen = set(data)
+                        elif isinstance(data, dict):
+                            seen = set(data.keys())
+                        else:
+                            seen = set()
+
+                        missing = [name for name in required.keys() if name not in seen]
+                        if not missing:
+                            logger.info("🚌 MCP Bus has all required agents registered")
+                            return
+
+                        # Try to register missing ones
+                        for name in missing:
+                            address = required[name]
+                            try:
+                                reg = await client.post(
+                                    f"{MCP_BUS_URL}/register",
+                                    json={"name": name, "address": address},
+                                    timeout=5,
+                                )
+                                if reg.status_code in (200, 201):
+                                    logger.info(f"✅ Registered agent '{name}' at {address}")
+                                else:
+                                    logger.warning(f"⚠️ Registration failed for '{name}' ({reg.status_code}): {reg.text[:120]}")
+                            except Exception as re:
+                                logger.warning(f"⚠️ Could not register '{name}' at {address}: {re}")
+                    else:
+                        logger.warning(f"⚠️ MCP /agents returned {resp.status_code}")
+                except Exception as e:
+                    logger.warning(f"⚠️ MCP /agents check failed: {e}")
+
+                await asyncio.sleep(1.0)
+        logger.warning(f"⚠️ Proceeding without full MCP registration: seen={sorted(seen)}")
 
     async def check_system_health(self) -> Dict[str, bool]:
         """Check health of all required agents"""
@@ -190,6 +300,7 @@ class LargeScaleCrawler:
             "newsreader": "http://localhost:8009/health",
             "memory": "http://localhost:8007/health",
             "archive": f"http://localhost:{self.config.archive_port}/health",
+            "gpu_orchestrator": "http://localhost:8014/health",
         }
 
         async def get_health(client, agent, url):
@@ -230,6 +341,78 @@ class LargeScaleCrawler:
 
         return result
 
+    async def ensure_models_ready(self, timeout_seconds: int = 180) -> bool:
+        """Ensure models are preloaded and ready via the GPU orchestrator.
+
+        Uses /models/preload to start a background warm-up and polls /models/status
+        until all_ready or timeout. Returns True if ready or orchestrator unavailable.
+        """
+        orchestrator_base = "http://localhost:8014"
+        try:
+            async with httpx.AsyncClient() as client:
+                # Quick health check
+                try:
+                    r = await client.get(f"{orchestrator_base}/health", timeout=5)
+                    if r.status_code not in (200, 201, 202):
+                        logger.warning("GPU orchestrator health not OK; skipping model preload gate")
+                        return True
+                except Exception:
+                    logger.info("GPU orchestrator not reachable; skipping model preload gate")
+                    return True
+
+                # Trigger preload if needed
+                try:
+                    pr = await client.post(f"{orchestrator_base}/models/preload", json={"refresh": False}, timeout=10)
+                    if pr.status_code == 503:
+                        # Hard failure: extract detailed reasons and abort early
+                        try:
+                            body = pr.json()
+                            detail = body.get("detail", body)
+                            errs = detail.get("errors", []) if isinstance(detail, dict) else []
+                            if errs:
+                                for e in errs[:20]:
+                                    logger.error(f"Model preload error: agent={e.get('agent')} model={e.get('model')} error={e.get('error')}")
+                        except Exception:
+                            logger.error(f"Model preload returned 503 with body: {pr.text[:200]}")
+                        return False
+                except Exception as e:
+                    logger.warning(f"Failed to trigger model preload: {e}")
+
+                # Poll status
+                deadline = time.time() + timeout_seconds
+                last_progress = None
+                while time.time() < deadline:
+                    try:
+                        s = await client.get(f"{orchestrator_base}/models/status", timeout=5)
+                        if s.status_code in (200, 201):
+                            data = s.json()
+                            all_ready = bool(data.get("all_ready", False))
+                            in_progress = bool(data.get("in_progress", False))
+                            summary = data.get("summary", {})
+                            now_progress = (summary.get("done", 0), summary.get("failed", 0), summary.get("total", 0))
+                            if now_progress != last_progress:
+                                logger.info(f"Model preload progress: done={now_progress[0]} failed={now_progress[1]} total={now_progress[2]}")
+                                last_progress = now_progress
+                            if all_ready:
+                                logger.info("✅ All models reported ready by gpu_orchestrator")
+                                return True
+                            if not in_progress and not all_ready:
+                                # Log detailed errors if present
+                                errs = data.get("errors", []) or []
+                                if errs:
+                                    for e in errs[:50]:
+                                        logger.error(f"Model preload error: agent={e.get('agent')} model={e.get('model')} error={e.get('error')}")
+                                logger.error("Model preload completed with failures; aborting to avoid unstable behavior")
+                                return False
+                    except Exception:
+                        pass
+                    await asyncio.sleep(3)
+                logger.warning("Model preload did not complete before timeout; proceeding anyway")
+                return False
+        except Exception as e:
+            logger.warning(f"Model preload gate encountered an error: {e}")
+            return True
+
     async def crawl_single_site(self, site: str, mode: str) -> SiteResult:
         """Crawl a single site using specified mode"""
         start_time = time.time()
@@ -254,6 +437,8 @@ class LargeScaleCrawler:
                 raise ValueError(f"Invalid mode: {mode}")
 
             if "error" in crawl_result:
+                # Console hint for troubleshooting when logging is muted
+                print(f"[crawl_single_site] Agent error for {site} mode={mode}: {crawl_result.get('error')}")
                 result.errors.append(f"Crawl failed: {crawl_result['error']}")
                 logger.error(f"❌ {site} crawl failed: {crawl_result['error']}")
                 return result
@@ -276,8 +461,9 @@ class LargeScaleCrawler:
                 for article in successful_articles:
                     if "scout_analysis" in article:
                         ai_analysis_count += 1
-                        scout_score = article["scout_analysis"].get("scout_score", 0.0)
-                        quality_scores.append(scout_score)
+                    q = self._get_quality_score(article)
+                    article["quality_score"] = q
+                    quality_scores.append(q)
 
                 result.ai_analysis_count = ai_analysis_count
                 if quality_scores:
@@ -293,6 +479,9 @@ class LargeScaleCrawler:
             }
 
             logger.info("✅ {} crawl complete!".format(site))
+            # Console summary for visibility in CI/test-mode
+            if self.config.test_mode:
+                print(f"[crawl_single_site] {site} {mode}: found={result.articles_found} time={result.processing_time:.1f}s")
             logger.info(f"   📊 Articles: {result.articles_found}")
             logger.info(f"   ⏱️ Time: {result.processing_time:.1f}s")
             logger.info(f"   🚀 Rate: {result.performance_metrics['articles_per_second']:.2f} art/sec")
@@ -354,7 +543,7 @@ class LargeScaleCrawler:
                                             "source": article.get("site", "unknown"),
                                             "timestamp": datetime.now().isoformat(),
                                             "pipeline": "large_scale_crawl",
-                                            "quality_score": article.get("scout_score", 0.0)
+                                            "quality_score": article.get("quality_score", self._get_quality_score(article))
                                         }
                                     }
                                 )
@@ -405,11 +594,28 @@ class LargeScaleCrawler:
 
             # Archive through Archive agent
             logger.info("💾 Archiving articles...")
+            # Prefer MCP bus call to archive_api tool
             archive_result = await self.call_agent(
-                "archive",
+                "archive_api",
                 "archive_from_crawler",
                 kwargs={"crawler_results": crawler_results}
             )
+
+            # Fallback: direct REST call if bus/tool fails
+            if (not archive_result) or (isinstance(archive_result, dict) and archive_result.get("error")):
+                logger.warning("⚠️ Bus archive call failed or returned error; trying direct REST fallback")
+                try:
+                    async with httpx.AsyncClient() as client:
+                        resp = await client.post(
+                            f"http://localhost:{self.config.archive_port}/archive_from_crawler",
+                            json={"args": [], "kwargs": {"crawler_results": crawler_results}},
+                            timeout=300
+                        )
+                        resp.raise_for_status()
+                        archive_result = resp.json().get("data", resp.json())
+                except Exception as rest_e:
+                    logger.error(f"❌ REST archive fallback failed: {rest_e}")
+                    archive_result = {"error": str(rest_e), "success": False}
 
             if "error" not in archive_result:
                 archive_summary = archive_result
@@ -454,6 +660,16 @@ class LargeScaleCrawler:
 
         try:
             pipeline_stage_timings = {}
+            # Step 0: Ensure models are ready to avoid on-demand spikes/OOM
+            logger.info("📦 Ensuring models are preloaded and ready via gpu_orchestrator...")
+            models_ready = await self.ensure_models_ready(timeout_seconds=180)
+            if not models_ready:
+                logger.error("❌ Models not fully ready. Aborting crawl to avoid unstable behavior.")
+                # Return early with minimal results; main() will exit non-zero
+                self.results.total_sites = 0
+                self.results.total_articles = 0
+                self.results.total_processing_time = time.time() - self.start_time
+                return self.results
             # Step 1: System health check
             logger.info("🩺 Checking system health...")
             health_status = await self.check_system_health()
@@ -463,46 +679,107 @@ class LargeScaleCrawler:
                 logger.warning(f"⚠️ Unhealthy agents: {unhealthy_agents}")
                 logger.warning("Continuing with available agents...")
 
-            # Step 2: Get production crawler information
+            # Step 2: Ensure required agents are registered on the MCP bus
+            await self.ensure_agents_registered(timeout_seconds=30)
+
+            # Step 2b: Consult GPU Orchestrator policy to guide processing
+            processing_batch_size = self.config.batch_size
+            orchestrator_note = ""
+            try:
+                if self.gpu_client is not None:
+                    decision = self.gpu_client.cpu_fallback_decision()
+                    use_gpu = bool(decision.get("use_gpu", False))
+                    safe_mode = bool(decision.get("safe_mode", True))
+                    gpu_available = bool(decision.get("gpu_available", False))
+                    orchestrator_note = (
+                        f"GPU orchestrator decision: use_gpu={use_gpu} safe_mode={safe_mode} gpu_available={gpu_available}"
+                    )
+                    logger.info("🔐 %s", orchestrator_note)
+                    # If GPU not allowed/available, reduce batch size to 1 for safety
+                    if not use_gpu:
+                        processing_batch_size = 1
+                        logger.info("🧯 GPU not permitted/available → forcing processing batch_size=1")
+                else:
+                    logger.info("🔐 GPU orchestrator client unavailable; proceeding with default batch size")
+            except Exception as e:
+                logger.warning(f"⚠️ GPU orchestrator consult failed: {e}")
+
+            # Step 3: Get production crawler information
             crawler_info = await self.get_production_crawler_info()
 
-            # Step 3: Determine crawl modes for each site
+            # Step 4: Baseline BBC (legacy) + Dynamic domains separation
             crawling_start_time = time.time()
-            site_modes = self._determine_site_modes()
+            baseline_keys = {"bbc", "bbc.com", "bbc.co.uk"}
+            baseline_site = None
+            remaining_domains: list[str] = []
+            for s in self.config.sites:
+                if s in baseline_keys and baseline_site is None:
+                    baseline_site = "bbc"  # normalize to legacy key
+                else:
+                    remaining_domains.append(s)
 
-            # Step 4: Execute concurrent site crawling
-            logger.info("🕷️ Starting concurrent site crawling...")
-            semaphore = asyncio.Semaphore(self.config.concurrent_sites)
+            site_results: list[SiteResult] = []
 
-            async def crawl_with_limit(site: str, mode: str) -> SiteResult:
-                async with semaphore:
-                    return await self.crawl_single_site(site, mode)
+            # Baseline legacy crawl (ultra_fast or ai_enhanced depending on mixed alternation)
+            if baseline_site:
+                mode = "ultra_fast" if self.config.mode in ("mixed", "ultra_fast") else "ai_enhanced"
+                logger.info(f"🎯 Baseline legacy crawl for {baseline_site} mode={mode}")
+                baseline_result = await self.crawl_single_site(baseline_site, mode)
+                site_results.append(baseline_result)
+            else:
+                logger.info("ℹ️ No baseline BBC site found in site list")
 
-            # Create progress bar
-            with tqdm(total=len(self.config.sites), desc="Crawling sites") as pbar:
-                tasks = [crawl_with_limit(site, mode) for site, mode in site_modes.items()]
-                site_results = []
+            # Dynamic multi-domain crawl for remaining domains via new production_crawl_dynamic tool
+            dynamic_articles: list[dict] = []
+            if remaining_domains:
+                logger.info(f"🌐 Dynamic domain crawl for {len(remaining_domains)} domains")
+                try:
+                    dyn = await self.call_agent(
+                        "scout",
+                        "production_crawl_dynamic",
+                        kwargs={
+                            "domains": remaining_domains,
+                            "articles_per_site": self.config.articles_per_site,
+                            "concurrent_sites": self.config.concurrent_sites,
+                            "max_total_articles": len(remaining_domains) * self.config.articles_per_site,
+                        },
+                    )
+                    if isinstance(dyn, dict) and "error" in dyn:
+                        print(f"[dynamic_crawl] Agent error: {dyn['error']}")
+                        logger.error(f"Dynamic crawl call failed: {dyn['error']}")
+                    else:
+                        domain_articles = dyn.get("domain_articles", {})
+                        for domain, arts in domain_articles.items():
+                            # Wrap each domain as a SiteResult-like object
+                            sr = SiteResult(site=domain, mode="dynamic", articles_found=len(arts), articles_processed=len(arts))
+                            sr.articles = arts
+                            sr.success_rate = 1.0 if arts else 0.0
+                            sr.performance_metrics = {
+                                "articles_per_second": dyn.get("articles_per_second", 0),
+                                "crawl_mode": "dynamic",
+                                "target_articles": self.config.articles_per_site,
+                                "actual_articles": len(arts),
+                                "ai_enhanced": False,
+                            }
+                            site_results.append(sr)
+                            dynamic_articles.extend(arts)
+                except Exception as e:
+                    logger.error(f"Dynamic crawl request exception: {e}")
+            else:
+                logger.info("ℹ️ No remaining domains for dynamic crawl")
 
-                for task in asyncio.as_completed(tasks):
-                    result = await task
-                    site_results.append(result)
-                    pbar.update(1)
-                    pbar.set_postfix({
-                        'site': result.site,
-                        'articles': result.articles_found,
-                        'rate': f"{result.performance_metrics.get('articles_per_second', 0):.1f} art/sec"
-                    })
             pipeline_stage_timings["1_site_crawling_and_discovery"] = time.time() - crawling_start_time
 
             # Step 5: Process articles through pipeline
             processing_start_time = time.time()
             all_articles = []
             for result in site_results:
-                # Filter by quality threshold
+                # Filter by quality threshold with robust scoring fallback
                 quality_articles = []
                 for article in result.articles:
-                    scout_score = article.get("scout_analysis", {}).get("scout_score", 0.0)
-                    if scout_score >= self.config.quality_threshold:
+                    q = self._get_quality_score(article)
+                    article["quality_score"] = q
+                    if q >= self.config.quality_threshold:
                         quality_articles.append(article)
 
                 result.articles = quality_articles
@@ -514,7 +791,7 @@ class LargeScaleCrawler:
             # Step 6: Batch processing through NewsReader and Memory
             if all_articles:
                 logger.info("🔄 Processing articles through NewsReader and Memory agents...")
-                batch_size = self.config.batch_size
+                batch_size = processing_batch_size
 
                 for i in range(0, len(all_articles), batch_size):
                     batch = all_articles[i:i + batch_size]
