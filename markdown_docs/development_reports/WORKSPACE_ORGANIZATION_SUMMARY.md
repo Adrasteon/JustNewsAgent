@@ -1,3 +1,11 @@
+---
+title: JustNews V4 Workspace Organization Summary
+description: Auto-generated description for JustNews V4 Workspace Organization Summary
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4 Workspace Organization Summary
 ## Date: August 5, 2025
 
@@ -101,3 +109,9 @@ All files, folders, and subdirectories are now fully organized and either:
 3. **Archived with documentation** (development history)
 
 The JustNews V4 system is ready for production deployment and further development!
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

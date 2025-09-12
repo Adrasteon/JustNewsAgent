@@ -1,3 +1,11 @@
+---
+title: Centralized Logging Migration Guide
+description: Auto-generated description for Centralized Logging Migration Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Centralized Logging Migration Guide
 
 ## Overview
@@ -78,3 +86,9 @@ except Exception as e:
 - ✅ Structured logs for production monitoring
 - ✅ Performance tracking built-in
 - ✅ Easy debugging with agent-specific logs
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

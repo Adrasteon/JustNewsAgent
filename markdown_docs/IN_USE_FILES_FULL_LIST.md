@@ -1,3 +1,11 @@
+---
+title: IN USE FILES FULL LIST
+description: Auto-generated description for IN USE FILES FULL LIST
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 /home/adra/JustNewsAgentic/agents/analyst/tensorrt_engines/native_bias_bert.json
 /home/adra/JustNewsAgentic/agents/analyst/tensorrt_engines/native_sentiment_roberta.json
 /home/adra/JustNewsAgentic/markdown_docs/IN_USE_FILES.md
@@ -527,4 +535,9 @@ Structure:
 /home/adra/JustNewsAgentic/training_system/core/training_coordinator.py
 /home/adra/JustNewsAgentic/training_system/utils/__init__.py
 /home/adra/JustNewsAgentic/markdown_docs/development_reports/NEURAL_VS_RULES_STRATEGIC_ANALYSIS.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
 

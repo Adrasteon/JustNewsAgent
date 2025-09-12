@@ -1,3 +1,11 @@
+---
+title: Product Modalities Comparison
+description: Auto-generated description for Product Modalities Comparison
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Product Modalities Comparison
 
 This document compares three high-level product modalities the JustNews system can pursue, aligns each with the repository's current code and DB schema, and gives recommended priorities, milestones, risks, tests, and resource implications.
@@ -197,3 +205,9 @@ This project is model-driven: agents rely on specialized models (see `markdown_d
 ---
 
 Generated: 2025-08-29
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

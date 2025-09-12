@@ -1,3 +1,11 @@
+---
+title: MODEL USAGE
+description: Auto-generated description for MODEL USAGE
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 Model Usage, Caching and GPU Guidelines
 ======================================
 
@@ -73,3 +81,9 @@ embedder = get_shared_embedding_model('sentence-transformers/all-MiniLM-L6-v2', 
 - `markdown_docs/agent_documentation/EMBEDDING_HELPER.md` — details about the helper functions and usage patterns.
 - `agents/common/embedding.py` — implementation and comments for the helper.
 - `agents/common/gpu_manager.py` — lightweight GPU manager shim used in dev and testing.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

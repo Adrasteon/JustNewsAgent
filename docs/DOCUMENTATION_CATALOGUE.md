@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Documentation Catalogue
+description: Auto-generated description for JustNewsAgent Documentation Catalogue
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Documentation Catalogue
 
 **Version:** 2.0
@@ -324,10 +332,10 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Examples for systemd native deployment](deploy/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units, covering sys... | mcp, ai-agents, scout | current |
-| [JustNews native deployment (systemd)](deploy/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
+| [Examples for systemd native deployment](markdown_docs/agent_documentation/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units, covering sys... | mcp, ai-agents, scout | current |
+| [JustNews native deployment (systemd)](markdown_docs/agent_documentation/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
 systemd units and sim... | mcp, models, logging | current |
-| [Systemd scaffold for JustNews](deploy/systemd/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
+| [Systemd scaffold for JustNews](markdown_docs/agent_documentation/systemd/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
 
 ---
 
@@ -515,3 +523,9 @@ systemd units and sim... | mcp, models, logging | current |
 
 **Last Catalogue Update:** 2025-09-08
 **Next Review Date:** 2025-10-07
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

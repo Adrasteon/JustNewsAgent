@@ -1,3 +1,11 @@
+---
+title: JustNews PostgreSQL Integration Guide
+description: Auto-generated description for JustNews PostgreSQL Integration Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews PostgreSQL Integration Guide
 
 **Date**: September 8, 2025
@@ -428,3 +436,8 @@ Native PostgreSQL deployment provides:
 - ✅ **Comprehensive Monitoring**: Full system integration
 
 **Recommendation**: Use native PostgreSQL for all JustNews deployments to maintain consistency with the "Native Ubuntu Deployment" architecture and maximize performance.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md

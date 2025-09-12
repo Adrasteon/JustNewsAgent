@@ -1,3 +1,11 @@
+---
+title: GPU Dashboard and Watcher Ingestion — Operations Guide
+description: Auto-generated description for GPU Dashboard and Watcher Ingestion — Operations Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GPU Dashboard and Watcher Ingestion — Operations Guide
 
 This document captures how to use the Dashboard agent to visualize GPU metrics and how to ingest the GPU watcher output for historical charts.
@@ -90,3 +98,9 @@ The dashboard computes `memory_utilization_percent` if total/used are provided.
 ---
 
 Last updated: 2025-09-10
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

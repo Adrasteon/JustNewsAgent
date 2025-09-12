@@ -1,3 +1,11 @@
+---
+title: Entrypoints and Orchestration Flows — 2025-08-18
+description: Auto-generated description for Entrypoints and Orchestration Flows — 2025-08-18
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Entrypoints and Orchestration Flows — 2025-08-18
 
 This document lists entry points into the JustNewsAgentic system that accept a URL or "news topic as text" and maps minimal orchestration flows to gather, analyze, assess, and synthesize news content.
@@ -206,3 +214,9 @@ POST to `http://<memory-host>:8007/save_article`
 - Add minimal example client functions (Python) to call the example payloads above and print formatted results.
 
 Which would you like me to implement next?
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

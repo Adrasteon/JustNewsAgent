@@ -1,3 +1,11 @@
+---
+title: JustNews V4 - GitHub Copilot Instructions
+description: Auto-generated description for JustNews V4 - GitHub Copilot Instructions
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4 - GitHub Copilot Instructions
 
 ## Project Overview

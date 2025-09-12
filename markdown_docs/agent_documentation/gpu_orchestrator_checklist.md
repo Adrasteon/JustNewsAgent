@@ -1,3 +1,11 @@
+---
+title: gpu orchestrator checklist
+description: Auto-generated description for gpu orchestrator checklist
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 ## GPU Orchestrator Implementation Checklist (E2E Readiness)
 
 Last Updated: 2025-09-11
@@ -78,3 +86,9 @@ Last Updated: 2025-09-11
 
 ---
 Authoritative tracking document for GPU Orchestrator readiness.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

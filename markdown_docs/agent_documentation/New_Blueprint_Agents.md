@@ -1,3 +1,10 @@
+---
+title: New Blueprint Agents
+description: Auto-generated description for New Blueprint Agents
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
 
 ## **A Blueprint for an Autonomous, Ethical, Open-Source AI News Reporter Agent**
 
@@ -745,3 +752,9 @@ By integrating Crawl4AI, the AI News Reporter will benefit from a more unified, 
 132. Python Web Scraping Tutorial \- GeeksforGeeks, accessed on July 30, 2025, [https://www.geeksforgeeks.org/python/python-web-scraping-tutorial/](https://www.geeksforgeeks.org/python/python-web-scraping-tutorial/)  
 133. Filimoa/open-parse: Improved file parsing for LLM's \- GitHub, accessed on July 30, 2025, [https://github.com/Filimoa/open-parse](https://github.com/Filimoa/open-parse)  
 134. Process documents with Layout Parser | Document AI | Google Cloud, accessed on July 30, 2025, [https://cloud.google.com/document-ai/docs/layout-parse-chunk](https://cloud.google.com/document-ai/docs/layout-parse-chunk)
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

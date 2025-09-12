@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Status Report
+description: Auto-generated description for JustNewsAgent Status Report
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Status Report
 **Date:** September 7, 2025
 **Branch:** dev/debugging
@@ -321,3 +329,9 @@ The JustNewsAgent project has been **successfully advanced to Phase 3** with com
 The implementation establishes a solid foundation for research-scale news archiving with knowledge graph capabilities, providing researchers with powerful tools for temporal analysis, entity relationship discovery, and comprehensive news data management.
 
 **Final Status: ✅ PHASE 3 SPRINT 1-2 COMPLETE - RESEARCH-SCALE ARCHIVING WITH KNOWLEDGE GRAPH ESTABLISHED**
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

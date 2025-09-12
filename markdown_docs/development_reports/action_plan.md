@@ -1,3 +1,11 @@
+---
+title: Action Plan: JustNews V4 RTX-Accelerated Development
+description: Auto-generated description for Action Plan: JustNews V4 RTX-Accelerated Development
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Action Plan: JustNews V4 RTX-Accelerated Development
 
 **Current Status**: Enhanced Scout Agent + TensorRT-LLM Integration Complete - Ready for Multi-Agent GPU Expansion
@@ -176,3 +184,9 @@ This action plan outlines the next phases for JustNews V4 development now that b
 ---
 
 *For details, see the latest `CHANGELOG.md`, `JustNews_Plan_V3.md`, and `JustNews_Proposal_V3.md`.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

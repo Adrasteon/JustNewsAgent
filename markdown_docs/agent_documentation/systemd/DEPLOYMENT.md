@@ -1,3 +1,11 @@
+---
+title: JustNews native deployment (systemd)
+description: Auto-generated description for JustNews native deployment (systemd)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews native deployment (systemd)
 
 This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
@@ -68,3 +76,8 @@ Preflight checks only:
 - Prefer absolute paths for the Python interpreter in the env files
 - Pin GPUs per service via `CUDA_VISIBLE_DEVICES` in the service env file
 - Implement `/health`, `/ready`, `/warmup` in each service to leverage Restart and readiness checks
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md

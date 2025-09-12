@@ -1,3 +1,11 @@
+---
+title: Production BBC Crawler - Duplicate Resolution Complete ✅
+description: Auto-generated description for Production BBC Crawler - Duplicate Resolution Complete ✅
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Production BBC Crawler - Duplicate Resolution Complete ✅
 
 ## 🎯 Issue Identified & Resolved
@@ -111,3 +119,9 @@ The production BBC crawler now properly resides **solely** within the Scout Agen
 *Location: agents/scout/production_crawlers/sites/bbc_ai_crawler.py*
 *Status: Active, tested, integrated*
 *Cross-agent imports: Fixed and validated*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -1,3 +1,11 @@
+---
+title: JustNews Agent - API Documentation
+description: Auto-generated description for JustNews Agent - API Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews Agent - API Documentation
 
 ## Phase 3 Sprint 3-4: Advanced Knowledge Graph APIs
@@ -1452,3 +1460,9 @@ python test_graphql_api.py
 **API Status:** Production Ready (Development Environment)
 **Knowledge Graph:** 73 nodes, 108 relationships, 68 entities</content>
 <parameter name="filePath">/home/adra/JustNewsAgent/docs/PHASE3_API_DOCUMENTATION.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

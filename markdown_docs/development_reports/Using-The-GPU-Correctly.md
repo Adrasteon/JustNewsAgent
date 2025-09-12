@@ -1,3 +1,11 @@
+---
+title: Using The GPU Correctly - Complete Configuration Guide
+description: Auto-generated description for Using The GPU Correctly - Complete Configuration Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Using The GPU Correctly - Complete Configuration Guide
 
 **Date**: August 13, 2025  
@@ -467,3 +475,9 @@ The configuration detailed in this document has been **production-validated** wi
 **Last Updated**: August 13, 2025  
 **Validation Status**: ✅ Production-Tested and Verified  
 **Next Review**: Monitor for any stability issues in production use
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

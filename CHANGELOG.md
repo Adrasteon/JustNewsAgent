@@ -1,3 +1,11 @@
+---
+title: Changelog
+description: Auto-generated description for Changelog
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -1118,3 +1126,9 @@ System Totals:
 ### Improved
 - All agents now support ML-based feedback loops as described in JustNews_Plan_V3.md.
 - Documentation and code comments updated to clarify feedback loop and continual learning mechanisms.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

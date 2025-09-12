@@ -1,3 +1,11 @@
+---
+title: Agent Communication Protocols Documentation
+description: Auto-generated description for Agent Communication Protocols Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Agent Communication Protocols Documentation
 
 ## Overview
@@ -487,3 +495,9 @@ export AGENT_DEBUG=true
 ---
 
 *This documentation covers the comprehensive communication protocols implemented in JustNews V4. For specific agent implementations, refer to individual agent documentation files.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

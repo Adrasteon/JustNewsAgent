@@ -1,3 +1,11 @@
+---
+title: GPU Orchestrator Migration Plan (V4)
+description: Auto-generated description for GPU Orchestrator Migration Plan (V4)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GPU Orchestrator Migration Plan (V4)
 
 Centralize GPU control into a dedicated, systemd-managed Orchestrator that provides admission control, leasing, and telemetry for all CUDA work. Remove agent-local background GPU cleanup to eliminate race conditions and device instability.
@@ -217,3 +225,9 @@ Exit Criteria
 
 Document owner: Platform/Infra
 Last updated: 2025-09-10
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

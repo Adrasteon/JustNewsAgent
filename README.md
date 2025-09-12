@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent V4 🤖
+description: Auto-generated description for JustNewsAgent V4 🤖
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent V4 🤖
 
 [![License: Apache 2.0](### 📊 **System Status**
@@ -1274,6 +1282,13 @@ python agents/dashboard/gui.py &
 - **GPU Setup Guide**: `docs/GPU_SETUP_README.md`
 - **Security Documentation**: This README section + `common/secret_manager.py`
 
+#### **Operations Runbooks (Ops quick links):**
+- Systemd operations guide: `markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md`
+- GPU Orchestrator operations: `markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md`
+- MCP Bus operations: `markdown_docs/agent_documentation/MCP_BUS_OPERATIONS.md`
+- Preflight gating runbook: `markdown_docs/agent_documentation/preflight_runbook.md`
+- Daily Ops Quick Reference: `markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md`
+
 #### **Interactive Tools:**
 ```bash
 # Configuration management
@@ -1989,3 +2004,9 @@ Acknowledgments
 - The broader open-source AI and machine learning community
 
 ```
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

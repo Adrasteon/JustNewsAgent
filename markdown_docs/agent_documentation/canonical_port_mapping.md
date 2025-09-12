@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Canonical Port Mapping
+description: Auto-generated description for JustNewsAgent Canonical Port Mapping
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Canonical Port Mapping
 
 ## 📋 Complete Port Usage Analysis
@@ -154,3 +162,9 @@ This analysis was validated against:
 ---
 
 *This document serves as the authoritative reference for all port assignments in the JustNewsAgent system. Last validated: September 9, 2025*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

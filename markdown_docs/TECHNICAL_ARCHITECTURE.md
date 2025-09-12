@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent V4 - Technical Architecture
+description: Auto-generated description for JustNewsAgent V4 - Technical Architecture
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent V4 - Technical Architecture
 
 This document provides comprehensive technical details about the JustNewsAgent V4 system architecture, performance metrics, and implementation details.
@@ -902,3 +910,9 @@ This enterprise-grade security system provides **military-grade protection** aga
 ---
 
 *For additional technical details, see the complete documentation in [`markdown_docs/`](markdown_docs/) and architecture specifications in [`docs/`](docs/).*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

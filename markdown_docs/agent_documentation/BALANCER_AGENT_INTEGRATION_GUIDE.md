@@ -1,3 +1,11 @@
+---
+title: Balancer Agent V1 - Integration & Debugging Guide
+description: Auto-generated description for Balancer Agent V1 - Integration & Debugging Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Balancer Agent V1 - Integration & Debugging Guide
 
 ## Overview
@@ -119,3 +127,9 @@ All model loading is wrapped in error handling and logs failures for debugging.
 
 **Maintainer:** Adrasteon / JustNews V4 Team
 **Last Updated:** August 15, 2025
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+
