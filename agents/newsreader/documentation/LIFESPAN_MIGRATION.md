@@ -1,3 +1,11 @@
+---
+title: LIFESPAN MIGRATION
+description: Auto-generated description for LIFESPAN MIGRATION
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 ## FastAPI Lifespan Migration Summary
 
 ### Changes Made
@@ -85,3 +93,9 @@ app = FastAPI(
 - **FastAPI Version**: Compatible with FastAPI 0.68.0+
 - **Python Version**: Python 3.7+ (async context managers)
 - **Existing Code**: All endpoints and functionality remain unchanged
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

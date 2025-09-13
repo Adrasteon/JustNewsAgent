@@ -1,3 +1,11 @@
+---
+title: Crawl4AI vs Playwright — feature-by-feature comparison
+description: Auto-generated description for Crawl4AI vs Playwright — feature-by-feature comparison
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Crawl4AI vs Playwright — feature-by-feature comparison
 
 Generated: 2025-08-27
@@ -173,3 +181,9 @@ Conclusions
 Suggested next steps
 - Keep Crawl4AI as the primary Scout engine and continue to use Playwright for ad-hoc or complex interaction fallbacks.
 - Implement a small `clean_page` wrapper in `agents/scout/tools.py` that: uses Crawl4AI scripting primitives to attempt clicks/presses and falls back to calling Playwright in an edge-case path when extra precision is needed.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -1,3 +1,11 @@
+---
+title: Phase 3: Comprehensive Archive Integration Plan
+description: Auto-generated description for Phase 3: Comprehensive Archive Integration Plan
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Phase 3: Comprehensive Archive Integration Plan
 
 **Date:** September 7, 2025  
@@ -478,3 +486,9 @@ This transformation positions JustNewsAgent as a critical infrastructure compone
 **Next Review:** October 7, 2025  
 **Approvals Required:** Technical Lead, Product Manager, Legal Counsel</content>
 <parameter name="filePath">/home/adra/JustNewsAgent/docs/phase3_archive_integration_plan.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

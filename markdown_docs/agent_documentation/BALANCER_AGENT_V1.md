@@ -1,3 +1,11 @@
+---
+title: Balancer Agent V1 Documentation
+description: Auto-generated description for Balancer Agent V1 Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Balancer Agent V1 Documentation
 
 ## Overview
@@ -42,3 +50,9 @@ See `balancer.py` for implementation details and endpoint usage.
 
 ---
 For further details, see the technical architecture and development reports in `markdown_docs/`.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

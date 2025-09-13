@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Advanced Performance Analytics Engine for JustNewsAgent
 
 Provides comprehensive performance monitoring, trend analysis, bottleneck detection,
@@ -14,6 +13,8 @@ Features:
 - System health monitoring
 - Custom analytics queries
 """
+
+from common.observability import get_logger
 
 import json
 import threading

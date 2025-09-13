@@ -1,3 +1,11 @@
+---
+title: JustNews V4 Quality Management System - Final Status
+description: Auto-generated description for JustNews V4 Quality Management System - Final Status
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4 Quality Management System - Final Status
 
 ## 🎯 Quality Achievement
@@ -44,3 +52,9 @@ All quality management systems are active and maintaining perfect documentation 
 
 Generated: Sun 07 Sep 2025 12:47:19 PM BST
 Environment: JustNews V4 Quality Assurance System
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

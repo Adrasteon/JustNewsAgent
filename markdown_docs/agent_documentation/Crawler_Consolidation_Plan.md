@@ -1,3 +1,11 @@
+---
+title: Crawler Consolidation Plan — JustNewsAgent
+description: Auto-generated description for Crawler Consolidation Plan — JustNewsAgent
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Crawler Consolidation Plan — JustNewsAgent
 
 Date: 2025-08-27
@@ -168,3 +176,9 @@ ruff check .
 ---
 
 End of consolidation plan.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

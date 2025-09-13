@@ -1,3 +1,11 @@
+---
+title: MAINTENANCE ACTION PLAN
+description: Auto-generated description for MAINTENANCE ACTION PLAN
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 ============================================================
 JUSTNEWSAGENT DOCUMENTATION CATALOGUE
 MAINTENANCE ACTION PLAN
@@ -99,3 +107,9 @@ RECOMMENDED ACTIONS:
 5. Maintenance Automation:
    - Schedule regular cross-reference validation
    - Monitor category sizes for optimal organization
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

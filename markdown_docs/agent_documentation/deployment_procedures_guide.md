@@ -1,3 +1,11 @@
+---
+title: Deployment Procedures Documentation
+description: Auto-generated description for Deployment Procedures Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Deployment Procedures Documentation
 
 ## Overview
@@ -1230,3 +1238,9 @@ print(f'GPU performance: {(end - start) * 1000:.2f}ms per operation')
 ---
 
 *This comprehensive deployment documentation covers all aspects of deploying and managing JustNews V4 in production environments. For specific configuration examples and troubleshooting guides, refer to the individual deployment scripts and configuration files.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

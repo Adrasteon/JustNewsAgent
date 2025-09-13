@@ -194,3 +194,13 @@ def get_critic_performance_endpoint(call: ToolCall):
             "models_loaded": False,
             "error": str(e)
         }
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("CRITIC_HOST", "0.0.0.0")
+    port = int(os.environ.get("CRITIC_PORT", 8006))
+
+    logger.info(f"Starting Critic Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

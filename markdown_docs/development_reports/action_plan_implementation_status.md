@@ -1,3 +1,11 @@
+---
+title: Action Plan Implementation Status (Code/Tests Evidence Only)
+description: Auto-generated description for Action Plan Implementation Status (Code/Tests Evidence Only)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Action Plan Implementation Status (Code/Tests Evidence Only)
 
 This document maps the actions listed in the action plan to their current implementation status in the repository using only runnable code, scripts, and tests as evidence (no documentation files are cited).
@@ -116,3 +124,9 @@ If you want, I will now:
 - (C) Create a small CI task / script to run the smoke stub during CI.
 
 Generated on: 2025-08-29
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

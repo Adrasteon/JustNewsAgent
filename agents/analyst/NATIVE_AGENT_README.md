@@ -1,3 +1,11 @@
+---
+title: Native TensorRT Analyst Agent - Quick Start Guide
+description: Auto-generated description for Native TensorRT Analyst Agent - Quick Start Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Native TensorRT Analyst Agent - Quick Start Guide
 
 ## 🏆 **Production Status: OPERATIONAL**
@@ -152,3 +160,9 @@ All existing integrations and MCP bus communication patterns remain unchanged.
 **Performance**: 406.9 articles/sec combined throughput  
 **Implementation**: Native TensorRT with professional CUDA management  
 **Ready for**: High-volume production deployment
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

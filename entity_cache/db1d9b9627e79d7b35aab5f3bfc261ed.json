@@ -1,0 +1,72 @@
+{
+  "data": [
+    {
+      "entity_id": "Q76",
+      "name": "Barack Obama",
+      "description": "president of the United States from 2009 to 2017",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q76",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "mul"
+      }
+    },
+    {
+      "entity_id": "Q47513588",
+      "name": "Barack Obama",
+      "description": "painting by Michael A. Glier",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q47513588",
+      "confidence": 1.0,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q649593",
+      "name": "Barack Obama Sr.",
+      "description": "Economist, father of Barack Obama Jr. (1934–1982)",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q649593",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q59661289",
+      "name": "Barack Obama Presidential Library",
+      "description": "reference unit of the National Archives and Records Administration",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q59661289",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q1379733",
+      "name": "presidency of Barack Obama",
+      "description": "44th presidential administration and cabinet of the USA (2009-2017)",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q1379733",
+      "confidence": 0.6,
+      "aliases": [
+        "Barack Obama presidency"
+      ],
+      "metadata": {
+        "match_type": "alias",
+        "language": "en"
+      }
+    }
+  ],
+  "cached_at": "2025-09-08T11:48:00.828759"
+}

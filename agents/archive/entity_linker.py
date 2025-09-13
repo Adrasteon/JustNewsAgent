@@ -228,7 +228,8 @@ class ExternalKnowledgeBaseLinker:
             lookup_params = {
                 'QueryString': entity_name,
                 'MaxHits': config["max_results"],
-                'QueryClass': self._map_entity_type_to_dbpedia_class(entity_type)
+                'QueryClass': self._map_entity_type_to_dbpedia_class(entity_type),
+                'format': 'json' # Add format=json to request JSON response
             }
 
             if not self.session:

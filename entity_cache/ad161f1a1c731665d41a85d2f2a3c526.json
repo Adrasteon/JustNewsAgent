@@ -1,0 +1,74 @@
+{
+  "data": [
+    {
+      "entity_id": "Q84263196",
+      "name": "COVID-19",
+      "description": "contagious disease caused by SARS-CoV-2",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q84263196",
+      "confidence": 1.0,
+      "aliases": [
+        "Covid-19"
+      ],
+      "metadata": {
+        "match_type": "alias",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q81068910",
+      "name": "COVID-19 pandemic",
+      "description": "pandemic caused by SARS-CoV-2",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q81068910",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q86694873",
+      "name": "COVID-19 pandemic in Africa",
+      "description": "ongoing coronavirus pandemic in Africa",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q86694873",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q87719492",
+      "name": "COVID-19 vaccine",
+      "description": "vaccine against SARS-CoV-2 coronavirus",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q87719492",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    },
+    {
+      "entity_id": "Q82069695",
+      "name": "SARS-CoV-2",
+      "description": "virus that causes COVID-19",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q82069695",
+      "confidence": 0.4,
+      "aliases": [
+        "COVID-19 virus"
+      ],
+      "metadata": {
+        "match_type": "alias",
+        "language": "en"
+      }
+    }
+  ],
+  "cached_at": "2025-09-08T11:48:04.326341"
+}

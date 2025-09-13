@@ -1,3 +1,11 @@
+---
+title: Performance Optimization Documentation
+description: Auto-generated description for Performance Optimization Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Performance Optimization Documentation
 
 ## Overview
@@ -734,3 +742,9 @@ class PerformanceProfiler:
 
 This comprehensive performance optimization documentation provides the foundation for maintaining high-performance operation in the JustNews V4 system while ensuring efficient resource utilization and scalability.</content>
 <parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/performance_optimization_documentation.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

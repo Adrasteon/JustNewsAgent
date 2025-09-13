@@ -1,3 +1,11 @@
+---
+title: MCP Bus Architecture Documentation
+description: Auto-generated description for MCP Bus Architecture Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # MCP Bus Architecture Documentation
 
 ## Overview
@@ -359,3 +367,9 @@ curl http://localhost:8000/agents
 **Version:** 1.0  
 **Authors:** JustNews Development Team</content>
 <parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/mcp_bus_architecture.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

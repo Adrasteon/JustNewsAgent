@@ -1,0 +1,1934 @@
+{
+  "data": [
+    {
+      "entity_id": "",
+      "name": "<B>London</B>",
+      "description": " City of <B>London</B>, <B>London's</B> ancient core − an area of just 1.12 square miles (2.9 km2) and",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1st-century_establishments_in_Roman_Britain",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1st-century_establishments_in_Roman_Britain",
+          "http://dbpedia.org/resource/Category:British_capitals",
+          "http://dbpedia.org/resource/Category:Capital_cities_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Capitals_in_Europe",
+          "http://dbpedia.org/resource/Category:Greater_London",
+          "http://dbpedia.org/resource/Category:London",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_the_1st_century",
+          "http://dbpedia.org/resource/Category:Port_cities_and_towns_in_Southern_England",
+          "http://dbpedia.org/resource/Category:Southern_England",
+          "http://dbpedia.org/resource/Category:Staple_ports"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B>, Ontario",
+      "description": "<B>London</B> is a city in southwestern Ontario, Canada, along the Quebec City–Windsor Corridor. The city",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1826_establishments_in_Canada",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1826_establishments_in_Canada",
+          "http://dbpedia.org/resource/Category:Cities_in_Ontario",
+          "http://dbpedia.org/resource/Category:London,_Ontario",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1826",
+          "http://dbpedia.org/resource/Category:Single-tier_municipalities_in_Ontario",
+          "http://dbpedia.org/resource/Category:Southwestern_Ontario"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "New <B>London</B>, Connecticut",
+      "description": "New <B>London</B> is a seaport city and a port of entry on the northeast coast of the United States",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1646_establishments_in_Connecticut",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1646_establishments_in_Connecticut",
+          "http://dbpedia.org/resource/Category:Cities_in_Connecticut",
+          "http://dbpedia.org/resource/Category:Cities_in_New_London_County,_Connecticut",
+          "http://dbpedia.org/resource/Category:New_London,_Connecticut",
+          "http://dbpedia.org/resource/Category:Populated_coastal_places_in_Connecticut",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1646",
+          "http://dbpedia.org/resource/Category:Populated_places_on_the_Thames_River_(Connecticut)"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "City of <B>London</B>",
+      "description": "The City of <B>London</B> is a city, county and a local government district that contains the historic",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:886_establishments",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:886_establishments",
+          "http://dbpedia.org/resource/Category:9th-century_establishments_in_England",
+          "http://dbpedia.org/resource/Category:Central_business_districts_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Cities_in_London",
+          "http://dbpedia.org/resource/Category:City_of_London",
+          "http://dbpedia.org/resource/Category:Counties_of_England_established_in_antiquity",
+          "http://dbpedia.org/resource/Category:Economy_of_London",
+          "http://dbpedia.org/resource/Category:Financial_districts",
+          "http://dbpedia.org/resource/Category:Financial_districts_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Greater_London",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Local_government_in_London",
+          "http://dbpedia.org/resource/Category:Offshore_finance"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Diocese of <B>London</B>",
+      "description": "The Diocese of <B>London</B> forms part of the Church of England's Province of Canterbury in England",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:Christianity_in_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Christianity_in_London",
+          "http://dbpedia.org/resource/Category:Diocese_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B>, Kentucky",
+      "description": "<B>London</B> is a home rule-class city in Laurel County, Kentucky, in the United States. It is the seat",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1836_establishments_in_Kentucky",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1836_establishments_in_Kentucky",
+          "http://dbpedia.org/resource/Category:Cities_in_Kentucky",
+          "http://dbpedia.org/resource/Category:Cities_in_Laurel_County,_Kentucky",
+          "http://dbpedia.org/resource/Category:County_seats_in_Kentucky",
+          "http://dbpedia.org/resource/Category:London,_Kentucky",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1836"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B>, Ohio",
+      "description": "<B>London</B> is a city in and the county seat of Madison County, Ohio, United States. Located about 25",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1810_establishments_in_Ohio",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1810_establishments_in_Ohio",
+          "http://dbpedia.org/resource/Category:Cities_in_Madison_County,_Ohio",
+          "http://dbpedia.org/resource/Category:Cities_in_Ohio",
+          "http://dbpedia.org/resource/Category:County_seats_in_Ohio",
+          "http://dbpedia.org/resource/Category:London,_Ohio",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1810"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Bishop of <B>London</B>",
+      "description": "The Bishop of <B>London</B> is the ordinary of the Church of England Diocese of <B>London</B> in the Province of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:Bishops_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Bishops_of_London",
+          "http://dbpedia.org/resource/Category:Lists_of_Church_of_England_bishops_and_archbishops",
+          "http://dbpedia.org/resource/Category:London_religion-related_lists"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Stansted Airport",
+      "description": "<B>London</B> Stansted Airport (IATA: STN, ICAO: EGSS) is an international airport located at Stansted",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:1943_establishments_in_England",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1943_establishments_in_England",
+          "http://dbpedia.org/resource/Category:Airports_established_in_1943",
+          "http://dbpedia.org/resource/Category:Airports_in_Essex",
+          "http://dbpedia.org/resource/Category:Airports_in_the_East_of_England",
+          "http://dbpedia.org/resource/Category:Airports_in_the_London_region",
+          "http://dbpedia.org/resource/Category:Civilian_airports_with_RAF_origins",
+          "http://dbpedia.org/resource/Category:Elsenham",
+          "http://dbpedia.org/resource/Category:Foster_and_Partners_buildings",
+          "http://dbpedia.org/resource/Category:Heathrow_Airport_Holdings",
+          "http://dbpedia.org/resource/Category:Lattice_shell_structures",
+          "http://dbpedia.org/resource/Category:London_Stansted_Airport",
+          "http://dbpedia.org/resource/Category:Manchester_Airports_Group",
+          "http://dbpedia.org/resource/Category:Ove_Arup_buildings_and_structures",
+          "http://dbpedia.org/resource/Category:Proposed_transport_infrastructure_in_the_East_of_England",
+          "http://dbpedia.org/resource/Category:Stansted_Mountfitchet",
+          "http://dbpedia.org/resource/Category:Takeley",
+          "http://dbpedia.org/resource/Category:Transport_in_Uttlesford"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Holloway, <B>London</B>",
+      "description": "Holloway is an inner-city district of the <B>London</B> Borough of Islington, 3.3 miles (5.3 km) north of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.8,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Islington",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Paddington",
+      "description": "Paddington is an area within the City of Westminster, in central <B>London</B>, located in the West End of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6000000000000001,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_City_of_Westminster",
+          "http://dbpedia.org/resource/Category:Paddington",
+          "http://dbpedia.org/resource/Category:Tyburnia"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Bloomsbury",
+      "description": " <B>London</B>. It is considered a fashionable residential area, and is the location of numerous cultural",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6000000000000001,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Bills_of_mortality_parishes",
+          "http://dbpedia.org/resource/Category:Bloomsbury",
+          "http://dbpedia.org/resource/Category:Bloomsbury_Group_locations",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Camden",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_London",
+          "http://dbpedia.org/resource/Category:James_Burton_(property_developer)_buildings"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Greater <B>London</B>",
+      "description": "Greater <B>London</B> is a ceremonial county of England that makes up the majority of the <B>London</B> region",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Ceremonial_counties_of_England",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Ceremonial_counties_of_England",
+          "http://dbpedia.org/resource/Category:Counties_of_England_established_in_1965",
+          "http://dbpedia.org/resource/Category:Geography_of_London",
+          "http://dbpedia.org/resource/Category:Greater_London",
+          "http://dbpedia.org/resource/Category:Interested_parties_in_planning_in_England",
+          "http://dbpedia.org/resource/Category:Local_government_in_London",
+          "http://dbpedia.org/resource/Category:Metropolitan_areas_of_England",
+          "http://dbpedia.org/resource/Category:NUTS_1_statistical_regions_of_England",
+          "http://dbpedia.org/resource/Category:NUTS_1_statistical_regions_of_the_European_Union",
+          "http://dbpedia.org/resource/Category:Regions_of_England",
+          "http://dbpedia.org/resource/Category:Southern_England"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Chelsea, <B>London</B>",
+      "description": "Chelsea is an area of South West <B>London</B>, bounded to the south by the River Thames. Its river",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:American_diaspora_in_Europe",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:American_diaspora_in_Europe",
+          "http://dbpedia.org/resource/Category:Chelsea,_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Kensington_and_Chelsea",
+          "http://dbpedia.org/resource/Category:History_of_Middlesex",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Hackney",
+      "description": "The <B>London</B> Borough of Hackney ( () HAK-nee) is a <B>London</B> borough in Inner <B>London</B>. The historical and",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Hackney",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Wimbledon, <B>London</B>",
+      "description": "Wimbledon  is a district and town of south-west <B>London</B>, England, 7.1 miles (11.4 km) south-west of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Merton",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Wimbledon,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "South <B>London</B>",
+      "description": "South <B>London</B> is the southern part of <B>London</B>, England. Situated south of the River Thames, it",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Geography_of_London",
+          "http://dbpedia.org/resource/Category:London_sub-regions"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Camden",
+      "description": "The <B>London</B> Borough of Camden is a borough in Northwest <B>London</B>; it forms part of Inner <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Camden",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Edmonton, <B>London</B>",
+      "description": "Edmonton is a district in North <B>London</B> in the <B>London</B> Borough of Enfield, England, 8.4 miles (13.5",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Enfield",
+          "http://dbpedia.org/resource/Category:Edmonton,_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Enfield",
+      "description": "The <B>London</B> Borough of Enfield () is a <B>London</B> borough in North <B>London</B>. It borders the <B>London</B> Borough",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Enfield",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Sutton, <B>London</B>",
+      "description": "Sutton is a large town, and the principal town of the eponymous <B>London</B> Borough of Sutton in South",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Sutton",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London",
+          "http://dbpedia.org/resource/Category:Sutton,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "St Pancras, <B>London</B>",
+      "description": "St Pancras () is an area of Central and North West <B>London</B>. For many centuries the name was used for",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Camden",
+          "http://dbpedia.org/resource/Category:St_Pancras,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Brent",
+      "description": "The <B>London</B> Borough of Brent () is a <B>London</B> borough in Northwest <B>London</B>; it forms part of Outer",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Brent",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Harrow, <B>London</B>",
+      "description": "Harrow () is a large suburban town in Greater <B>London</B>, England. It serves as the principal",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Harrow",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "County of <B>London</B>",
+      "description": "The County of <B>London</B> was a county of England from 1889 to 1965, corresponding to the area known",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Administrative_counties_abolished_in_1965",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Administrative_counties_abolished_in_1965",
+          "http://dbpedia.org/resource/Category:Counties_of_England_disestablished_in_1965",
+          "http://dbpedia.org/resource/Category:Counties_of_England_established_in_1889",
+          "http://dbpedia.org/resource/Category:County_of_London",
+          "http://dbpedia.org/resource/Category:Greater_London_predecessors",
+          "http://dbpedia.org/resource/Category:History_of_local_government_in_London_(1889–1965)"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Newham",
+      "description": "The <B>London</B> Borough of Newham  () is a <B>London</B> borough created in 1965 by the <B>London</B> Government Act",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Newham",
+          "http://dbpedia.org/resource/Category:London_boroughs",
+          "http://dbpedia.org/resource/Category:Pakistani-British_culture_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Tower Hamlets",
+      "description": "The <B>London</B> Borough of Tower Hamlets is a <B>London</B> borough located in East <B>London</B>; it covers much of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:London_boroughs",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1965"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Lambeth",
+      "description": "Lambeth ( ()) is a <B>London</B> borough in south <B>London</B>, England, which forms part of Inner <B>London</B>. Its",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Barking, <B>London</B>",
+      "description": "Barking is a suburban area of East <B>London</B> and the administrative centre of the <B>London</B> Borough of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Barking,_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Barking_and_Dagenham",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Acton, <B>London</B>",
+      "description": "Acton () is an area of west <B>London</B>, England, within the <B>London</B> Borough of Ealing. It is 6.1 miles",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Acton,_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Acton,_London",
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Ealing",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Spa_towns_in_England"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "The <B>London</B> Studios",
+      "description": "The <B>London</B> Studios (also known as The South Bank Studios, The <B>London</B> Television Centre, ITV Towers",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1972_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1972_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:2018_disestablishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Buildings_and_structures_completed_in_1972",
+          "http://dbpedia.org/resource/Category:Buildings_and_structures_in_the_London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:ITV_offices,_studios_and_buildings",
+          "http://dbpedia.org/resource/Category:Local_mass_media_in_London",
+          "http://dbpedia.org/resource/Category:Mass_media_company_headquarters_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:Mitsubishi_Estate",
+          "http://dbpedia.org/resource/Category:Television_studios_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Bromley",
+      "description": "The <B>London</B> Borough of Bromley ( ()) is the southeasternmost of the 32 <B>London</B> boroughs that make up",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Blackheath, <B>London</B>",
+      "description": "Blackheath is a district of south-east <B>London</B>, England, straddling the Royal Borough of Greenwich",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1730_establishments_in_England",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1730_establishments_in_England",
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Blackheath,_London",
+          "http://dbpedia.org/resource/Category:Common_land_in_London",
+          "http://dbpedia.org/resource/Category:Conservation_areas_in_London",
+          "http://dbpedia.org/resource/Category:Cricket_grounds_in_London",
+          "http://dbpedia.org/resource/Category:Defunct_cricket_grounds_in_England",
+          "http://dbpedia.org/resource/Category:Defunct_sports_venues_in_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Greenwich",
+          "http://dbpedia.org/resource/Category:English_cricket_venues_in_the_18th_century",
+          "http://dbpedia.org/resource/Category:Nature_reserves_in_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Sports_venues_completed_in_1730",
+          "http://dbpedia.org/resource/Category:Sports_venues_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Poplar, <B>London</B>",
+      "description": "Poplar is a district in East <B>London</B>, England, the administrative centre of the borough of Tower",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Poplar,_London",
+          "http://dbpedia.org/resource/Category:Port_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Barnet",
+      "description": "The <B>London</B> Borough of Barnet () is a suburban <B>London</B> borough in North <B>London</B>. It forms part of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Barnet",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Northwood, <B>London</B>",
+      "description": "Northwood is an area in the north-west of Greater <B>London</B>, England. It is located within the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Hillingdon",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Ealing",
+      "description": "The <B>London</B> Borough of Ealing ( ()) is a <B>London</B> borough in West <B>London</B>. It comprises seven major",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Ealing",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Tower of <B>London</B>",
+      "description": "The Tower of <B>London</B>, officially Her Majesty's Royal Palace and Fortress of the Tower of <B>London</B>, is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Army_museums_in_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Army_museums_in_London",
+          "http://dbpedia.org/resource/Category:Buildings_and_structures_completed_in_1078",
+          "http://dbpedia.org/resource/Category:Buildings_and_structures_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Castles_in_London",
+          "http://dbpedia.org/resource/Category:Defence_of_London",
+          "http://dbpedia.org/resource/Category:Defunct_prisons_in_London",
+          "http://dbpedia.org/resource/Category:Fortifications_of_London",
+          "http://dbpedia.org/resource/Category:Gothic_architecture_in_England",
+          "http://dbpedia.org/resource/Category:Grade_I_listed_buildings_in_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Grade_I_listed_castles",
+          "http://dbpedia.org/resource/Category:Historic_Royal_Palaces",
+          "http://dbpedia.org/resource/Category:History_museums_in_London",
+          "http://dbpedia.org/resource/Category:Honourable_Artillery_Company",
+          "http://dbpedia.org/resource/Category:Local_museums_in_London",
+          "http://dbpedia.org/resource/Category:Museums_in_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Museums_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:National_government_buildings_in_London",
+          "http://dbpedia.org/resource/Category:Regimental_museums_in_London",
+          "http://dbpedia.org/resource/Category:Reportedly_haunted_locations_in_London",
+          "http://dbpedia.org/resource/Category:Royal_Regiment_of_Fusiliers",
+          "http://dbpedia.org/resource/Category:Royal_residences_in_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Tourist_attractions_in_London",
+          "http://dbpedia.org/resource/Category:Tower_of_London",
+          "http://dbpedia.org/resource/Category:Towers_completed_in_the_11th_century",
+          "http://dbpedia.org/resource/Category:Towers_in_London",
+          "http://dbpedia.org/resource/Category:William_the_Conqueror",
+          "http://dbpedia.org/resource/Category:World_Heritage_Sites_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Croydon",
+      "description": "The <B>London</B> Borough of Croydon () is a <B>London</B> borough in South <B>London</B>, part of Outer <B>London</B>. It",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Coast_to_Capital_Local_Enterprise_Partnership",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Croydon",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Sydenham, <B>London</B>",
+      "description": "Sydenham () is a district of south-east <B>London</B>, England, within the <B>London</B> Boroughs of Lewisham",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Sydenham,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Hillingdon",
+      "description": "The <B>London</B> Borough of Hillingdon () is a large borough located in Greater <B>London</B>, England which had",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Hillingdon",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Southwark",
+      "description": "The <B>London</B> Borough of Southwark ( ()) in South <B>London</B> forms part of Inner <B>London</B> and is connected",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Stratford, <B>London</B>",
+      "description": "Stratford is a district in the East End of <B>London</B>, in the <B>London</B> Borough of Newham, England. It is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Newham",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Stratford,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Richmond upon Thames",
+      "description": "The <B>London</B> Borough of Richmond upon Thames () in southwest <B>London</B> forms part of Outer <B>London</B> and is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Richmond_upon_Thames",
+          "http://dbpedia.org/resource/Category:London_boroughs",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1965"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Merton",
+      "description": "The <B>London</B> Borough of Merton ( ()) is a borough in south-west <B>London</B>, England. The borough was",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Merton",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Lewisham",
+      "description": "Lewisham ( ()) is a <B>London</B> borough in South <B>London</B>; it forms part of Inner <B>London</B>. The principal",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Bow, <B>London</B>",
+      "description": "Bow () is an area of East <B>London</B> within the <B>London</B> Borough of Tower Hamlets. It is primarily a",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Bow,_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Execution_sites_in_England",
+          "http://dbpedia.org/resource/Category:London_crime_history",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Stratford,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Islington",
+      "description": "The <B>London</B> Borough of Islington ( () IZ-ling-tən) is a <B>London</B> borough in Inner <B>London</B>. The borough",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_England",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_England",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Islington",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "New <B>London</B> County, Connecticut",
+      "description": "New <B>London</B> County is in the southeastern corner of Connecticut and comprises the Norwich-New <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1666_establishments_in_Connecticut",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1666_establishments_in_Connecticut",
+          "http://dbpedia.org/resource/Category:1960_disestablishments_in_Connecticut",
+          "http://dbpedia.org/resource/Category:New_London_County,_Connecticut",
+          "http://dbpedia.org/resource/Category:Populated_places_established_in_1666"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Kilburn, <B>London</B>",
+      "description": "Kilburn is an area of <B>London</B>, England, which spans the boundary of two <B>London</B> Boroughs: Camden to",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_City_of_Westminster",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Brent",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Camden",
+          "http://dbpedia.org/resource/Category:Irish_diaspora_in_England",
+          "http://dbpedia.org/resource/Category:Kilburn,_London",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Harrow",
+      "description": "The <B>London</B> Borough of Harrow  is a <B>London</B> borough in north-west <B>London</B>, England, and forms part of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:History_of_local_government_in_Middlesex",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Harrow",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Hounslow",
+      "description": "The <B>London</B> Borough of Hounslow () is a <B>London</B> borough in West <B>London</B>, England, forming part of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Hounslow",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Farnborough, <B>London</B>",
+      "description": "Farnborough is an area of South East <B>London</B> within the <B>London</B> Borough of Bromley. It is located",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Bromley"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Hammersmith and Fulham",
+      "description": "The <B>London</B> Borough of Hammersmith and Fulham () is a <B>London</B> borough partly in west <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Hammersmith_and_Fulham",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Bexley",
+      "description": "The <B>London</B> Borough of Bexley  () is a <B>London</B> borough in Southeast <B>London</B>, forming part of Outer",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Bexley",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Wandsworth",
+      "description": "Wandsworth ( ()) is a <B>London</B> borough in southwest <B>London</B>; it forms part of Inner <B>London</B>. The",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Wandsworth",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Haringey",
+      "description": "The <B>London</B> Borough of Haringey (pronounced  () HARR-ing-gay, same as Harringay)is a <B>London</B> borough",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Haringey",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Waltham Forest",
+      "description": "The <B>London</B> Borough of Waltham Forest () is a <B>London</B> borough in northeast <B>London</B>, England. The",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Waltham_Forest",
+          "http://dbpedia.org/resource/Category:London_boroughs",
+          "http://dbpedia.org/resource/Category:Pakistani-British_culture_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Blackwall, <B>London</B>",
+      "description": "Blackwall is a locale in East <B>London</B>, located in the <B>London</B> Borough of Tower Hamlets and also forms",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Blackwall,_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Port_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Sutton",
+      "description": "The <B>London</B> Borough of Sutton () is a <B>London</B> borough in South <B>London</B>, England and forms part of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Sutton",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Hampton, <B>London</B>",
+      "description": "Hampton is a suburban area on the north bank of the River Thames, in the <B>London</B> Borough of Richmond",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Richmond_upon_Thames",
+          "http://dbpedia.org/resource/Category:Hampton,_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Wards_of_the_London_Borough_of_Richmond_upon_Thames"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Southgate, <B>London</B>",
+      "description": "Southgate is a suburban area of north <B>London</B>, England in the <B>London</B> Borough of Enfield. It is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Enfield",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Southgate,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Purley, <B>London</B>",
+      "description": "Purley is an area of the <B>London</B> Borough of Croydon in <B>London</B>, England. It was part of the county of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Croydon"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Charlton, <B>London</B>",
+      "description": "Charlton is a district of south east <B>London</B>, England, within the Royal Borough of Greenwich. It is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Cable_manufacture_in_London",
+          "http://dbpedia.org/resource/Category:Charlton,_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Greenwich"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Lee, <B>London</B>",
+      "description": "Lee, also known as Lee Green, is a district of south east <B>London</B>, England, within the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Lee,_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "<B>London</B> Borough of Havering",
+      "description": "The <B>London</B> Borough of Havering ( ()) in East <B>London</B>, England, forms part of Outer <B>London</B>. The",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.6,
+      "category": "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:1965_establishments_in_the_United_Kingdom",
+          "http://dbpedia.org/resource/Category:Local_authorities_adjoining_the_River_Thames",
+          "http://dbpedia.org/resource/Category:London_Borough_of_Havering",
+          "http://dbpedia.org/resource/Category:London_boroughs"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Westminster",
+      "description": "Westminster is a government district and former capital of the Kingdom of England in Central <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_City_of_Westminster",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Kensington",
+      "description": " of central <B>London</B>. The district's commercial heart is Kensington High Street, running on an east-west",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Kensington_and_Chelsea",
+          "http://dbpedia.org/resource/Category:Kensington",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Hampstead",
+      "description": "Hampstead ( or ) is an area in north <B>London</B>, England. Lying 4 miles (6.4 km) northwest of Charing",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Camden",
+          "http://dbpedia.org/resource/Category:Hampstead",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Lewisham",
+      "description": "Lewisham () is an area of south east <B>London</B>, England, 5.9 miles (9.5 km) south of Charing Cross. It",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Lambeth",
+      "description": "Lambeth () is a district in South <B>London</B>, England, in the <B>London</B> Borough of Lambeth. It is situated",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Burial_sites_of_the_House_of_Valois-Saint-Remy",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Lambeth"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Islington",
+      "description": "Islington () is a district in Greater <B>London</B>, England, and part of the <B>London</B> Borough of Islington",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Islington",
+          "http://dbpedia.org/resource/Category:Islington",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Fulham",
+      "description": "Fulham () is an area of the <B>London</B> Borough of Hammersmith and Fulham in South West <B>London</B>, England",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Hammersmith_and_Fulham",
+          "http://dbpedia.org/resource/Category:Fulham",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Hammersmith_and_Fulham",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Bromley",
+      "description": "Bromley is a large town in South East <B>London</B>, England, and the principal town of the <B>London</B> Borough",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Hammersmith",
+      "description": "Hammersmith is a district of west <B>London</B>, England, located 4.3 miles (6.9 km) west-southwest of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Business_improvement_districts_in_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Business_improvement_districts_in_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Hammersmith_and_Fulham",
+          "http://dbpedia.org/resource/Category:Hammersmith",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Hammersmith_and_Fulham",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Polish-British_culture"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Wandsworth",
+      "description": "Wandsworth Town  is a district of south <B>London</B>, within the <B>London</B> Borough of Wandsworth 4.6 miles",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Wandsworth",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Croydon",
+      "description": " principal settlement in the <B>London</B> Borough of Croydon, it is one of the largest commercial districts",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Croydon",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Croydon",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Rotherhithe",
+      "description": "Rotherhithe () is a residential district in south-east <B>London</B>, England, and part of the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:Peninsulas_of_England",
+          "http://dbpedia.org/resource/Category:Port_of_London",
+          "http://dbpedia.org/resource/Category:Ports_and_harbours_of_the_Thames_Estuary",
+          "http://dbpedia.org/resource/Category:Redeveloped_ports_and_waterfronts_in_London",
+          "http://dbpedia.org/resource/Category:Redevelopment_projects_in_London",
+          "http://dbpedia.org/resource/Category:Rotherhithe",
+          "http://dbpedia.org/resource/Category:Shipbuilding_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Southwark",
+      "description": "Southwark ( SUDH-ək) is a district of Central <B>London</B> and is the north-west of the <B>London</B> Borough of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:History_of_the_City_of_London",
+          "http://dbpedia.org/resource/Category:Market_towns_in_Surrey"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Marylebone",
+      "description": "Marylebone ( or , , , or ) is an area in the West End of <B>London</B>, England, which is since 1965 part",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_City_of_Westminster",
+          "http://dbpedia.org/resource/Category:Marylebone"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Battersea",
+      "description": "Battersea is a district of South West <B>London</B>, England, within the <B>London</B> Borough of Wandsworth. It",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Battersea",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Wandsworth"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Beckenham",
+      "description": "Beckenham () is a town in Greater <B>London</B>, England, within the <B>London</B> Borough of Bromley. It borders",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Bromley"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Camberwell",
+      "description": "Camberwell () is a district of South <B>London</B>, England, within the <B>London</B> Borough of Southwark. It is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Camberwell",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Southwark"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Chipping Barnet",
+      "description": "Chipping Barnet or High Barnet is a suburban market town in north <B>London</B>, forming part of the",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Chipping_Barnet",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Chipping_Barnet",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Brixton",
+      "description": "Brixton is a district of South <B>London</B>, England, within the <B>London</B> Borough of Lambeth. The area is",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Brixton",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Brixton",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Deptford",
+      "description": "Deptford  is an area of south-east <B>London</B>, England. It is on the south bank of the River Thames",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Deptford",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Deptford",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Port_of_London",
+          "http://dbpedia.org/resource/Category:Shipbuilding_in_London",
+          "http://dbpedia.org/resource/Category:Shipyards_on_the_River_Thames"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Woolwich",
+      "description": "Woolwich () is a district of southeast <B>London</B>, England, within the Royal Borough of Greenwich. It",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Greenwich",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London",
+          "http://dbpedia.org/resource/Category:Woolwich"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Chiswick",
+      "description": "Chiswick ( () CHIZ-ik) is a district of west <B>London</B>, England. It contains Hogarth's House, the",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Chiswick",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Hounslow",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Stepney",
+      "description": "Stepney, also known as Stepney Green, is a district in the East End of <B>London</B> in the <B>London</B> Borough",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Conservation_areas_in_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Conservation_areas_in_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Tower_Hamlets",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Stepney"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "SW postcode area",
+      "description": "The SW (South Western) postcode area, also known as the <B>London</B> SW postcode area, is a group of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Postcode_areas_covering_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Postcode_areas_covering_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Ilford",
+      "description": "Ilford is a large town in east <B>London</B>, England, located 9.1 miles (14.6 km) east of Charing Cross",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Business_improvement_districts_in_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Redbridge",
+          "http://dbpedia.org/resource/Category:Ilford",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Walthamstow",
+      "description": "Walthamstow ( or ) is a major district in North East <B>London</B>, the central settlement of the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Waltham_Forest",
+          "http://dbpedia.org/resource/Category:Major_centres_of_London",
+          "http://dbpedia.org/resource/Category:Walthamstow"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Bermondsey",
+      "description": "Bermondsey () is a district in South East <B>London</B> in the <B>London</B> Borough of Southwark, England, 2.5",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Bermondsey",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:Port_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "West Ham",
+      "description": "West Ham is a district in East <B>London</B>, located 6.1 mi (9.8 km) east of Charing Cross Forming the",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:History_of_Essex",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Newham",
+          "http://dbpedia.org/resource/Category:West_Ham"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Uxbridge",
+      "description": "Uxbridge () is a suburban town in west <B>London</B>, and the administrative headquarters of the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Hillingdon",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Uxbridge"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "SE postcode area",
+      "description": "The SE (South Eastern) postcode area covers a broad radial swathe of the south-east of the <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Bexley",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Bexley",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Bromley",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Croydon",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Lambeth",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Lewisham",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_London_Borough_of_Southwark",
+          "http://dbpedia.org/resource/Category:Media_and_communications_in_the_Royal_Borough_of_Greenwich",
+          "http://dbpedia.org/resource/Category:Postcode_areas_covering_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Greenwich",
+      "description": "Greenwich ( () GREN-itch,  GRIN-ij,  GRIN-itch, or  GREN-ij) is an area of South East <B>London</B>",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_London_on_the_River_Thames",
+          "http://dbpedia.org/resource/Category:Districts_of_the_Royal_Borough_of_Greenwich",
+          "http://dbpedia.org/resource/Category:Former_civil_parishes_in_the_Royal_Borough_of_Greenwich",
+          "http://dbpedia.org/resource/Category:Port_of_London"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Romford",
+      "description": "Romford is a large town in east <B>London</B> and the administrative centre of the <B>London</B> Borough of",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Havering",
+          "http://dbpedia.org/resource/Category:Market_towns_in_London",
+          "http://dbpedia.org/resource/Category:Metropolitan_centres_of_London",
+          "http://dbpedia.org/resource/Category:Romford"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Tottenham",
+      "description": "Tottenham () is a district of North <B>London</B>, England, in the <B>London</B> Borough of Haringey. It is 5.9",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Haringey",
+          "http://dbpedia.org/resource/Category:History_of_the_London_Borough_of_Haringey",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex",
+          "http://dbpedia.org/resource/Category:Tottenham"
+        ]
+      }
+    },
+    {
+      "entity_id": "",
+      "name": "Hendon",
+      "description": "Hendon is a <B>London</B> urban area in the Borough of Barnet, 7 miles (11 km) northwest of Charing Cross",
+      "knowledge_base": "dbpedia",
+      "url": "",
+      "confidence": 0.4,
+      "category": "http://dbpedia.org/resource/Category:Areas_of_London",
+      "metadata": {
+        "classes": [],
+        "categories": [
+          "http://dbpedia.org/resource/Category:Areas_of_London",
+          "http://dbpedia.org/resource/Category:District_centres_of_London",
+          "http://dbpedia.org/resource/Category:Districts_of_the_London_Borough_of_Barnet",
+          "http://dbpedia.org/resource/Category:Hendon",
+          "http://dbpedia.org/resource/Category:Places_formerly_in_Middlesex"
+        ]
+      }
+    }
+  ],
+  "cached_at": "2025-09-08T11:51:59.599021"
+}

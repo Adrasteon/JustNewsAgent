@@ -1,3 +1,11 @@
+---
+title: API Documentation
+description: Auto-generated description for API Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # API Documentation
 
 ## Overview
@@ -1297,3 +1305,9 @@ results = await client.batch_process(
 ---
 
 *This comprehensive API documentation covers all endpoints, parameters, responses, and usage patterns for the JustNews V4 system. For specific implementation details, refer to the individual agent source code and configuration files.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

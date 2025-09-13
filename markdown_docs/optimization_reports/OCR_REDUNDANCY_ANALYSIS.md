@@ -1,3 +1,11 @@
+---
+title: OCR Redundancy Analysis - NewsReader V2 Engine
+description: Auto-generated description for OCR Redundancy Analysis - NewsReader V2 Engine
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # OCR Redundancy Analysis - NewsReader V2 Engine
 
 ## Executive Summary
@@ -168,3 +176,9 @@ OCR (EasyOCR) is **CONFIRMED REDUNDANT** in the NewsReader V2 architecture:
 - Monitor production usage for any edge cases requiring OCR
 - After validation period (recommended 1-2 weeks), completely remove OCR code
 - Final cleanup: Remove easyocr from requirements.txt
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

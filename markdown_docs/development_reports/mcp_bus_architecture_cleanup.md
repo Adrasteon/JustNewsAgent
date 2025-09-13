@@ -1,3 +1,11 @@
+---
+title: MCP Bus Architecture Cleanup - August 2, 2025
+description: Auto-generated description for MCP Bus Architecture Cleanup - August 2, 2025
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # MCP Bus Architecture Cleanup - August 2, 2025
 
 ## 🎯 Issue Identified
@@ -77,3 +85,9 @@ Successfully resolved architectural duplication by archiving legacy MCP bus impl
 ---
 *Cleanup completed: August 2, 2025*
 *Architecture validated: Single source of truth established*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

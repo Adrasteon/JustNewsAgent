@@ -1,3 +1,11 @@
+---
+title: News Outlets Loader & Backfill Runbook
+description: Auto-generated description for News Outlets Loader & Backfill Runbook
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # News Outlets Loader & Backfill Runbook
 
 This runbook explains how to safely run the canonical sources loader (`scripts/news_outlets.py`) and the backfill script (`scripts/backfill_article_sources.py`) against the `justnews` database. It covers prerequisites, dry-run and production runs, validation, backups and rollback guidance, scheduling notes, and common troubleshooting items encountered during development.
@@ -198,5 +206,8 @@ PYTHONPATH=. python3 scripts/news_outlets.py --file <file> --dry-run
 ## Notes & history
 - This runbook was created on 2025-08-28 and captures fixes and troubleshooting from recent runs: adding `~/.pgpass` support, running with `PYTHONPATH=.`, and switching the loader to a CTE-style upsert to handle expression-based unique indexes.
 
+## See also
 
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
 

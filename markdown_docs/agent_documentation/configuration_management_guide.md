@@ -1,3 +1,11 @@
+---
+title: Configuration Management Documentation
+description: Auto-generated description for Configuration Management Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Configuration Management Documentation
 
 ## Overview
@@ -977,3 +985,9 @@ print(f"GPU enabled: {config.get('gpu.enabled')}")
 ---
 
 *This comprehensive configuration management documentation covers all aspects of the JustNews V4 configuration system. For specific implementation details, refer to the individual configuration files and Python modules.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

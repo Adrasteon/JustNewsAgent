@@ -230,12 +230,19 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
     except Exception:
         cache_folder = str(cache_folder)
 
-    # Normalize device key for caching; if device is None, auto-detect
+    # If SAFE_MODE or FORCE_CPU is set, always run on CPU and avoid GPU manager
+    safe_mode = str(os.environ.get('SAFE_MODE', '0')).lower() in ('1', 'true', 'yes')
+    force_cpu = str(os.environ.get('FORCE_CPU', '0')).lower() in ('1', 'true', 'yes')
+
+    # Normalize device key for caching; if device is None, auto-detect (unless safe/force cpu)
     device_key = None
     try:
         import torch
         if device is None:
-            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+            if safe_mode or force_cpu:
+                device = torch.device('cpu')
+            else:
+                device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         if isinstance(device, torch.device):
             device_key = str(device)
@@ -265,9 +272,9 @@ def get_shared_embedding_model(model_name: str = "all-MiniLM-L6-v2", cache_folde
     logger.info("Loading shared embedding model: %s (cache=%s) device=%s agent=%s",
                 model_name, cache_folder, device_key, caller_agent or 'unknown')
 
-    # Check GPU manager for allocation if using GPU
+    # Skip GPU allocation entirely in safe/force CPU mode
     gpu_allocation = None
-    if device_key.startswith('cuda') and _get_gpu_manager() is not None:
+    if (not safe_mode and not force_cpu) and device_key.startswith('cuda') and _get_gpu_manager() is not None:
         try:
             gpu_manager = _get_gpu_manager()
             # Request GPU allocation for embedding model (typically smaller models)

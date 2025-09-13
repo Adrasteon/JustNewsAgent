@@ -58,7 +58,8 @@ def register_with_mcp_bus(port: int = 0):
 async def lifespan(app: FastAPI):
     # Register with MCP Bus on startup (best effort)
     try:
-        register_with_mcp_bus()
+        port = int(os.environ.get('DB_WORKER_PORT', 8010))
+        register_with_mcp_bus(port)
     except Exception:
         logger.debug("MCP Bus registration failed during startup")
     yield

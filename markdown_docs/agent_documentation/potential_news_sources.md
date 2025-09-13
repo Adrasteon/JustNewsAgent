@@ -1,5 +1,10 @@
-
-
+---
+title: potential news sources
+description: Auto-generated description for potential news sources
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
 
 These organizations provide news coverage to other outlets worldwide and often have a broad, international perspective.
 
@@ -312,4 +317,8 @@ These sites are excellent for deep dives into specific subject areas.
 | https://www.eater.com | Eater | A food and dining network offering news, reviews, and guides. |
 | https://www.foodandwine.com | Food & Wine | A monthly magazine published by Dotdash Meredith. |
 
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
 

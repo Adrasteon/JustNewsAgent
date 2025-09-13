@@ -1,3 +1,11 @@
+---
+title: Agent Upgrade Plan - JustNewsAgent V4
+description: Auto-generated description for Agent Upgrade Plan - JustNewsAgent V4
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Agent Upgrade Plan - JustNewsAgent V4
 
 ## Executive Summary
@@ -413,3 +421,9 @@ The JustNewsAgent system has a solid foundation with production-ready GPU accele
 ---
 
 *This analysis was conducted on August 31, 2025, and should be reviewed quarterly to track progress and identify new improvement opportunities.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

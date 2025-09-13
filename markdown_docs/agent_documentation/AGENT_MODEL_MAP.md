@@ -1,3 +1,11 @@
+---
+title: AGENT_MODEL_MAP — definitive mapping
+description: Authoritative agent-to-model mapping and canonical storage paths for production deployments.
+tags: [models, mapping, agents, deployment]
+status: active
+last_updated: 2025-09-12
+---
+
 # AGENT_MODEL_MAP — Definitive Agent → Model mapping
 
 This document lists the authoritative mapping of agents to their external model dependencies as defined in `scripts/download_agent_models.py` (the `AGENT_MODEL_MAP` constant). It also records the current canonical target path and observed size (from the data drive) at the time this file was generated.
@@ -9,8 +17,6 @@ Generated: 2025-08-20
 `/media/adra/Data/justnews/agents/<agent>/models/<model-folder>`
 
 (Each agent's `agents/<agent>/models` in the repository is a symlink to the canonical path when models are present.)
-
----
 
 ## Mapping (agent -> [(type, HF id)])
 
@@ -47,8 +53,6 @@ Generated: 2025-08-20
 - chief_editor
   - (transformers) distilbert-base-uncased
 
----
-
 ## Observed on-disk targets & sizes
 
 (Resolved symlink targets and `du -sh` sizes at generation time.)
@@ -66,8 +70,12 @@ Generated: 2025-08-20
 - scout: `/media/adra/Data/justnews/agents/scout/models` — 1.5G
 - synthesizer: `/media/adra/Data/justnews/agents/synthesizer/models` — 636M
 
----
-
 ## Notes
 - `dashboard` and `reasoning` intentionally do not have model folders: `dashboard` is a GUI controller; `reasoning` uses the Nucleoid engine and does not require a HF model folder.
 - To update this document, re-run the quick verification and regenerate this file.
+
+## See also
+
+- MODEL_STORE_GUIDELINES.md
+- GPU_ORCHESTRATOR_OPERATIONS.md
+- preflight_runbook.md

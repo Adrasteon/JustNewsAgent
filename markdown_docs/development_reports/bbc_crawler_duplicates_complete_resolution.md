@@ -1,3 +1,11 @@
+---
+title: BBC Crawler Duplicates - Complete Resolution ✅
+description: Auto-generated description for BBC Crawler Duplicates - Complete Resolution ✅
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # BBC Crawler Duplicates - Complete Resolution ✅
 
 ## 🎯 **Duplicate Resolution Summary**
@@ -117,3 +125,9 @@ Successfully eliminated all duplicate BBC crawler implementations, establishing 
 *Active location: agents/scout/production_crawlers/sites/*
 *Performance: 8.14+ art/sec ultra-fast, 0.86+ art/sec AI-enhanced*
 *Architecture: Clean, integrated, production-ready*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

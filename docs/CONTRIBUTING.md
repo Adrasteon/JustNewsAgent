@@ -1,3 +1,11 @@
+---
+title: 📚 JustNews V4 Documentation Contributor Guidelines
+description: Auto-generated description for 📚 JustNews V4 Documentation Contributor Guidelines
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # 📚 JustNews V4 Documentation Contributor Guidelines
 
 ## 🎯 Overview
@@ -452,3 +460,9 @@ hotfix/critical-fix
 **Remember**: High-quality documentation is a critical component of JustNews V4's success. Your contributions help maintain our industry-leading standards and ensure the system remains accessible and maintainable.
 
 **Thank you for contributing to JustNews V4 documentation! 🚀**
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

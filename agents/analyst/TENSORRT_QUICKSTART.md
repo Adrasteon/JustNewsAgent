@@ -1,3 +1,11 @@
+---
+title: TensorRT Quickstart (safe, no-GPU stub)
+description: Auto-generated description for TensorRT Quickstart (safe, no-GPU stub)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # TensorRT Quickstart (safe, no-GPU stub)
 
 This file explains how to run a safe, developer-friendly stub for the TensorRT engine build process.
@@ -30,3 +38,9 @@ Notes
 Recommended next steps
 - Add a CI job that runs `--check-only` to assert environment capability.
 - Add unit tests that mock `tensorrt`/`torch` to validate the logic in `native_tensorrt_compiler.py` without hardware.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

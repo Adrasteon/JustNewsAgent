@@ -20,6 +20,8 @@ API Endpoints:
 
 import hashlib
 import json
+import os
+import requests
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -144,6 +146,11 @@ class APIResponse(BaseModel):
     message: str | None = None
     timestamp: str
 
+class ToolCall(BaseModel):
+    """Generic tool invocation payload (MCP-style)"""
+    args: list[Any] | None = None
+    kwargs: dict[str, Any] | None = None
+
 # Lifespan context manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -160,6 +167,18 @@ async def lifespan(app: FastAPI):
         # Initialize archive manager
         archive_manager = ArchiveManager()
         logger.info("✅ Archive Manager initialized")
+
+        # Attempt MCP Bus registration (non-fatal if bus not running)
+        try:
+            mcp_bus_url = os.getenv("MCP_BUS_URL", "http://localhost:8000")
+            registration_payload = {"name": "archive_api", "address": "http://localhost:8021"}
+            resp = requests.post(f"{mcp_bus_url}/register", json=registration_payload, timeout=(2,5))
+            if resp.status_code in (200, 201):
+                logger.info("🔌 Registered archive_api with MCP Bus")
+            else:
+                logger.warning(f"⚠️ MCP Bus registration failed status={resp.status_code}")
+        except Exception as e:
+            logger.warning(f"⚠️ MCP Bus registration exception: {e}")
 
         logger.info("🎉 Archive API startup complete")
 
@@ -231,6 +250,31 @@ async def health_check(request: Request):
         message="API is operational",
         timestamp=datetime.now().isoformat()
     )
+
+@app.post("/archive_from_crawler")
+@limiter.limit("10/minute")
+async def archive_from_crawler_endpoint(request: Request, call: ToolCall, archive_manager: ArchiveManager = Depends(get_archive_manager)):
+    """Archive crawler results batch and run Knowledge Graph processing.
+
+    Expected body: {"args": [], "kwargs": {"crawler_results": {...}}}
+    """
+    try:
+        if archive_manager is None:
+            raise HTTPException(status_code=503, detail="Archive manager not initialized")
+        crawler_results = None
+        if call.kwargs and isinstance(call.kwargs, dict):
+            crawler_results = call.kwargs.get("crawler_results")
+        if not crawler_results:
+            raise HTTPException(status_code=400, detail="crawler_results missing in kwargs")
+        summary = await archive_manager.archive_from_crawler(crawler_results)
+        if isinstance(summary, dict) and summary.get("error"):
+            return APIResponse(success=False, data=summary, message=summary.get("error"), timestamp=datetime.now().isoformat())
+        return APIResponse(success=True, data=summary, message="Archive and KG processing complete", timestamp=datetime.now().isoformat())
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"archive_from_crawler endpoint failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/articles", response_model=PaginatedResponse)
 @limiter.limit("20/minute")  # List operations are resource intensive

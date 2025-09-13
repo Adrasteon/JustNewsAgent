@@ -1,3 +1,11 @@
+---
+title: RAPIDS Integration Guide
+description: Auto-generated description for RAPIDS Integration Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # RAPIDS Integration Guide
 
 ## Overview
@@ -325,3 +333,9 @@ For RAPIDS-related issues:
 *Last Updated: August 31, 2025*
 *Environment: justnews-v2-py312 (Python 3.12.11, RAPIDS 25.04)*</content>
 <parameter name="filePath">/home/adra/JustNewsAgent/docs/RAPIDS_USAGE_GUIDE.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

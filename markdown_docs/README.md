@@ -1,3 +1,11 @@
+---
+title: JustNews V4 Documentation Index
+description: Auto-generated description for JustNews V4 Documentation Index
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4 Documentation Index
 
 This directory contains organized documentation for the JustNews V4 project. Files are categorized for easy navigation and reference.
@@ -21,6 +29,13 @@ This directory contains organized documentation for the JustNews V4 project. Fil
 - `SCOUT_AGENT_DOCUMENTATION.md` - Legacy Scout Agent implementation guide (V1)
 - `SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md` - Advanced crawling features
 - `SCOUT_MEMORY_PIPELINE_SUCCESS.md` - Memory pipeline integration
+
+#### Operations Runbooks
+- `OPERATOR_GUIDE_SYSTEMD.md` — Systemd deployment and operations
+- `GPU_ORCHESTRATOR_OPERATIONS.md` — Orchestrator readiness and model preload ops
+- `MCP_BUS_OPERATIONS.md` — MCP Bus health, registration, and tool routing
+- `preflight_runbook.md` — Model gating and preload failure runbook
+- `OPERATIONS_QUICK_REFERENCE.md` — Daily ops quick commands
 
 ### `/development_reports/`
 **Technical analysis and development validation:**
@@ -67,3 +82,9 @@ The following essential files remain in the project root:
 ---
 
 *This documentation structure supports both development reference and production deployment guidance for the JustNews V4 multi-agent news analysis system.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

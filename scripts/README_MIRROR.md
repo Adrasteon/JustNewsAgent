@@ -1,3 +1,11 @@
+---
+title: README MIRROR
+description: Auto-generated description for README MIRROR
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 Mirror per-agent models to large volume
 =====================================
 
@@ -60,3 +68,9 @@ If you need to roll back after running the script:
 1. Remove the symlink `agents/<agent>/models`.
 2. Move `TARGET/<agent>/models` back into `agents/<agent>/models` using `mv`.
 3. Adjust ownership/permissions accordingly.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

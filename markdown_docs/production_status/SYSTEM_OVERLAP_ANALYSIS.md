@@ -1,3 +1,11 @@
+---
+title: JustNewsAgentic System Assessment Summary
+description: Auto-generated description for JustNewsAgentic System Assessment Summary
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgentic System Assessment Summary
 ## Complete Overlap Analysis and Standardization Plan
 
@@ -224,3 +232,9 @@ This consolidation will transform JustNewsAgentic from a redundant system into a
 **Expected Timeline**: 6-8 weeks for complete standardization  
 **Expected ROI**: 3x performance improvement, 60% maintenance reduction  
 **Risk Level**: Low (Scout V2 already proven in production)
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -420,3 +420,13 @@ def analyze_content_trends_endpoint(call: ToolCall):
 # Use Scout V2 /comprehensive_content_analysis endpoint for combined analysis
 
 # @app.post("/analyze_sentiment_and_bias") - REMOVED
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("ANALYST_HOST", "0.0.0.0")
+    port = int(os.environ.get("ANALYST_PORT", 8004))
+
+    logger.info(f"Starting Analyst Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

@@ -1,3 +1,11 @@
+---
+title: Sources Schema and Workflow
+description: Auto-generated description for Sources Schema and Workflow
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Sources Schema and Workflow
 
 This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion workflows, canonicalization rules, and usage examples for the JustNews project.
@@ -134,3 +142,9 @@ ON CONFLICT DO NOTHING;
 ---
 
 For implementation help (migrations, triggers, or API endpoints) see the `scripts/` directory in this repo and contact the repository owner for deployment instructions.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

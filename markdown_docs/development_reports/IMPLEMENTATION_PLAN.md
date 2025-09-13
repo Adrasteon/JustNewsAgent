@@ -1,3 +1,11 @@
+---
+title: JustNewsAgentic — Implementation Plan for Evidence, KG, Fact‑Checking & Conservative Generation
+description: Auto-generated description for JustNewsAgentic — Implementation Plan for Evidence, KG, Fact‑Checking & Conservative Generation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgentic — Implementation Plan for Evidence, KG, Fact‑Checking & Conservative Generation
 
 Date: 2025-09-07  
@@ -238,3 +246,9 @@ python scripts/smoke_demo.py  # demo uses MockLLM and local sample article
 - Full legal and privacy compliance
 
 ---
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

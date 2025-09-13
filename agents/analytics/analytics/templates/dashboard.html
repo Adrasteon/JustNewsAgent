@@ -238,16 +238,23 @@
             margin: 10px 0;
         }
 
-        .error-hidden {
-            display: none;
-        }
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .dashboard-hidden {
-            display: none;
-        }
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
 
-        .agent-profiles-section {
-            margin-bottom: 30px;
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: space-between;
+            }
         }
     </style>
 </head>
@@ -286,9 +293,9 @@
         </div>
 
         <div id="loading" class="loading">Loading analytics data...</div>
-        <div id="error" class="error error-hidden"></div>
+        <div id="error" class="error" style="display: none;"></div>
 
-        <div id="dashboard" class="dashboard-hidden">
+        <div id="dashboard" style="display: none;">
             <!-- System Health Card -->
             <div class="dashboard-grid">
                 <div class="card">
@@ -375,14 +382,6 @@
                 </div>
             </div>
 
-            <!-- Agent Profiles -->
-            <div class="card agent-profiles-section">
-                <h3>🤖 Agent Profiles</h3>
-                <div id="agentProfiles" class="agent-profile">
-                    Loading agent profiles...
-                </div>
-            </div>
-
             <!-- Optimization Recommendations -->
             <div class="dashboard-grid">
                 <div class="card">
@@ -408,62 +407,27 @@
         let gpuChart = null;
 
         async function loadData() {
-            // Check if all required DOM elements exist
-            const requiredElements = [
-                'loading', 'error', 'dashboard', 'timeRange', 'agentSelect',
-                'healthScore', 'successRate', 'avgThroughput', 'peakMemory',
-                'healthIndicator', 'healthStatusText', 'totalOps', 'avgProcessingTime',
-                'gpuUtilization', 'activeAgents', 'bottlenecksList', 'recommendationsList',
-                'performanceChart', 'gpuChart', 'agentProfiles', 'optimizationRecommendations', 'optimizationInsights'
-            ];
-
-            const missingElements = requiredElements.filter(id => !document.getElementById(id));
-            if (missingElements.length > 0) {
-                console.error('Missing DOM elements:', missingElements);
-                document.getElementById('error').textContent = `Dashboard initialization error: Missing elements: ${missingElements.join(', ')}`;
-                document.getElementById('error').style.display = 'block';
-                return;
-            }
-
             const timeRange = document.getElementById('timeRange').value;
             const agentSelect = document.getElementById('agentSelect').value;
 
             try {
-                document.getElementById('error').classList.add('error-hidden');
+                document.getElementById('error').style.display = 'none';
                 document.getElementById('loading').style.display = 'block';
-                document.getElementById('dashboard').classList.add('dashboard-hidden');
+                document.getElementById('dashboard').style.display = 'none';
 
                 // Load system health
                 const healthResponse = await fetch('/api/health');
                 const healthData = await healthResponse.json();
 
-                // Validate time range (API only accepts 1-24 hours)
-                const validTimeRange = Math.min(Math.max(parseInt(timeRange), 1), 24);
-
                 // Load analytics data
-                const analyticsResponse = await fetch(`/api/realtime/${validTimeRange}`);
+                const analyticsResponse = await fetch(`/api/realtime/${timeRange}`);
                 const analyticsData = await analyticsResponse.json();
-
-                // Check if analytics data contains an error
-                if (analyticsData.detail || analyticsData.error) {
-                    throw new Error(analyticsData.detail || analyticsData.error || 'Failed to load analytics data');
-                }
 
                 // Load agent profiles if specific agent selected
                 let agentProfiles = {};
                 if (agentSelect !== 'all') {
-                    try {
-                        const agentResponse = await fetch(`/api/agent/${agentSelect}/${validTimeRange}`);
-                        const agentData = await agentResponse.json();
-
-                        // Check if agent data contains an error
-                        if (!agentData.error) {
-                            agentProfiles = agentData;
-                        }
-                    } catch (agentError) {
-                        console.warn('Agent data not available:', agentError);
-                        // Continue without agent profiles
-                    }
+                    const agentResponse = await fetch(`/api/agent/${agentSelect}/${timeRange}`);
+                    agentProfiles = await agentResponse.json();
                 }
 
                 currentData = { health: healthData, analytics: analyticsData, agentProfiles };
@@ -473,106 +437,69 @@
 
             } catch (error) {
                 console.error('Error loading data:', error);
-                const errorElement = document.getElementById('error');
-                if (errorElement) {
-                    errorElement.textContent = `Error loading data: ${error.message}`;
-                    errorElement.classList.remove('error-hidden');
-                }
-                // Set default data to prevent undefined errors
-                currentData = {
-                    health: { overall_health_score: 0, status: 'unknown' },
-                    analytics: {
-                        success_rate_pct: 0,
-                        avg_throughput_items_per_s: 0,
-                        peak_gpu_memory_mb: 0,
-                        total_operations: 0,
-                        avg_processing_time_s: 0,
-                        avg_gpu_utilization_pct: 0,
-                        bottleneck_indicators: [],
-                        optimization_recommendations: []
-                    },
-                    agentProfiles: {}
-                };
-                updateDashboard();
+                document.getElementById('error').textContent = `Error loading data: ${error.message}`;
+                document.getElementById('error').style.display = 'block';
             } finally {
-                const loadingElement = document.getElementById('loading');
-                const dashboardElement = document.getElementById('dashboard');
-                if (loadingElement) loadingElement.style.display = 'none';
-                if (dashboardElement) dashboardElement.classList.remove('dashboard-hidden');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
             }
         }
 
         function updateDashboard() {
             const { health, analytics, agentProfiles } = currentData;
 
-            // Update health metrics with null checks
-            const healthScore = (health && health.overall_health_score !== undefined) ? health.overall_health_score.toFixed(1) : '0.0';
-            document.getElementById('healthScore').textContent = `${healthScore}%`;
-
-            const successRate = (analytics && analytics.success_rate_pct !== undefined) ? analytics.success_rate_pct.toFixed(1) : '0.0';
-            document.getElementById('successRate').textContent = `${successRate}%`;
-
-            const avgThroughput = (analytics && analytics.avg_throughput_items_per_s !== undefined) ? analytics.avg_throughput_items_per_s.toFixed(1) : '0.0';
-            document.getElementById('avgThroughput').textContent = `${avgThroughput}/s`;
-
-            const peakMemory = (analytics && analytics.peak_gpu_memory_mb !== undefined) ? analytics.peak_gpu_memory_mb.toFixed(0) : '0';
-            document.getElementById('peakMemory').textContent = `${peakMemory}MB`;
+            // Update health metrics
+            document.getElementById('healthScore').textContent = `${health.overall_health_score.toFixed(1)}%`;
+            document.getElementById('successRate').textContent = `${analytics.success_rate_pct.toFixed(1)}%`;
+            document.getElementById('avgThroughput').textContent = `${analytics.avg_throughput_items_per_s.toFixed(1)}/s`;
+            document.getElementById('peakMemory').textContent = `${analytics.peak_gpu_memory_mb.toFixed(0)}MB`;
 
             // Update health status
             const healthIndicator = document.getElementById('healthIndicator');
             const healthStatusText = document.getElementById('healthStatusText');
             healthIndicator.className = 'status-indicator';
 
-            if (health && health.status === 'healthy') {
+            if (health.status === 'healthy') {
                 healthIndicator.classList.add('status-healthy');
                 healthStatusText.textContent = 'System Healthy';
-            } else if (health && health.status === 'warning') {
+            } else if (health.status === 'warning') {
                 healthIndicator.classList.add('status-warning');
                 healthStatusText.textContent = 'System Warning';
-            } else if (health && health.status === 'critical') {
-                healthIndicator.classList.add('status-critical');
-                healthStatusText.textContent = 'System Critical';
             } else {
                 healthIndicator.classList.add('status-critical');
-                healthStatusText.textContent = 'Status Unknown';
+                healthStatusText.textContent = 'System Critical';
             }
 
-            // Update performance overview with null checks
-            const totalOps = (analytics && analytics.total_operations !== undefined) ? analytics.total_operations.toLocaleString() : '0';
-            document.getElementById('totalOps').textContent = totalOps;
-
-            const avgProcessingTime = (analytics && analytics.avg_processing_time_s !== undefined) ? analytics.avg_processing_time_s.toFixed(2) : '0.00';
-            document.getElementById('avgProcessingTime').textContent = `${avgProcessingTime}s`;
-
-            const gpuUtilization = (analytics && analytics.avg_gpu_utilization_pct !== undefined) ? analytics.avg_gpu_utilization_pct.toFixed(1) : '0.0';
-            document.getElementById('gpuUtilization').textContent = `${gpuUtilization}%`;
-
+            // Update performance overview
+            document.getElementById('totalOps').textContent = analytics.total_operations.toLocaleString();
+            document.getElementById('avgProcessingTime').textContent = `${analytics.avg_processing_time_s.toFixed(2)}s`;
+            document.getElementById('gpuUtilization').textContent = `${analytics.avg_gpu_utilization_pct.toFixed(1)}%`;
             document.getElementById('activeAgents').textContent = '6'; // Static for now
 
-            // Update bottlenecks with null checks
+            // Update bottlenecks
             const bottlenecksList = document.getElementById('bottlenecksList');
             bottlenecksList.innerHTML = '';
-            if (analytics && analytics.bottleneck_indicators && analytics.bottleneck_indicators.length > 0) {
+            if (analytics.bottleneck_indicators.length === 0) {
+                bottlenecksList.innerHTML = '<li>No bottlenecks detected</li>';
+            } else {
                 analytics.bottleneck_indicators.forEach(bottleneck => {
                     const li = document.createElement('li');
                     li.textContent = bottleneck;
                     bottlenecksList.appendChild(li);
                 });
-            } else {
-                bottlenecksList.innerHTML = '<li>No bottlenecks detected</li>';
             }
 
-            // Update recommendations with null checks
+            // Update recommendations
             const recommendationsList = document.getElementById('recommendationsList');
             recommendationsList.innerHTML = '';
-            if (analytics && analytics.optimization_recommendations && analytics.optimization_recommendations.length > 0) {
+            if (analytics.optimization_recommendations.length === 0) {
+                recommendationsList.innerHTML = '<li>No recommendations available</li>';
+            } else {
                 analytics.optimization_recommendations.forEach(rec => {
                     const li = document.createElement('li');
                     li.textContent = rec;
                     recommendationsList.appendChild(li);
                 });
-            } else {
-                recommendationsList.innerHTML = '<li>No recommendations available</li>';
             }
 
             // Update agent profiles
@@ -584,13 +511,9 @@
 
         function updateAgentProfiles(profiles) {
             const container = document.getElementById('agentProfiles');
-            if (!container) {
-                console.warn('Agent profiles container not found');
-                return;
-            }
             container.innerHTML = '';
 
-            if (!profiles || Object.keys(profiles).length === 0) {
+            if (Object.keys(profiles).length === 0) {
                 container.textContent = 'No agent profiles available';
                 return;
             }
@@ -599,30 +522,23 @@
                 const agentCard = document.createElement('div');
                 agentCard.className = 'agent-card';
 
-                // Safe property access with defaults
-                const perfStats = profile && profile.performance_stats ? profile.performance_stats : {};
-                const avgTime = (perfStats.avg_processing_time_s !== undefined) ? perfStats.avg_processing_time_s.toFixed(2) : '0.00';
-                const successRate = (perfStats.success_rate_pct !== undefined) ? perfStats.success_rate_pct.toFixed(1) : '0.0';
-                const throughput = (perfStats.avg_throughput_items_per_s !== undefined) ? perfStats.avg_throughput_items_per_s.toFixed(1) : '0.0';
-                const peakMemory = (perfStats.peak_memory_mb !== undefined) ? perfStats.peak_memory_mb.toFixed(0) : '0';
-
                 agentCard.innerHTML = `
                     <div class="agent-name">${agentName.charAt(0).toUpperCase() + agentName.slice(1)}</div>
                     <div class="agent-metrics">
                         <div class="agent-metric">
-                            <div class="agent-metric-value">${avgTime}s</div>
+                            <div class="agent-metric-value">${profile.performance_stats.avg_processing_time_s.toFixed(2)}s</div>
                             <div>Avg Time</div>
                         </div>
                         <div class="agent-metric">
-                            <div class="agent-metric-value">${successRate}%</div>
+                            <div class="agent-metric-value">${profile.performance_stats.success_rate_pct.toFixed(1)}%</div>
                             <div>Success Rate</div>
                         </div>
                         <div class="agent-metric">
-                            <div class="agent-metric-value">${throughput}/s</div>
+                            <div class="agent-metric-value">${profile.performance_stats.avg_throughput_items_per_s.toFixed(1)}/s</div>
                             <div>Throughput</div>
                         </div>
                         <div class="agent-metric">
-                            <div class="agent-metric-value">${peakMemory}MB</div>
+                            <div class="agent-metric-value">${profile.performance_stats.peak_memory_mb.toFixed(0)}MB</div>
                             <div>Peak Memory</div>
                         </div>
                     </div>
@@ -639,23 +555,19 @@
                 performanceChart.destroy();
             }
 
-            const analytics = currentData.analytics || {};
-            const avgProcessingTime = analytics.avg_processing_time_s || 0;
-            const avgThroughput = analytics.avg_throughput_items_per_s || 0;
-
             performanceChart = new Chart(ctx1, {
                 type: 'line',
                 data: {
                     labels: ['-4h', '-3h', '-2h', '-1h', 'Now'],
                     datasets: [{
                         label: 'Processing Time (s)',
-                        data: [2.1, 1.9, 2.3, 1.8, avgProcessingTime],
+                        data: [2.1, 1.9, 2.3, 1.8, currentData.analytics.avg_processing_time_s],
                         borderColor: '#3498db',
                         backgroundColor: 'rgba(52, 152, 219, 0.1)',
                         tension: 0.4
                     }, {
                         label: 'Throughput (items/s)',
-                        data: [45, 52, 48, 55, avgThroughput],
+                        data: [45, 52, 48, 55, currentData.analytics.avg_throughput_items_per_s],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.4
@@ -683,14 +595,12 @@
                 gpuChart.destroy();
             }
 
-            const gpuUtilization = analytics.avg_gpu_utilization_pct || 0;
-
             gpuChart = new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
                     labels: ['GPU Utilization', 'Available'],
                     datasets: [{
-                        data: [gpuUtilization, 100 - gpuUtilization],
+                        data: [currentData.analytics.avg_gpu_utilization_pct, 100 - currentData.analytics.avg_gpu_utilization_pct],
                         backgroundColor: ['#f39c12', '#ecf0f1'],
                         borderWidth: 0
                     }]
@@ -734,12 +644,8 @@
 
         async function loadOptimizationData() {
             try {
-                // Use valid time range for optimization data (1-24 hours)
-                const timeRange = currentData.timeRange || 24;
-                const validTimeRange = Math.min(Math.max(parseInt(timeRange), 1), 24);
-
                 // Load optimization recommendations
-                const recResponse = await fetch(`/api/optimization-recommendations?hours=${validTimeRange}`);
+                const recResponse = await fetch(`/api/optimization-recommendations?hours=${currentData.timeRange || 24}`);
                 const recommendations = await recResponse.json();
 
                 // Load optimization insights
@@ -751,79 +657,55 @@
 
             } catch (error) {
                 console.error('Error loading optimization data:', error);
-                const recContainer = document.getElementById('optimizationRecommendations');
-                const insightsContainer = document.getElementById('optimizationInsights');
-
-                if (recContainer) {
-                    recContainer.textContent = 'Error loading recommendations';
-                }
-                if (insightsContainer) {
-                    insightsContainer.textContent = 'Error loading insights';
-                }
+                document.getElementById('optimizationRecommendations').textContent = 'Error loading recommendations';
+                document.getElementById('optimizationInsights').textContent = 'Error loading insights';
             }
         }
 
         function displayOptimizationRecommendations(recommendations) {
             const container = document.getElementById('optimizationRecommendations');
-            if (!container) {
-                console.warn('Optimization recommendations container not found');
-                return;
-            }
             container.innerHTML = '';
 
-            if (!recommendations || !Array.isArray(recommendations) || recommendations.length === 0) {
+            if (!recommendations || recommendations.length === 0) {
                 container.textContent = 'No optimization recommendations available';
                 return;
             }
 
             recommendations.forEach(rec => {
-                if (!rec) return; // Skip null/undefined recommendations
-
                 const recCard = document.createElement('div');
                 recCard.className = 'agent-card';
                 recCard.style.borderLeftColor = getPriorityColor(rec.priority);
 
-                // Safe property access with defaults
-                const title = rec.title || 'Unknown Recommendation';
-                const priority = rec.priority || 'medium';
-                const category = rec.category || 'general';
-                const description = rec.description || 'No description available';
-                const impactScore = (rec.impact_score !== undefined) ? rec.impact_score.toFixed(0) : '0';
-                const confidenceScore = (rec.confidence_score !== undefined) ? rec.confidence_score.toFixed(0) : '0';
-                const complexity = rec.complexity || 'medium';
-                const timeSavings = (rec.time_savings !== undefined) ? rec.time_savings.toFixed(1) : '0.0';
-                const affectedAgents = Array.isArray(rec.affected_agents) ? rec.affected_agents : [];
-
                 recCard.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div class="agent-name">${title}</div>
+                        <div class="agent-name">${rec.title}</div>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <span class="status-indicator" style="background-color: ${getPriorityColor(priority)}"></span>
-                            <span style="font-size: 0.8rem; color: #666;">${priority.toUpperCase()}</span>
-                            <span style="font-size: 0.8rem; color: #666;">${category.replace('_', ' ').toUpperCase()}</span>
+                            <span class="status-indicator" style="background-color: ${getPriorityColor(rec.priority)}"></span>
+                            <span style="font-size: 0.8rem; color: #666;">${rec.priority.toUpperCase()}</span>
+                            <span style="font-size: 0.8rem; color: #666;">${rec.category.replace('_', ' ').toUpperCase()}</span>
                         </div>
                     </div>
-                    <div style="margin-bottom: 10px; color: #555; font-size: 0.9rem;">${description}</div>
+                    <div style="margin-bottom: 10px; color: #555; font-size: 0.9rem;">${rec.description}</div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 10px;">
                         <div style="text-align: center; font-size: 0.8rem;">
-                            <div style="font-weight: bold; color: #27ae60;">${impactScore}%</div>
+                            <div style="font-weight: bold; color: #27ae60;">${rec.impact_score.toFixed(0)}%</div>
                             <div>Impact</div>
                         </div>
                         <div style="text-align: center; font-size: 0.8rem;">
-                            <div style="font-weight: bold; color: #3498db;">${confidenceScore}%</div>
+                            <div style="font-weight: bold; color: #3498db;">${rec.confidence_score.toFixed(0)}%</div>
                             <div>Confidence</div>
                         </div>
                         <div style="text-align: center; font-size: 0.8rem;">
-                            <div style="font-weight: bold; color: #e67e22;">${complexity}</div>
+                            <div style="font-weight: bold; color: #e67e22;">${rec.complexity}</div>
                             <div>Complexity</div>
                         </div>
                         <div style="text-align: center; font-size: 0.8rem;">
-                            <div style="font-weight: bold; color: #9b59b6;">${timeSavings}s</div>
+                            <div style="font-weight: bold; color: #9b59b6;">${rec.time_savings.toFixed(1)}s</div>
                             <div>Time Saved</div>
                         </div>
                     </div>
                     <div style="font-size: 0.8rem; color: #666;">
-                        <strong>Affected:</strong> ${affectedAgents.join(', ') || 'None'}
+                        <strong>Affected:</strong> ${rec.affected_agents.join(', ')}
                     </div>
                 `;
 
@@ -833,10 +715,6 @@
 
         function displayOptimizationInsights(insights) {
             const container = document.getElementById('optimizationInsights');
-            if (!container) {
-                console.warn('Optimization insights container not found');
-                return;
-            }
             container.innerHTML = '';
 
             if (!insights || insights.error) {
@@ -905,10 +783,17 @@
             }
         }
 
-        // Automatically load data when the page loads
-        window.addEventListener('DOMContentLoaded', function() {
+        // Automatic loading on page load
+        document.addEventListener('DOMContentLoaded', function() {
             loadData();
         });
+
+        // Auto-refresh every 30 seconds
+        setInterval(function() {
+            if (document.getElementById('dashboard').style.display !== 'none') {
+                loadData();
+            }
+        }, 30000);
     </script>
 </body>
 </html>

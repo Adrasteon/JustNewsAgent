@@ -1,0 +1,582 @@
+#!/bin/bash
+# justnews-systemd-wrapper.sh - Comprehensive JustNews Systemd Deployment Wrapper
+# Ensures all prerequisites are met before starting systemd services
+# Handles environment setup, dependency validation, and service orchestration
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR" && pwd)"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Configuration
+CONDA_ENV="justnews-v2-py312"
+FORCE_SETUP=false
+SKIP_CHECKS=false
+VERBOSE=false
+
+# Logging functions
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+log_step() {
+    echo -e "${PURPLE}[STEP]${NC} $1"
+}
+
+log_detail() {
+    if [[ "$VERBOSE" == true ]]; then
+        echo -e "${CYAN}[DETAIL]${NC} $1"
+    fi
+}
+
+# Check if running as root
+check_root() {
+    if [[ $EUID -eq 0 ]]; then
+        log_error "This script should NOT be run as root"
+        log_error "Systemd services will run as the justnews user"
+        exit 1
+    fi
+}
+
+# Check system prerequisites
+check_system_prerequisites() {
+    log_step "Checking system prerequisites..."
+
+    local missing_deps=()
+
+    # Check required commands
+    local required_cmds=("systemctl" "curl" "python3" "conda" "git")
+    for cmd in "${required_cmds[@]}"; do
+        if ! command -v "$cmd" &> /dev/null; then
+            missing_deps+=("$cmd")
+        fi
+    done
+
+    if [[ ${#missing_deps[@]} -gt 0 ]]; then
+        log_error "Missing required commands: ${missing_deps[*]}"
+        log_info "Please install missing dependencies and try again"
+        return 1
+    fi
+
+    log_success "System prerequisites check passed"
+    return 0
+}
+
+# Check and setup mount points
+check_mount_points() {
+    log_step "Checking mount points..."
+
+    # Mount point definitions
+    local extend_device="/dev/nvme0n1p6"
+    local extend_mount="/media/adra/Extend"
+    local data_device="/dev/nvme1n1p2"
+    local data_mount="/media/adra/Data"
+
+    # Check Extend mount (required for conda)
+    if ! mount | grep -q "on $extend_mount "; then
+        log_warning "Extend mount not available, attempting to mount..."
+        if [[ -b "$extend_device" ]]; then
+            sudo mkdir -p "$extend_mount" 2>/dev/null || true
+            if sudo mount "$extend_device" "$extend_mount" 2>/dev/null; then
+                log_success "Extend mounted successfully"
+            else
+                log_error "Failed to mount Extend - conda environment may not be available"
+                return 1
+            fi
+        else
+            log_error "Extend device $extend_device not found"
+            return 1
+        fi
+    else
+        log_success "Extend mount is available"
+    fi
+
+    # Check Data mount (required for ModelStore)
+    if ! mount | grep -q "on $data_mount "; then
+        log_warning "Data mount not available, attempting to mount..."
+        if [[ -b "$data_device" ]]; then
+            sudo mkdir -p "$data_mount" 2>/dev/null || true
+            if sudo mount "$data_device" "$data_mount" 2>/dev/null; then
+                log_success "Data mounted successfully"
+            else
+                log_warning "Failed to mount Data - ModelStore may not be available"
+            fi
+        else
+            log_warning "Data device $data_device not found - using fallback paths"
+        fi
+    else
+        log_success "Data mount is available"
+    fi
+
+    return 0
+}
+
+# Setup conda environment
+setup_conda_environment() {
+    log_step "Setting up conda environment..."
+
+    # Check if conda is available
+    if ! command -v conda &> /dev/null; then
+        log_error "conda not found in PATH"
+        return 1
+    fi
+
+    # Initialize conda
+    export PATH="/home/adra/miniconda3/bin:$PATH"
+    source /home/adra/miniconda3/etc/profile.d/conda.sh 2>/dev/null || true
+
+    # Check if environment exists
+    if ! conda env list | grep -q "$CONDA_ENV"; then
+        log_error "Conda environment '$CONDA_ENV' not found"
+        log_info "Please create the environment first:"
+        log_info "  conda create -n $CONDA_ENV python=3.12 -y"
+        return 1
+    fi
+
+    # Activate environment
+    if ! conda activate "$CONDA_ENV"; then
+        log_error "Failed to activate conda environment '$CONDA_ENV'"
+        return 1
+    fi
+
+    log_success "Conda environment '$CONDA_ENV' activated"
+    log_detail "Python version: $(python --version)"
+    log_detail "PyTorch available: $(python -c 'import torch; print("Yes")' 2>/dev/null || echo "No")"
+
+    return 0
+}
+
+# Check GPU availability
+check_gpu_setup() {
+    log_step "Checking GPU setup..."
+
+    if ! command -v nvidia-smi &> /dev/null; then
+        log_warning "nvidia-smi not found - GPU support may be limited"
+        return 0
+    fi
+
+    local gpu_count
+    gpu_count=$(nvidia-smi --list-gpus 2>/dev/null | wc -l)
+
+    if [[ $gpu_count -gt 0 ]]; then
+        log_success "Found $gpu_count GPU(s)"
+        log_detail "$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader,nounits)"
+    else
+        log_warning "No GPUs detected"
+    fi
+
+    return 0
+}
+
+# Setup PostgreSQL
+setup_postgresql() {
+    log_step "Setting up PostgreSQL..."
+
+    local pg_script="$PROJECT_ROOT/deploy/systemd/setup_postgresql.sh"
+
+    if [[ ! -f "$pg_script" ]]; then
+        log_error "PostgreSQL setup script not found: $pg_script"
+        return 1
+    fi
+
+    # Check if PostgreSQL is already running
+    if systemctl is-active --quiet postgresql 2>/dev/null; then
+        log_success "PostgreSQL is already running"
+        return 0
+    fi
+
+    log_info "Installing/configuring PostgreSQL..."
+    if ! sudo "$pg_script"; then
+        log_error "PostgreSQL setup failed"
+        return 1
+    fi
+
+    log_success "PostgreSQL setup completed"
+    return 0
+}
+
+# Install systemd services
+install_systemd_services() {
+    log_step "Installing systemd services..."
+
+    local systemd_dir="$PROJECT_ROOT/deploy/systemd"
+    local units_dir="$systemd_dir/units"
+    local scripts_dir="$systemd_dir/scripts"
+
+    # Check if systemd template exists
+    if [[ ! -f "$units_dir/justnews@.service" ]]; then
+        log_error "Systemd service template not found: $units_dir/justnews@.service"
+        return 1
+    fi
+
+    # Install service template
+    log_info "Installing systemd service template..."
+    sudo cp "$units_dir/justnews@.service" /etc/systemd/system/
+
+    # Install startup scripts
+    log_info "Installing startup scripts..."
+    sudo cp "$scripts_dir/justnews-start-agent.sh" /usr/local/bin/
+    sudo cp "$scripts_dir/wait_for_mcp.sh" /usr/local/bin/
+    sudo chmod +x /usr/local/bin/justnews-start-agent.sh
+    sudo chmod +x /usr/local/bin/wait_for_mcp.sh
+
+    # Create justnews user if it doesn't exist
+    if ! id -u justnews &>/dev/null; then
+        log_info "Creating justnews user..."
+        sudo useradd -r -s /bin/false justnews 2>/dev/null || true
+    fi
+
+    # Create necessary directories
+    sudo mkdir -p /etc/justnews
+    sudo mkdir -p /var/log/justnews
+    sudo mkdir -p /var/lib/justnews
+    sudo chown justnews:justnews /var/log/justnews
+    sudo chown justnews:justnews /var/lib/justnews
+
+    # Reload systemd
+    sudo systemctl daemon-reload
+
+    log_success "Systemd services installed"
+    return 0
+}
+
+# Setup environment files
+setup_environment_files() {
+    log_step "Setting up environment files..."
+
+    local env_dir="$PROJECT_ROOT/deploy/systemd/env"
+    local global_env="/etc/justnews/global.env"
+
+    # Create global environment file if it doesn't exist
+    if [[ ! -f "$global_env" ]]; then
+        log_info "Creating global environment file..."
+
+        # Set default environment variables
+        cat << EOF | sudo tee "$global_env" > /dev/null
+# JustNews Global Environment Configuration
+# Generated by justnews-systemd-wrapper.sh on $(date)
+
+# Project paths
+PROJECT_ROOT=$PROJECT_ROOT
+PYTHONPATH=\${PROJECT_ROOT}
+
+# Conda environment
+CONDA_ENV=$CONDA_ENV
+
+# Model store configuration
+MODEL_STORE_ROOT=/media/adra/Data/justnews/model_store
+BASE_MODEL_DIR=/media/adra/Data/justnews/agents
+
+# PostgreSQL defaults
+POSTGRES_HOST=localhost
+POSTGRES_DB=justnews
+POSTGRES_USER=justnews_user
+POSTGRES_PASSWORD=CHANGEME_DUMMY
+
+# GPU configuration
+USE_GPU=true
+CUDA_VISIBLE_DEVICES=0
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FORMAT=json
+
+# Security
+STRICT_MODEL_STORE=1
+EOF
+
+        sudo chown justnews:justnews "$global_env"
+        sudo chmod 600 "$global_env"
+        log_success "Global environment file created"
+    else
+        log_success "Global environment file already exists"
+    fi
+
+    return 0
+}
+
+# Run preflight checks
+run_preflight_checks() {
+    log_step "Running preflight checks..."
+
+    local preflight_script="$PROJECT_ROOT/deploy/systemd/preflight.sh"
+
+    if [[ ! -f "$preflight_script" ]]; then
+        log_error "Preflight script not found: $preflight_script"
+        return 1
+    fi
+
+    log_info "Executing preflight checks..."
+    if ! "$preflight_script" --stop; then
+        log_error "Preflight checks failed"
+        return 1
+    fi
+
+    log_success "Preflight checks passed"
+    return 0
+}
+
+# Validate project structure
+validate_project_structure() {
+    log_step "Validating project structure..."
+
+    local required_files=(
+        "agents/mcp_bus/main.py"
+        "agents/scout/main.py"
+        "agents/analyst/main.py"
+        "agents/synthesizer/main.py"
+        "requirements.txt"
+        "start_services_daemon.sh"
+    )
+
+    local missing_files=()
+
+    for file in "${required_files[@]}"; do
+        if [[ ! -f "$PROJECT_ROOT/$file" ]]; then
+            missing_files+=("$file")
+        fi
+    done
+
+    if [[ ${#missing_files[@]} -gt 0 ]]; then
+        log_error "Missing required files: ${missing_files[*]}"
+        return 1
+    fi
+
+    log_success "Project structure is valid"
+    return 0
+}
+
+# Start systemd services
+start_systemd_services() {
+    log_step "Starting systemd services..."
+
+    local enable_script="$PROJECT_ROOT/deploy/systemd/enable_all.sh"
+
+    if [[ ! -f "$enable_script" ]]; then
+        log_error "Service enable script not found: $enable_script"
+        return 1
+    fi
+
+    log_info "Starting all JustNews services..."
+    if ! sudo "$enable_script" start; then
+        log_error "Failed to start systemd services"
+        return 1
+    fi
+
+    log_success "Systemd services started successfully"
+    return 0
+}
+
+# Show status
+show_deployment_status() {
+    log_step "Deployment status..."
+
+    echo
+    echo "========================================"
+    echo "JustNews Systemd Deployment Status"
+    echo "========================================"
+    echo
+
+    # Show service status
+    echo "Systemd Services:"
+    sudo "$PROJECT_ROOT/deploy/systemd/enable_all.sh" status
+    echo
+
+    # Show key information
+    echo "Environment Information:"
+    echo "  Project Root: $PROJECT_ROOT"
+    echo "  Conda Environment: $CONDA_ENV"
+    echo "  Python Version: $(python --version 2>/dev/null || echo 'N/A')"
+    echo "  User: $(whoami)"
+    echo
+
+    # Show mount status
+    echo "Mount Status:"
+    echo "  Extend: $(mount | grep -q "on /media/adra/Extend" && echo "✅ Mounted" || echo "❌ Not mounted")"
+    echo "  Data: $(mount | grep -q "on /media/adra/Data" && echo "✅ Mounted" || echo "❌ Not mounted")"
+    echo
+
+    # Show GPU status
+    echo "GPU Status:"
+    if command -v nvidia-smi &> /dev/null; then
+        nvidia-smi --query-gpu=name,memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null || echo "  No GPUs detected"
+    else
+        echo "  nvidia-smi not available"
+    fi
+    echo
+
+    echo "========================================"
+    log_success "JustNews systemd deployment completed successfully!"
+    echo
+    log_info "Access points:"
+    log_info "  MCP Bus: http://localhost:8000"
+    log_info "  Dashboard: http://localhost:8011"
+    log_info "  Analytics: http://localhost:8012"
+    log_info "  Archive API: http://localhost:8021"
+    echo
+    log_info "Management commands:"
+    log_info "  Status: sudo $PROJECT_ROOT/deploy/systemd/enable_all.sh status"
+    log_info "  Stop: sudo $PROJECT_ROOT/deploy/systemd/enable_all.sh stop"
+    log_info "  Restart: sudo $PROJECT_ROOT/deploy/systemd/enable_all.sh restart"
+}
+
+# Show usage
+show_usage() {
+    cat << EOF
+JustNews Systemd Deployment Wrapper
+
+USAGE:
+    $0 [OPTIONS]
+
+DESCRIPTION:
+    Comprehensive wrapper script that ensures all JustNews systemd requirements
+    are met before starting services. Handles environment setup, dependency
+    validation, and service orchestration.
+
+OPTIONS:
+    -h, --help              Show this help message
+    -f, --force             Force reinstallation of components
+    -s, --skip-checks       Skip preflight checks
+    -v, --verbose           Enable verbose output
+    --no-postgres           Skip PostgreSQL setup
+    --no-services           Skip systemd service installation
+
+EXAMPLES:
+    $0                      # Full deployment with all checks
+    $0 --force              # Force reinstallation of all components
+    $0 --skip-checks        # Skip preflight checks (faster)
+    $0 --verbose            # Show detailed progress information
+
+REQUIREMENTS:
+    - Linux system with systemd
+    - NVIDIA GPU (recommended)
+    - Sufficient disk space (10GB+)
+    - Internet connection for package installation
+
+EXIT CODES:
+    0 - Success
+    1 - Error
+    2 - Partial success with warnings
+EOF
+}
+
+# Parse command line arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_usage
+                exit 0
+                ;;
+            -f|--force)
+                FORCE_SETUP=true
+                shift
+                ;;
+            -s|--skip-checks)
+                SKIP_CHECKS=true
+                shift
+                ;;
+            -v|--verbose)
+                VERBOSE=true
+                shift
+                ;;
+            --no-postgres)
+                SKIP_POSTGRES=true
+                shift
+                ;;
+            --no-services)
+                SKIP_SERVICES=true
+                shift
+                ;;
+            *)
+                log_error "Unknown option: $1"
+                show_usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+# Main function
+main() {
+    parse_args "$@"
+
+    echo "========================================"
+    log_info "JustNews Systemd Deployment Wrapper"
+    echo "========================================"
+    echo "Started at: $(date)"
+    echo
+
+    check_root
+
+    local steps=(
+        "check_system_prerequisites"
+        "check_mount_points"
+        "setup_conda_environment"
+        "check_gpu_setup"
+        "validate_project_structure"
+    )
+
+    # Add optional steps based on flags
+    if [[ "${SKIP_POSTGRES:-false}" != true ]]; then
+        steps+=("setup_postgresql")
+    fi
+
+    if [[ "${SKIP_SERVICES:-false}" != true ]]; then
+        steps+=("install_systemd_services")
+    fi
+
+    steps+=("setup_environment_files")
+
+    if [[ "$SKIP_CHECKS" != true ]]; then
+        steps+=("run_preflight_checks")
+    fi
+
+    steps+=("start_systemd_services")
+
+    local total_steps=${#steps[@]}
+    local current_step=1
+
+    for step_func in "${steps[@]}"; do
+        echo
+        log_info "Step $current_step/$total_steps: $step_func"
+        ((current_step++))
+
+        if ! $step_func; then
+            log_error "Step '$step_func' failed"
+            log_error "Deployment aborted"
+            exit 1
+        fi
+    done
+
+    echo
+    show_deployment_status
+
+    log_success "JustNews systemd deployment completed successfully!"
+    echo "Total deployment time: $SECONDS seconds"
+}
+
+# Run main function
+main "$@"</content>
+<parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/justnews-systemd-wrapper.sh

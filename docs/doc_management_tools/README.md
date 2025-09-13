@@ -1,3 +1,11 @@
+---
+title: Documentation Management Tools
+description: Auto-generated description for Documentation Management Tools
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Documentation Management Tools
 
 This directory contains automated tools for managing the JustNewsAgent documentation catalogue and maintaining documentation quality.
@@ -33,6 +41,17 @@ python maintenance_action_plan.py    # Generate maintenance report
 ```
 
 ### Quality Assurance Scripts
+
+#### `doc_linter.py`
+**Purpose**: Validate markdown docs for frontmatter, location, and fence formatting; optionally auto-fix.
+**Usage**:
+```bash
+python doc_linter.py --report           # JSON report of issues
+python doc_linter.py --report --fix     # Apply safe fixes and report
+# Optional flags
+python doc_linter.py --strict-location   # Treat out-of-place files as errors (default: warn)
+python doc_linter.py --add-seealso --fix # Inject default See also section when missing
+```
 
 #### `automation_tools.py`
 **Purpose**: Automated quality monitoring and maintenance scheduling
@@ -87,6 +106,14 @@ python fix_last_ref.py
 ```
 
 ### Catalogue Organization
+
+#### `generate_docs_index.py`
+**Purpose**: Build `docs_index.json` from `markdown_docs/` frontmatter grouped by category.
+**Usage**:
+```bash
+python generate_docs_index.py --write    # Write docs_index.json at repo root
+python generate_docs_index.py --dry-run  # Preview output (first categories)
+```
 
 #### `catalogue_reorganization.py`
 **Purpose**: Reorganize large categories into subcategories
@@ -199,3 +226,9 @@ Scripts generate output in the parent `docs/` directory:
 - Run any script with `--help` for usage information
 - Check the main documentation in `../README.md`
 - Review error messages for specific guidance
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

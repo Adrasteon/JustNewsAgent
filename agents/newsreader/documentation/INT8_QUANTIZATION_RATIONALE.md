@@ -1,3 +1,11 @@
+---
+title: Why INT8 Quantization Should Be Implemented Immediately
+description: Auto-generated description for Why INT8 Quantization Should Be Implemented Immediately
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Why INT8 Quantization Should Be Implemented Immediately
 
 ## You're Absolutely Right! Here's Why:
@@ -159,3 +167,9 @@ python quantized_llava_newsreader_agent.py test
 The analysis shows that **my initial recommendation for dynamic loading was over-engineering** when a simple, proven optimization (INT8 quantization) solves the problem elegantly.
 
 **Recommendation**: Deploy `quantized_llava_newsreader_agent.py` immediately and skip the complex dynamic loading approach entirely.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

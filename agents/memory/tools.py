@@ -101,8 +101,28 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
             metadata_payload = json.dumps({"raw": str(metadata)})
 
         # Get the next available ID (simple approach without sequence)
-        next_id_result = execute_query_single("SELECT COALESCE(MAX(id), 0) + 1 FROM articles")
-        next_id = next_id_result['coalesce'] if next_id_result else 1
+        # Use a stable alias and be robust to driver-specific key names
+        next_id_result = execute_query_single("SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM articles")
+        next_id = 1
+        if next_id_result:
+            if isinstance(next_id_result, dict):
+                if 'next_id' in next_id_result:
+                    next_id = int(next_id_result['next_id'])
+                elif 'coalesce' in next_id_result:  # some drivers name expression as 'coalesce'
+                    next_id = int(next_id_result['coalesce'])
+                elif '?column?' in next_id_result:  # postgres default unnamed expression
+                    next_id = int(next_id_result['?column?'])
+                else:
+                    # fallback to first value
+                    try:
+                        next_id = int(list(next_id_result.values())[0])
+                    except Exception:
+                        next_id = 1
+            else:
+                try:
+                    next_id = int(next_id_result)
+                except Exception:
+                    next_id = 1
 
         # Insert with explicit ID - metadata as JSON string (Postgres will cast)
         execute_query(

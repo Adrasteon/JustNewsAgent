@@ -1,3 +1,11 @@
+---
+title: The Definitive User Guide: JustNews Agentic System (V4)
+description: Auto-generated description for The Definitive User Guide: JustNews Agentic System (V4)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 <!--
 	THE DEFINITIVE USER GUIDE: JustNews Agentic System (V4)
 	This guide is a living document, integrating and expanding upon all major documentation, agent guides, production reports, and technical references in the workspace as of August 5, 2025.
@@ -281,3 +289,9 @@ print(response.json())
 ---
 
 **Status: August 5, 2025 - Production-Ready, Fully Documented, and Validated**
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

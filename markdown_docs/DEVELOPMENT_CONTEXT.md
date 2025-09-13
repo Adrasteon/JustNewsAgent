@@ -1,3 +1,11 @@
+---
+title: JustNews Agentic - Development Context
+description: Auto-generated description for JustNews Agentic - Development Context
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews Agentic - Development Context
 
 **Last Updated**: September 2, 2025  
@@ -414,3 +422,9 @@ python config/validate_config.py
 ```
 
 This centralized configuration system provides **enterprise-grade configuration management** that makes it easy to locate, adjust, and manage all critical system variables across development, staging, and production environments! 🎯✨
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

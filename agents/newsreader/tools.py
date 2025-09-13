@@ -12,6 +12,7 @@ V2 Standards:
 
 import asyncio
 import json
+import os
 import threading
 import time
 from datetime import UTC, datetime
@@ -29,6 +30,116 @@ def utc_now() -> datetime:
 
 # Configure logging first
 logger = get_logger(__name__)
+
+# Global memory monitor
+_memory_monitor_thread: threading.Thread | None = None
+_memory_monitor_active = False
+
+def start_memory_monitor():
+    """Start background memory monitoring thread"""
+    global _memory_monitor_thread, _memory_monitor_active
+
+    if _memory_monitor_thread is not None and _memory_monitor_thread.is_alive():
+        return
+
+    _memory_monitor_active = True
+    _memory_monitor_thread = threading.Thread(target=_memory_monitor_loop, daemon=True)
+    _memory_monitor_thread.start()
+    logger.info("🧠 GPU memory monitor started")
+
+def stop_memory_monitor():
+    """Stop background memory monitoring"""
+    global _memory_monitor_active
+    _memory_monitor_active = False
+    logger.info("🧠 GPU memory monitor stopped")
+
+def _memory_monitor_loop():
+    """Background memory monitoring loop"""
+    while _memory_monitor_active:
+        try:
+            _check_and_cleanup_memory()
+        except Exception as e:
+            logger.warning(f"Memory monitor error: {e}")
+        time.sleep(30)  # Check every 30 seconds
+
+def _check_and_cleanup_memory():
+    """Check GPU memory usage and cleanup if necessary"""
+    if not torch.cuda.is_available():
+        return
+
+    try:
+        # Get current memory usage
+        allocated_gb = torch.cuda.memory_allocated() / 1e9
+        total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
+        utilization_percent = (allocated_gb / total_gb) * 100
+
+        # Define thresholds
+        CRITICAL_THRESHOLD = 0.90  # 90% - critical, force cleanup
+        WARNING_THRESHOLD = 0.80   # 80% - warning, attempt cleanup
+        SAFE_MEMORY_GB = 3.0       # Keep at least 3GB free
+
+        if utilization_percent >= CRITICAL_THRESHOLD:
+            logger.warning(f"🚨 CRITICAL: GPU memory {utilization_percent:.1f}% used ({allocated_gb:.1f}GB/{total_gb:.1f}GB)")
+            _force_memory_cleanup()
+        elif utilization_percent >= WARNING_THRESHOLD:
+            logger.warning(f"⚠️ WARNING: GPU memory {utilization_percent:.1f}% used ({allocated_gb:.1f}GB/{total_gb:.1f}GB)")
+            _attempt_memory_cleanup()
+        elif allocated_gb > (total_gb - SAFE_MEMORY_GB):
+            logger.info(f"🧹 Maintaining safe memory levels: {allocated_gb:.1f}GB used")
+            torch.cuda.empty_cache()
+
+    except Exception as e:
+        logger.warning(f"Memory check failed: {e}")
+
+def _force_memory_cleanup():
+    """Force aggressive memory cleanup"""
+    logger.info("🧹 FORCE CLEANUP: Aggressive GPU memory cleanup initiated")
+
+    try:
+        # Clear global engine
+        clear_engine()
+
+        # Force garbage collection
+        import gc
+        gc.collect()
+
+        # Aggressive CUDA cleanup
+        for _ in range(5):  # Multiple attempts
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+            time.sleep(0.1)
+
+        # Log results
+        allocated_gb = torch.cuda.memory_allocated() / 1e9
+        logger.info(f"✅ FORCE CLEANUP: Memory reduced to {allocated_gb:.1f}GB")
+
+    except Exception as e:
+        logger.error(f"Force cleanup failed: {e}")
+
+def _attempt_memory_cleanup():
+    """Attempt gentle memory cleanup"""
+    logger.info("🧹 Attempting memory cleanup...")
+
+    try:
+        # Gentle cleanup
+        torch.cuda.empty_cache()
+
+        # Clear any cached models if possible
+        if hasattr(torch.cuda, 'empty_cache'):
+            torch.cuda.empty_cache()
+
+        allocated_gb = torch.cuda.memory_allocated() / 1e9
+        logger.info(f"🧹 Cleanup completed: {allocated_gb:.1f}GB allocated")
+
+    except Exception as e:
+        logger.warning(f"Gentle cleanup failed: {e}")
+
+# Start memory monitor on import (guarded by env flag; default OFF for safety)
+if (os.environ.get("GPU_MONITOR_ENABLED", "0").lower() in ("1", "true", "yes", "on")):
+    start_memory_monitor()
+    logger.info("GPU_MONITOR_ENABLED is set; background memory monitor active")
+else:
+    logger.info("GPU memory monitor disabled by default (set GPU_MONITOR_ENABLED=1 to enable)")
 
 try:
     from .newsreader_v2_true_engine import (
@@ -78,6 +189,16 @@ def clear_engine():
                 _engine_instance = None
                 _engine_initializing = False
 
+                # Release GPU allocation through manager
+                try:
+                    from common.gpu_manager_production import release_agent_gpu
+                    release_agent_gpu("newsreader")
+                    logger.info("✅ GPU allocation released for newsreader")
+                except ImportError:
+                    logger.debug("GPU manager not available for release")
+                except Exception as e:
+                    logger.warning(f"Error releasing GPU allocation: {e}")
+
             # Force GPU memory cleanup
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
@@ -114,15 +235,34 @@ def get_engine():
         # CRITICAL SAFETY: Check GPU memory before creating new instance
         if V2_ENGINE_AVAILABLE:
             if torch.cuda.is_available():
-                allocated_gb = torch.cuda.memory_allocated() / 1e9
-                # More reasonable threshold: 80% of available memory or max per agent limit
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
-                safe_threshold = min(gpu_memory * 0.8, 20.0)  # 80% of GPU memory or 20GB max
+                # Use GPU manager for allocation if available
+                try:
+                    from common.gpu_manager_production import request_agent_gpu, release_agent_gpu
 
-                if allocated_gb > safe_threshold:
-                    logger.error(f"❌ GPU memory safety check failed: {allocated_gb:.1f}GB allocated, threshold: {safe_threshold:.1f}GB")
-                    logger.error("❌ Preventing engine creation to avoid system crash")
-                    return None
+                    # Request GPU allocation through manager
+                    allocation = request_agent_gpu(
+                        agent_name="newsreader",
+                        memory_gb=2.0,  # Conservative allocation for LLaVA
+                        model_type="vision"
+                    )
+
+                    if allocation['status'] != 'allocated':
+                        logger.error(f"❌ GPU allocation failed: {allocation.get('message', 'Unknown error')}")
+                        return None
+
+                    logger.info(f"✅ GPU allocated for newsreader: {allocation}")
+
+                except ImportError:
+                    # Fallback to direct memory check
+                    allocated_gb = torch.cuda.memory_allocated() / 1e9
+                    # More reasonable threshold: 80% of available memory or max per agent limit
+                    gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
+                    safe_threshold = min(gpu_memory * 0.8, 20.0)  # 80% of GPU memory or 20GB max
+
+                    if allocated_gb > safe_threshold:
+                        logger.error(f"❌ GPU memory safety check failed: {allocated_gb:.1f}GB allocated, threshold: {safe_threshold:.1f}GB")
+                        logger.error("❌ Preventing engine creation to avoid system crash")
+                        return None
 
             # Log memory status before initialization
             if torch.cuda.is_available():
@@ -170,11 +310,11 @@ async def process_article_content(
 ) -> dict[str, Any]:
     """
     Process article content with multi-modal analysis
-    
+
     V2 Features (TRUE Implementation):
     - Screenshot-based webpage processing with LLaVA
     - Multi-modal content understanding
-    - Advanced text extraction and analysis  
+    - Advanced text extraction and analysis
     - Visual content processing with OCR and layout
     - Comprehensive metadata extraction
     """
@@ -189,6 +329,14 @@ async def process_article_content(
         valid_modes = ["fast", "comprehensive", "precision"]
         if processing_mode not in valid_modes:
             raise ValueError(f"Invalid processing mode '{processing_mode}'. Valid modes: {valid_modes}")
+
+        # Check GPU memory before processing
+        if torch.cuda.is_available():
+            allocated_gb = torch.cuda.memory_allocated() / 1e9
+            gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
+            if allocated_gb > gpu_memory * 0.9:  # 90% threshold for processing
+                logger.warning(f"High GPU memory usage before processing: {allocated_gb:.1f}GB")
+                _attempt_memory_cleanup()
 
         engine = get_engine()
 
@@ -315,6 +463,10 @@ async def process_article_content(
                 "screenshot_based": formatted_result.get('v2_compliance', {}).get('screenshot_based', False)
             })
 
+        # Cleanup GPU memory after processing
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         return formatted_result
 
     except Exception as e:
@@ -328,6 +480,11 @@ async def process_article_content(
         }
 
         logger.error(f"Error processing content: {e}")
+
+        # Cleanup on error
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+
         return error_result
 
 async def _process_text_content(

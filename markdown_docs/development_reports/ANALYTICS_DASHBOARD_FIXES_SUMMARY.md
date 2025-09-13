@@ -1,3 +1,11 @@
+---
+title: Analytics Dashboard Fixes Summary
+description: Auto-generated description for Analytics Dashboard Fixes Summary
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Analytics Dashboard Fixes Summary
 
 ## Overview
@@ -187,3 +195,9 @@ The analytics dashboard has been comprehensively improved with production-ready 
 **Version**: Analytics Dashboard v2.0 (Enhanced)
 **Next Review**: Scheduled for Q4 2025 or when new features are added</content>
 <parameter name="filePath">/home/adra/JustNewsAgent/docs/ANALYTICS_DASHBOARD_FIXES_SUMMARY.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

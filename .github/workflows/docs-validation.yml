@@ -1,0 +1,39 @@
+name: Docs Validation
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install minimal deps
+        run: |
+          python -m pip install --upgrade pip
+          # If tools need extra packages in the future, add here.
+
+      - name: Run docs linter (report only)
+        run: |
+          python docs/doc_management_tools/doc_linter.py --report || true
+
+      - name: Enforce docs location and link policy
+        run: |
+          python scripts/ci/enforce_docs_policy.py
+
+      - name: Generate docs index (verification)
+        run: |
+          python docs/doc_management_tools/generate_docs_index.py --write

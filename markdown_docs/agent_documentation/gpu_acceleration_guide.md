@@ -1,3 +1,11 @@
+---
+title: GPU Acceleration Documentation
+description: Auto-generated description for GPU Acceleration Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GPU Acceleration Documentation
 
 ## Overview
@@ -500,3 +508,9 @@ except RuntimeError as e:
 **Version:** 1.0  
 **Authors:** JustNews Development Team</content>
 <parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_acceleration_guide.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

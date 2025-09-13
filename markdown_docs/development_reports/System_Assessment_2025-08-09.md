@@ -1,3 +1,11 @@
+---
+title: System Assessment and Improvement Plan — 2025-08-09
+description: Auto-generated description for System Assessment and Improvement Plan — 2025-08-09
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # System Assessment and Improvement Plan — 2025-08-09
 
 This document captures a focused assessment of the JustNewsAgentic V4 system and proposes prioritized, actionable improvements for reliability, performance, security, and operations. It synthesizes current context from `README.md` and `.github/copilot-instructions.md`.
@@ -146,3 +154,9 @@ JustNewsAgentic V4 is a production-ready, GPU-accelerated, multi-agent news anal
 ---
 
 Requirements coverage: This document records the system assessment and a prioritized improvement roadmap based on the latest project context (as of 2025-08-09).
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

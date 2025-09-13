@@ -1,3 +1,11 @@
+---
+title: 📊 **DOCUMENTATION COVERAGE ANALYSIS REPORT**
+description: Auto-generated description for 📊 **DOCUMENTATION COVERAGE ANALYSIS REPORT**
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # 📊 **DOCUMENTATION COVERAGE ANALYSIS REPORT**
 ## Comparing Documentation to Codebase Functionality
 
@@ -348,3 +356,9 @@
 ---
 
 **This analysis reveals significant documentation gaps that are impacting development efficiency and system maintainability. Prioritizing the critical infrastructure documentation will provide the biggest immediate benefit to the development team.**
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -1,3 +1,11 @@
+---
+title: System Startup Scripts - Restored and Enhanced ✅
+description: Auto-generated description for System Startup Scripts - Restored and Enhanced ✅
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # System Startup Scripts - Restored and Enhanced ✅
 
 ## 🎯 **Script Recovery & Enhancement**
@@ -152,3 +160,9 @@ Successfully restored and enhanced the JustNews V4 system startup scripts, provi
 *Scripts restored: August 2, 2025*
 *Enhancement: Complete 10-agent architecture support*
 *Status: Production-ready system management*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

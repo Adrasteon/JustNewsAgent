@@ -1,3 +1,11 @@
+---
+title: GPU Crash Investigation - Final Report
+description: Auto-generated description for GPU Crash Investigation - Final Report
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GPU Crash Investigation - Final Report
 
 **Investigation Period**: August 13, 2025  
@@ -277,3 +285,9 @@ The production-validated solution provides a stable foundation for all GPU-inten
 **Validation Date**: August 13, 2025  
 **Status**: ✅ **RESOLVED - Production Ready**  
 **Next Review**: Monitor for 30 days to ensure continued stability
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+
