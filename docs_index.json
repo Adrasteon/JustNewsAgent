@@ -788,5 +788,38 @@
         "status": "current"
       }
     ]
+  },
+  {
+    "category": "Deployment (systemd)",
+    "files": [
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/README.md",
+        "title": "Systemd Deployment - Operator Index",
+        "description": "Operator entry point for orchestrator-first startup, gating, and health checks.",
+        "last_updated": "2025-09-12",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/QUICK_REFERENCE.md",
+        "title": "Systemd Quick Reference",
+        "description": "Copy-paste daily ops: start/stop, health, gating, ports, troubleshooting.",
+        "last_updated": "2025-09-12",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md",
+        "title": "Comprehensive Systemd Guide",
+        "description": "Deep-dive on preflight gating, environment, drop-ins, restart policy, and readiness.",
+        "last_updated": "2025-09-12",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/postgresql_integration.md",
+        "title": "PostgreSQL Integration (Systemd)",
+        "description": "DB configuration and readiness validation for production.",
+        "last_updated": "2025-09-12",
+        "status": "current"
+      }
+    ]
   }
 ]

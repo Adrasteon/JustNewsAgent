@@ -196,6 +196,11 @@ deep_content_analysis.py
 # Allow committing the TensorRT stub test used for CI checks
 !tests/test_tensorrt_stub.py
 
+# Allowlist production deployment scripts (systemd)
+!deploy/systemd/*.sh
+!deploy/systemd/scripts/*.sh
+!deploy/systemd/helpers/*.sh
+
 # Database Files and Vector Stores
 *.db
 *_vectordb/

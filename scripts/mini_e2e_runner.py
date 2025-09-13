@@ -49,6 +49,7 @@ import subprocess
 import sys
 import time
 import json
+import shutil
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -62,6 +63,93 @@ except ImportError as e:  # pragma: no cover - dependency should exist
 ORCH_PORT = int(os.environ.get("GPU_ORCHESTRATOR_PORT", "8014"))
 ORCH_BASE = f"http://localhost:{ORCH_PORT}"  # canonical base
 RESULTS_DIR = Path(__file__).parent.parent / "orchestrator_demo_results"
+SYSTEMD_ENV_DIR_DEFAULT = Path(__file__).parent.parent / "deploy" / "systemd" / "env"
+
+from common.dev_db_fallback import apply_test_db_env_fallback
+
+# Apply centralized development DB fallback (temporary). Non-destructive.
+_applied = apply_test_db_env_fallback()  # returns list of applied vars (unused but could be logged)
+
+
+
+def parse_env_file(path: Path) -> Dict[str, str]:
+    """Parse a simple KEY=VALUE env file ignoring comments and blanks.
+
+    Performs shell-style $VAR expansion after initial collection to allow
+    referencing earlier variables inside the same file (best-effort, not full bash).
+    """
+    data: Dict[str, str] = {}
+    if not path.exists():  # silent skip
+        return data
+    try:
+        for raw in path.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '=' not in line:
+                continue
+            key, val = line.split('=', 1)
+            key = key.strip()
+            val = val.strip()
+            # Strip optional surrounding quotes
+            if (val.startswith('"') and val.endswith('"')) or (val.startswith("'") and val.endswith("'")):
+                val = val[1:-1]
+            data[key] = val
+        # Second pass expansion
+        expanded: Dict[str, str] = {}
+        temp_env = os.environ.copy()
+        temp_env.update(data)
+        for k, v in data.items():
+            expanded[k] = os.path.expandvars(v.replace('$PROJECT_ROOT', temp_env.get('PROJECT_ROOT', '')))
+        return expanded
+    except Exception as e:  # pragma: no cover - robust to malformed file
+        print(f"[mini-e2e] Warning: failed parsing env file {path}: {e}")
+        return data
+
+
+def load_env_sources(env_dir: Path, extra_files: List[str], include_global: bool, overwrite: bool) -> Dict[str, str]:
+    """Load environment variables from systemd-style env directory.
+
+    Precedence (later overrides earlier if overwrite=True):
+      1. global.env (if included)
+      2. extra_files in listed order
+    If overwrite is False existing os.environ keys win.
+    Returns dict of variables actually injected (post precedence resolution).
+    """
+    collected: Dict[str, str] = {}
+    loaded_sequence: List[Path] = []
+    if include_global:
+        g = env_dir / 'global.env'
+        if g.exists():
+            collected.update(parse_env_file(g))
+            loaded_sequence.append(g)
+    for name in extra_files:
+        p = Path(name)
+        if not p.is_absolute():
+            p = env_dir / name
+        if p.exists():
+            # Merge respecting overwrite flag
+            file_vars = parse_env_file(p)
+            for k, v in file_vars.items():
+                if overwrite or k not in collected:
+                    collected[k] = v
+            loaded_sequence.append(p)
+        else:
+            print(f"[mini-e2e] Note: env file not found: {p}")
+    # Final application respecting existing environment if overwrite disabled
+    applied: Dict[str, str] = {}
+    for k, v in collected.items():
+        if not overwrite and k in os.environ:
+            continue
+        applied[k] = v
+    if applied:
+        os.environ.update(applied)
+    if loaded_sequence:
+        print("[mini-e2e] Loaded env files:")
+        for lp in loaded_sequence:
+            print(f"  - {lp}")
+    print(f"[mini-e2e] Injected {len(applied)} variables from env directory")
+    return applied
 
 
 def build_phase_configs(enable_nvml: bool) -> List[Dict[str, Any]]:
@@ -279,12 +367,61 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
         default="mini_e2e_crawl",
         help="Prefix for captured crawl metrics files"
     )
+    # Environment loading options
+    p.add_argument("--env-dir", type=Path, default=SYSTEMD_ENV_DIR_DEFAULT, help="Directory containing systemd style env files (default deploy/systemd/env)")
+    p.add_argument(
+        "--env-files",
+        nargs="+",
+        default=[],
+        help="Additional env file basenames to load after global.env (e.g. memory.env scout.env)"
+    )
+    p.add_argument("--no-global-env", action="store_true", help="Do not auto-load global.env")
+    p.add_argument("--overwrite-env", action="store_true", help="Allow env files to overwrite existing environment variables")
+    p.add_argument("--report-missing", action="store_true", help="Report missing critical variables (MCP_BUS_URL / DATABASE_URL)")
+    # DB preflight & seeding
+    p.add_argument("--preflight-db", action="store_true", help="Run DB connectivity preflight before phases")
+    p.add_argument("--auto-seed-sources", action="store_true", help="Seed sources table if missing/empty (implies --preflight-db)")
+    p.add_argument(
+        "--sources-md",
+        type=Path,
+        default=Path(__file__).parent.parent / "markdown_docs" / "agent_documentation" / "potential_news_sources.md",
+        help="Path to sources markdown for seeding",
+    )
     return p.parse_args(argv)
 
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = parse_args(argv)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Load env files early so subsequent phases inherit
+    injected_env: Dict[str, str] = {}
+    if args.env_dir:
+        injected_env = load_env_sources(
+            env_dir=Path(args.env_dir),
+            extra_files=args.env_files,
+            include_global=not args.no_global_env,
+            overwrite=args.overwrite_env,
+        )
+    # Fallback mapping: if JUSTNEWS_DB_* present but POSTGRES_* missing, map them for consistency
+    if os.environ.get("JUSTNEWS_DB_HOST") and not os.environ.get("POSTGRES_HOST"):
+        os.environ.setdefault("POSTGRES_HOST", os.environ["JUSTNEWS_DB_HOST"])
+    if os.environ.get("JUSTNEWS_DB_NAME") and not os.environ.get("POSTGRES_DB"):
+        os.environ.setdefault("POSTGRES_DB", os.environ["JUSTNEWS_DB_NAME"])
+    if os.environ.get("JUSTNEWS_DB_USER") and not os.environ.get("POSTGRES_USER"):
+        os.environ.setdefault("POSTGRES_USER", os.environ["JUSTNEWS_DB_USER"])
+    if os.environ.get("JUSTNEWS_DB_PASSWORD") and not os.environ.get("POSTGRES_PASSWORD"):
+        os.environ.setdefault("POSTGRES_PASSWORD", os.environ["JUSTNEWS_DB_PASSWORD"])
+    missing_crit: List[str] = []
+    if args.report_missing:
+        crit_keys = ["MCP_BUS_URL", "DATABASE_URL", "POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER"]
+        for ck in crit_keys:
+            if not os.environ.get(ck):
+                missing_crit.append(ck)
+        if missing_crit:
+            print(f"[mini-e2e] Missing critical variables: {', '.join(missing_crit)}")
+        else:
+            print("[mini-e2e] All critical variables present")
 
     if port_in_use(ORCH_PORT):
         if args.force_kill:
@@ -300,6 +437,13 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     phases_cfg = build_phase_configs(enable_nvml=args.enable_nvml)
     phase_results: List[Dict[str, Any]] = []
+
+    # Optional DB preflight (runs before orchestrator phases)
+    db_preflight_result: Dict[str, Any] = {}
+    if args.auto_seed_sources:
+        args.preflight_db = True  # implicit
+    if args.preflight_db:
+        db_preflight_result = run_db_preflight(args)
 
     for cfg in phases_cfg:
         print(f"[mini-e2e] Running {cfg['name']} SAFE_MODE={cfg['SAFE_MODE']} ENABLE_NVML={cfg['ENABLE_NVML']}")
@@ -317,11 +461,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     summary["analyst_decision_flip_artifact"] = analyst_path
     summary["dry_run"] = args.dry_run
     summary["nvml_requested"] = args.enable_nvml
+    summary["env_injected_count"] = len(injected_env)
+    summary["env_injected_keys"] = sorted(list(injected_env.keys()))[:40]  # trim for brevity
+    if injected_env and len(injected_env) > 40:
+        summary["env_injected_truncated"] = True
+    if 'missing_crit' in locals() and missing_crit:
+        summary["missing_critical_env"] = missing_crit
 
     # Optional crawl automation (performed only if phases succeeded & not dry-run)
     if args.run_crawl and not args.dry_run:
         crawl_results = run_crawl(args)
         summary["crawl"] = crawl_results
+
+    if db_preflight_result:
+        summary["db_preflight"] = db_preflight_result
 
     if not args.dry_run:
         Path(args.summary_output).write_text(json.dumps(summary, indent=2))
@@ -336,11 +489,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     return 0
 
 
-if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
-
-
-# --- Crawl Automation Helpers (appended for clarity) ---
+# --- Crawl Automation Helpers (defined before __main__ to avoid NameError) ---
 def run_crawl(args: argparse.Namespace) -> Dict[str, Any]:
     """Run a small crawl after SAFE_MODE=false phase.
 
@@ -450,3 +599,106 @@ def run_crawl(args: argparse.Namespace) -> Dict[str, Any]:
         }
     )
     return crawl_info
+
+
+# --- DB Preflight & Source Seeding -------------------------------------------------
+def run_db_preflight(args: argparse.Namespace) -> Dict[str, Any]:
+    """Verify DB connectivity and optionally seed sources.
+
+    Strategy:
+      1. Determine connection parameters from DATABASE_URL or JUSTNEWS_DB_* / POSTGRES_* envs.
+      2. Attempt simple SELECT 1.
+      3. If --auto-seed-sources: check sources table existence & row count; seed if missing or empty.
+    Returns structured diagnostic dict (never raises).
+    """
+    result: Dict[str, Any] = {"requested": True}
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        # Build from component vars
+        host = os.environ.get("JUSTNEWS_DB_HOST") or os.environ.get("POSTGRES_HOST", "localhost")
+        port = os.environ.get("JUSTNEWS_DB_PORT", "5432")
+        name = os.environ.get("JUSTNEWS_DB_NAME") or os.environ.get("POSTGRES_DB", "justnews")
+        user = os.environ.get("JUSTNEWS_DB_USER") or os.environ.get("POSTGRES_USER", "justnews_user")
+        pwd = os.environ.get("JUSTNEWS_DB_PASSWORD") or os.environ.get("POSTGRES_PASSWORD", "password123")
+        db_url = f"postgresql://{user}:{pwd}@{host}:{port}/{name}"
+        result["composed_url"] = True
+    result["db_url_present"] = bool(db_url)
+
+    # Use psql for lightweight check if available (avoids direct psycopg2 dependency here)
+    if not shutil.which("psql"):
+        result["error"] = "psql_not_found"
+        return result
+    # tempfile may be used later if extended (placeholder for future diagnostics dumps)
+    import tempfile  # noqa: F401
+
+    check_cmd = ["psql", db_url, "-tAc", "SELECT 1"]
+    try:
+        proc = subprocess.run(check_cmd, capture_output=True, text=True, timeout=8)
+        result["select1_rc"] = proc.returncode
+        result["select1_out"] = proc.stdout.strip()
+        if proc.returncode != 0:
+            result["stderr"] = proc.stderr.strip()[:400]
+            return result
+    except Exception as e:  # pragma: no cover
+        result["exception"] = str(e)
+        return result
+
+    # Optionally seed sources
+    if args.auto_seed_sources:
+        # Determine if table exists & row count
+        table_check_cmd = [
+            "psql",
+            db_url,
+            "-tAc",
+            "SELECT to_regclass('public.sources') IS NOT NULL AS exists, COALESCE((SELECT count(*) FROM public.sources),0) AS count"
+        ]
+        try:
+            proc2 = subprocess.run(table_check_cmd, capture_output=True, text=True, timeout=10)
+            if proc2.returncode == 0:
+                # Output like: 't|42' or 'f|0'
+                raw = proc2.stdout.strip()
+                result["sources_raw"] = raw
+                if '|' in raw:
+                    exists_part, count_part = raw.split('|', 1)
+                    exists = exists_part.strip() in ('t', 'true', 'True')
+                    try:
+                        count_val = int(count_part.strip())
+                    except ValueError:
+                        count_val = -1
+                    result["sources_exists"] = exists
+                    result["sources_count"] = count_val
+                    need_seed = (not exists) or count_val == 0
+                else:
+                    need_seed = True
+            else:
+                result["sources_check_error"] = proc2.stderr.strip()[:400]
+                need_seed = True
+        except Exception as e:  # pragma: no cover
+            result["sources_check_exception"] = str(e)
+            need_seed = True
+
+        result["seed_attempted"] = False
+        if need_seed:
+            seed_script = Path(__file__).parent / "news_outlets.py"
+            if not seed_script.exists():
+                # Fallback to scripts directory (already there actually)
+                seed_script = Path(__file__).parent / "news_outlets.py"
+            if seed_script.exists() and args.sources_md.exists():
+                seed_cmd = [sys.executable, str(seed_script), "--file", str(args.sources_md)]
+                try:
+                    seed_proc = subprocess.run(seed_cmd, capture_output=True, text=True, timeout=120)
+                    result["seed_attempted"] = True
+                    result["seed_rc"] = seed_proc.returncode
+                    if seed_proc.returncode != 0:
+                        result["seed_stderr"] = seed_proc.stderr[-500:]
+                    else:
+                        result["seed_stdout_tail"] = seed_proc.stdout[-500:]
+                except Exception as e:  # pragma: no cover
+                    result["seed_exception"] = str(e)
+            else:
+                result["seed_skipped_reason"] = "script_or_markdown_missing"
+    return result
+
+
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(main())

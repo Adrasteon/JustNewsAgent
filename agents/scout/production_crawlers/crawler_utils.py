@@ -268,11 +268,50 @@ def initialize_connection_pool():
     Should be called once at application startup.
     """
     global _connection_pool
+    global POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
 
     if _connection_pool is not None:
         return _connection_pool
 
     try:
+        # Dynamic env refresh: if any core value is missing, attempt to resolve from alternates
+        if not all([POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD]):
+            prev = (POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
+            POSTGRES_HOST = (
+                POSTGRES_HOST
+                or os.environ.get("JUSTNEWS_DB_HOST")
+                or os.environ.get("DB_HOST")
+                or "localhost"
+            )
+            POSTGRES_DB = (
+                POSTGRES_DB
+                or os.environ.get("JUSTNEWS_DB_NAME")
+                or os.environ.get("DB_NAME")
+                or os.environ.get("POSTGRES_DB")
+                or "justnews"
+            )
+            POSTGRES_USER = (
+                POSTGRES_USER
+                or os.environ.get("JUSTNEWS_DB_USER")
+                or os.environ.get("DB_USER")
+                or os.environ.get("POSTGRES_USER")
+                or "justnews_user"
+            )
+            POSTGRES_PASSWORD = (
+                POSTGRES_PASSWORD
+                or os.environ.get("JUSTNEWS_DB_PASSWORD")
+                or os.environ.get("DB_PASSWORD")
+                or os.environ.get("POSTGRES_PASSWORD")
+                or "password123"
+            )
+            if prev != (POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD):
+                logger.warning(
+                    "🔄 Refreshed DB env values dynamically host=%s db=%s user=%s (password=****)",
+                    POSTGRES_HOST,
+                    POSTGRES_DB,
+                    POSTGRES_USER,
+                )
+
         _connection_pool = pool.ThreadedConnectionPool(
             minconn=POOL_MIN_CONNECTIONS,
             maxconn=POOL_MAX_CONNECTIONS,

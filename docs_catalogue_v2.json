@@ -1,13 +1,70 @@
 {
   "catalogue_metadata": {
     "version": "2.0",
-    "last_updated": "2025-09-08",
+  "last_updated": "2025-09-13",
     "total_documents": 265,
-    "categories": 28,
+  "categories": 29,
     "status": "current",
     "description": "Enhanced documentation catalogue with improved descriptions, tags, and metadata"
   },
   "categories": [
+    {
+      "id": "deployment_systemd",
+      "name": "Deployment (systemd)",
+      "description": "Operator runbooks and production deployment guides for native systemd.",
+      "priority": "critical",
+      "documents": [
+        {
+          "id": "systemd_readme",
+          "title": "Systemd Deployment - Operator Index",
+          "path": "deploy/systemd/README.md",
+          "description": "Operator entry point and 5-minute flow for systemd deployment, orchestrator-first startup, gating, and health checks.",
+          "last_updated": "2025-09-12",
+          "status": "current",
+          "tags": ["operations", "deployment", "systemd", "gpu", "orchestrator"],
+          "related_documents": [
+            "systemd_quickref",
+            "systemd_comprehensive",
+            "systemd_postgresql"
+          ],
+          "word_count": 1200
+        },
+        {
+          "id": "systemd_quickref",
+          "title": "Systemd Quick Reference",
+          "path": "deploy/systemd/QUICK_REFERENCE.md",
+          "description": "Copy-paste daily ops: start/stop, health, gating, ports, troubleshooting.",
+          "last_updated": "2025-09-12",
+          "status": "current",
+          "tags": ["operations", "quickref", "systemd"],
+          "related_documents": ["systemd_readme", "systemd_comprehensive"],
+          "word_count": 600
+        },
+        {
+          "id": "systemd_comprehensive",
+          "title": "Comprehensive Systemd Guide",
+          "path": "deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md",
+          "description": "Deep-dive on preflight gating, environment, drop-ins, restart policy, and readiness.",
+          "last_updated": "2025-09-12",
+          "status": "current",
+          "tags": ["systemd", "gating", "readiness", "ops"],
+          "related_documents": ["systemd_readme", "systemd_quickref"],
+          "word_count": 2200
+        },
+        {
+          "id": "systemd_postgresql",
+          "title": "PostgreSQL Integration (Systemd)",
+          "path": "deploy/systemd/postgresql_integration.md",
+          "description": "DB configuration, readiness checks, and validation commands for production.",
+          "last_updated": "2025-09-12",
+          "status": "current",
+          "tags": ["database", "postgresql", "ops", "systemd"],
+          "related_documents": ["systemd_readme"],
+          "word_count": 800
+        }
+      ],
+      "document_count": 4
+    },
     {
       "id": "main_documentation",
       "name": "Main Documentation",

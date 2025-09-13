@@ -1283,11 +1283,15 @@ python agents/dashboard/gui.py &
 - **Security Documentation**: This README section + `common/secret_manager.py`
 
 #### **Operations Runbooks (Ops quick links):**
-- Systemd operations guide: `markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md`
+- Systemd Quick Reference (canonical): `deploy/systemd/QUICK_REFERENCE.md`
+- Systemd Comprehensive Guide: `deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md`
+- Systemd operations guide (legacy path): `markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md`
 - GPU Orchestrator operations: `markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md`
 - MCP Bus operations: `markdown_docs/agent_documentation/MCP_BUS_OPERATIONS.md`
 - Preflight gating runbook: `markdown_docs/agent_documentation/preflight_runbook.md`
 - Daily Ops Quick Reference: `markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md`
+ - One-command fresh restart: `deploy/systemd/reset_and_start.sh`
+  - One-command cold start (post-reboot): `deploy/systemd/cold_start.sh`
 
 #### **Interactive Tools:**
 ```bash
