@@ -30,6 +30,10 @@ Troubleshooting? See the Quick Reference and Comprehensive guide below.
 - PostgreSQL integration guide (DB URL and checks)
 	- `./postgresql_integration.md`
 
+Incident reference:
+- Systemd Orchestrator Incident Report — Sept 13, 2025
+	- `../../markdown_docs/development_reports/systemd_operational_incident_report_2025-09-13.md`
+
 ## Scripts
 
 - `enable_all.sh` – enable/disable/start/stop/restart/fresh for all services

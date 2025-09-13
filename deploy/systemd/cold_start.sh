@@ -31,7 +31,7 @@ check_tools() {
 }
 
 ensure_path_wrappers() {
-  # Install operator PATH wrappers if missing (idempotent)
+  # Install/refresh operator PATH wrappers (idempotent)
   local dsts=(
     "/usr/local/bin/enable_all.sh"
     "/usr/local/bin/health_check.sh"
@@ -46,31 +46,41 @@ ensure_path_wrappers() {
   )
   for i in "${!dsts[@]}"; do
     local dst="${dsts[$i]}"; local src="${srcs[$i]}"
-    if [[ -f "$src" ]] && [[ ! -x "$dst" ]]; then
-      cp "$src" "$dst" && chmod +x "$dst" && ok "Installed PATH wrapper $(basename "$dst")"
+    if [[ -f "$src" ]]; then
+      if [[ ! -f "$dst" ]] || ! cmp -s "$src" "$dst"; then
+        cp "$src" "$dst" && chmod +x "$dst" && ok "Installed/updated PATH wrapper $(basename "$dst")"
+      fi
     fi
   done
 }
 
 ensure_install_helpers() {
-  # Install helper scripts if missing
+  # Install/refresh helper scripts (idempotent)
   local start_dst="/usr/local/bin/justnews-start-agent.sh"
   local start_src="$PROJECT_ROOT/deploy/systemd/justnews-start-agent.sh"
   local wait_dst="/usr/local/bin/wait_for_mcp.sh"
   local wait_src="$PROJECT_ROOT/deploy/systemd/wait_for_mcp.sh"
-  if [[ ! -x "$start_dst" && -f "$start_src" ]]; then
-    cp "$start_src" "$start_dst" && chmod +x "$start_dst" && ok "Installed $start_dst"
-  fi
-  if [[ ! -x "$wait_dst" && -f "$wait_src" ]]; then
-    cp "$wait_src" "$wait_dst" && chmod +x "$wait_dst" && ok "Installed $wait_dst"
-  fi
+  local smoke_dst="/usr/local/bin/justnews-boot-smoke.sh"
+  local smoke_src="$PROJECT_ROOT/deploy/systemd/scripts/justnews-boot-smoke.sh"
+  for pair in "$start_src|$start_dst" "$wait_src|$wait_dst" "$smoke_src|$smoke_dst"; do
+    IFS='|' read -r src dst <<<"$pair"
+    if [[ -f "$src" ]]; then
+      if [[ ! -f "$dst" ]] || ! cmp -s "$src" "$dst"; then
+        cp "$src" "$dst" && chmod +x "$dst" && ok "Installed/updated $dst"
+      fi
+    fi
+  done
 }
 
 ensure_unit_template() {
   local unit_dst="/etc/systemd/system/justnews@.service"
   local unit_src="$PROJECT_ROOT/deploy/systemd/units/justnews@.service"
-  if [[ ! -f "$unit_dst" && -f "$unit_src" ]]; then
-    cp "$unit_src" "$unit_dst" && systemctl daemon-reload && ok "Installed unit template"
+  if [[ -f "$unit_src" ]]; then
+    if [[ ! -f "$unit_dst" ]] || ! cmp -s "$unit_src" "$unit_dst"; then
+      cp "$unit_src" "$unit_dst"
+      systemctl daemon-reload
+      ok "Installed/updated unit template"
+    fi
   fi
 }
 

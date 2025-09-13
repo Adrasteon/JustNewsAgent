@@ -81,7 +81,7 @@ check_services_installed() {
     if [[ ! -f "/usr/local/bin/justnews-start-agent.sh" ]]; then
         log_error "Missing justnews-start-agent.sh script"
         log_error "Please install the startup script:"
-        log_error "  sudo cp $PROJECT_ROOT/deploy/systemd/scripts/justnews-start-agent.sh /usr/local/bin/"
+    log_error "  sudo cp $PROJECT_ROOT/deploy/systemd/justnews-start-agent.sh /usr/local/bin/"
         log_error "  sudo chmod +x /usr/local/bin/justnews-start-agent.sh"
         exit 1
     fi
@@ -89,7 +89,7 @@ check_services_installed() {
     if [[ ! -f "/usr/local/bin/wait_for_mcp.sh" ]]; then
         log_error "Missing wait_for_mcp.sh script"
         log_error "Please install the MCP wait script:"
-        log_error "  sudo cp $PROJECT_ROOT/deploy/systemd/scripts/wait_for_mcp.sh /usr/local/bin/"
+    log_error "  sudo cp $PROJECT_ROOT/deploy/systemd/wait_for_mcp.sh /usr/local/bin/"
         log_error "  sudo chmod +x /usr/local/bin/wait_for_mcp.sh"
         exit 1
     fi

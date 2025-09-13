@@ -198,6 +198,26 @@
       "document_count": 4
     },
     {
+      "id": "operations_incidents",
+      "name": "Operations & Incident Reports",
+      "description": "Postmortems, incident timelines, and operational fixes for production reliability.",
+      "priority": "high",
+      "documents": [
+        {
+          "id": "systemd_orchestrator_incident_2025_09_13",
+          "title": "Systemd Orchestrator Incident Report — Sept 13, 2025",
+          "path": "markdown_docs/development_reports/systemd_operational_incident_report_2025-09-13.md",
+          "description": "Chronology of orchestrator startup failures under systemd and targeted fixes (root resolution, MCP bypass, env quoting, uvicorn entrypoint).",
+          "last_updated": "2025-09-13",
+          "status": "current",
+          "tags": ["systemd", "orchestrator", "readiness", "uvicorn", "ops"],
+          "related_documents": ["systemd_readme", "systemd_comprehensive", "mcp_bus_architecture"],
+          "word_count": 1200
+        }
+      ],
+      "document_count": 1
+    },
+    {
       "id": "agent_documentation",
       "name": "Agent Documentation",
       "description": "Individual agent implementations, configurations, and capabilities",

@@ -7,7 +7,51 @@ set -euo pipefail
 # Configuration
 SCRIPT_NAME="$(basename "$0")"
 AGENT_NAME="${1:-}"
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# Optionally prime env from global file early for root resolution
+if [[ -r "/etc/justnews/global.env" ]]; then
+    # shellcheck source=/dev/null
+    source "/etc/justnews/global.env"
+fi
+
+# Resolve project root robustly (WorkingDirectory -> JUSTNEWS_ROOT -> SERVICE_DIR -> script-relative -> fallback)
+resolve_project_root() {
+    # Helper: consider a directory a valid repo root only if it contains expected agent folders
+    _is_valid_root() {
+        local root="$1"
+        [[ -d "$root/agents" ]] && [[ -d "$root/agents/gpu_orchestrator" ]] && [[ -d "$root/deploy" ]]
+    }
+
+    local cwd; cwd="$(pwd)"
+    if _is_valid_root "$cwd"; then
+        echo "$cwd"; return 0
+    fi
+
+    if [[ -n "${JUSTNEWS_ROOT:-}" ]] && _is_valid_root "$JUSTNEWS_ROOT"; then
+        echo "$JUSTNEWS_ROOT"; return 0
+    fi
+
+    if [[ -n "${SERVICE_DIR:-}" ]]; then
+        if _is_valid_root "$SERVICE_DIR"; then
+            echo "$SERVICE_DIR"; return 0
+        fi
+        if _is_valid_root "$SERVICE_DIR/JustNewsAgent"; then
+            echo "$SERVICE_DIR/JustNewsAgent"; return 0
+        fi
+    fi
+
+    # Try two levels up from this script (useful when running from repo, not after install)
+    local script_dir; script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local candidate; candidate="$(cd "$script_dir/../.." && pwd)"
+    if _is_valid_root "$candidate"; then
+        echo "$candidate"; return 0
+    fi
+
+    # Final fallback: known path on this machine
+    echo "/home/adra/justnewsagent/JustNewsAgent"; return 0
+}
+
+PROJECT_ROOT="$(resolve_project_root)"
 
 # Colors for output
 RED='\033[0;31m'
@@ -158,8 +202,8 @@ setup_environment() {
 wait_for_dependencies() {
     local agent="$1"
 
-    # MCP Bus is required for all agents except mcp_bus itself
-    if [[ "$agent" != "mcp_bus" ]]; then
+    # MCP Bus wait: skip for mcp_bus and gpu_orchestrator, or when REQUIRE_BUS=0
+    if [[ "${REQUIRE_BUS:-1}" != "0" && "$agent" != "mcp_bus" && "$agent" != "gpu_orchestrator" ]]; then
         log_info "Waiting for MCP Bus dependency..."
 
         if [[ -x "$PROJECT_ROOT/deploy/systemd/wait_for_mcp.sh" ]]; then
@@ -204,7 +248,27 @@ start_agent() {
     log_info "Starting $agent agent..."
 
     # Build the command - use module invocation to fix relative imports
-    local cmd=("python3" "-m" "agents.${agent}.main")
+    # Prefer interpreter from env if provided
+    local py_interpreter
+    py_interpreter="${PYTHON_BIN:-python3}"
+    if ! command -v "$py_interpreter" >/dev/null 2>&1; then
+        log_warning "Configured PYTHON_BIN not found (PYTHON_BIN='${PYTHON_BIN:-}'), falling back to 'python3'"
+        py_interpreter="python3"
+    fi
+    local cmd
+    if [[ "$agent" == "gpu_orchestrator" ]]; then
+        # Prefer uvicorn runner for orchestrator for clearer server logs and binding
+        local port="${GPU_ORCHESTRATOR_PORT:-8014}"
+        if "$py_interpreter" -c "import uvicorn" >/dev/null 2>&1; then
+            cmd=("$py_interpreter" "-m" "uvicorn" "agents.gpu_orchestrator.main:app" "--host" "0.0.0.0" "--port" "$port" "--log-level" "info")
+            log_info "Using uvicorn runner on port $port"
+        else
+            log_warning "uvicorn not available; falling back to module runner"
+            cmd=("$py_interpreter" "-m" "agents.${agent}.main")
+        fi
+    else
+        cmd=("$py_interpreter" "-m" "agents.${agent}.main")
+    fi
 
     # Add any additional arguments from environment
     if [[ -n "${AGENT_ARGS:-}" ]]; then
@@ -214,6 +278,7 @@ start_agent() {
     fi
 
     # Log the command (without sensitive info)
+    log_info "Using Python: $(command -v "$py_interpreter" || echo "$py_interpreter")"
     log_info "Executing: ${cmd[*]}"
 
     # Execute the agent
@@ -312,6 +377,8 @@ main() {
     echo "========================================"
     log_info "JustNews Agent Startup: $agent"
     echo "========================================"
+
+    log_info "Resolved PROJECT_ROOT=$PROJECT_ROOT"
 
     validate_agent_name "$agent"
     check_agent_directory "$agent"
