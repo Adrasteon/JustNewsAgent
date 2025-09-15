@@ -14,6 +14,9 @@ import re
 import sys
 from collections.abc import Iterable
 
+# Add project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import psycopg2
 import psycopg2.extras
 

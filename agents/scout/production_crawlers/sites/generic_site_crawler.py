@@ -32,6 +32,7 @@ except Exception:  # noqa: BLE001
 
 from playwright.async_api import async_playwright
 
+from ...tools import _record_scout_performance
 from ..crawler_utils import (
     CanonicalMetadata,
     ModalDismisser,
@@ -286,9 +287,19 @@ class GenericSiteCrawler:
         if url in self.processed_urls:
             return None
         self.processed_urls.add(url)
+        start_time = time.time()
         try:
             if not self.robots_checker.check_robots_txt(url):
                 logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
+                processing_time = time.time() - start_time
+                _record_scout_performance({
+                    "agent_name": "scout",
+                    "operation": "process_single_url",
+                    "processing_time_s": processing_time,
+                    "batch_size": 1,
+                    "success": False,
+                    "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                })
                 return CanonicalMetadata.generate_metadata(
                     url=url,
                     title="Robots.txt Disallowed",
@@ -327,6 +338,15 @@ class GenericSiteCrawler:
                             self.site_config.name + " Article"
                         )
                         if len(clean_text) > 80 and len(title) > 5:
+                            processing_time = time.time() - start_time
+                            _record_scout_performance({
+                                "agent_name": "scout",
+                                "operation": "process_single_url",
+                                "processing_time_s": processing_time,
+                                "batch_size": 1,
+                                "success": True,
+                                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                            })
                             return CanonicalMetadata.generate_metadata(
                                 url=url,
                                 title=title[:300],
@@ -360,6 +380,15 @@ class GenericSiteCrawler:
                 len(content_data["content"]) > 50
                 and len(content_data["title"]) > 10
             ):
+                processing_time = time.time() - start_time
+                _record_scout_performance({
+                    "agent_name": "scout",
+                    "operation": "process_single_url",
+                    "processing_time_s": processing_time,
+                    "batch_size": 1,
+                    "success": True,
+                    "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                })
                 return CanonicalMetadata.generate_metadata(
                     url=url,
                     title=content_data["title"],
@@ -373,9 +402,27 @@ class GenericSiteCrawler:
                     news_score=0.7,
                     canonical=content_data["canonical"],
                 )
+            processing_time = time.time() - start_time
+            _record_scout_performance({
+                "agent_name": "scout",
+                "operation": "process_single_url",
+                "processing_time_s": processing_time,
+                "batch_size": 1,
+                "success": False,
+                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+            })
             return None
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to process {url}: {e}")
+            processing_time = time.time() - start_time
+            _record_scout_performance({
+                "agent_name": "scout",
+                "operation": "process_single_url",
+                "processing_time_s": processing_time,
+                "batch_size": 1,
+                "success": False,
+                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+            })
             return CanonicalMetadata.generate_metadata(
                 url=url,
                 title="Error",
