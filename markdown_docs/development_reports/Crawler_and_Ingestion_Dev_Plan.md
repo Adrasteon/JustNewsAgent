@@ -24,7 +24,7 @@ last_updated: 2025-09-14
 3. **Mixed Mode**: Balanced approach combining speed and quality
 4. **Dynamic Multi-Site**: 0.55+ articles/second across concurrent sites
 
-### **2. AI Analysis Pipeline (7-Model Stack)**
+### **2. AI Analysis Pipeline (6 Active Models + Cached Alternatives)**
 
 #### **Scout Agent Models**
 1. **LLaMA-3-8B**: Primary content classification and analysis
@@ -34,8 +34,9 @@ last_updated: 2025-09-14
 5. **Toxic Comment Model**: Bias detection and analysis
 
 #### **NewsReader Agent Models**
-6. **LLaVA-OneVision**: Visual content analysis from images
-7. **LLaVA-1.5-7B or BLIP-2**: Screenshot and image analysis
+6. **LLaVA-OneVision** (Active): `llava-hf/llava-onevision-qwen2-0.5b-ov-hf` - 0.5B parameters, ~1.2GB GPU memory - Visual content analysis from images and screenshots
+7. **LLaVA-1.5-7B** (Cached): `llava-hf/llava-1.5-7b-hf` - 7B parameters, ~7.6GB GPU memory - Legacy model, not currently used
+8. **BLIP-2** (Fallback): `Salesforce/blip2-opt-2.7b` - Alternative vision-language model, not downloaded/cached
 
 ### **3. Data Storage and Processing**
 
@@ -302,7 +303,7 @@ memory_v2_items (id, content, content_type, metadata, embedding, tags)
 - **Multi-Agent Architecture**: Successfully implemented MCP-based distributed system
 - **GPU Acceleration**: Production-ready TensorRT optimization achieving 730+ articles/sec
 - **Database Integration**: Sophisticated PostgreSQL schema with vector extensions
-- **AI Pipeline**: 7-model stack providing comprehensive content analysis
+- **AI Pipeline**: 6 active models with cached alternatives providing comprehensive content analysis
 - **Performance Metrics**: Detailed monitoring and performance tracking
 
 ### **Operational Capabilities**
@@ -328,7 +329,7 @@ memory_v2_items (id, content, content_type, metadata, embedding, tags)
 
 ## **CONCLUSION**
 
-The JustNewsAgent crawling and ingestion system represents a sophisticated, production-ready platform with strong foundations in AI-driven content analysis and scalable architecture. The system successfully combines high-performance crawling (8+ articles/sec) with comprehensive AI analysis through a 7-model stack.
+The JustNewsAgent crawling and ingestion system represents a sophisticated, production-ready platform with strong foundations in AI-driven content analysis and scalable architecture. The system successfully combines high-performance crawling (8+ articles/sec) with comprehensive AI analysis through 6 active models optimized for memory efficiency and performance.
 
 Key strengths include the multi-agent MCP architecture, GPU-accelerated processing, and sophisticated database integration. However, the system would benefit from enhanced content discovery mechanisms, improved real-time monitoring, and expanded source coverage.
 
@@ -347,6 +348,6 @@ The prioritized development plan focuses on immediate wins in content discovery 
 
 ---
 
-*Analysis conducted on September 14, 2025*
+*Analysis conducted on September 15, 2025*
 *Author: GitHub Copilot Analysis*
-*Version: 1.0*
+*Version: 1.1 - Updated with current model implementation details*
