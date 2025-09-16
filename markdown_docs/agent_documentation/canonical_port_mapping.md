@@ -11,7 +11,7 @@ last_updated: 2025-09-12
 ## 📋 Complete Port Usage Analysis
 
 *Generated on: September 9, 2025*
-*Last Updated: September 11, 2025 - Analytics Agent (8011) row added; counts updated*
+*Last Updated: September 15, 2025 - Crawler Agent (8015) added; counts updated*
 
 This document provides the canonical list of all ports used in the JustNewsAgent system, compiled from a comprehensive search of the entire codebase and validated against running services.
 
@@ -43,6 +43,7 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 | **8012** | Archive Agent | Document storage and retrieval | `http://localhost:8012/health` | ✅ Active |
 | **8013** | Dashboard Agent | Web-based monitoring and management | `http://localhost:8013` | ✅ Active |
 | **8014** | GPU Orchestrator | Central GPU coordination and telemetry | `http://localhost:8014/health` | ✅ Active |
+| **8015** | Crawler Agent | Unified production crawling with AI analysis pipeline | `http://localhost:8015/health` | ✅ Active |
 
 ---
 
@@ -75,11 +76,11 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 ## 📊 Port Distribution Summary
 
 - **Core Agent Services**: 8000-8009 (10 ports)
-- **API/Dashboard Services**: 8010-8014 (5 ports)
+- **API/Dashboard Services**: 8010-8015 (6 ports)
 - **Extended API Services**: 8020-8022 (3 ports, planned)
 - **Database**: 5432 (1 port)
 - **External Services**: 8080 (1 port)
-- **Total Ports Used**: 16 (12 active, 4 planned)
+- **Total Ports Used**: 17 (13 active, 4 planned)
 
 ---
 
@@ -124,8 +125,8 @@ export POSTGRES_PASSWORD=CHANGEME_DUMMY
 ## 🔍 Validation Methodology
 
 This analysis was validated against:
-- ✅ **Running Services**: 14 services confirmed active via `systemctl` (added Analytics Agent)
-- ✅ **Health Checks**: 12/14 services responding to health endpoints (some planned endpoints still pending)
+- ✅ **Running Services**: 15 services confirmed active via `systemctl` (added Crawler Agent)
+- ✅ **Health Checks**: 13/15 services responding to health endpoints (some planned endpoints still pending)
 - ✅ **Port Listening**: Verified via `netstat` and `ss` commands
 - ✅ **Configuration Files**: Cross-referenced with `/etc/justnews/*.env` files
 - ✅ **Source Code**: Validated against agent `main.py` port assignments
@@ -154,14 +155,14 @@ This analysis was validated against:
 
 - **Port Range Allocation**: System uses organized port ranges for different service types
 - **Environment Configuration**: All ports configurable via environment variables
-- **Conflict Resolution**: Dashboard moved to 8013 to resolve Analytics conflict
+- **Conflict Resolution**: Dashboard moved to 8013 to resolve Analytics conflict; Crawler Agent added on 8015
 - **Database Setup**: PostgreSQL with dedicated user and database configuration
-- **Health Monitoring**: 11/13 services provide health check endpoints
+- **Health Monitoring**: 13/15 services provide health check endpoints
 - **Documentation**: Keep this file updated when new services are added
 
 ---
 
-*This document serves as the authoritative reference for all port assignments in the JustNewsAgent system. Last validated: September 9, 2025*
+*This document serves as the authoritative reference for all port assignments in the JustNewsAgent system. Last validated: September 15, 2025*
 
 ## See also
 

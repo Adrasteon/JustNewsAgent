@@ -9,11 +9,19 @@ from contextlib import asynccontextmanager
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 app = FastAPI()
+
+# Initialize metrics
+metrics = JustNewsMetrics("mcp_bus")
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
 
 ready = False
 
@@ -113,6 +121,11 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+@app.get("/metrics")
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
 
 @asynccontextmanager
 async def lifespan(app):

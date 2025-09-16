@@ -33,6 +33,9 @@ except ImportError:
 # Import storage module
 from .storage import get_storage
 
+# Import metrics library
+from common.metrics import JustNewsMetrics
+
 # Configure logging
 
 logger = get_logger(__name__)
@@ -393,6 +396,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("dashboard")
+
 ready = False
 
 # Register shutdown endpoint
@@ -408,6 +414,9 @@ try:
     register_reload_endpoint(app)
 except Exception:
     logger.debug("reload endpoint not registered for dashboard")
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
 
 class ToolCall(BaseModel):
     args: list
@@ -1084,3 +1093,9 @@ def orchestrator_gpu_info_proxy():
 def orchestrator_gpu_policy_proxy():
     """Proxy to orchestrator /policy with fallback."""
     return fetch_orchestrator_policy()
+
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain")

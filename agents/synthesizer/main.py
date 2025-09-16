@@ -11,6 +11,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -62,6 +63,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("synthesizer")
+app.middleware("http")(metrics.request_middleware)
+
 # Register shutdown endpoint if available
 try:
     from agents.common.shutdown import register_shutdown_endpoint
@@ -87,6 +92,13 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+# Metrics endpoint
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi import Response
+    return Response(content=metrics.get_metrics(), media_type="text/plain")
 
 @app.post("/log_feedback")
 def log_feedback(call: ToolCall):

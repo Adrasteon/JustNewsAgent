@@ -12,6 +12,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 from .tools import (
     analyze_content_trends,
@@ -120,6 +121,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("analyst")
+
 # Add security middleware
 app.add_middleware(
     CORSMiddleware,
@@ -133,6 +137,9 @@ app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["*"]  # Configure appropriately for production
 )
+
+# Metrics middleware (must be added after security middleware)
+app.middleware("http")(metrics.request_middleware)
 
 # Security middleware
 @app.middleware("http")
@@ -172,6 +179,12 @@ def health():
 def ready_endpoint():
     """Readiness endpoint for startup gating."""
     return {"ready": ready}
+
+@app.get("/metrics")
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
 
 # RESTORED ENDPOINTS - Sentiment and bias analysis capabilities restored
 # These endpoints provide the Analyst Agent with its own sentiment analysis capabilities

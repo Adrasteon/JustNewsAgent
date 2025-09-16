@@ -17,6 +17,7 @@ from pydantic import BaseModel
 # Import security utilities
 from agents.scout.security_utils import log_security_event, rate_limit, validate_url
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 # Configure logging
 
@@ -77,6 +78,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="Scout Agent", description="Secure web crawling and content analysis agent")
 
+# Initialize metrics
+metrics = JustNewsMetrics("scout")
+
 # Security middleware
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 app.add_middleware(
@@ -86,6 +90,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# Metrics middleware (must be added after security middleware)
+app.middleware("http")(metrics.request_middleware)
 
 # Request middleware for rate limiting
 @app.middleware("http")
@@ -256,6 +263,12 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+@app.get("/metrics")
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
 
 @app.post("/log_feedback")
 def log_feedback(call: ToolCall):

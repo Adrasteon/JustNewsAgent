@@ -13,6 +13,9 @@ from pydantic import BaseModel
 from agents.balancer import tools
 from common.observability import get_logger
 
+# Import metrics library
+from common.metrics import JustNewsMetrics
+
 # Configure logging
 logger = get_logger(__name__)
 
@@ -62,6 +65,9 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI with the lifespan context manager
 app = FastAPI(title="Balancer Agent", lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("balancer")
+
 # Register common shutdown endpoint
 try:
     from agents.common.shutdown import register_shutdown_endpoint
@@ -76,6 +82,9 @@ try:
 except Exception:
     logger.debug("reload endpoint not registered for balancer")
 
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
+
 @app.get("/health")
 def health():
     return {"status": "ok", "agent": "balancer"}
@@ -83,6 +92,13 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain")
 
 # Pydantic models
 class ToolCall(BaseModel):

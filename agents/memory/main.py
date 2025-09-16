@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 import requests
 
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 try:
     # Optional import for Hugging Face hub login and snapshot_download
@@ -220,6 +221,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("memory")
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
+
 # Register common shutdown endpoint
 try:
     from agents.common.shutdown import register_shutdown_endpoint
@@ -253,11 +260,10 @@ def health():
 
 
 @app.get("/metrics")
-def metrics():
-    """Simple metrics endpoint exposing queue size and embedding model readiness."""
-    qsize = storage_queue.qsize() if storage_queue is not None else -1
-    model_ready = embedding_model is not None
-    return {"queue_size": qsize, "model_ready": model_ready}
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
 
 @app.get("/ready")
 def ready_endpoint():

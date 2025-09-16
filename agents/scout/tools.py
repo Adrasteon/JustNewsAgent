@@ -1033,6 +1033,7 @@ def initialize_production_crawlers():
 async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     """
     Ultra-fast production crawling for maximum throughput (8+ articles/second)
+    Now calls the separate Crawler agent via MCP Bus.
     
     Args:
         site: News site identifier ('bbc', 'cnn', 'reuters', etc.)
@@ -1041,7 +1042,7 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     Returns:
         Dict with crawl results and performance metrics
     """
-    logger.info(f"[ScoutAgent] Ultra-fast production crawl: {site} ({target_articles} articles)")
+    logger.info(f"[ScoutAgent] Ultra-fast production crawl via Crawler agent: {site} ({target_articles} articles)")
 
     # Security validation
     if not site or not isinstance(site, str):
@@ -1063,25 +1064,40 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
         log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ultra_fast'})
         return {"error": "Rate limit exceeded", "articles": []}
 
-    # Initialize production crawlers if not already done
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        initialize_production_crawlers()
-
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        error_msg = "Production crawlers not available"
-        logger.error(error_msg)
-        log_feedback("production_crawl_ultra_fast_error", {"site": site, "error": error_msg})
-        return {"error": error_msg, "articles": []}
-
     try:
-        results = await production_crawler.crawl_site_ultra_fast(site, target_articles)
-        log_feedback("production_crawl_ultra_fast", {
-            "site": site,
-            "target": target_articles,
-            "actual": results.get("count", 0),
-            "rate": results.get("articles_per_second", 0)
-        })
-        return results
+        # Call Crawler agent via MCP Bus
+        import requests
+        payload = {
+            "args": [],
+            "kwargs": {
+                "domains": [site],
+                "max_articles_per_site": target_articles,
+                "concurrent_sites": 1,
+                "max_total_articles": target_articles
+            }
+        }
+        
+        response = requests.post(
+            "http://localhost:8009/unified_production_crawl",
+            json=payload,
+            timeout=300  # 5 minutes timeout for crawling
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_feedback("production_crawl_ultra_fast", {
+                "site": site,
+                "target": target_articles,
+                "actual": result.get("total_articles", 0),
+                "rate": result.get("articles_per_second", 0)
+            })
+            return result
+        else:
+            error_msg = f"Crawler agent returned status {response.status_code}: {response.text}"
+            logger.error(f"Ultra-fast production crawl failed for {site}: {error_msg}")
+            log_feedback("production_crawl_ultra_fast_error", {"site": site, "error": error_msg})
+            return {"error": error_msg, "articles": []}
+            
     except Exception as e:
         logger.error(f"Ultra-fast production crawl failed for {site}: {e}")
         log_feedback("production_crawl_ultra_fast_error", {"site": site, "error": str(e)})
@@ -1091,13 +1107,15 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
 async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
     """
     AI-enhanced production crawling for full article extraction and NewsReader analysis.
+    Now calls the separate Crawler agent via MCP Bus.
+    
     Args:
         site: News site identifier (e.g., 'bbc')
         target_articles: Number of articles to crawl
     Returns:
         Dict with crawl results and performance metrics
     """
-    logger.info(f"[ScoutAgent] AI-enhanced production crawl: {site} ({target_articles} articles)")
+    logger.info(f"[ScoutAgent] AI-enhanced production crawl via Crawler agent: {site} ({target_articles} articles)")
 
     # Security validation
     if not site or not isinstance(site, str):
@@ -1119,24 +1137,40 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
         log_security_event('rate_limit_exceeded', {'function': 'production_crawl_ai_enhanced'})
         return {"error": "Rate limit exceeded", "articles": []}
 
-    # Initialize production crawlers if not already done
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        initialize_production_crawlers()
-
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        error_msg = "Production crawlers not available"
-        logger.error(error_msg)
-        log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": error_msg})
-        return {"error": error_msg, "articles": []}
     try:
-        results = await production_crawler.crawl_site_ai_enhanced(site, target_articles)
-        log_feedback("production_crawl_ai_enhanced", {
-            "site": site,
-            "target": target_articles,
-            "actual": results.get("count", 0),
-            "rate": results.get("articles_per_second", 0)
-        })
-        return results
+        # Call Crawler agent via MCP Bus
+        import requests
+        payload = {
+            "args": [],
+            "kwargs": {
+                "domains": [site],
+                "max_articles_per_site": target_articles,
+                "concurrent_sites": 1,
+                "max_total_articles": target_articles
+            }
+        }
+        
+        response = requests.post(
+            "http://localhost:8009/unified_production_crawl",
+            json=payload,
+            timeout=600  # 10 minutes timeout for AI-enhanced crawling
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            log_feedback("production_crawl_ai_enhanced", {
+                "site": site,
+                "target": target_articles,
+                "actual": result.get("total_articles", 0),
+                "rate": result.get("articles_per_second", 0)
+            })
+            return result
+        else:
+            error_msg = f"Crawler agent returned status {response.status_code}: {response.text}"
+            logger.error(f"AI-enhanced production crawl failed for {site}: {error_msg}")
+            log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": error_msg})
+            return {"error": error_msg, "articles": []}
+            
     except Exception as e:
         logger.error(f"AI-enhanced production crawl failed for {site}: {e}")
         log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": str(e)})
@@ -1146,11 +1180,12 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
 def get_production_crawler_info():
     """
     Get information about available production crawlers and supported sites
+    Now calls the separate Crawler agent via MCP Bus.
 
     Returns:
         Dict with crawler capabilities and supported sites
     """
-    logger.info("[ScoutAgent] Getting production crawler info")
+    logger.info("[ScoutAgent] Getting production crawler info via Crawler agent")
 
     # Rate limiting
     if not rate_limit("get_production_crawler_info"):
@@ -1161,45 +1196,30 @@ def get_production_crawler_info():
             "supported_sites": []
         }
 
-    # Initialize production crawlers if not already done
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        initialize_production_crawlers()
-
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        return {
-            "available": False,
-            "error": "Production crawlers not initialized",
-            "supported_sites": []
-        }
-
     try:
-        # Use synchronous database call instead of async
-        from agents.scout.production_crawlers.crawler_utils import get_active_sources
-        sources = get_active_sources()
-        supported_sites = [{
-            'id': s['id'],
-            'name': s['name'],
-            'domain': s['domain'],
-            'url': s['url'],
-            'description': s['description'],
-            'last_verified': s['last_verified'].isoformat() if s.get('last_verified') else None
-        } for s in sources]
+        # Call Crawler agent via MCP Bus
+        import requests
+        payload = {"args": [], "kwargs": {}}
         
-        supported_modes = production_crawler.get_supported_modes()
-
-        result = {
-            "available": True,
-            "supported_sites": supported_sites,
-            "supported_modes": supported_modes,
-            "capabilities": ["ultra_fast", "ai_enhanced", "multi_site"],
-            "performance_targets": {
-                "ultra_fast": "8+ articles/second",
-                "ai_enhanced": "0.8+ articles/second"
-            }
-        }
-
-        log_feedback("get_production_crawler_info", {"sites_count": len(supported_sites)})
-        return result
+        response = requests.post(
+            "http://localhost:8009/get_crawler_info",
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            # Add Scout agent context
+            result["agent"] = "crawler"
+            result["accessed_via"] = "scout_agent"
+            log_feedback("get_production_crawler_info", {"sites_count": len(result.get("supported_sites", []))})
+            return result
+        else:
+            error_msg = f"Crawler agent returned status {response.status_code}: {response.text}"
+            logger.error(f"Failed to get production crawler info: {error_msg}")
+            log_feedback("get_production_crawler_info_error", {"error": error_msg})
+            return {"available": False, "error": error_msg, "supported_sites": []}
+            
     except Exception as e:
         logger.error(f"Failed to get production crawler info: {e}")
         log_feedback("get_production_crawler_info_error", {"error": str(e)})
@@ -1214,6 +1234,7 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
                                    concurrent_sites: int = 3,
                                    max_total_articles: int | None = None) -> dict:
     """Dynamic multi-site crawl using generic site crawler.
+    Now calls the separate Crawler agent via MCP Bus.
 
     Args:
         domains: Optional explicit domain list. If None, all active sources.
@@ -1224,69 +1245,56 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
     Returns:
         Dict with per-domain article lists and aggregated stats.
     """
-    logger.info(f"[ScoutAgent] Dynamic multi-site crawl request domains={domains} articles_per_site={articles_per_site} concurrent_sites={concurrent_sites}")
+    logger.info(f"[ScoutAgent] Dynamic multi-site crawl via Crawler agent: domains={domains} articles_per_site={articles_per_site} concurrent_sites={concurrent_sites}")
 
     # Rate limiting
     if not rate_limit("production_crawl_dynamic"):
         log_security_event('rate_limit_exceeded', {'function': 'production_crawl_dynamic'})
         return {"error": "Rate limit exceeded"}
 
-    # Initialize orchestrator lazily
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        initialize_production_crawlers()
-
-    if not PRODUCTION_CRAWLERS_AVAILABLE:
-        return {"error": "Production crawlers not available"}
-
     try:
-        # Access underlying orchestrator's multi-site crawler
-        orch = production_crawler  # ProductionCrawlerOrchestrator instance
-        orch.multi_site_crawler.concurrent_sites = concurrent_sites
-        orch.multi_site_crawler.articles_per_site = articles_per_site
-
-        # Determine max articles
-        if max_total_articles is None and domains:
-            max_total_articles = len(domains) * articles_per_site
-        if max_total_articles is None:
-            max_total_articles = articles_per_site * 10  # sensible default cap
-
-        raw_summary = await orch.crawl_multi_site_dynamic(
-            domains=domains,
-            max_total_articles=max_total_articles,
-            concurrent_sites=concurrent_sites,
-            articles_per_site=articles_per_site,
-        )
-
-        # raw_summary has keys: (from orchestrator) including articles list
-        articles = raw_summary.get("articles", [])
-        # Build domain_articles mapping
-        from urllib.parse import urlparse
-        domain_articles: dict[str, list] = {}
-        for art in articles:
-            url = art.get("url", "")
-            parsed = urlparse(url)
-            dom = parsed.netloc.replace("www.", "") if parsed.netloc else art.get("publisher") or "unknown"
-            domain_articles.setdefault(dom, []).append(art)
-
-        domain_breakdown = {k: len(v) for k, v in domain_articles.items()}
-        response = {
-            "dynamic": True,
-            "domains_requested": domains,
-            "sites_crawled": raw_summary.get("sites_crawled"),
-            "total_articles": raw_summary.get("total_articles"),
-            "processing_time_seconds": raw_summary.get("processing_time_seconds"),
-            "articles_per_second": raw_summary.get("articles_per_second"),
-            "domain_breakdown": domain_breakdown,
-            "domain_articles": domain_articles,
-            "timestamp": raw_summary.get("timestamp"),
+        # Call Crawler agent via MCP Bus
+        import requests
+        payload = {
+            "args": [],
+            "kwargs": {
+                "domains": domains,
+                "max_articles_per_site": articles_per_site,
+                "concurrent_sites": concurrent_sites,
+                "max_total_articles": max_total_articles
+            }
         }
-        log_feedback("production_crawl_dynamic", {
-            "domains": len(domain_breakdown),
-            "total_articles": response["total_articles"],
-            "aps": response.get("articles_per_second", 0)
-        })
-        return response
+        
+        response = requests.post(
+            "http://localhost:8009/unified_production_crawl",
+            json=payload,
+            timeout=900  # 15 minutes timeout for dynamic crawling
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            # Add Scout agent context
+            result["accessed_via"] = "scout_agent"
+            log_feedback("production_crawl_dynamic", {
+                "domains": len(result.get("domain_breakdown", {})),
+                "total_articles": result.get("total_articles", 0),
+                "aps": result.get("articles_per_second", 0)
+            })
+            return result
+        else:
+            error_msg = f"Crawler agent returned status {response.status_code}: {response.text}"
+            logger.error(f"Dynamic multi-site crawl failed: {error_msg}")
+            log_feedback("production_crawl_dynamic_error", {"error": error_msg})
+            return {"error": error_msg}
+            
     except Exception as e:
         logger.error(f"Dynamic multi-site crawl failed: {e}")
         log_feedback("production_crawl_dynamic_error", {"error": str(e)})
         return {"error": str(e)}
+
+def _record_scout_performance(data: dict) -> None:
+    """
+    Stub for recording scout performance metrics.
+    """
+    # TODO: integrate with JustNewsMetrics
+    pass

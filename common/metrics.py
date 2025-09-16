@@ -25,6 +25,66 @@ class JustNewsMetrics:
     Provides standardized metrics, middleware, and utilities.
     """
 
+    # Agent display names for clearer labeling
+    AGENT_DISPLAY_NAMES = {
+        'scout': 'content-discovery-agent',
+        'analyst': 'sentiment-analysis-agent',
+        'synthesizer': 'content-synthesis-agent',
+        'fact_checker': 'fact-verification-agent',
+        'critic': 'quality-assessment-agent',
+        'memory': 'data-storage-agent',
+        'reasoning': 'logical-reasoning-agent',
+        'newsreader': 'news-processing-agent',
+        'balancer': 'load-balancing-agent',
+        'archive': 'content-archiving-agent',
+        'dashboard': 'web-dashboard-agent',
+        'analytics': 'system-analytics-agent',
+        'chief_editor': 'workflow-orchestration-agent',
+        'crawler': 'content-crawling-agent',
+        'gpu_orchestrator': 'gpu-resource-orchestrator',
+        'mcp_bus': 'communication-bus'
+    }
+
+    # Endpoint display names for clearer labeling
+    ENDPOINT_DISPLAY_NAMES = {
+        '/health': 'health-check-endpoint',
+        '/ready': 'readiness-check-endpoint',
+        '/metrics': 'prometheus-metrics-endpoint',
+        '/': 'root-endpoint',
+        '/unified_production_crawl': 'crawling-operation-endpoint',
+        '/get_crawler_info': 'crawler-info-endpoint',
+        '/get_performance_metrics': 'performance-metrics-endpoint',
+        '/analyze': 'sentiment-analysis-endpoint',
+        '/synthesize': 'content-synthesis-endpoint',
+        '/fact_check': 'fact-checking-endpoint',
+        '/quality_check': 'quality-assessment-endpoint',
+        '/store': 'data-storage-endpoint',
+        '/retrieve': 'data-retrieval-endpoint',
+        '/reason': 'logical-reasoning-endpoint',
+        '/process': 'content-processing-endpoint',
+        '/balance': 'load-balancing-endpoint',
+        '/archive': 'content-archiving-endpoint',
+        '/dashboard': 'dashboard-endpoint',
+        '/analytics': 'analytics-endpoint',
+        '/orchestrate': 'workflow-orchestration-endpoint',
+        '/gpu_status': 'gpu-status-endpoint',
+        '/register': 'agent-registration-endpoint',
+        '/call': 'inter-agent-communication-endpoint'
+    }
+
+    # HTTP status code mappings
+    STATUS_DISPLAY_NAMES = {
+        '200': 'success',
+        '201': 'created',
+        '400': 'bad-request',
+        '401': 'unauthorized',
+        '403': 'forbidden',
+        '404': 'not-found',
+        '500': 'internal-server-error',
+        '502': 'bad-gateway',
+        '503': 'service-unavailable'
+    }
+
     def __init__(self, agent_name: str, registry: Optional[CollectorRegistry] = None):
         """
         Initialize metrics for an agent.
@@ -34,6 +94,7 @@ class JustNewsMetrics:
             registry: Optional custom registry (useful for testing)
         """
         self.agent_name = agent_name
+        self.display_name = self.AGENT_DISPLAY_NAMES.get(agent_name, f'{agent_name}-agent')
         self.registry = registry or CollectorRegistry()
 
         # Initialize standard metrics
@@ -41,84 +102,84 @@ class JustNewsMetrics:
         self._init_agent_specific_metrics()
         self._init_system_metrics()
 
-        logger.info(f"Initialized metrics for agent: {agent_name}")
+        logger.info(f"Initialized metrics for agent: {agent_name} (display: {self.display_name})")
 
     def _init_standard_metrics(self):
         """Initialize standard HTTP and request metrics."""
-        # Request metrics
+        # Request metrics with enhanced labels
         self.requests_total = Counter(
             'justnews_requests_total',
             'Total number of requests processed',
-            ['agent', 'method', 'endpoint', 'status'],
+            ['agent', 'agent_display_name', 'method', 'endpoint', 'endpoint_display_name', 'status', 'status_display_name'],
             registry=self.registry
         )
 
         self.request_duration = Histogram(
             'justnews_request_duration_seconds',
             'Request duration in seconds',
-            ['agent', 'method', 'endpoint'],
+            ['agent', 'agent_display_name', 'method', 'endpoint', 'endpoint_display_name'],
             buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0],
             registry=self.registry
         )
 
-        # Error metrics
+        # Error metrics with enhanced labels
         self.errors_total = Counter(
             'justnews_errors_total',
             'Total number of errors',
-            ['agent', 'error_type', 'endpoint'],
+            ['agent', 'agent_display_name', 'error_type', 'endpoint', 'endpoint_display_name'],
             registry=self.registry
         )
 
-        # Active connections
+        # Active connections with enhanced labels
         self.active_connections = Gauge(
             'justnews_active_connections',
             'Number of active connections',
-            ['agent'],
+            ['agent', 'agent_display_name'],
             registry=self.registry
         )
 
     def _init_agent_specific_metrics(self):
         """Initialize agent-specific metrics (to be extended by subclasses)."""
-        # Processing metrics
+        # Processing metrics with enhanced labels
         self.processing_queue_size = Gauge(
             'justnews_processing_queue_size',
             'Current size of processing queue',
-            ['agent', 'queue_type'],
+            ['agent', 'agent_display_name', 'queue_type', 'queue_display_name'],
             registry=self.registry
         )
 
         self.processing_duration = Histogram(
             'justnews_processing_duration_seconds',
             'Processing duration in seconds',
-            ['agent', 'operation_type'],
+            ['agent', 'agent_display_name', 'operation_type', 'operation_display_name'],
             buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0],
             registry=self.registry
         )
 
-        # Quality metrics
+        # Quality metrics with enhanced labels
         self.quality_score = Histogram(
             'justnews_quality_score',
             'Quality score distribution',
-            ['agent', 'metric_type'],
+            ['agent', 'agent_display_name', 'metric_type', 'metric_display_name'],
             buckets=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
             registry=self.registry
         )
 
     def _init_system_metrics(self):
         """Initialize system-level metrics."""
-        # Memory usage
+        # Memory usage with enhanced labels
         self.memory_usage_bytes = Gauge(
             'justnews_memory_usage_bytes',
             'Memory usage in bytes',
-            ['agent', 'type'],
+            ['agent', 'agent_display_name', 'type', 'memory_type_display_name'],
             registry=self.registry
         )
 
-        # CPU usage
+        # CPU usage with enhanced labels
         self.cpu_usage_percent = Gauge(
             'justnews_cpu_usage_percent',
             'CPU usage percentage',
-            ['agent'],
+            ['agent', 'agent_display_name'],
             registry=self.registry
         )
 
@@ -129,14 +190,14 @@ class JustNewsMetrics:
                 self.gpu_memory_used_bytes = Gauge(
                     'justnews_gpu_memory_used_bytes',
                     'GPU memory used in bytes',
-                    ['agent', 'gpu_id'],
+                    ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
                     registry=self.registry
                 )
 
                 self.gpu_utilization_percent = Gauge(
                     'justnews_gpu_utilization_percent',
                     'GPU utilization percentage',
-                    ['agent', 'gpu_id'],
+                    ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
                     registry=self.registry
                 )
         except Exception as e:
@@ -144,46 +205,71 @@ class JustNewsMetrics:
 
     def record_request(self, method: str, endpoint: str, status: int, duration: float):
         """Record an HTTP request."""
+        endpoint_display = self.ENDPOINT_DISPLAY_NAMES.get(endpoint, f'{endpoint.replace("/", "").replace("_", "-")}-endpoint')
+        status_display = self.STATUS_DISPLAY_NAMES.get(str(status), f'http-{status}')
+
         self.requests_total.labels(
             agent=self.agent_name,
+            agent_display_name=self.display_name,
             method=method,
             endpoint=endpoint,
-            status=str(status)
+            endpoint_display_name=endpoint_display,
+            status=str(status),
+            status_display_name=status_display
         ).inc()
 
         self.request_duration.labels(
             agent=self.agent_name,
+            agent_display_name=self.display_name,
             method=method,
-            endpoint=endpoint
+            endpoint=endpoint,
+            endpoint_display_name=endpoint_display
         ).observe(duration)
 
     def record_error(self, error_type: str, endpoint: str = ""):
         """Record an error."""
+        endpoint_display = self.ENDPOINT_DISPLAY_NAMES.get(endpoint, f'{endpoint.replace("/", "").replace("_", "-")}-endpoint' if endpoint else 'unknown-endpoint')
+
         self.errors_total.labels(
             agent=self.agent_name,
+            agent_display_name=self.display_name,
             error_type=error_type,
-            endpoint=endpoint
+            endpoint=endpoint,
+            endpoint_display_name=endpoint_display
         ).inc()
 
     def record_processing(self, operation_type: str, duration: float):
         """Record processing operation."""
+        # Create a more readable operation display name
+        operation_display = operation_type.replace('_', '-').replace(' ', '-')
+
         self.processing_duration.labels(
             agent=self.agent_name,
-            operation_type=operation_type
+            agent_display_name=self.display_name,
+            operation_type=operation_type,
+            operation_display_name=operation_display
         ).observe(duration)
 
     def update_queue_size(self, queue_type: str, size: int):
         """Update processing queue size."""
+        queue_display = queue_type.replace('_', '-').replace(' ', '-')
+
         self.processing_queue_size.labels(
             agent=self.agent_name,
-            queue_type=queue_type
+            agent_display_name=self.display_name,
+            queue_type=queue_type,
+            queue_display_name=queue_display
         ).set(size)
 
     def record_quality_score(self, metric_type: str, score: float):
         """Record quality score."""
+        metric_display = metric_type.replace('_', '-').replace(' ', '-')
+
         self.quality_score.labels(
             agent=self.agent_name,
-            metric_type=metric_type
+            agent_display_name=self.display_name,
+            metric_type=metric_type,
+            metric_display_name=metric_display
         ).observe(score)
 
     def update_system_metrics(self):
@@ -195,32 +281,43 @@ class JustNewsMetrics:
 
             self.memory_usage_bytes.labels(
                 agent=self.agent_name,
-                type='rss'
+                agent_display_name=self.display_name,
+                type='rss',
+                memory_type_display_name='resident-set-size'
             ).set(memory_info.rss)
 
             self.memory_usage_bytes.labels(
                 agent=self.agent_name,
-                type='vms'
+                agent_display_name=self.display_name,
+                type='vms',
+                memory_type_display_name='virtual-memory-size'
             ).set(memory_info.vms)
 
             # CPU metrics
             cpu_percent = process.cpu_percent(interval=1.0)
             self.cpu_usage_percent.labels(
-                agent=self.agent_name
+                agent=self.agent_name,
+                agent_display_name=self.display_name
             ).set(cpu_percent)
 
             # GPU metrics
             try:
                 gpus = GPUtil.getGPUs()
                 for i, gpu in enumerate(gpus):
+                    gpu_display = f'gpu-{i}'
+
                     self.gpu_memory_used_bytes.labels(
                         agent=self.agent_name,
-                        gpu_id=str(i)
+                        agent_display_name=self.display_name,
+                        gpu_id=str(i),
+                        gpu_display_name=gpu_display
                     ).set(gpu.memoryUsed * 1024 * 1024)  # Convert MB to bytes
 
                     self.gpu_utilization_percent.labels(
                         agent=self.agent_name,
-                        gpu_id=str(i)
+                        agent_display_name=self.display_name,
+                        gpu_id=str(i),
+                        gpu_display_name=gpu_display
                     ).set(gpu.load * 100)
             except Exception as e:
                 logger.debug(f"Could not update GPU metrics: {e}")
@@ -242,7 +339,7 @@ class JustNewsMetrics:
             duration = time.time() - start_time
             self.record_processing(operation_type, duration)
 
-    def request_middleware(self, request, call_next):
+    async def request_middleware(self, request, call_next):
         """
         FastAPI middleware for automatic request metrics collection.
 
@@ -252,10 +349,13 @@ class JustNewsMetrics:
         start_time = time.time()
 
         # Update active connections
-        self.active_connections.labels(agent=self.agent_name).inc()
+        self.active_connections.labels(
+            agent=self.agent_name,
+            agent_display_name=self.display_name
+        ).inc()
 
         try:
-            response = call_next(request)
+            response = await call_next(request)
             duration = time.time() - start_time
 
             # Record successful request
@@ -289,7 +389,10 @@ class JustNewsMetrics:
 
         finally:
             # Decrement active connections
-            self.active_connections.labels(agent=self.agent_name).dec()
+            self.active_connections.labels(
+                agent=self.agent_name,
+                agent_display_name=self.display_name
+            ).dec()
 
 
 # Global metrics instance (can be overridden per agent)

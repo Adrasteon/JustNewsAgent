@@ -99,6 +99,18 @@ services:
     restart: unless-stopped
     privileged: true
 
+  dcgm-exporter:
+    image: nvidia/dcgm-exporter:latest
+    container_name: justnews-dcgm-exporter
+    ports:
+      - "9400:9400"
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    networks:
+      - monitoring
+    restart: unless-stopped
+
 volumes:
   prometheus_data:
     driver: local

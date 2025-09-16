@@ -20,6 +20,9 @@ from pydantic import BaseModel, Field
 
 from common.observability import get_logger
 
+# Import metrics library
+from common.metrics import JustNewsMetrics
+
 
 logger = get_logger(__name__)
 
@@ -276,6 +279,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="GPU Orchestrator", lifespan=lifespan)
 
 
+# Initialize metrics
+metrics = JustNewsMetrics("gpu_orchestrator")
+
 # Optional shared endpoints if available
 try:
 	from agents.common.shutdown import register_shutdown_endpoint
@@ -291,6 +297,9 @@ try:
 except Exception:
 	logger.debug("reload endpoint not registered for gpu_orchestrator")
 
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
 
 @app.get("/health")
 def health():
@@ -409,39 +418,10 @@ def release(req: ReleaseRequest):
 
 
 @app.get("/metrics")
-def metrics():  # pragma: no cover - simple string builder
-	# Prometheus exposition format
-	uptime = time.time() - _START_TIME
-	_purge_expired_leases()
-	lines = [
-		"# HELP gpu_orchestrator_uptime_seconds Process uptime in seconds",
-		"# TYPE gpu_orchestrator_uptime_seconds counter",
-		f"gpu_orchestrator_uptime_seconds {uptime:.0f}",
-		"# HELP gpu_orchestrator_active_leases Current active GPU (or CPU placeholder) leases",
-		"# TYPE gpu_orchestrator_active_leases gauge",
-		f"gpu_orchestrator_active_leases {len(ALLOCATIONS)}",
-	]
-	for k, v in sorted(_METRICS_COUNTERS.items()):
-		name = f"gpu_orchestrator_{k}"
-		lines.append(f"# HELP {name} {k.replace('_', ' ')}")
-		lines.append(f"# TYPE {name} counter")
-		lines.append(f"{name} {v}")
-	# NVML status gauges
-	if ENABLE_NVML and not SAFE_MODE:
-		lines.append("# HELP gpu_orchestrator_nvml_supported NVML initialization success flag")
-		lines.append("# TYPE gpu_orchestrator_nvml_supported gauge")
-		lines.append(f"gpu_orchestrator_nvml_supported {1 if _NVML_SUPPORTED else 0}")
-		if _NVML_INIT_ERROR and not _NVML_SUPPORTED:
-			lines.append("# HELP gpu_orchestrator_nvml_error_info Last NVML initialization error (label)")
-			lines.append("# TYPE gpu_orchestrator_nvml_error_info gauge")
-			# Represent error presence as gauge; message is not standard but kept minimal
-			lines.append("gpu_orchestrator_nvml_error_info 1")
-	# MPS status gauge
-	mps = _detect_mps()
-	lines.append("# HELP gpu_orchestrator_mps_enabled NVIDIA MPS enabled flag")
-	lines.append("# TYPE gpu_orchestrator_mps_enabled gauge")
-	lines.append(f"gpu_orchestrator_mps_enabled {1 if mps.get('enabled') else 0}")
-	return PlainTextResponse("\n".join(lines) + "\n")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain")
 
 
 # ---------------------------

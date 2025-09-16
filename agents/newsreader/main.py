@@ -26,6 +26,9 @@ from pydantic import BaseModel, Field
 
 from common.observability import get_logger
 
+# Import metrics library
+from common.metrics import JustNewsMetrics
+
 # Import V2 tools for core processing
 from .tools import (
     analyze_content_structure,
@@ -186,6 +189,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Initialize metrics
+metrics = JustNewsMetrics("newsreader")
+
 # Middleware setup
 app.add_middleware(
     CORSMiddleware,
@@ -214,6 +220,9 @@ async def security_middleware(request: Request, call_next):
 
     response = await call_next(request)
     return response
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
 
 # Register common shutdown endpoint
 try:
@@ -557,6 +566,12 @@ async def extract_news_content(url: str, screenshot_path: str = None) -> dict[st
 def analyze_image_content(image_path: str) -> dict[str, str]:
     """Analyze image content with LLaVA"""
     return analyze_image_with_llava(image_path=image_path)
+
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain")
 
 if __name__ == "__main__":
     uvicorn.run(

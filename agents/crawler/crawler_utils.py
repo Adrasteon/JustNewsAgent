@@ -424,8 +424,6 @@ def update_source_crawling_strategy(source_id: int, strategy: str, performance_d
                 """, (json.dumps(metadata_update), source_id))
 
                 if cur.rowcount > 0:
-                    # Commit metadata update
-                    conn.commit()
                     logger.info(f"✅ Updated crawling strategy for source {source_id}: {strategy}")
                     return True
                 else:
@@ -476,8 +474,6 @@ def record_crawling_performance(source_id: int, performance_data: dict) -> bool:
                     performance_data.get('error_count', 0)
                 ))
 
-                # Commit performance record insertion
-                conn.commit()
                 logger.info(f"✅ Recorded performance for source {source_id}")
                 return True
 
@@ -556,8 +552,6 @@ def create_crawling_performance_table() -> bool:
                     CREATE INDEX IF NOT EXISTS idx_crawling_performance_strategy
                     ON public.crawling_performance(strategy_used);
                 """)
-                # Commit table creation
-                conn.commit()
 
                 logger.info("✅ Crawling performance table created/verified")
                 return True

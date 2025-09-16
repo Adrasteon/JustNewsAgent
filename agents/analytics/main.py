@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from agents.analytics.dashboard import create_analytics_app
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 # Configure logging
 logger = get_logger(__name__)
@@ -62,6 +63,10 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI with the lifespan context manager
 app = FastAPI(title="Analytics Agent", lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("analytics")
+app.middleware("http")(metrics.request_middleware)
+
 # Register common shutdown endpoint
 try:
     from agents.common.shutdown import register_shutdown_endpoint
@@ -87,6 +92,13 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+# Metrics endpoint
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi import Response
+    return Response(content=metrics.get_metrics(), media_type="text/plain")
 
 # Pydantic models
 class ToolCall(BaseModel):

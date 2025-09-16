@@ -84,7 +84,7 @@ validate_agent_name() {
     if [[ -z "$agent" ]]; then
         log_error "Agent name is required"
         log_info "Usage: $SCRIPT_NAME <agent_name>"
-    log_info "Available agents: mcp_bus, chief_editor, scout, fact_checker, analyst, synthesizer, critic, memory, reasoning, newsreader, dashboard, analytics, balancer, archive, gpu_orchestrator"
+    log_info "Available agents: mcp_bus, chief_editor, scout, fact_checker, analyst, synthesizer, critic, memory, reasoning, newsreader, dashboard, analytics, balancer, archive, gpu_orchestrator, crawler"
         exit 1
     fi
 
@@ -103,8 +103,9 @@ validate_agent_name() {
         "dashboard"
         "analytics"
         "balancer"
-    "archive"
-    "gpu_orchestrator"
+        "archive"
+        "gpu_orchestrator"
+        "crawler"
     )
 
     local agent_valid=false
@@ -316,6 +317,7 @@ AGENTS:
     balancer        Load balancing and resource management
     archive         Content archiving and retrieval
     gpu_orchestrator GPU telemetry and allocation coordinator (SAFE_MODE-aware)
+    crawler         Content crawling and data collection
 
 OPTIONS:
     -h, --help      Show this help message

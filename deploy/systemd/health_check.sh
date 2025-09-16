@@ -24,6 +24,7 @@ declare -A SERVICES=(
     ["archive"]="8012:/health"        # Archive agent
     ["dashboard"]="8013:/health"      # Dashboard web UI
     ["gpu_orchestrator"]="8014:/health" # GPU Orchestrator service
+    ["unified-crawler"]="8015:/health" # Unified Production Crawler
 )
 
 # Additional readiness endpoints (service:port:/ready) for stricter gating

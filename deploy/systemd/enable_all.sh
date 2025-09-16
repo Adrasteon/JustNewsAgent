@@ -24,6 +24,7 @@ SERVICES=(
     "analytics"      # Analytics service (port 8011 per canonical mapping)
     "archive"        # Archive agent (port 8012)
     "dashboard"      # Dashboard agent (port 8013)
+    "crawler"        # Unified Production Crawler - intelligent multi-strategy
 )
 
 # Colors for output
