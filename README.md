@@ -1,6 +1,6 @@
 # JustNewsAgent V4 🤖
 
-[![License: Apache 2.0](### 📊 **System Status**
+(### 📊 **System Status**
 - **Status:** Production Ready with Advanced Optimizations, Mon### 📊 **System Status**
 - **Status:** Production Ready with Advanced Knowledge Graph & APIs
 - **GPU Utilization:** Optimized across all agents (2-8GB per agent) with intelligent allocation
