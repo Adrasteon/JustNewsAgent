@@ -24,7 +24,7 @@ declare -A SERVICES=(
     ["archive"]="8012:/health"        # Archive agent
     ["dashboard"]="8013:/health"      # Dashboard web UI
     ["gpu_orchestrator"]="8014:/health" # GPU Orchestrator service
-    ["unified-crawler"]="8015:/health" # Unified Production Crawler
+    ["crawler"]="8015:/health"          # Unified Production Crawler instance
 )
 
 # Additional readiness endpoints (service:port:/ready) for stricter gating
@@ -132,15 +132,21 @@ check_service() {
         service_status="inactive"
     fi
 
-    # Check if port is listening (handle errors gracefully)
-    if timeout 2 bash -c "</dev/tcp/$HOST/$port" 2>/dev/null; then
+    # Prefer HTTP health for listening/healthy detection
+    if curl -s --max-time 2 --fail "http://$HOST:$port$endpoint" >/dev/null 2>&1; then
         port_status="listening"
+        http_status="healthy"
     else
-        port_status="not_listening"
+        # Fallback to TCP port check
+        if timeout 2 bash -c "</dev/tcp/$HOST/$port" 2>/dev/null; then
+            port_status="listening"
+        else
+            port_status="not_listening"
+        fi
     fi
 
-    # Check HTTP endpoint if port is listening
-    if [[ "$port_status" == "listening" ]]; then
+    # If not already determined healthy, check HTTP endpoint
+    if [[ "$port_status" == "listening" && "$http_status" == "unknown" ]]; then
         if curl -s --max-time 5 --fail "http://$HOST:$port$endpoint" >/dev/null 2>&1; then
             http_status="healthy"
         else

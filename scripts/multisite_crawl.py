@@ -22,8 +22,19 @@ import asyncio
 import requests
 import psycopg2
 from common.observability import log_error
+import argparse
 
 from agents.scout.production_crawlers.unified_production_crawler import UnifiedProductionCrawler  # still imported for fallback
+
+# CLI argument parsing
+parser = argparse.ArgumentParser(description="Run unified production crawl via MCP Bus")
+parser.add_argument("--max-sites", type=int, default=3, help="Max concurrent sites to crawl")
+parser.add_argument("--articles-per-site", type=int, default=25, help="Max articles per site to collect")
+parser.add_argument("--domain-limit", type=int, default=0, help="Limit total domains to crawl (0=no limit)")
+args = parser.parse_args()
+
+# MCP Bus endpoint
+mcp_bus_url = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 
 # Agent endpoints
 CRAWLER_AGENT_URL = os.environ.get("CRAWLER_AGENT_URL", f"http://localhost:{os.environ.get('CRAWLER_AGENT_PORT', '8015')}")
@@ -44,20 +55,42 @@ def fetch_domains():
 async def main():
     try:
         domains = fetch_domains()
+        # Apply domain limit for testing
+        if args.domain_limit and args.domain_limit > 0:
+            domains = domains[: args.domain_limit]
         print(f"Starting unified crawl for {len(domains)} domains...")
     except Exception as e:
         log_error(e, context="fetch_domains")
         return
     try:
-        # Invoke unified_production_crawl via MCP Bus
-        mcp_bus_url = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
-        resp = requests.post(
-            f"{mcp_bus_url}/call",
-            json={"agent": "crawler", "tool": "unified_production_crawl", "args": [domains], "kwargs": {}},
-            timeout=(5, 300)
-        )
-        resp.raise_for_status()
-        result = resp.json()
+        # Try invoking via MCP Bus
+        try:
+            resp = requests.post(
+                f"{mcp_bus_url}/call",
+                json={
+                    "agent": "crawler",
+                    "tool": "unified_production_crawl",
+                    "args": [domains],
+                    "kwargs": {
+                        "max_articles_per_site": args.articles_per_site,
+                        "concurrent_sites": args.max_sites
+                    }
+                },
+                timeout=(5, 300)
+            )
+            resp.raise_for_status()
+            result = resp.json()
+        except Exception as e_bus:
+            log_error(e_bus, context="mcp_crawl_bus")
+            print("Falling back to direct Crawler Agent endpoint...")
+            # Direct call to Crawler Agent
+            dresp = requests.post(
+                f"{CRAWLER_AGENT_URL}/unified_production_crawl",
+                json={"args": [domains], "kwargs": {"max_articles_per_site": args.articles_per_site, "concurrent_sites": args.max_sites}},
+                timeout=(5, 300)
+            )
+            dresp.raise_for_status()
+            result = dresp.json()
         print("Crawl complete via Crawler Agent", result)
         # Forward articles to Memory Agent for embedding and storage
         articles = result.get("articles", []) or []

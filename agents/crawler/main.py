@@ -8,6 +8,10 @@ from contextlib import asynccontextmanager
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from typing import Dict, Any
+import uuid
+import asyncio
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -20,6 +24,8 @@ from common.metrics import JustNewsMetrics
 logger = get_logger(__name__)
 
 ready = False
+# In-memory storage of crawl job statuses
+crawl_jobs: Dict[str, Any] = {}
 
 # Environment variables
 CRAWLER_AGENT_PORT = int(os.environ.get("CRAWLER_AGENT_PORT", 8015))  # Updated to 8015 per canonical port mapping
@@ -91,14 +97,50 @@ class ToolCall(BaseModel):
     kwargs: dict
 
 @app.post("/unified_production_crawl")
-async def unified_production_crawl_endpoint(call: ToolCall):
-    try:
-        from agents.crawler.unified_production_crawler import unified_production_crawl
-        logger.info(f"Calling unified_production_crawl with args: {call.args} and kwargs: {call.kwargs}")
-        return await unified_production_crawl(*call.args, **call.kwargs)
-    except Exception as e:
-        logger.error(f"An error occurred in unified_production_crawl: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+async def unified_production_crawl_endpoint(call: ToolCall, background_tasks: BackgroundTasks):
+    """
+    Enqueue a background unified production crawl job and return immediately with a job ID.
+    """
+    # Generate a unique job identifier
+    job_id = uuid.uuid4().hex
+    # Initialize job status
+    crawl_jobs[job_id] = {"status": "pending"}
+    # Extract parameters
+    domains = call.args[0] if call.args else []
+    max_articles = call.kwargs.get("max_articles_per_site", 25)
+    concurrent = call.kwargs.get("concurrent_sites", 3)
+    logger.info(f"Enqueueing background crawl job {job_id} for {len(domains)} domains")
+    # Define background task
+    async def _crawl_task(domains, max_articles, concurrent, job_id):
+        from agents.crawler.unified_production_crawler import UnifiedProductionCrawler
+        try:
+            crawl_jobs[job_id]["status"] = "running"
+            crawler = UnifiedProductionCrawler()
+            await crawler._load_ai_models()
+            result = await crawler.run_unified_crawl(domains, max_articles, concurrent)
+            # Store result in job status
+            crawl_jobs[job_id] = {"status": "completed", "result": result}
+            logger.info(f"Background crawl {job_id} complete. Articles: {len(result.get('articles', []))}")
+        except Exception as e:
+            crawl_jobs[job_id] = {"status": "failed", "error": str(e)}
+            logger.error(f"Background crawl {job_id} failed: {e}")
+    # Schedule the task
+    background_tasks.add_task(_crawl_task, domains, max_articles, concurrent, job_id)
+    # Return accepted status with job ID
+    return JSONResponse(status_code=202, content={"status": "accepted", "job_id": job_id})
+
+@app.get("/job_status/{job_id}")
+def job_status(job_id: str):
+    """Retrieve status and result (if completed) for a crawl job."""
+    if job_id not in crawl_jobs:
+        raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+    return crawl_jobs[job_id]
+
+@app.get("/jobs")
+def list_jobs():
+    """List all current crawl job IDs with their status (without full results)."""
+    # Return a mapping of job_id to status only for brevity
+    return {job_id: info.get("status") for job_id, info in crawl_jobs.items()}
 
 @app.post("/get_crawler_info")
 def get_crawler_info_endpoint(call: ToolCall):
