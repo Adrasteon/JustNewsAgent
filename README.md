@@ -1,6 +1,9 @@
 # JustNewsAgent V4 🤖
 
-(### 📊 **System Status**
+<a href="https://github.com/Adrasteon/JustNewsAgent">JustNewsAgent</a> © 2025 by <a href="https://github.com/Adrasteon">Martin Grantham</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+
+
+📊 **System Status**
 - **Status:** Production Ready with Advanced Optimizations, Mon### 📊 **System Status**
 - **Status:** Production Ready with Advanced Knowledge Graph & APIs
 - **GPU Utilization:** Optimized across all agents (2-8GB per agent) with intelligent allocation
@@ -17,7 +20,7 @@
 - **Configuration:** Centralized management with environment profiles and validation
 - **Monitoring:** Real-time dashboards with advanced metrics, alerts, and analytics
 - **Code Quality:** 100% linting compliance with Python PEP 8 standards (67 issues resolved)
-- **Documentation:** Comprehensive coverage with 200+ page implementation guideimg.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+- **Documentation:** Comprehensive coverage with 200+ page implementation guide
 [![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![CUDA](https://img.shields.io/badge/CUDA-12.4+-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![RAPIDS](https://img.shields.io/badge/RAPIDS-25.04+-orange.svg)](https://rapids.ai/)
@@ -1612,7 +1615,7 @@ Support & contacts
 License
 -------
 
-This project is licensed under the Apache 2.0 License — see the `LICENSE` file for details.
+<a href="https://github.com/Adrasteon/JustNewsAgent">JustNewsAgent</a> © 2025 by <a href="https://github.com/Adrasteon">Martin Grantham</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
 Acknowledgments
 ---------------
