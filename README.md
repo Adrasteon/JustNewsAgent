@@ -1609,7 +1609,7 @@ Support & contacts
 
 **Community:**
 - **Contributing:** See Contributing section above
-- **Code of Conduct:** Apache 2.0 License terms
+- **Code of Conduct:** See License Below.
 - **Security Issues:** Report via GitHub Issues with "security" label
 
 License
