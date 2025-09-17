@@ -21,6 +21,10 @@ curl -s http://127.0.0.1:8000/agents | jq
 
 # Orchestrator readiness
 curl -s http://127.0.0.1:8014/models/status | jq '{in_progress, all_ready, summary}'
+
+# MPS status and allocation
+curl -s http://127.0.0.1:8014/gpu/info | jq '{mps_enabled, mps}'
+curl -s http://127.0.0.1:8014/mps/allocation | jq '.mps_resource_allocation.system_summary'
 ```
 
 ## Manage services
@@ -49,6 +53,11 @@ curl -s -X POST -H 'Content-Type: application/json' \
  -d '{"refresh": false}' http://127.0.0.1:8014/models/preload
 # Status
 curl -s http://127.0.0.1:8014/models/status | jq
+
+# MPS status
+curl -s http://127.0.0.1:8014/gpu/info | jq '.mps'
+# MPS control daemon
+pgrep -x nvidia-cuda-mps-control || echo "MPS daemon not running"
 ```
 
 ## MCP Bus

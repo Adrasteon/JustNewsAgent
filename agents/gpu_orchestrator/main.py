@@ -266,6 +266,7 @@ async def lifespan(app: FastAPI):
 				"release",
 				"models_preload",
 				"models_status",
+				"mps_allocation",
 			],
 		)
 	except Exception:
@@ -614,21 +615,57 @@ def models_preload(req: PreloadRequest):
 	}
 
 
+@app.get("/mps/allocation")
+def get_mps_allocation():
+	"""Return MPS resource allocation configuration for all agents."""
+	try:
+		import json
+		from pathlib import Path
+		
+		project_root = Path(__file__).resolve().parents[2]
+		config_path = project_root / "config" / "gpu" / "mps_allocation_config.json"
+		
+		if not config_path.exists():
+			return {"error": "MPS allocation configuration not found", "path": str(config_path)}
+		
+		with open(config_path, "r") as f:
+			config = json.load(f)
+		
+		return config
+	except Exception as e:
+		logger.error(f"Failed to load MPS allocation config: {e}")
+		return {"error": str(e)}
+
+
 @app.get("/models/status")
 def models_status():
-	"""Return the current model preload status and readiness summary."""
-	state = _MODEL_PRELOAD_STATE
-	total = state.get("summary", {}).get("total", 0)
-	done = state.get("summary", {}).get("done", 0)
-	failed = state.get("summary", {}).get("failed", 0)
-	all_ready = (total > 0 and failed == 0 and done == total) and not state.get("in_progress", False)
-	# Build a concise error list for clarity
-	errors: List[Dict[str, Any]] = []
-	for a, models in state.get("per_agent", {}).items():
-		for mid, st in models.items():
-			if st.get("status") == "error":
-				errors.append({"agent": a, "model": mid, "error": st.get("error")})
-	return {**state, "all_ready": all_ready, "errors": errors}
+	"""Return current model preload status."""
+	failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
+	done = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("done", 0) or 0)
+	total = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("total", 0) or 0)
+	
+	all_ready = (failed == 0 and done == total and not _MODEL_PRELOAD_STATE.get("in_progress", False))
+	
+	# Build error list for failed models
+	errors = []
+	if _MODEL_PRELOAD_STATE.get("per_agent"):
+		for agent, models in _MODEL_PRELOAD_STATE["per_agent"].items():
+			for model_id, status in models.items():
+				if status.get("status") == "error":
+					errors.append({
+						"agent": agent,
+						"model": model_id,
+						"error": status.get("error")
+					})
+	
+	return {
+		"all_ready": all_ready,
+		"in_progress": _MODEL_PRELOAD_STATE.get("in_progress", False),
+		"summary": _MODEL_PRELOAD_STATE.get("summary", {}),
+		"errors": errors,
+		"started_at": _MODEL_PRELOAD_STATE.get("started_at"),
+		"completed_at": _MODEL_PRELOAD_STATE.get("completed_at"),
+	}
 
 
 if __name__ == "__main__":

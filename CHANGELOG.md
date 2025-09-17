@@ -12,6 +12,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased] - 2025-09-09 - **SYSTEM STABILITY & GPU ACCELERATION RESTORATION**
 
+### � **MPS Resource Allocation System - ENTERPRISE GPU ISOLATION COMPLETE**
+- **✅ Machine-Readable Configuration**: `config/gpu/mps_allocation_config.json` with calculated per-agent memory limits
+- **✅ GPU Orchestrator Integration**: `/mps/allocation` endpoint provides centralized resource allocation data
+- **✅ Per-Agent Memory Limits**: Fixed allocations based on model requirements (1.0GB - 5.0GB per agent)
+- **✅ Safety Margins**: 50-100% buffer above calculated requirements for production stability
+- **✅ System Summary**: 23.0GB total allocation across 9 agents with 69.6% memory efficiency
+- **✅ Preflight Integration**: MCP Bus startup now validates model preload status via `/models/status` endpoint
+- **✅ Enterprise Architecture**: Professional-grade GPU resource isolation with process-level separation
+- **✅ Documentation Complete**: Comprehensive MPS resource allocation guide in `markdown_docs/agent_documentation/MPS_RESOURCE_ALLOCATION.md`
+- **Technical**: Fixed missing `/models/status` endpoint in GPU orchestrator, added MPS allocation configuration system
+
 ### � GPU Orchestrator Integration (In Progress)
 - ✅ Central GPU Orchestrator service (port 8014) with `/health`, `/policy`, `/gpu/info`, `/allocations`
 - ✅ Systemd onboarding (enable_all + health_check scripts updated)

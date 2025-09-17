@@ -16,6 +16,7 @@ This runbook explains how to use the preflight gate to enforce model readiness a
 - Verifies the GPU Orchestrator is reachable on port 8014.
 - Ensures the Model Store is canonical (STRICT mode, no downloads).
 - Triggers/monitors a models preload warmup and gates startup until `all_ready=true`.
+- Validates NVIDIA MPS is enabled and operational for GPU resource isolation.
 - Exits non‑zero on failure to stop systemd from starting dependent services.
 
 ## Quick usage
@@ -76,6 +77,11 @@ Environment knobs:
    - Cause: Large tokenizer/model init; fragmentation.
    - Fix: Ensure STRICT_MODEL_STORE=1 (no downloads); increase swap; reduce concurrent warmups if later parallelized.
    - Verify: Retry and monitor `nvidia-smi` (should be mostly idle during CPU preload).
+
+5. MPS not operational
+   - Cause: NVIDIA MPS daemon not running or misconfigured.
+   - Fix: Start MPS daemon with `nvidia-cuda-mps-control -d`; verify `/tmp/nvidia-mps/` exists.
+   - Verify: Check `curl :8014/gpu/info` shows `mps_enabled: true`; verify control process running.
 
 ## Quick recovery
 - Refresh job to clear past failures: `POST /models/preload {"refresh": true}`

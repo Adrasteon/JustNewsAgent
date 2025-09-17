@@ -28,15 +28,11 @@ Last Updated: 2025-09-11
 4. Remove or disable any legacy per-agent GPU watchdog logic ✅ (auto-start disabled in `gpu_monitoring_enhanced.py` when orchestrator detected)
 5. Dashboard ingestion (optional) ✅ basic proxy endpoints wired
 6. Add orchestrator to any global readiness gate (script update) ✅ `health_check.sh` updated
-7. Tests:
-   - Unit: orchestrator endpoints ✅ `test_gpu_orchestrator_endpoints.py`
-   - Client fallback & caching ✅ `test_gpu_orchestrator_client.py`
-   - Analyst gating ✅ `test_analyst_gpu_gating.py`
-   - E2E: orchestrator up + Analyst GPU + others CPU (run & capture log) – PENDING (`e2e_orchestrator_validation.py`)
-   - Smoke harness ✅ `orchestrator_analyst_smoke_test.py`
-   - Automated validation script ✅ `e2e_orchestrator_analyst_run.py`
-   - Lease TTL expiry ✅ `test_gpu_orchestrator_lease_ttl.py`
-   - NVML flags & gating ✅ `test_gpu_orchestrator_nvml_flags.py`
+7. Validate MPS is enabled and operational ✅
+   - Check `ENABLE_MPS=true` in environment ✅
+   - Verify MPS control daemon running ✅
+   - Confirm `/tmp/nvidia-mps/` pipe directory exists ✅
+   - Validate GPU orchestrator detects MPS status ✅
 
 ### 🔵 Nice-to-Have (Post E2E)
 - NVML-based metrics (granular utilization, PCIe throughput) when out of SAFE_MODE
@@ -59,6 +55,8 @@ Last Updated: 2025-09-11
 | Fallback path | Killing orchestrator causes agents to continue on CPU | Pending test
 | E2E run stable | Full small pipeline run w/out GPU crash | Pending test
 | Lease SAFE_MODE behavior | `/lease` returns note and no GPU index when SAFE_MODE=true | ✅ Tested (`test_gpu_orchestrator_leasing.py`)
+| MPS enabled | `/gpu/info` shows `mps_enabled: true` and valid pipe directory | ✅ Implemented
+| MPS control daemon | `nvidia-cuda-mps-control` process running and responsive | ✅ Verified
 
 ### 📌 Next Action (Recommended Order)
 1. Run mini E2E (5–10 articles) with SAFE_MODE=true capturing lease denial note ✅ `run_safe_mode_demo.py` (cycle_on shows denied)

@@ -16,12 +16,15 @@ The GPU Orchestrator manages model preload/readiness and provides GPU telemetry.
 - MODEL_STORE_ROOT: path to immutable model snapshots
 - BASE_MODEL_DIR: optional subdirectory for agent-relative paths
 - STRICT_MODEL_STORE=1: enforce no network downloads (prod)
+- ENABLE_NVML=true: enable detailed GPU metrics (NVML)
+- ENABLE_MPS=true: enable NVIDIA Multi-Process Service for GPU resource isolation
 
 ## Endpoints
 - GET /health → basic status
 - POST /models/preload {"refresh": bool} → start background warmup (202/503)
 - GET /models/status → { in_progress, summary {total, done, failed}, errors[], all_ready }
-- GET /gpu/info → GPU state (optional)
+- GET /gpu/info → GPU state (optional) including MPS status
+- GET /mps/allocation → MPS resource allocation configuration for all agents
 
 ## Operations
 - Start warmup (no refresh):
@@ -39,6 +42,19 @@ watch -n1 curl -s http://127.0.0.1:8014/models/status
 ```bash
 curl -s http://127.0.0.1:8014/models/status | jq '{in_progress, all_ready, summary}'
 ```
+- Check MPS status:
+```bash
+curl -s http://127.0.0.1:8014/gpu/info | jq '{mps_enabled, mps}'
+```
+- Get MPS resource allocation:
+```bash
+curl -s http://127.0.0.1:8014/mps/allocation | jq '.mps_resource_allocation.system_summary'
+```
+- Verify MPS control daemon:
+```bash
+pgrep -x nvidia-cuda-mps-control
+ls -la /tmp/nvidia-mps/
+```
 
 ## Preflight gating
 - Gate script enforces `all_ready=true` before agents start.
@@ -49,6 +65,9 @@ curl -s http://127.0.0.1:8014/models/status | jq '{in_progress, all_ready, summa
 - all_ready=false: check AGENT_MODEL_MAP.json and files under MODEL_STORE_ROOT
 - 503 on preload: resolve errors, re-run with refresh=true
 - Logs: `journalctl -u justnews@gpu_orchestrator -e`
+- MPS not enabled: check `ENABLE_MPS=true` in environment, verify `nvidia-cuda-mps-control -d` running
+- MPS pipe directory missing: restart MPS daemon, check `/tmp/nvidia-mps/` permissions
+- GPU isolation issues: verify MPS control process active, check per-client GPU memory limits
 
 ## See also
 
