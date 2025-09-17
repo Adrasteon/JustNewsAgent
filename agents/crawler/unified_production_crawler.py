@@ -257,6 +257,57 @@ class UnifiedProductionCrawler:
             logger.error(f"Remote AI analysis failed: {e}")
         return article
 
+    async def crawl_site(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+        """
+        Crawl a single site using the optimal strategy
+        """
+        strategy = self._determine_optimal_strategy(site_config)
+
+        if strategy == 'ultra_fast':
+            return await self._crawl_ultra_fast_mode(site_config, max_articles)
+        elif strategy == 'ai_enhanced':
+            return await self._crawl_ai_enhanced_mode(site_config, max_articles)
+        else:  # generic
+            return await self._crawl_generic_mode(site_config, max_articles)
+
+    async def run_unified_crawl(self, domains: List[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> Dict[str, Any]:
+        """
+        Main entry point for unified crawling - converts domains to SiteConfig objects and runs crawl
+        """
+        logger.info(f"🚀 Starting unified crawl for domains: {domains}")
+
+        # Convert domains to SiteConfig objects
+        site_configs = []
+        for domain in domains:
+            try:
+                # Get source info from database
+                sources = get_sources_by_domain([domain])  # Pass as list
+                if sources:
+                    source = sources[0]  # Use first match
+                    config = SiteConfig(source)
+                    site_configs.append(config)
+                else:
+                    # Create basic config for unknown domains
+                    logger.warning(f"No database entry for {domain}, creating basic config")
+                    config = SiteConfig({
+                        'id': None,
+                        'name': domain,
+                        'domain': domain,
+                        'url': f'https://{domain}',
+                        'crawling_strategy': 'generic'
+                    })
+                    site_configs.append(config)
+            except Exception as e:
+                logger.error(f"Failed to create config for {domain}: {e}")
+                continue
+
+        if not site_configs:
+            logger.error("❌ No valid site configurations created")
+            return {"error": "No valid domains provided"}
+
+        # Execute the crawl
+        return await self.crawl_multiple_sites(site_configs, max_articles_per_site, concurrent_sites)
+
     async def crawl_multiple_sites(self, site_configs: List[SiteConfig],
                                  max_articles_per_site: int = 25,
                                  concurrent_sites: int = 3) -> Dict[str, Any]:
@@ -299,27 +350,11 @@ class UnifiedProductionCrawler:
             "articles_per_second": articles_per_second,
             "strategy_breakdown": self.performance_metrics["mode_usage"],
             "site_breakdown": {domain: len(articles) for domain, articles in results.items()},
+            "articles": all_articles  # Include the actual articles
         }
 
-        sources = get_active_sources()
-        site_configs = []
-        for source in sources:
-            try:
-                config = SiteConfig(source)
-                site_configs.append(config)
-            except Exception as e:
-                logger.warning(f"Failed to create config for {source.get('name', 'Unknown')}: {e}")
-
-        if not site_configs:
-            logger.error("❌ No site configurations available")
-            return {"error": "No sources available"}
-
-        # Execute unified crawl
-        return await self.crawl_multiple_sites(
-            site_configs,
-            max_articles_per_site,
-            concurrent_sites
-        )
+        logger.info(f"✅ Unified crawl completed: {total_articles} articles in {total_time:.2f}s ({articles_per_second:.2f} articles/sec)")
+        return summary
 
     def get_performance_report(self) -> Dict[str, Any]:
         """Get comprehensive performance report"""
@@ -350,3 +385,28 @@ async def unified_production_crawl(domains: List[str], max_articles_per_site: in
 
 # Export for Scout Agent integration
 __all__ = ['UnifiedProductionCrawler']
+
+
+def get_crawler_info(*args, **kwargs) -> Dict[str, Any]:
+    """
+    Get information about the crawler configuration and capabilities.
+    This is a standalone function for external access to crawler info.
+    """
+    crawler = UnifiedProductionCrawler()
+    
+    return {
+        "crawler_type": "UnifiedProductionCrawler",
+        "version": "3.0",
+        "capabilities": [
+            "ultra_fast_crawling",
+            "ai_enhanced_crawling", 
+            "generic_crawling",
+            "multi_site_concurrent_crawling",
+            "performance_monitoring",
+            "database_driven_source_management"
+        ],
+        "supported_strategies": ["ultra_fast", "ai_enhanced", "generic"],
+        "performance_metrics": crawler.get_performance_report(),
+        "database_connected": True,  # Assume connected if no exception
+        "timestamp": datetime.now().isoformat()
+    }

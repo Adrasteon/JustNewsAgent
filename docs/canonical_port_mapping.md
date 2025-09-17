@@ -25,7 +25,8 @@ This document defines the canonical port assignments for all JustNews agents and
 | 8008 | Reasoning Agent | Nucleoid symbolic logic processing | ✅ Active |
 | 8009 | *(Previously Crawler)* | Port was assigned to Crawler but conflicts detected | ❌ Deprecated |
 | 8010-8014 | *(Available)* | Reserved for future agents | Reserved |
-| 8015 | Crawler Agent | Unified production crawling with AI analysis pipeline | ✅ Active | ✅ Active |
+| 8015 | Crawler Agent | Unified production crawling with AI analysis pipeline | ✅ Active |
+| 8016 | Crawler Control | Web interface for crawler management and monitoring | ✅ Active | ✅ Active |
 
 ## Port Assignment Rules
 
@@ -38,7 +39,7 @@ This document defines the canonical port assignments for all JustNews agents and
 
 ## Current Agent Status
 
-### ✅ Active Agents (Ports 8000-8008, 8010-8015)
+### ✅ Active Agents (Ports 8000-8008, 8010-8016)
 - **MCP Bus** (8000): Central communication hub
 - **Chief Editor** (8001): Workflow orchestration
 - **Scout** (8002): Content discovery with LLaMA-3-8B GPU acceleration
@@ -55,6 +56,7 @@ This document defines the canonical port assignments for all JustNews agents and
 - **Dashboard** (8013): Web-based monitoring and management
 - **GPU Orchestrator** (8014): Central GPU coordination and telemetry
 - **Crawler** (8015): Unified production crawling with AI pipeline
+- **Crawler Control** (8016): Web interface for crawler management and monitoring
 
 ### 🔄 Reserved Ports (None currently)
 - All ports in the 8000-8015 range are now actively assigned
@@ -64,6 +66,7 @@ This document defines the canonical port assignments for all JustNews agents and
 
 ## Recent Changes
 
+- **2025-09-16**: Assigned port 8016 to Crawler Control web interface
 - **2025-09-15**: Complete port mapping audit - discovered actual assignments differ from documentation
 - **2025-09-15**: Corrected all port assignments based on actual agent code verification
 - **2025-09-15**: Moved Crawler Agent from port 8009 to 8015 due to port conflict resolution

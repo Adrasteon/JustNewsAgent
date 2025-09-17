@@ -25,6 +25,7 @@ SERVICES=(
     "archive"        # Archive agent (port 8012)
     "dashboard"      # Dashboard agent (port 8013)
     "crawler"        # Unified Production Crawler - intelligent multi-strategy
+    "crawler_control" # Crawler Control web interface (port 8016)
 )
 
 # Colors for output

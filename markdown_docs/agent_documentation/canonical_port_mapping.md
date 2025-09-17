@@ -11,7 +11,7 @@ last_updated: 2025-09-12
 ## 📋 Complete Port Usage Analysis
 
 *Generated on: September 9, 2025*
-*Last Updated: September 15, 2025 - Crawler Agent (8015) added; counts updated*
+*Last Updated: September 16, 2025 - Crawler Control (8016) added; port assignments updated*
 
 This document provides the canonical list of all ports used in the JustNewsAgent system, compiled from a comprehensive search of the entire codebase and validated against running services.
 
@@ -44,6 +44,7 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 | **8013** | Dashboard Agent | Web-based monitoring and management | `http://localhost:8013` | ✅ Active |
 | **8014** | GPU Orchestrator | Central GPU coordination and telemetry | `http://localhost:8014/health` | ✅ Active |
 | **8015** | Crawler Agent | Unified production crawling with AI analysis pipeline | `http://localhost:8015/health` | ✅ Active |
+| **8016** | Crawler Control | Web interface for crawler management and monitoring | `http://localhost:8016` | ✅ Active |
 
 ---
 

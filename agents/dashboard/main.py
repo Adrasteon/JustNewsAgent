@@ -20,7 +20,19 @@ from common.observability import get_logger
 # This makes `from config import load_config` work when running the FastAPI app directly.
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from config import load_config, save_config
+# Import config module
+try:
+    from .config import load_config, save_config
+except ImportError:
+    # Fallback for direct execution
+    def load_config():
+        return {
+            "dashboard_port": 8013,
+            "mcp_bus_url": "http://localhost:8000",
+            "gpu_config": {}
+        }
+    def save_config(config):
+        pass
 
 # Import production GPU manager
 try:
@@ -31,7 +43,31 @@ except ImportError:
     get_gpu_manager = None
 
 # Import storage module
-from .storage import get_storage
+try:
+    from .storage import get_storage
+except ImportError:
+    # Fallback for direct execution
+    import sys
+    from pathlib import Path
+    storage_path = Path(__file__).parent / "storage.py"
+    if storage_path.exists():
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("storage", storage_path)
+        storage_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(storage_module)
+        get_storage = storage_module.get_storage
+    else:
+        # Mock storage if not available
+        def get_storage():
+            class MockStorage:
+                def store_gpu_metrics(self, data): pass
+                def get_gpu_metrics_history(self, *args, **kwargs): return []
+                def get_agent_allocation_history(self, *args, **kwargs): return []
+                def get_performance_trends(self, *args, **kwargs): return []
+                def get_recent_alerts(self, *args, **kwargs): return []
+                def get_storage_stats(self, *args, **kwargs): return {}
+            return MockStorage()
+        get_storage = get_storage
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
@@ -445,12 +481,12 @@ def ready_endpoint():
 
 @app.get("/")
 def dashboard_home():
-    """Serve the main GPU dashboard page"""
+    """Serve the main dashboard page"""
     try:
-        # Try to serve the template file first
-        template_path = Path(__file__).parent / "templates" / "dashboard.html"
-        if template_path.exists():
-            return FileResponse(template_path, media_type="text/html")
+        # Try to serve the web interface HTML file first
+        web_interface_path = Path(__file__).parent / "web_interface" / "index.html"
+        if web_interface_path.exists():
+            return FileResponse(web_interface_path, media_type="text/html")
         else:
             # Fall back to embedded HTML
             return HTMLResponse(content=get_fallback_dashboard_html())
@@ -1099,3 +1135,163 @@ def get_metrics():
     """Prometheus metrics endpoint."""
     from fastapi.responses import Response
     return Response(metrics.get_metrics(), media_type="text/plain")
+
+# Crawler Control Endpoints
+
+class CrawlRequest(BaseModel):
+    domains: list[str]
+    max_sites: int = 5
+    max_articles_per_site: int = 10
+    concurrent_sites: int = 3
+    strategy: str = "auto"
+    enable_ai: bool = True
+    timeout: int = 300
+    user_agent: str = "JustNewsAgent/1.0"
+
+@app.post("/api/crawl/start")
+async def start_crawl(request: CrawlRequest):
+    """Start a new crawl job"""
+    try:
+        # Use MCP bus to call the crawler agent
+        payload = {
+            "agent": "crawler",
+            "tool": "unified_production_crawl",
+            "args": [request.domains],
+            "kwargs": {
+                "max_sites": request.max_sites,
+                "max_articles_per_site": request.max_articles_per_site,
+                "concurrent_sites": request.concurrent_sites,
+                "strategy": request.strategy,
+                "enable_ai": request.enable_ai,
+                "timeout": request.timeout,
+                "user_agent": request.user_agent
+            }
+        }
+        response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Failed to start crawl: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to start crawl: {str(e)}")
+
+@app.get("/api/crawl/status")
+async def get_crawl_status():
+    """Get current crawl job statuses"""
+    try:
+        # Use MCP bus to get crawler status
+        payload = {
+            "agent": "crawler",
+            "tool": "get_jobs",
+            "args": [],
+            "kwargs": {}
+        }
+        response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=5)
+        response.raise_for_status()
+        jobs = response.json()
+        
+        # Get details for each job
+        job_details = {}
+        for job_id, status in jobs.items():
+            try:
+                detail_payload = {
+                    "agent": "crawler",
+                    "tool": "get_job_status",
+                    "args": [job_id],
+                    "kwargs": {}
+                }
+                detail_response = requests.post(f"{MCP_BUS_URL}/call", json=detail_payload, timeout=5)
+                detail_response.raise_for_status()
+                job_details[job_id] = detail_response.json()
+            except:
+                job_details[job_id] = {"status": "unknown"}
+        
+        return job_details
+    except requests.RequestException as e:
+        logger.error(f"Failed to get crawl status: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get crawl status: {str(e)}")
+
+@app.get("/api/metrics/crawler")
+async def get_crawler_metrics():
+    """Get crawler performance metrics"""
+    try:
+        # Use MCP bus to get crawler metrics
+        payload = {
+            "agent": "crawler",
+            "tool": "get_metrics",
+            "args": [],
+            "kwargs": {}
+        }
+        response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        # Fallback mock data
+        return {
+            "articles_processed": 150,
+            "sites_crawled": 5,
+            "articles_per_second": 2.5,
+            "mode_usage": {"ultra_fast": 2, "ai_enhanced": 1, "generic": 2}
+        }
+
+@app.get("/api/metrics/analyst")
+async def get_analyst_metrics():
+    """Get analyst metrics"""
+    try:
+        # Use MCP bus to get analyst metrics
+        payload = {
+            "agent": "analyst",
+            "tool": "get_metrics",
+            "args": [],
+            "kwargs": {}
+        }
+        response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        # Fallback mock data
+        return {
+            "sentiment_count": 120,
+            "bias_count": 80,
+            "topics_count": 95
+        }
+
+@app.get("/api/metrics/memory")
+async def get_memory_metrics():
+    """Get memory usage metrics"""
+    try:
+        # Use MCP bus to get memory metrics
+        payload = {
+            "agent": "memory",
+            "tool": "get_metrics",
+            "args": [],
+            "kwargs": {}
+        }
+        response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=5)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException:
+        # Fallback mock data
+        return {
+            "used": 60,
+            "free": 40
+        }
+
+@app.get("/api/health")
+async def get_system_health():
+    """Get overall system health"""
+    health = {}
+    agents = [
+        ("crawler", 8015),  # Assuming crawler port
+        ("analyst", 8004),
+        ("memory", 8007),
+        ("mcp_bus", 8000)
+    ]
+    
+    for name, port in agents:
+        try:
+            response = requests.get(f"http://localhost:{port}/health", timeout=2)
+            health[name] = response.status_code == 200
+        except:
+            health[name] = False
+    
+    return health

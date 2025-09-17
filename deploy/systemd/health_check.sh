@@ -25,6 +25,7 @@ declare -A SERVICES=(
     ["dashboard"]="8013:/health"      # Dashboard web UI
     ["gpu_orchestrator"]="8014:/health" # GPU Orchestrator service
     ["crawler"]="8015:/health"          # Unified Production Crawler instance
+    ["crawler_control"]="8016:/"        # Crawler Control web interface
 )
 
 # Additional readiness endpoints (service:port:/ready) for stricter gating

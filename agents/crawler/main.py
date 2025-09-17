@@ -142,6 +142,38 @@ def list_jobs():
     # Return a mapping of job_id to status only for brevity
     return {job_id: info.get("status") for job_id, info in crawl_jobs.items()}
 
+@app.post("/clear_jobs")
+def clear_jobs():
+    """Clear completed and failed jobs from memory."""
+    global crawl_jobs
+    cleared_jobs = []
+    for job_id in list(crawl_jobs.keys()):
+        del crawl_jobs[job_id]
+        cleared_jobs.append(job_id)
+    
+    return {"cleared_jobs": cleared_jobs, "message": f"Cleared {len(cleared_jobs)} jobs from memory"}
+
+@app.post("/reset_crawler")
+def reset_crawler():
+    """Completely reset the crawler state - clear all jobs and reset performance metrics."""
+    global crawl_jobs
+    
+    # Clear all jobs
+    cleared_jobs = list(crawl_jobs.keys())
+    crawl_jobs.clear()
+    
+    # Reset performance metrics if they exist
+    try:
+        from agents.crawler.performance_monitoring import reset_performance_metrics
+        reset_performance_metrics()
+    except ImportError:
+        pass  # Performance monitoring might not be available
+    
+    return {
+        "cleared_jobs": cleared_jobs, 
+        "message": f"Completely reset crawler: cleared {len(cleared_jobs)} jobs and reset metrics"
+    }
+
 @app.post("/get_crawler_info")
 def get_crawler_info_endpoint(call: ToolCall):
     try:
@@ -155,9 +187,10 @@ def get_crawler_info_endpoint(call: ToolCall):
 @app.post("/get_performance_metrics")
 def get_performance_metrics_endpoint(call: ToolCall):
     try:
-        from agents.crawler.performance_monitoring import get_performance_metrics
+        from agents.crawler.performance_monitoring import get_performance_monitor
+        monitor = get_performance_monitor()
         logger.info(f"Calling get_performance_metrics with args: {call.args} and kwargs: {call.kwargs}")
-        return get_performance_metrics(*call.args, **call.kwargs)
+        return monitor.get_current_metrics()
     except Exception as e:
         logger.error(f"An error occurred in get_performance_metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))

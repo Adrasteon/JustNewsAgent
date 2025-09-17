@@ -240,6 +240,34 @@ class PerformanceMetrics:
         except Exception as e:
             logger.error(f"❌ Failed to export metrics: {e}")
 
+    def reset(self):
+        """Reset all performance metrics to initial state"""
+        self.start_time = time.time()
+
+        # Reset core metrics
+        self.articles_processed = 0
+        self.articles_successful = 0
+        self.sites_crawled = 0
+        self.errors_total = 0
+
+        # Reset strategy metrics
+        self.strategy_usage.clear()
+        self.strategy_performance.clear()
+
+        # Reset time-based metrics
+        self.processing_times.clear()
+        self.articles_per_second_history.clear()
+        self.error_rate_history.clear()
+
+        # Reset site-specific metrics
+        self.site_metrics.clear()
+
+        # Stop monitoring if active
+        if self.monitoring_active:
+            self.stop_monitoring()
+
+        logger.info("✅ Performance metrics reset to initial state")
+
 
 class PerformanceOptimizer:
     """Performance optimization recommendations based on metrics"""
@@ -344,11 +372,19 @@ def export_performance_metrics(filepath: str):
     _performance_monitor.export_metrics(filepath)
 
 # Export for unified crawler integration
+def reset_performance_metrics():
+    """Reset global performance metrics"""
+    global _performance_monitor
+    if _performance_monitor:
+        _performance_monitor.reset()
+    logger.info("Performance metrics reset")
+
 __all__ = [
     'PerformanceMetrics',
     'PerformanceOptimizer',
     'get_performance_monitor',
     'start_performance_monitoring',
     'stop_performance_monitoring',
-    'export_performance_metrics'
+    'export_performance_metrics',
+    'reset_performance_metrics'
 ]

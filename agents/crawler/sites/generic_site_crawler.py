@@ -221,11 +221,58 @@ class GenericSiteCrawler:
             )
             return []
         finally:
+            # Robust browser cleanup for URL discovery
+            logger.debug(f"🧹 Cleaning up browser for URL discovery from {self.site_config.name}")
+            cleanup_errors = []
+            
             try:
-                await browser.close()
+                if browser and not browser.is_connected():
+                    logger.debug("Browser already closed")
+                else:
+                    # Close all pages first
+                    try:
+                        pages = browser.contexts[0].pages if browser.contexts else []
+                        for page in pages:
+                            try:
+                                await page.close()
+                            except Exception as e:
+                                logger.debug(f"Error closing page: {e}")
+                    except Exception as e:
+                        logger.debug(f"Error closing pages: {e}")
+                    
+                    # Close all contexts
+                    try:
+                        for context in browser.contexts:
+                            try:
+                                await context.close()
+                            except Exception as e:
+                                logger.debug(f"Error closing context: {e}")
+                    except Exception as e:
+                        logger.debug(f"Error closing contexts: {e}")
+                    
+                    # Close browser
+                    try:
+                        await browser.close()
+                        logger.debug("✅ Browser closed successfully")
+                    except Exception as e:
+                        logger.warning(f"❌ Error closing browser: {e}")
+                        cleanup_errors.append(f"browser: {e}")
+            except Exception as e:
+                logger.warning(f"❌ Unexpected error during browser cleanup: {e}")
+                cleanup_errors.append(f"browser_unexpected: {e}")
+            
+            # Stop playwright
+            try:
                 await playwright.stop()
-            except Exception:  # noqa: BLE001
-                pass
+                logger.debug("✅ Playwright stopped successfully")
+            except Exception as e:
+                logger.warning(f"❌ Error stopping playwright: {e}")
+                cleanup_errors.append(f"playwright: {e}")
+            
+            if cleanup_errors:
+                logger.warning(f"⚠️ URL discovery cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
+            else:
+                logger.debug("✅ URL discovery browser cleaned up successfully")
 
     async def extract_content(self, page) -> dict[str, Any]:
         """Extract article title + content via configured selectors."""
@@ -365,53 +412,28 @@ class GenericSiteCrawler:
                         f"Crawl4AI extraction failed for {url}: {e} – falling back to Playwright"  # noqa: E501
                     )
             # Fallback: Playwright
-            context = await browser.new_context(
-                viewport={"width": 1024, "height": 768},
-                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-            )
-            page = await context.new_page()
-            await page.goto(url, wait_until="domcontentloaded", timeout=12000)
-            await ModalDismisser.dismiss_modals(page)
-            await asyncio.sleep(1.5)
-            content_data = await self.extract_content(page)
-            await context.close()
-            await asyncio.sleep(random.uniform(1.0, 3.0))
-            if (
-                len(content_data["content"]) > 50
-                and len(content_data["title"]) > 10
-            ):
-                processing_time = time.time() - start_time
-                # _record_scout_performance({  # Commented out - Scout-specific performance tracking
-                #     "agent_name": "scout",
-                #     "operation": "process_single_url",
-                #     "processing_time_s": processing_time,
-                #     "batch_size": 1,
-                #     "success": True,
-                #     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-                # })
-                return CanonicalMetadata.generate_metadata(
-                    url=url,
-                    title=content_data["title"],
-                    content=content_data["content"],
-                    extraction_method=content_data["extraction_method"],
-                    status="success",
-                    paywall_flag=content_data["paywall_flag"],
-                    confidence=0.7,
-                    publisher=self.site_config.name,
-                    crawl_mode="generic_site",
-                    news_score=0.7,
-                    canonical=content_data["canonical"],
+            context = None
+            try:
+                context = await browser.new_context(
+                    viewport={"width": 1024, "height": 768},
+                    user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
                 )
-            processing_time = time.time() - start_time
-            # _record_scout_performance({  # Commented out - Scout-specific performance tracking
-            #     "agent_name": "scout",
-            #     "operation": "process_single_url",
-            #     "processing_time_s": processing_time,
-            #     "batch_size": 1,
-            #     "success": False,
-            #     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-            # })
-            return None
+                page = await context.new_page()
+                await page.goto(url, wait_until="domcontentloaded", timeout=12000)
+                await ModalDismisser.dismiss_modals(page)
+                await asyncio.sleep(1.5)
+                content_data = await self.extract_content(page)
+                await context.close()
+                context = None  # Mark as closed
+                await asyncio.sleep(random.uniform(1.0, 3.0))
+            finally:
+                # Ensure context is closed even if exception occurs
+                if context:
+                    try:
+                        await context.close()
+                        logger.debug(f"✅ Context closed for {url}")
+                    except Exception as e:
+                        logger.debug(f"Error closing context for {url}: {e}")
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to process {url}: {e}")
             processing_time = time.time() - start_time
@@ -475,15 +497,61 @@ class GenericSiteCrawler:
             )
             return results
         finally:
-            for b in browsers:
+            # Robust browser cleanup - ensure all browsers are closed
+            logger.info(f"🧹 Cleaning up {len(browsers)} browsers for {self.site_config.name}")
+            cleanup_errors = []
+            
+            for i, b in enumerate(browsers):
                 try:
-                    await b.close()
-                except Exception:  # noqa: BLE001
-                    pass
+                    if b and not b.is_connected():
+                        logger.debug(f"Browser {i} already closed")
+                        continue
+                    
+                    # Close all pages first
+                    try:
+                        pages = b.contexts[0].pages if b.contexts else []
+                        for page in pages:
+                            try:
+                                page.close()
+                            except Exception as e:
+                                logger.debug(f"Error closing page: {e}")
+                    except Exception as e:
+                        logger.debug(f"Error closing pages: {e}")
+                    
+                    # Close all contexts
+                    try:
+                        for context in b.contexts:
+                            try:
+                                context.close()
+                            except Exception as e:
+                                logger.debug(f"Error closing context: {e}")
+                    except Exception as e:
+                        logger.debug(f"Error closing contexts: {e}")
+                    
+                    # Close browser
+                    try:
+                        await b.close()
+                        logger.debug(f"✅ Browser {i} closed successfully")
+                    except Exception as e:
+                        logger.warning(f"❌ Error closing browser {i}: {e}")
+                        cleanup_errors.append(f"browser_{i}: {e}")
+                        
+                except Exception as e:
+                    logger.warning(f"❌ Unexpected error during browser {i} cleanup: {e}")
+                    cleanup_errors.append(f"browser_{i}_unexpected: {e}")
+            
+            # Stop playwright
             try:
                 await playwright.stop()
-            except Exception:  # noqa: BLE001
-                pass
+                logger.debug("✅ Playwright stopped successfully")
+            except Exception as e:
+                logger.warning(f"❌ Error stopping playwright: {e}")
+                cleanup_errors.append(f"playwright: {e}")
+            
+            if cleanup_errors:
+                logger.warning(f"⚠️ Browser cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
+            else:
+                logger.info("✅ All browsers cleaned up successfully")
 
 
 class MultiSiteCrawler:
