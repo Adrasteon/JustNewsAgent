@@ -1,0 +1,18 @@
+[
+  {
+    "use_gpu": false,
+    "safe_mode": true,
+    "gpu_available": false,
+    "policy_fallback": true,
+    "safe_mode_env": "true",
+    "duration_s": 0.417
+  },
+  {
+    "use_gpu": false,
+    "safe_mode": true,
+    "gpu_available": false,
+    "policy_fallback": true,
+    "safe_mode_env": "false",
+    "duration_s": 0.4175
+  }
+]

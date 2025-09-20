@@ -38,6 +38,23 @@ def handle_review_request(kwargs: dict[str, Any]) -> dict[str, Any]:
         logger.error(f'Failed to write review queue: {e}')
         return {'status': 'error', 'error': str(e)}
 
+    # Collect prediction for training
+    try:
+        from training_system import collect_prediction
+        collect_prediction(
+            agent_name="chief_editor",
+            task_type="evidence_review_queuing",
+            input_text=f"Manifest: {manifest}, Reason: {reason}",
+            prediction={'status': 'ok', 'manifest': manifest},
+            confidence=0.95,  # High confidence for successful queuing
+            source_url=""
+        )
+        logger.debug("📊 Training data collected for evidence review queuing")
+    except ImportError:
+        logger.debug("Training system not available - skipping data collection")
+    except Exception as e:
+        logger.warning(f"Failed to collect training data: {e}")
+
     # Best-effort notifications
     try:
         slack_text = f"New evidence queued for review: {manifest} (reason={reason})"

@@ -1,0 +1,49 @@
+{
+  "crawl_configuration": {
+    "sites": [
+      "bbc"
+    ],
+    "mode": "mixed",
+    "articles_per_site": 5,
+    "concurrent_sites": 1,
+    "quality_threshold": 0.6,
+    "batch_size": 10,
+    "test_mode": false
+  },
+  "overall_results": {
+    "total_sites": 1,
+    "total_articles": 0,
+    "total_processing_time": 37.0241961479187,
+    "overall_success_rate": 0,
+    "overall_quality_score": 0.0,
+    "articles_per_second": 0.0,
+    "timestamp": "2025-09-11T12:28:56.467016"
+  },
+  "ai_models_used": [
+    "LLaMA-3-8B (Scout Classification)",
+    "BERT (News Classification)",
+    "BERT (Quality Assessment)",
+    "RoBERTa (Sentiment Analysis)",
+    "Toxic Comment Model (Bias Detection)",
+    "LLaVA-OneVision (Visual Analysis)",
+    "LLaVA-1.5-7B or BLIP-2 (NewsReader)"
+  ],
+  "site_results": [
+    {
+      "site": "bbc",
+      "mode": "ultra_fast",
+      "articles_found": 0,
+      "articles_processed": 0,
+      "success_rate": 0.0,
+      "avg_quality_score": 0.0,
+      "processing_time": 31.42719864845276,
+      "ai_analysis_count": 0,
+      "performance_metrics": {},
+      "errors": [
+        "Server error '502 Bad Gateway' for url 'http://localhost:8000/call'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/502"
+      ]
+    }
+  ],
+  "archive_summary": {},
+  "knowledge_graph_stats": {}
+}

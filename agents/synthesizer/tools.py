@@ -354,67 +354,93 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
     """Cluster articles using optimized embedding configuration."""
     if not article_texts:
         return {"clusters": [], "cluster_labels": [], "n_clusters": 0, "articles_processed": 0}
-
-    model = get_embedding_model()
-    embeddings = model.encode(article_texts)
-    method = os.environ.get("SYNTHESIZER_CLUSTER_METHOD", "kmeans").lower()
-    clusters = []
-    cluster_labels = []
-
+    
+    result = {"clusters": [], "cluster_labels": [], "n_clusters": 0, "articles_processed": 0}  # Initialize result
+    
     try:
-        if method == "bertopic":
-            if BERTopic is None:
-                raise ImportError("BERTopic is not installed.")
-            topic_model = BERTopic(verbose=False)
-            topics, _ = topic_model.fit_transform(article_texts)
-            n_clusters = max(topics) + 1 if topics else 0
-            clusters = [[] for _ in range(n_clusters)]
-            cluster_labels = ["topic_" + str(i) for i in range(n_clusters)]
-            for idx, topic in enumerate(topics):
-                if topic >= 0:
-                    clusters[topic].append(idx)
-        elif method == "hdbscan":
-            if hdbscan is None:
-                raise ImportError("hdbscan is not installed.")
-            clusterer = hdbscan.HDBSCAN(min_cluster_size=2)
-            labels = clusterer.fit_predict(embeddings)
-            n_clusters = max(labels) + 1 if labels.size > 0 else 0
-            clusters = [[] for _ in range(n_clusters)]
-            cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
-            for idx, label in enumerate(labels):
-                if label >= 0:
+        model = get_embedding_model()
+        embeddings = model.encode(article_texts)
+        method = os.environ.get("SYNTHESIZER_CLUSTER_METHOD", "kmeans").lower()
+        clusters = []
+        cluster_labels = []
+        
+        try:
+            if method == "bertopic":
+                if BERTopic is None:
+                    raise ImportError("BERTopic is not installed.")
+                topic_model = BERTopic(verbose=False)
+                topics, _ = topic_model.fit_transform(article_texts)
+                n_clusters = max(topics) + 1 if topics else 0
+                clusters = [[] for _ in range(n_clusters)]
+                cluster_labels = ["topic_" + str(i) for i in range(n_clusters)]
+                for idx, topic in enumerate(topics):
+                    if topic >= 0:
+                        clusters[topic].append(idx)
+            elif method == "hdbscan":
+                if hdbscan is None:
+                    raise ImportError("hdbscan is not installed.")
+                clusterer = hdbscan.HDBSCAN(min_cluster_size=2)
+                labels = clusterer.fit_predict(embeddings)
+                n_clusters = max(labels) + 1 if labels.size > 0 else 0
+                clusters = [[] for _ in range(n_clusters)]
+                cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
+                for idx, label in enumerate(labels):
+                    if label >= 0:
+                        clusters[label].append(idx)
+            else:
+                if KMeans is None:
+                    raise ImportError("sklearn KMeans is not installed.")
+                if len(article_texts) < n_clusters:
+                    n_clusters = len(article_texts)
+                kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+                labels = kmeans.fit_predict(embeddings)
+                clusters = [[] for _ in range(n_clusters)]
+                cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
+                for idx, label in enumerate(labels):
                     clusters[label].append(idx)
-        else:
-            if KMeans is None:
-                raise ImportError("sklearn KMeans is not installed.")
-            if len(article_texts) < n_clusters:
-                n_clusters = len(article_texts)
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-            labels = kmeans.fit_predict(embeddings)
-            clusters = [[] for _ in range(n_clusters)]
-            cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
-            for idx, label in enumerate(labels):
-                clusters[label].append(idx)
-
-        log_feedback("cluster_articles", {"method": method, "n_clusters": len(clusters), "clusters": clusters})
-        return {
-            "clusters": clusters,
-            "cluster_labels": cluster_labels,
-            "n_clusters": len(clusters),
-            "articles_processed": len(article_texts),
-            "method": method
-        }
-    except Exception as e:
-        logger.error(f"Error in cluster_articles: {e}")
-        log_feedback("cluster_articles_error", {"error": str(e), "method": method})
-        return {
-            "clusters": [[i for i in range(len(article_texts))]],  # Fallback: all in one cluster
-            "cluster_labels": ["fallback_cluster"],
-            "n_clusters": 1,
-            "articles_processed": len(article_texts),
-            "method": "fallback",
-            "error": str(e)
-        }
+            
+            result = {
+                "clusters": clusters,
+                "cluster_labels": cluster_labels,
+                "n_clusters": len(clusters),
+                "articles_processed": len(article_texts),
+                "method": method
+            }
+            
+            log_feedback("cluster_articles", {"method": method, "n_clusters": len(clusters), "clusters": clusters})
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error in cluster_articles: {e}")
+            log_feedback("cluster_articles_error", {"error": str(e), "method": method})
+            result = {
+                "clusters": [[i for i in range(len(article_texts))]],  # Fallback: all in one cluster
+                "cluster_labels": ["fallback_cluster"],
+                "n_clusters": 1,
+                "articles_processed": len(article_texts),
+                "method": "fallback",
+                "error": str(e)
+            }
+            return result
+            
+    finally:
+        # Collect prediction for training
+        try:
+            confidence = min(0.95, max(0.5, result.get("n_clusters", 1) / max(1, len(article_texts) / 2)))  # Higher confidence for more clusters
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="synthesizer",
+                task_type="article_clustering",
+                input_text=str(article_texts),
+                prediction=result,
+                confidence=confidence,
+                source_url=""
+            )
+            logger.debug(f"📊 Training data collected for article clustering (confidence: {confidence:.3f})")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
 
 def neutralize_text(text: str) -> dict[str, Any]:
     """Use optimized model to neutralize text with reduced memory usage."""
@@ -449,7 +475,8 @@ def neutralize_text(text: str) -> dict[str, Any]:
     neutralized_bias_score = sum(1 for word in result.lower().split() if word in bias_indicators) / max(len(result.split()), 1)
 
     log_feedback("neutralize_text", {"input": text, "output": result})
-    return {
+    
+    result_dict = {
         "neutralized_text": result,
         "original_text": text,
         "bias_score": neutralized_bias_score,
@@ -457,6 +484,26 @@ def neutralize_text(text: str) -> dict[str, Any]:
         "processing_time": 0.0,  # Would need timing implementation
         "method": "dialogpt_neutralization"
     }
+    
+    # Collect prediction for training
+    try:
+        confidence = min(0.95, max(0.5, 1.0 - neutralized_bias_score))  # Higher confidence for better neutralization
+        from training_system import collect_prediction
+        collect_prediction(
+            agent_name="synthesizer",
+            task_type="text_neutralization",
+            input_text=text,
+            prediction=result_dict,
+            confidence=confidence,
+            source_url=""
+        )
+        logger.debug(f"📊 Training data collected for text neutralization (confidence: {confidence:.3f})")
+    except ImportError:
+        logger.debug("Training system not available - skipping data collection")
+    except Exception as e:
+        logger.warning(f"Failed to collect training data: {e}")
+    
+    return result_dict
 
 def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
     """Use optimized model to summarize article clusters efficiently."""
@@ -493,13 +540,33 @@ def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
     confidence = min(0.9, len(result.split()) / 100.0)  # Simple heuristic
 
     log_feedback("aggregate_cluster", {"input": article_texts, "output": result})
-    return {
+    
+    result_dict = {
         "summary": result,
         "key_points": key_points,
         "confidence": confidence,
         "articles_processed": len(article_texts),
         "method": "dialogpt_aggregation"
     }
+    
+    # Collect prediction for training
+    try:
+        from training_system import collect_prediction
+        collect_prediction(
+            agent_name="synthesizer",
+            task_type="cluster_aggregation",
+            input_text=str(article_texts),
+            prediction=result_dict,
+            confidence=confidence,
+            source_url=""
+        )
+        logger.debug(f"📊 Training data collected for cluster aggregation (confidence: {confidence:.3f})")
+    except ImportError:
+        logger.debug("Training system not available - skipping data collection")
+    except Exception as e:
+        logger.warning(f"Failed to collect training data: {e}")
+    
+    return result_dict
 
 # ==================== SYNTHESIZER V2 TRAINING-INTEGRATED METHODS ====================
 

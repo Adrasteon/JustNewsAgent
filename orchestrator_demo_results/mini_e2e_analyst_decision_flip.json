@@ -1,0 +1,26 @@
+[
+  {
+    "use_gpu": false,
+    "safe_mode": true,
+    "gpu_available": true,
+    "device_count": 1,
+    "nvml_enriched": false,
+    "nvml_supported": false,
+    "safe_mode_env": "true",
+    "source": "in_memory_testclient",
+    "requested_safe_mode_env": "true",
+    "duration_s": 0.4623
+  },
+  {
+    "use_gpu": true,
+    "safe_mode": false,
+    "gpu_available": true,
+    "device_count": 1,
+    "nvml_enriched": false,
+    "nvml_supported": false,
+    "safe_mode_env": "false",
+    "source": "in_memory_testclient",
+    "requested_safe_mode_env": "false",
+    "duration_s": 0.462
+  }
+]

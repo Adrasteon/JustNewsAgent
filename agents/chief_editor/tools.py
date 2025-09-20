@@ -56,6 +56,24 @@ def request_story_brief(topic: str, scope: str):
     logger.info(f"Requesting story brief for topic: {topic}, scope: {scope}")
     brief = f"Story brief for topic '{topic}' within scope '{scope}'."
     log_feedback("request_story_brief", {"topic": topic, "scope": scope, "brief": brief})
+    
+    # Collect prediction for training
+    try:
+        from training_system import collect_prediction
+        collect_prediction(
+            agent_name="chief_editor",
+            task_type="story_brief_generation",
+            input_text=f"Topic: {topic}, Scope: {scope}",
+            prediction={"brief": brief},
+            confidence=0.8,  # Default confidence for brief generation
+            source_url=""
+        )
+        logger.debug("📊 Training data collected for story brief generation")
+    except ImportError:
+        logger.debug("Training system not available - skipping data collection")
+    except Exception as e:
+        logger.warning(f"Failed to collect training data: {e}")
+    
     return brief
 
 def publish_story(story_id: str):
@@ -72,17 +90,57 @@ def publish_story(story_id: str):
         resp.raise_for_status()
         result = resp.json()
         log_feedback("publish_story", {"story_id": story_id, "result": result})
-        return {
+        
+        result_dict = {
             "status": "published",
             "story_id": story_id,
             "mcp_result": result,
             "message": "Librarian Agent notified and story status updated via MCP bus."
         }
+        
+        # Collect prediction for training
+        try:
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="chief_editor",
+                task_type="story_publishing",
+                input_text=story_id,
+                prediction=result_dict,
+                confidence=0.9,  # High confidence for successful publishing
+                source_url=""
+            )
+            logger.debug("📊 Training data collected for story publishing")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
+        return result_dict
     except Exception as e:
         logger.error(f"Error calling MCP bus for publish_story: {e}")
         log_feedback("publish_story_error", {"story_id": story_id, "error": str(e)})
-        return {
+        
+        error_result = {
             "status": "error",
             "story_id": story_id,
             "error": str(e)
         }
+        
+        # Collect prediction for training even on error
+        try:
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="chief_editor",
+                task_type="story_publishing",
+                input_text=story_id,
+                prediction=error_result,
+                confidence=0.1,  # Low confidence for failed publishing
+                source_url=""
+            )
+            logger.debug("📊 Training data collected for failed story publishing")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
+        return error_result

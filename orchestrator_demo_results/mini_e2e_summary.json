@@ -1,0 +1,173 @@
+{
+  "phases": [
+    {
+      "phase": "phase1_safe_mode_on",
+      "safe_mode": "true",
+      "enable_nvml": "false",
+      "ready": true,
+      "start_time": 1757604973.9800303,
+      "health": {
+        "status": "ok",
+        "safe_mode": true
+      },
+      "policy": {
+        "max_memory_per_agent_mb": 2048,
+        "allow_fractional_shares": true,
+        "kill_on_oom": false,
+        "safe_mode_read_only": true
+      },
+      "gpu_info": {
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 3090",
+            "memory_total_mb": 24576.0,
+            "memory_used_mb": 2398.0,
+            "utilization_gpu_pct": 56.0,
+            "temperature_c": 29.0,
+            "power_draw_w": 34.43,
+            "memory_utilization_pct": 9.757486979166668
+          }
+        ],
+        "available": true,
+        "nvml_enriched": false,
+        "nvml_supported": false
+      },
+      "lease": {
+        "granted": false,
+        "note": "SAFE_MODE",
+        "agent": "mini_e2e"
+      },
+      "duration_seconds": 0.966
+    },
+    {
+      "phase": "phase2_safe_mode_off",
+      "safe_mode": "false",
+      "enable_nvml": "true",
+      "ready": true,
+      "start_time": 1757604974.9461246,
+      "health": {
+        "status": "ok",
+        "safe_mode": false
+      },
+      "policy": {
+        "max_memory_per_agent_mb": 2048,
+        "allow_fractional_shares": true,
+        "kill_on_oom": false,
+        "safe_mode_read_only": false
+      },
+      "gpu_info": {
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 3090",
+            "memory_total_mb": 24576.0,
+            "memory_used_mb": 2396.0,
+            "utilization_gpu_pct": 21.0,
+            "temperature_c": 29.0,
+            "power_draw_w": 35.56,
+            "memory_utilization_pct": 9.749348958333332,
+            "nvml_gpu_util_pct": 21,
+            "nvml_mem_used_mb": 2870.25,
+            "nvml_mem_total_mb": 24576.0,
+            "nvml_mem_util_pct": 11.68
+          }
+        ],
+        "available": true,
+        "nvml_enriched": true,
+        "nvml_supported": true
+      },
+      "lease": {
+        "granted": true,
+        "agent": "mini_e2e",
+        "gpu": 0,
+        "token": "bf922f68-5a50-49c0-a1a4-cd118d87a7c9",
+        "timestamp": 1757604975.776434
+      },
+      "duration_seconds": 0.996
+    }
+  ],
+  "expectation_checks": {
+    "phase1_safe_mode_denied": true,
+    "phase2_gpu_possible": true
+  },
+  "analyst_decision_flip_artifact": null,
+  "dry_run": false,
+  "nvml_requested": true,
+  "env_injected_count": 99,
+  "env_injected_keys": [
+    "ACCESS_LOG",
+    "AGENT_TIMEOUT",
+    "ALLOWED_EXTENSIONS",
+    "ALLOWED_HOSTS",
+    "ANTHROPIC_API_KEY",
+    "API_KEYS",
+    "API_KEY_EXPIRY_HOURS",
+    "BACKUP_DIR",
+    "BACKUP_RETENTION_DAYS",
+    "BATCH_PROCESSING_SIZE",
+    "BATCH_SIZE",
+    "CACHE_EMBEDDINGS",
+    "COMPRESSION_ENABLED",
+    "CONTENT_RETENTION_DAYS",
+    "CONTENT_STORAGE_TYPE",
+    "CONTENT_UPDATE_INTERVAL",
+    "CORS_ORIGINS",
+    "CRAWL_DELAY",
+    "CRAWL_TIMEOUT",
+    "CUDA_VISIBLE_DEVICES",
+    "DATABASE_TYPE",
+    "DB_MAX_OVERFLOW",
+    "DB_POOL_SIZE",
+    "DEBUG",
+    "EMAIL_FROM",
+    "EMBEDDING_BATCH_SIZE",
+    "EMBEDDING_MODEL",
+    "ENABLE_AUTH",
+    "ENABLE_CONTENT_METRICS",
+    "ENABLE_DUPLICATE_FILTERING",
+    "ENABLE_METRICS",
+    "ENABLE_RSS",
+    "ENABLE_STORAGE_METRICS",
+    "ENVIRONMENT",
+    "ERROR_LOG",
+    "GPU_MEMORY_FRACTION",
+    "HEALTH_CHECK_ENABLED",
+    "HEALTH_CHECK_INTERVAL",
+    "HEALTH_CHECK_PATH",
+    "HEALTH_CHECK_TIMEOUT"
+  ],
+  "env_injected_truncated": true,
+  "crawl": {
+    "requested": true,
+    "ready": true,
+    "args": {
+      "articles": 2,
+      "sites": null,
+      "mode": null,
+      "concurrent": null,
+      "test_mode": true
+    },
+    "exit_code": 1,
+    "duration_seconds": 5.899,
+    "pre_metrics_file": "/home/adra/justnewsagent/JustNewsAgent/orchestrator_demo_results/mini_e2e_crawl_pre.prom",
+    "post_metrics_file": "/home/adra/justnewsagent/JustNewsAgent/orchestrator_demo_results/mini_e2e_crawl_post.prom",
+    "command": [
+      "/home/adra/miniconda3/envs/justnews-v2-py312/bin/python",
+      "run_large_scale_crawl.py",
+      "--test",
+      "--articles",
+      "2"
+    ]
+  },
+  "db_preflight": {
+    "requested": true,
+    "db_url_present": true,
+    "select1_rc": 0,
+    "select1_out": "1",
+    "sources_raw": "t|227",
+    "sources_exists": true,
+    "sources_count": 227,
+    "seed_attempted": false
+  }
+}

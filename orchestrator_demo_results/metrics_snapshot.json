@@ -1,0 +1,45 @@
+{
+  "cycles": {
+    "safe_mode_on": {
+      "safe_mode": true,
+      "lease": {
+        "granted": false,
+        "note": "SAFE_MODE",
+        "agent": "demo"
+      },
+      "metrics": {
+        "gpu_orchestrator_active_leases": 0.0,
+        "gpu_orchestrator_lease_requests_total": 1.0,
+        "gpu_orchestrator_policy_get_requests_total": 3.0,
+        "gpu_orchestrator_requests_total": 4.0
+      }
+    },
+    "safe_mode_off": {
+      "safe_mode": false,
+      "lease": {
+        "granted": true,
+        "agent": "demo",
+        "gpu": 0,
+        "token": "470fcad9-408d-4107-af1e-8fe254f26c24",
+        "timestamp": 1757582277.4969637
+      },
+      "metrics": {
+        "gpu_orchestrator_active_leases": 1.0,
+        "gpu_orchestrator_lease_requests_total": 1.0,
+        "gpu_orchestrator_policy_get_requests_total": 3.0,
+        "gpu_orchestrator_requests_total": 4.0
+      }
+    }
+  },
+  "diff_off_minus_on": {
+    "gpu_orchestrator_active_leases": 1.0,
+    "gpu_orchestrator_lease_requests_total": 0.0,
+    "gpu_orchestrator_policy_get_requests_total": 0.0,
+    "gpu_orchestrator_requests_total": 0.0
+  },
+  "observations": [
+    "Active leases gauge increases from 0 (SAFE_MODE) to 1 (lease granted when SAFE_MODE=false).",
+    "Lease requests count per cold start remains 1 in each isolated process (expected).",
+    "Lease denied with SAFE_MODE note in true cycle; granted with GPU index in false cycle."
+  ]
+}
