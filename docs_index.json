@@ -67,6 +67,27 @@
         "description": "News neutralization and balancing agent with MCP integration and GPU acceleration",
         "last_updated": "2025-08-31",
         "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SYNTHESIZER_AGENT_V3_DOCUMENTATION.md",
+        "title": "Synthesizer Agent V3 - Production Engine",
+        "description": "Complete V3 synthesis engine with 4-model stack, GPU acceleration, and continuous learning integration",
+        "last_updated": "2025-09-20",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/CHIEF_EDITOR_AGENT_DOCUMENTATION.md",
+        "title": "Chief Editor Agent - Editorial Orchestration",
+        "description": "Complete editorial orchestration agent with publishing, evidence review, and continuous learning integration",
+        "last_updated": "2025-09-20",
+        "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MEMORY_AGENT_DOCUMENTATION.md",
+        "title": "Memory Agent - Vector Storage & Retrieval",
+        "description": "Complete vector-based storage and retrieval system with PostgreSQL backend and continuous learning integration",
+        "last_updated": "2025-09-20",
+        "status": "production_ready"
       }
     ]
   },
@@ -93,6 +114,13 @@
         "description": "4-model production stack validation and deployment with GPU acceleration",
         "last_updated": "2025-08-31",
         "status": "production_ready"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/V2_ENGINES_TRAINING_INTEGRATION_COMPLETE.md",
+        "title": "V2 Engines Training Integration - MISSION ACCOMPLISHED",
+        "description": "Complete integration of all 7 V2 agents with online training system for continuous learning",
+        "last_updated": "2025-09-20",
+        "status": "completed"
       }
     ]
   },

@@ -109,8 +109,28 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
         )
 
         log_feedback("save_article", {"status": "success", "article_id": next_id})
+        
+        result = {"status": "success", "article_id": next_id, "id": next_id}
+        
+        # Collect prediction for training
+        try:
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="memory",
+                task_type="article_storage",
+                input_text=content,
+                prediction=result,
+                confidence=0.95,  # High confidence for successful storage
+                source_url=""
+            )
+            logger.debug("📊 Training data collected for article storage")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
         # Return both 'article_id' and legacy 'id' key for backward compatibility
-        return {"status": "success", "article_id": next_id, "id": next_id}
+        return result
     except Exception as e:
         logger.error(f"Error saving article: {e}")
         return {"error": str(e)}
@@ -215,6 +235,25 @@ def vector_search_articles_local(query: str, top_k: int = 5) -> list:
                 "content": contents[aid],
                 "metadata": metas.get(aid),
             })
+        
+        # Collect prediction for training
+        try:
+            from training_system import collect_prediction
+            confidence = min(0.9, max(0.1, float(np.mean(sims[top_idx])))) if len(top_idx) > 0 else 0.5
+            collect_prediction(
+                agent_name="memory",
+                task_type="vector_search",
+                input_text=query,
+                prediction={"results": results, "top_k": top_k},
+                confidence=confidence,
+                source_url=""
+            )
+            logger.debug(f"📊 Training data collected for vector search (confidence: {confidence:.3f})")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
         return results
     except Exception:
         logger.exception("vector_search_articles_local: error computing similarities")
@@ -229,8 +268,48 @@ def log_training_example(task: str, input: dict, output: dict, critique: str) ->
         res = response.json()
         # Normalize to expected dict with status
         if isinstance(res, dict) and 'status' in res:
-            return res
-        return {"status": "logged"}
+            result = res
+        else:
+            result = {"status": "logged"}
+        
+        # Collect prediction for training
+        try:
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="memory",
+                task_type="training_example_logging",
+                input_text=f"Task: {task}, Input: {str(input)}, Output: {str(output)}, Critique: {critique}",
+                prediction=result,
+                confidence=0.9,  # High confidence for successful logging
+                source_url=""
+            )
+            logger.debug("📊 Training data collected for training example logging")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
+        return result
     except requests.exceptions.RequestException as e:
         logger.warning(f"log_training_example: memory agent request failed: {e}")
-        return {"status": "logged", "error": "memory_agent_unavailable"}
+        
+        error_result = {"status": "logged", "error": "memory_agent_unavailable"}
+        
+        # Collect prediction for training even on error
+        try:
+            from training_system import collect_prediction
+            collect_prediction(
+                agent_name="memory",
+                task_type="training_example_logging",
+                input_text=f"Task: {task}, Input: {str(input)}, Output: {str(output)}, Critique: {critique}",
+                prediction=error_result,
+                confidence=0.1,  # Low confidence for failed logging
+                source_url=""
+            )
+            logger.debug("📊 Training data collected for failed training example logging")
+        except ImportError:
+            logger.debug("Training system not available - skipping data collection")
+        except Exception as e:
+            logger.warning(f"Failed to collect training data: {e}")
+        
+        return error_result

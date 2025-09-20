@@ -1,0 +1,30 @@
+# HELP gpu_orchestrator_uptime_seconds Process uptime in seconds
+# TYPE gpu_orchestrator_uptime_seconds counter
+gpu_orchestrator_uptime_seconds 1
+# HELP gpu_orchestrator_active_leases Current active GPU (or CPU placeholder) leases
+# TYPE gpu_orchestrator_active_leases gauge
+gpu_orchestrator_active_leases 1
+# HELP gpu_orchestrator_gpu_info_requests_total gpu info requests total
+# TYPE gpu_orchestrator_gpu_info_requests_total counter
+gpu_orchestrator_gpu_info_requests_total 1
+# HELP gpu_orchestrator_lease_expired_total lease expired total
+# TYPE gpu_orchestrator_lease_expired_total counter
+gpu_orchestrator_lease_expired_total 0
+# HELP gpu_orchestrator_lease_requests_total lease requests total
+# TYPE gpu_orchestrator_lease_requests_total counter
+gpu_orchestrator_lease_requests_total 1
+# HELP gpu_orchestrator_policy_get_requests_total policy get requests total
+# TYPE gpu_orchestrator_policy_get_requests_total counter
+gpu_orchestrator_policy_get_requests_total 3
+# HELP gpu_orchestrator_policy_post_requests_total policy post requests total
+# TYPE gpu_orchestrator_policy_post_requests_total counter
+gpu_orchestrator_policy_post_requests_total 0
+# HELP gpu_orchestrator_release_requests_total release requests total
+# TYPE gpu_orchestrator_release_requests_total counter
+gpu_orchestrator_release_requests_total 0
+# HELP gpu_orchestrator_requests_total requests total
+# TYPE gpu_orchestrator_requests_total counter
+gpu_orchestrator_requests_total 5
+# HELP gpu_orchestrator_nvml_supported NVML initialization success flag
+# TYPE gpu_orchestrator_nvml_supported gauge
+gpu_orchestrator_nvml_supported 1
