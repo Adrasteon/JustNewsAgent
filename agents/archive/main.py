@@ -137,10 +137,9 @@ class CrawlerResults(BaseModel):
     articles: list[ArticleData] = []
 
 @app.post("/archive_articles")
-def archive_articles(call: ToolCall):
+async def archive_articles(call: ToolCall):
     """Archive articles from crawler results with Knowledge Graph integration"""
     try:
-        import asyncio
         from datetime import datetime
 
         kwargs = call.kwargs or {}
@@ -158,8 +157,8 @@ def archive_articles(call: ToolCall):
         if not crawler_results["articles"]:
             raise HTTPException(status_code=400, detail="No articles provided for archiving")
 
-        # Run async archive operation
-        archive_summary = asyncio.run(archive_manager.archive_from_crawler(crawler_results))
+        # Run async archive operation directly (no asyncio.run needed)
+        archive_summary = await archive_manager.archive_from_crawler(crawler_results)
 
         logger.info(f"Archived {len(crawler_results['articles'])} articles")
         return {"status": "success", "data": archive_summary}
@@ -168,19 +167,17 @@ def archive_articles(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/retrieve_article")
-def retrieve_article(call: ToolCall):
+async def retrieve_article(call: ToolCall):
     """Retrieve archived article by storage key"""
     try:
-        import asyncio
-
         kwargs = call.kwargs or {}
         storage_key = kwargs.get("storage_key")
 
         if not storage_key:
             raise HTTPException(status_code=400, detail="storage_key is required")
 
-        # Run async retrieval operation
-        article_data = asyncio.run(archive_manager.storage_manager.retrieve_article(storage_key))
+        # Run async retrieval operation directly (no asyncio.run needed)
+        article_data = await archive_manager.storage_manager.retrieve_article(storage_key)
 
         if article_data is None:
             raise HTTPException(status_code=404, detail=f"Article not found: {storage_key}")
@@ -192,11 +189,9 @@ def retrieve_article(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/search_archive")
-def search_archive(call: ToolCall):
+async def search_archive(call: ToolCall):
     """Search archived articles by metadata"""
     try:
-        import asyncio
-
         kwargs = call.kwargs or {}
         query = kwargs.get("query", "")
         filters = kwargs.get("filters", {})
@@ -204,8 +199,8 @@ def search_archive(call: ToolCall):
         if not query:
             raise HTTPException(status_code=400, detail="query is required")
 
-        # Run async search operation
-        storage_keys = asyncio.run(archive_manager.metadata_index.search_articles(query, filters))
+        # Run async search operation directly (no asyncio.run needed)
+        storage_keys = await archive_manager.metadata_index.search_articles(query, filters)
 
         logger.info(f"Search query '{query}' returned {len(storage_keys)} results")
         return {"status": "success", "data": {"query": query, "results": storage_keys, "count": len(storage_keys)}}
@@ -253,10 +248,9 @@ def get_archive_stats(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/store_single_article")
-def store_single_article(call: ToolCall):
+async def store_single_article(call: ToolCall):
     """Store a single article with complete metadata"""
     try:
-        import asyncio
         from datetime import datetime
 
         kwargs = call.kwargs or {}
@@ -285,8 +279,8 @@ def store_single_article(call: ToolCall):
             "timestamp": kwargs.get("timestamp", datetime.now().isoformat())
         }
 
-        # Run async storage operation
-        storage_key = asyncio.run(archive_manager.storage_manager.store_article(article_data))
+        # Run async storage operation directly (no asyncio.run needed)
+        storage_key = await archive_manager.storage_manager.store_article(article_data)
 
         logger.info(f"Stored single article: {kwargs['title'][:50]}...")
         return {"status": "success", "data": {"storage_key": storage_key, "article_title": kwargs["title"]}}
