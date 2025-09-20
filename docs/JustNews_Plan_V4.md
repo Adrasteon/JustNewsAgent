@@ -1,3 +1,11 @@
+---
+title: JustNews V4: RTX-Enhanced Migration and Implementation Plan
+description: Auto-generated description for JustNews V4: RTX-Enhanced Migration and Implementation Plan
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4: RTX-Enhanced Migration and Implementation Plan
 
 **Environment**: RAPIDS 25.04, Python 3.12.11, CUDA 12.4, RTX 3090 (24GB VRAM)
@@ -2017,4 +2025,9 @@ class IndependenceAssessment:
                 "accuracy": accuracy,
                 "inference_time": inference_time
             }
-       
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

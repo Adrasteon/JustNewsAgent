@@ -1,3 +1,11 @@
+---
+title: Crawl4AI API SUMMARY
+description: Auto-generated description for Crawl4AI API SUMMARY
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 ## Crawl4AI — API & Key Interfaces (concise reference)
 
 This short reference summarises the Crawl4AI programmatic APIs, dispatcher classes, REST endpoints, and common usage patterns (extracted from the project's Crawl4AI docs).
@@ -138,3 +146,9 @@ Notes and tips
 ---
 
 Generated: 2025-08-27 — brief summary created from project documentation and Crawl4AI docs.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

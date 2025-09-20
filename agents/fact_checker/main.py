@@ -13,6 +13,9 @@ from pydantic import BaseModel
 
 from common.observability import get_logger
 
+# Import metrics library
+from common.metrics import JustNewsMetrics
+
 # Configure logging
 
 logger = get_logger(__name__)
@@ -62,6 +65,9 @@ async def lifespan(app: FastAPI):
 # Initialize FastAPI with the lifespan context manager
 app = FastAPI(lifespan=lifespan)
 
+# Initialize metrics
+metrics = JustNewsMetrics("fact_checker")
+
 # Register shutdown endpoint if available
 try:
     from agents.common.shutdown import register_shutdown_endpoint
@@ -76,6 +82,9 @@ try:
 except Exception:
     logger.debug("reload endpoint not registered for fact_checker")
 
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -83,6 +92,13 @@ def health():
 @app.get("/ready")
 def ready_endpoint():
     return {"ready": ready}
+
+
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain")
 
 class ToolCall(BaseModel):
     args: list
@@ -180,3 +196,13 @@ def log_feedback(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("FACT_CHECKER_HOST", "0.0.0.0")
+    port = int(os.environ.get("FACT_CHECKER_PORT", 8003))
+
+    logger.info(f"Starting Fact Checker Agent on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

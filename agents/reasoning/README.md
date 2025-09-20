@@ -1,3 +1,11 @@
+---
+title: Reasoning Agent
+description: Auto-generated description for Reasoning Agent
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Reasoning Agent
 
 This package contains the reasoning agent (Nucleoid) for JustNews.
@@ -13,3 +21,9 @@ Design Notes
 
 Testing and development
 - To run unit tests for this package, add tests under `tests/` that import `agents.reasoning.enhanced_reasoning_architecture` and `agents.reasoning.main`.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

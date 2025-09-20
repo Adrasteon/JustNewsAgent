@@ -76,7 +76,9 @@ class GPUModelManager:
 
     def __init__(self) -> None:
         if PRODUCTION_AVAILABLE:
-            self._manager = get_gpu_manager()
+            # Import and call the production get_gpu_manager directly
+            from agents.common.gpu_manager_production import get_gpu_manager as get_production_gpu_manager
+            self._manager = get_production_gpu_manager()
         else:
             # Fallback to simple registry
             import threading

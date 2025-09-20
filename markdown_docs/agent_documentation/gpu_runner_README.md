@@ -1,3 +1,11 @@
+---
+title: gpu runner README
+description: Auto-generated description for gpu runner README
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 GPU Runner README
 
 This document describes how to run the GPU-enabled build runner on a machine
@@ -122,3 +130,9 @@ predictions = rf.predict(X_test)
 - RAPIDS automatically manages GPU memory
 - Monitor usage with `nvidia-smi`
 - Set memory limits if needed: `cudf.set_allocator("managed")`
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

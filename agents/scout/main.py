@@ -17,6 +17,7 @@ from pydantic import BaseModel
 # Import security utilities
 from agents.scout.security_utils import log_security_event, rate_limit, validate_url
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 # Configure logging
 
@@ -42,7 +43,8 @@ class MCPBusClient:
             "address": agent_address,
         }
         try:
-            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
+            # Use shorter timeout to prevent hanging
+            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(1, 2))
             response.raise_for_status()
             logger.info(f"Successfully registered {agent_name} with MCP Bus.")
         except requests.exceptions.RequestException as e:
@@ -54,6 +56,7 @@ async def lifespan(app: FastAPI):
     logger.info("Scout agent is starting up.")
     mcp_bus_client = MCPBusClient()
     try:
+        # Try to register with MCP Bus with shorter timeout
         mcp_bus_client.register_agent(
             agent_name="scout",
             agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
@@ -61,7 +64,8 @@ async def lifespan(app: FastAPI):
                 "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
                 "intelligent_source_discovery", "intelligent_content_crawl",
                 "intelligent_batch_analysis", "enhanced_newsreader_crawl",
-                "production_crawl_ultra_fast", "get_production_crawler_info"
+                "production_crawl_ultra_fast", "get_production_crawler_info",
+                "production_crawl_dynamic"
             ],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -74,6 +78,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="Scout Agent", description="Secure web crawling and content analysis agent")
 
+# Initialize metrics
+metrics = JustNewsMetrics("scout")
+
 # Security middleware
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 app.add_middleware(
@@ -83,6 +90,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# Metrics middleware (must be added after security middleware)
+app.middleware("http")(metrics.request_middleware)
 
 # Request middleware for rate limiting
 @app.middleware("http")
@@ -113,31 +123,6 @@ async def security_middleware(request: Request, call_next):
 
     response = await call_next(request)
     return response
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("Scout agent is starting up.")
-    mcp_bus_client = MCPBusClient()
-    try:
-        mcp_bus_client.register_agent(
-            agent_name="scout",
-            agent_address=f"http://localhost:{SCOUT_AGENT_PORT}",
-            tools=[
-                "discover_sources", "crawl_url", "deep_crawl_site", "enhanced_deep_crawl_site",
-                "intelligent_source_discovery", "intelligent_content_crawl",
-                "intelligent_batch_analysis", "enhanced_newsreader_crawl",
-                "production_crawl_ultra_fast", "get_production_crawler_info"
-            ],
-        )
-        logger.info("Registered tools with MCP Bus.")
-    except Exception as e:
-        logger.warning(f"MCP Bus unavailable: {e}. Running in standalone mode.")
-    global ready
-    ready = True
-    yield
-    logger.info("Scout agent is shutting down.")
-
-app = FastAPI(lifespan=lifespan)
 
 # Register shutdown endpoint if available
 try:
@@ -279,6 +264,12 @@ def health():
 def ready_endpoint():
     return {"ready": ready}
 
+@app.get("/metrics")
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    from fastapi.responses import Response
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
+
 @app.post("/log_feedback")
 def log_feedback(call: ToolCall):
     try:
@@ -360,3 +351,29 @@ def get_production_crawler_info_endpoint(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred in get_production_crawler_info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/production_crawl_dynamic")
+async def production_crawl_dynamic_endpoint(call: ToolCall):
+    try:
+        from agents.scout.tools import production_crawl_dynamic
+        logger.info(f"Calling production_crawl_dynamic with args: {call.args} and kwargs: {call.kwargs}")
+        # Expect kwargs: domains (list[str]|None), articles_per_site, concurrent_sites, max_total_articles
+        return await production_crawl_dynamic(*call.args, **call.kwargs)
+    except Exception as e:
+        logger.error(f"An error occurred in production_crawl_dynamic: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# =============================================================================
+# SERVER STARTUP
+# =============================================================================
+
+if __name__ == "__main__":
+    import uvicorn
+    logger.info(f"Starting Scout Agent on port {SCOUT_AGENT_PORT}")
+    uvicorn.run(
+        "agents.scout.main:app",
+        host="0.0.0.0",
+        port=SCOUT_AGENT_PORT,
+        reload=False,
+        log_level="info"
+    )

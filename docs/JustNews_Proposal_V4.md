@@ -1,3 +1,11 @@
+---
+title: JustNews V4: Hybrid Architecture Proposal
+description: Auto-generated description for JustNews V4: Hybrid Architecture Proposal
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4: Hybrid Architecture Proposal
 
 **Last Updated**: 2025-09-07
@@ -570,3 +578,9 @@ Priority-based correction handling:
 - ✅ **Safety Measures**: EWC + automatic rollback operational
 - ✅ **User Feedback**: Priority correction system functional
 - ✅ **Production Ready**: Full deployment capabilities validated
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

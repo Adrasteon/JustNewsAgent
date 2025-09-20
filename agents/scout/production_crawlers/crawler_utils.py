@@ -19,6 +19,7 @@ support database-driven multi-site clustering operations.
 
 import asyncio
 import hashlib
+import json
 
 # Database utilities for source management
 import os
@@ -268,11 +269,50 @@ def initialize_connection_pool():
     Should be called once at application startup.
     """
     global _connection_pool
+    global POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
 
     if _connection_pool is not None:
         return _connection_pool
 
     try:
+        # Dynamic env refresh: if any core value is missing, attempt to resolve from alternates
+        if not all([POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD]):
+            prev = (POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
+            POSTGRES_HOST = (
+                POSTGRES_HOST
+                or os.environ.get("JUSTNEWS_DB_HOST")
+                or os.environ.get("DB_HOST")
+                or "localhost"
+            )
+            POSTGRES_DB = (
+                POSTGRES_DB
+                or os.environ.get("JUSTNEWS_DB_NAME")
+                or os.environ.get("DB_NAME")
+                or os.environ.get("POSTGRES_DB")
+                or "justnews"
+            )
+            POSTGRES_USER = (
+                POSTGRES_USER
+                or os.environ.get("JUSTNEWS_DB_USER")
+                or os.environ.get("DB_USER")
+                or os.environ.get("POSTGRES_USER")
+                or "justnews_user"
+            )
+            POSTGRES_PASSWORD = (
+                POSTGRES_PASSWORD
+                or os.environ.get("JUSTNEWS_DB_PASSWORD")
+                or os.environ.get("DB_PASSWORD")
+                or os.environ.get("POSTGRES_PASSWORD")
+                or "password123"
+            )
+            if prev != (POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD):
+                logger.warning(
+                    "🔄 Refreshed DB env values dynamically host=%s db=%s user=%s (password=****)",
+                    POSTGRES_HOST,
+                    POSTGRES_DB,
+                    POSTGRES_USER,
+                )
+
         _connection_pool = pool.ThreadedConnectionPool(
             minconn=POOL_MIN_CONNECTIONS,
             maxconn=POOL_MAX_CONNECTIONS,
@@ -362,3 +402,166 @@ def get_sources_by_domain(domains: list[str]) -> list[dict[str, Any]]:
     except Exception as e:
         logger.error(f"❌ Failed to query sources by domain: {e}")
         return []
+
+def update_source_crawling_strategy(source_id: int, strategy: str, performance_data: dict) -> bool:
+    """Update source with crawling strategy and performance data"""
+    try:
+        # Update metadata with crawling strategy
+        metadata_update = {
+            "crawling_strategy": strategy,
+            "last_crawling_performance": performance_data,
+            "last_crawling_attempt": datetime.now().isoformat()
+        }
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE public.sources
+                    SET metadata = metadata || %s,
+                        last_verified = now(),
+                        updated_at = now()
+                    WHERE id = %s
+                """, (json.dumps(metadata_update), source_id))
+
+                if cur.rowcount > 0:
+                    # Commit metadata update
+                    conn.commit()
+                    logger.info(f"✅ Updated crawling strategy for source {source_id}: {strategy}")
+                    return True
+                else:
+                    logger.warning(f"⚠️ No source found with ID {source_id}")
+                    return False
+
+    except Exception as e:
+        logger.error(f"❌ Failed to update source crawling strategy: {e}")
+        return False
+
+def get_sources_with_strategy() -> list[dict[str, Any]]:
+    """Get sources with their assigned crawling strategies"""
+    try:
+        sources = execute_query("""
+            SELECT id, url, domain, name, description, metadata,
+                   last_verified, created_at, updated_at
+            FROM public.sources
+            WHERE last_verified IS NOT NULL
+            AND last_verified > now() - interval '30 days'
+            AND metadata ? 'crawling_strategy'
+            ORDER BY last_verified DESC, name ASC
+        """)
+
+        logger.info(f"✅ Found {len(sources)} sources with crawling strategies")
+        return sources
+
+    except Exception as e:
+        logger.error(f"❌ Failed to query sources with strategies: {e}")
+        return []
+
+def record_crawling_performance(source_id: int, performance_data: dict) -> bool:
+    """Record crawling performance metrics for a source"""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO public.crawling_performance
+                    (source_id, articles_found, articles_successful, processing_time_seconds,
+                     articles_per_second, strategy_used, error_count, timestamp)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, now())
+                """, (
+                    source_id,
+                    performance_data.get('articles_found', 0),
+                    performance_data.get('articles_successful', 0),
+                    performance_data.get('processing_time_seconds', 0.0),
+                    performance_data.get('articles_per_second', 0.0),
+                    performance_data.get('strategy_used', 'unknown'),
+                    performance_data.get('error_count', 0)
+                ))
+
+                # Commit performance record insertion
+                conn.commit()
+                logger.info(f"✅ Recorded performance for source {source_id}")
+                return True
+
+    except Exception as e:
+        logger.error(f"❌ Failed to record crawling performance: {e}")
+        return False
+
+def get_source_performance_history(source_id: int, limit: int = 10) -> list[dict[str, Any]]:
+    """Get performance history for a source"""
+    try:
+        performance = execute_query("""
+            SELECT articles_found, articles_successful, processing_time_seconds,
+                   articles_per_second, strategy_used, error_count, timestamp
+            FROM public.crawling_performance
+            WHERE source_id = %s
+            ORDER BY timestamp DESC
+            LIMIT %s
+        """, (source_id, limit))
+
+        logger.info(f"✅ Found {len(performance)} performance records for source {source_id}")
+        return performance
+
+    except Exception as e:
+        logger.error(f"❌ Failed to get performance history: {e}")
+        return []
+
+def get_optimal_sources_for_strategy(strategy: str, limit: int = 10) -> list[dict[str, Any]]:
+    """Get sources that perform best with a specific crawling strategy"""
+    try:
+        sources = execute_query("""
+            SELECT s.id, s.url, s.domain, s.name, s.description,
+                   AVG(cp.articles_per_second) as avg_performance,
+                   COUNT(cp.*) as crawl_count,
+                   MAX(cp.timestamp) as last_crawl
+            FROM public.sources s
+            JOIN public.crawling_performance cp ON s.id = cp.source_id
+            WHERE cp.strategy_used = %s
+            AND cp.timestamp > now() - interval '7 days'
+            GROUP BY s.id, s.url, s.domain, s.name, s.description
+            HAVING COUNT(cp.*) >= 3
+            ORDER BY AVG(cp.articles_per_second) DESC
+            LIMIT %s
+        """, (strategy, limit))
+
+        logger.info(f"✅ Found {len(sources)} optimal sources for {strategy} strategy")
+        return sources
+
+    except Exception as e:
+        logger.error(f"❌ Failed to get optimal sources for strategy: {e}")
+        return []
+
+def create_crawling_performance_table() -> bool:
+    """Create the crawling performance tracking table if it doesn't exist"""
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS public.crawling_performance (
+                        id SERIAL PRIMARY KEY,
+                        source_id INTEGER REFERENCES public.sources(id),
+                        articles_found INTEGER NOT NULL DEFAULT 0,
+                        articles_successful INTEGER NOT NULL DEFAULT 0,
+                        processing_time_seconds FLOAT NOT NULL DEFAULT 0.0,
+                        articles_per_second FLOAT NOT NULL DEFAULT 0.0,
+                        strategy_used VARCHAR(50) NOT NULL,
+                        error_count INTEGER NOT NULL DEFAULT 0,
+                        timestamp TIMESTAMP WITH TIME ZONE DEFAULT now()
+                    );
+
+                    CREATE INDEX IF NOT EXISTS idx_crawling_performance_source_id
+                    ON public.crawling_performance(source_id);
+
+                    CREATE INDEX IF NOT EXISTS idx_crawling_performance_timestamp
+                    ON public.crawling_performance(timestamp);
+
+                    CREATE INDEX IF NOT EXISTS idx_crawling_performance_strategy
+                    ON public.crawling_performance(strategy_used);
+                """)
+                # Commit table creation
+                conn.commit()
+
+                logger.info("✅ Crawling performance table created/verified")
+                return True
+
+    except Exception as e:
+        logger.error(f"❌ Failed to create crawling performance table: {e}")
+        return False

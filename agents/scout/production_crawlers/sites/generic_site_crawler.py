@@ -1,37 +1,38 @@
 from common.observability import get_logger
 
 #!/usr/bin/env python3
-"""
-Generic Site Crawler for JustNewsAgent Production Crawlers
+"""Generic multi-site crawler with Crawl4AI-first strategy.
 
-PHASE 2 ACHIEVEMENT: Successfully implemented database-driven multi-site clustering
-with concurrent processing of 0.55 articles/second across multiple news sources.
+This module provides:
+- SiteConfig: per-site selector configuration
+- GenericSiteCrawler: article discovery + extraction for a single site
+- MultiSiteCrawler: orchestration across multiple sites concurrently
 
-A flexible crawler that can handle different news sites dynamically using
-database-driven source configurations. Supports configurable selectors and
-extraction patterns for various site layouts with full canonical metadata
-generation and evidence capture.
-
-Key Features:
-- Database-driven source management with PostgreSQL integration
-- Concurrent multi-site crawling with configurable browser pools
-- Canonical metadata emission with required fields (url_hash, domain, canonical, etc.)
-- Evidence capture for auditability and provenance tracking
-- Ethical crawling with robots.txt compliance and rate limiting
-- Generic DOM extraction supporting any news site structure
+Strategy:
+1. Prefer Crawl4AI for link discovery & article extraction (fast, cleaner text)
+2. Gracefully fall back to Playwright when Crawl4AI fails or disabled
+3. Emit canonical metadata objects expected by downstream agents
 """
 
 import asyncio
 import json
+import os
 import random
 import re
 import time
 from datetime import datetime
-from typing import Any
+from typing import Any, List
 from urllib.parse import urljoin, urlparse
+
+try:  # pragma: no cover
+    from crawl4ai import AsyncWebCrawler  # type: ignore
+    _CRAWL4AI_AVAILABLE = True
+except Exception:  # noqa: BLE001
+    _CRAWL4AI_AVAILABLE = False
 
 from playwright.async_api import async_playwright
 
+from ...tools import _record_scout_performance
 from ..crawler_utils import (
     CanonicalMetadata,
     ModalDismisser,
@@ -45,191 +46,220 @@ logger = get_logger(__name__)
 
 
 class SiteConfig:
-    """Configuration for a specific news site"""
+    """Configuration for a specific news site."""
 
     def __init__(self, source_data: dict[str, Any]):
-        self.source_id = source_data.get('id')
-        self.url = source_data.get('url')
-        self.domain = source_data.get('domain')
-        self.name = source_data.get('name', 'Unknown')
-        self.description = source_data.get('description', '')
-        self.metadata = source_data.get('metadata', {})
+        self.source_id = source_data.get("id")
+        self.url = source_data.get("url")
+        self.domain = source_data.get("domain")
+        self.name = source_data.get("name", "Unknown")
+        self.description = source_data.get("description", "")
+        self.metadata = source_data.get("metadata", {})
 
-        # Default selectors (can be overridden by metadata)
+        # Default selectors (override via metadata["selectors"])
         self.article_link_selectors = [
-            'a[href*="article"]',
-            'a[href*="news"]',
-            'a[href*="story"]',
-            'a[href*="/202"]',  # Date-based URLs
-            '.headline a',
-            '.story-link',
-            '[data-testid*="article"] a'
+            "a[href*='article']",
+            "a[href*='news']",
+            "a[href*='story']",
+            "a[href*='/202']",  # Date patterns
+            ".headline a",
+            ".story-link",
+            "[data-testid*='article'] a",
         ]
-
         self.title_selectors = [
-            'h1',
-            '[data-component="headline"]',
-            '.story-headline',
-            '.article-title',
-            '[role="main"] h1'
+            "h1",
+            "[data-component='headline']",
+            ".story-headline",
+            ".article-title",
+            "[role='main'] h1",
         ]
-
         self.content_selectors = [
-            '[data-component="text-block"]',
-            '.story-body__inner',
-            '[role="main"] p',
-            'main p',
-            '.article-body p',
-            '[data-testid="paragraph"]',
-            '.content p'
+            "[data-component='text-block']",
+            ".story-body__inner",
+            "[role='main'] p",
+            "main p",
+            ".article-body p",
+            "[data-testid='paragraph']",
+            ".content p",
         ]
 
-        # Load custom selectors from metadata if available
-        if 'selectors' in self.metadata:
-            selectors = self.metadata['selectors']
-            if 'article_links' in selectors:
-                self.article_link_selectors = selectors['article_links']
-            if 'title' in selectors:
-                self.title_selectors = selectors['title']
-            if 'content' in selectors:
-                self.content_selectors = selectors['content']
+        if "selectors" in self.metadata:
+            selectors = self.metadata["selectors"]
+            self.article_link_selectors = selectors.get(
+                "article_links", self.article_link_selectors
+            )
+            self.title_selectors = selectors.get("title", self.title_selectors)
+            self.content_selectors = selectors.get("content", self.content_selectors)
 
     def get_base_url(self) -> str:
-        """Get the base URL for the site"""
         parsed = urlparse(self.url)
         return f"{parsed.scheme}://{parsed.netloc}"
 
-    def is_article_url(self, url: str) -> bool:
-        """Check if a URL looks like an article URL"""
-        if not url:
-            return False
-
-        # Convert relative URLs to absolute
-        if url.startswith('/'):
-            url = urljoin(self.get_base_url(), url)
-
-        # Check if URL is from this domain
-        parsed = urlparse(url)
-        if parsed.netloc != self.domain:
-            return False
-
-        # Common article URL patterns
-        article_patterns = [
-            r'/article',
-            r'/news/',
-            r'/story/',
-            r'/202\d',  # Date-based URLs
-            r'/\d{4}/\d{2}/\d{2}',  # YYYY/MM/DD pattern
-        ]
-
-        path = parsed.path.lower()
-        return any(re.search(pattern, path) for pattern in article_patterns)
-
 
 class GenericSiteCrawler:
-    """Generic crawler that can handle different news sites"""
+    """Crawler for a single site (Crawl4AI preferred, Playwright fallback)."""
 
-    def __init__(self, site_config: SiteConfig, concurrent_browsers: int = 2,
-                 batch_size: int = 10, requests_per_minute: int = 20):
+    def __init__(
+        self,
+        site_config: SiteConfig,
+        concurrent_browsers: int = 2,
+        batch_size: int = 8,
+    ):
         self.site_config = site_config
         self.concurrent_browsers = concurrent_browsers
         self.batch_size = batch_size
-
-        # Use shared utilities
-        self.rate_limiter = RateLimiter(requests_per_minute)
+        self.rate_limiter = RateLimiter()
         self.robots_checker = RobotsChecker()
-
-        # Site-specific state
-        self.processed_urls = set()
+        self.processed_urls: set[str] = set()
         self.session_start_time = time.time()
 
-    async def get_article_urls(self, max_urls: int = 50) -> list[str]:
-        """Get article URLs from the site's main page"""
-        browser = await async_playwright().start()
-        browser_instance = await browser.chromium.launch(headless=True)
+    async def get_article_urls(self, max_urls: int = 40) -> list[str]:
+        """Discover candidate article URLs.
 
-        try:
-            context = await browser_instance.new_context()
-            page = await context.new_page()
+        Order of attempts:
+        1. Crawl4AI (if available & not forced Playwright)
+        2. Playwright DOM discovery
+        """
+        use_crawl4ai = (
+            _CRAWL4AI_AVAILABLE
+            and os.environ.get("GENERIC_CRAWLER_USE_PLAYWRIGHT", "0") != "1"
+        )
+        urls: list[str] = []
+        base = self.site_config.get_base_url()
 
-            # Navigate to main page
-            await page.goto(self.site_config.url, timeout=15000)
-
-            # Dismiss modals
-            await ModalDismisser.dismiss_modals(page)
-            await asyncio.sleep(2)
-
-            # Extract article links
-            urls = []
-            for selector in self.site_config.article_link_selectors:
-                try:
-                    links = await page.locator(selector).all()
-                    for link in links:
-                        try:
-                            href = await link.get_attribute('href')
-                            if href and self.site_config.is_article_url(href):
-                                # Convert relative URLs to absolute
-                                if href.startswith('/'):
-                                    href = urljoin(self.site_config.get_base_url(), href)
-
-                                if href not in urls and href not in self.processed_urls:
-                                    urls.append(href)
-                                    if len(urls) >= max_urls:
-                                        break
-                        except Exception:
-                            continue
+        if use_crawl4ai:
+            try:  # pragma: no cover - network
+                async with AsyncWebCrawler(verbose=False) as crawler:
+                    result = await crawler.arun(url=self.site_config.url)
+                html = getattr(result, "raw_html", None) or getattr(
+                    result, "cleaned_html", ""
+                )
+                for match in re.findall(r'href=["\']([^"\']+)["\']', html):
+                    href = match.strip()
+                    if href.startswith("/"):
+                        href = urljoin(base, href)
+                    if not href.startswith("http"):
+                        continue
+                    if any(
+                        key in href.lower()
+                        for key in [
+                            "video",
+                            "live",
+                            "audio",
+                            "sport",
+                            "gallery",
+                            "podcast",
+                        ]
+                    ):
+                        continue
+                    if re.search(r"/[0-9]{4}/[0-9]{2}/[0-9]{2}/", href) or any(
+                        token in href.lower() for token in ["article", "story", "news"]
+                    ):
+                        urls.append(href.split("#")[0])
                     if len(urls) >= max_urls:
                         break
-                except Exception:
+                urls = list(dict.fromkeys(urls))  # de-dupe, preserve order
+                if urls:
+                    logger.info(
+                        f"✅ [Crawl4AI] Found {len(urls)} URLs for {self.site_config.name}"
+                    )
+                    return urls[:max_urls]
+            except Exception as e:  # noqa: BLE001
+                logger.debug(
+                    f"Crawl4AI link discovery failed for {self.site_config.name}: {e}"  # noqa: E501
+                )
+
+        # Fallback: Playwright DOM evaluation
+        playwright = await async_playwright().start()
+        browser = await playwright.chromium.launch(headless=True)
+        try:
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+            )
+            page = await context.new_page()
+            await page.goto(self.site_config.url, timeout=15000)
+            await ModalDismisser.dismiss_modals(page)
+            await asyncio.sleep(1.0)
+            anchors = await page.locator("a").element_handles()
+            for a in anchors:
+                try:
+                    href = await a.get_attribute("href")
+                    if not href:
+                        continue
+                    if href.startswith("/"):
+                        href = urljoin(base, href)
+                    if not href.startswith("http"):
+                        continue
+                    if any(
+                        skip in href.lower()
+                        for skip in [
+                            "video",
+                            "live",
+                            "audio",
+                            "sport",
+                            "gallery",
+                            "podcast",
+                        ]
+                    ):
+                        continue
+                    if re.search(r"/[0-9]{4}/[0-9]{2}/[0-9]{2}/", href) or any(
+                        token in href.lower() for token in ["article", "story", "news"]
+                    ):
+                        urls.append(href.split("#")[0])
+                    if len(urls) >= max_urls:
+                        break
+                except Exception:  # noqa: BLE001
                     continue
-
-            await browser_instance.close()
-            logger.info(f"✅ Found {len(urls)} article URLs from {self.site_config.name}")
+            urls = list(dict.fromkeys(urls))
+            logger.info(
+                f"✅ [Playwright] Found {len(urls)} article URLs from {self.site_config.name}"  # noqa: E501
+            )
             return urls[:max_urls]
-
-        except Exception as e:
-            logger.error(f"❌ Failed to get URLs from {self.site_config.name}: {e}")
-            await browser_instance.close()
+        except Exception as e:  # noqa: BLE001
+            logger.error(
+                f"❌ Failed to get URLs from {self.site_config.name}: {e}"  # noqa: E501
+            )
             return []
+        finally:
+            try:
+                await browser.close()
+                await playwright.stop()
+            except Exception:  # noqa: BLE001
+                pass
 
     async def extract_content(self, page) -> dict[str, Any]:
-        """Extract content using site-specific selectors"""
+        """Extract article title + content via configured selectors."""
         try:
-            # Get title
             title = ""
             for selector in self.site_config.title_selectors:
                 try:
                     element = page.locator(selector).first
-                    title = await element.text_content()
-                    if title and len(title.strip()) > 10:
-                        title = title.strip()
+                    title_candidate = await element.text_content()
+                    if title_candidate and len(title_candidate.strip()) > 10:
+                        title = title_candidate.strip()
                         break
-                except Exception:
+                except Exception:  # noqa: BLE001
                     continue
 
-            # Get content
-            content_parts = []
+            content_parts: list[str] = []
             for selector in self.site_config.content_selectors:
                 try:
                     elements = page.locator(selector)
                     count = await elements.count()
-                    for i in range(min(count, 8)):  # Limit to first 8 paragraphs
+                    for i in range(min(count, 8)):
                         try:
                             text = await elements.nth(i).text_content()
                             if text and len(text.strip()) > 20:
                                 content_parts.append(text.strip())
-                        except Exception:
+                        except Exception:  # noqa: BLE001
                             continue
-                    if len(content_parts) > 3:  # If we got enough content, stop
+                    if len(content_parts) > 3:
                         break
-                except Exception:
+                except Exception:  # noqa: BLE001
                     continue
 
             content = " ".join(content_parts)
-
-            # Extract canonical and paywall info
-            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)
-
+            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)  # noqa: E501
             return {
                 "title": title,
                 "content": content,
@@ -239,11 +269,10 @@ class GenericSiteCrawler:
                 "extraction_metadata": {
                     "site_config": self.site_config.name,
                     "content_length": len(content),
-                    "paragraphs_found": len(content_parts)
-                }
+                    "paragraphs_found": len(content_parts),
+                },
             }
-
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Content extraction failed: {e}")
             return {
                 "title": "Error",
@@ -251,20 +280,26 @@ class GenericSiteCrawler:
                 "canonical": None,
                 "paywall_flag": False,
                 "extraction_method": "error",
-                "extraction_metadata": {"error": str(e)}
+                "extraction_metadata": {"error": str(e)},
             }
 
     async def process_single_url(self, browser, url: str) -> dict | None:
-        """Process a single URL from this site"""
         if url in self.processed_urls:
             return None
-
         self.processed_urls.add(url)
-
+        start_time = time.time()
         try:
-            # Check robots.txt compliance
             if not self.robots_checker.check_robots_txt(url):
                 logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
+                processing_time = time.time() - start_time
+                _record_scout_performance({
+                    "agent_name": "scout",
+                    "operation": "process_single_url",
+                    "processing_time_s": processing_time,
+                    "batch_size": 1,
+                    "success": False,
+                    "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                })
                 return CanonicalMetadata.generate_metadata(
                     url=url,
                     title="Robots.txt Disallowed",
@@ -275,37 +310,85 @@ class GenericSiteCrawler:
                     confidence=0.0,
                     publisher=self.site_config.name,
                     crawl_mode="generic_site",
-                    news_score=0.0
+                    news_score=0.0,
                 )
-
-            # Apply rate limiting
             await self.rate_limiter.wait_if_needed(self.site_config.domain)
-
-            # Create context and page
+            use_crawl4ai = (
+                _CRAWL4AI_AVAILABLE
+                and os.environ.get("GENERIC_CRAWLER_USE_PLAYWRIGHT", "0") != "1"
+            )
+            if use_crawl4ai:
+                try:
+                    async with AsyncWebCrawler(verbose=False) as crawler:
+                        result = await crawler.arun(
+                            url=url,
+                            extraction_strategy="LLMExtractionStrategy",
+                            css_selector="main, article, .content, .story-body, [role='main']",  # noqa: E501
+                            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+                        )
+                        content = (
+                            result.cleaned_html
+                            or result.markdown
+                            or result.extracted_content
+                            or ""
+                        )
+                        clean_text = re.sub(r"<[^>]+>", " ", content)
+                        clean_text = re.sub(r"\s+", " ", clean_text).strip()
+                        title = getattr(result, "title", "") or (
+                            self.site_config.name + " Article"
+                        )
+                        if len(clean_text) > 80 and len(title) > 5:
+                            processing_time = time.time() - start_time
+                            _record_scout_performance({
+                                "agent_name": "scout",
+                                "operation": "process_single_url",
+                                "processing_time_s": processing_time,
+                                "batch_size": 1,
+                                "success": True,
+                                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                            })
+                            return CanonicalMetadata.generate_metadata(
+                                url=url,
+                                title=title[:300],
+                                content=clean_text[:12000],
+                                extraction_method="crawl4ai_generic",
+                                status="success",
+                                paywall_flag=False,
+                                confidence=0.72,
+                                publisher=self.site_config.name,
+                                crawl_mode="generic_site",
+                                news_score=0.72,
+                                canonical=None,
+                            )
+                except Exception as e:  # noqa: BLE001
+                    logger.debug(
+                        f"Crawl4AI extraction failed for {url}: {e} – falling back to Playwright"  # noqa: E501
+                    )
+            # Fallback: Playwright
             context = await browser.new_context(
-                viewport={'width': 1024, 'height': 768},
-                user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
+                viewport={"width": 1024, "height": 768},
+                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
             )
             page = await context.new_page()
-
-            # Navigate
-            await page.goto(url, wait_until='domcontentloaded', timeout=12000)
-
-            # Dismiss modals
+            await page.goto(url, wait_until="domcontentloaded", timeout=12000)
             await ModalDismisser.dismiss_modals(page)
             await asyncio.sleep(1.5)
-
-            # Extract content
             content_data = await self.extract_content(page)
-
-            # Close context
             await context.close()
-
-            # Throttle between requests
             await asyncio.sleep(random.uniform(1.0, 3.0))
-
-            # Only return if we got meaningful content
-            if len(content_data["content"]) > 50 and len(content_data["title"]) > 10:
+            if (
+                len(content_data["content"]) > 50
+                and len(content_data["title"]) > 10
+            ):
+                processing_time = time.time() - start_time
+                _record_scout_performance({
+                    "agent_name": "scout",
+                    "operation": "process_single_url",
+                    "processing_time_s": processing_time,
+                    "batch_size": 1,
+                    "success": True,
+                    "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+                })
                 return CanonicalMetadata.generate_metadata(
                     url=url,
                     title=content_data["title"],
@@ -313,17 +396,33 @@ class GenericSiteCrawler:
                     extraction_method=content_data["extraction_method"],
                     status="success",
                     paywall_flag=content_data["paywall_flag"],
-                    confidence=0.7,  # Generic sites get lower confidence
+                    confidence=0.7,
                     publisher=self.site_config.name,
                     crawl_mode="generic_site",
                     news_score=0.7,
-                    canonical=content_data["canonical"]
+                    canonical=content_data["canonical"],
                 )
-
+            processing_time = time.time() - start_time
+            _record_scout_performance({
+                "agent_name": "scout",
+                "operation": "process_single_url",
+                "processing_time_s": processing_time,
+                "batch_size": 1,
+                "success": False,
+                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+            })
             return None
-
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to process {url}: {e}")
+            processing_time = time.time() - start_time
+            _record_scout_performance({
+                "agent_name": "scout",
+                "operation": "process_single_url",
+                "processing_time_s": processing_time,
+                "batch_size": 1,
+                "success": False,
+                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
+            })
             return CanonicalMetadata.generate_metadata(
                 url=url,
                 title="Error",
@@ -335,72 +434,56 @@ class GenericSiteCrawler:
                 publisher=self.site_config.name,
                 crawl_mode="generic_site",
                 news_score=0.0,
-                error=str(e)
+                error=str(e),
             )
 
     async def crawl_site(self, max_articles: int = 25) -> list[dict]:
-        """Crawl this site for articles"""
-        logger.info(f"🚀 Starting generic crawl of {self.site_config.name} for {max_articles} articles")
-
-        # Get article URLs
+        logger.info(
+            f"🚀 Starting generic crawl of {self.site_config.name} for {max_articles} articles"
+        )
         urls = await self.get_article_urls(max_urls=max_articles * 2)
         if not urls:
             logger.warning(f"❌ No URLs found for {self.site_config.name}")
             return []
-
-        # Create browser instances
         playwright = await async_playwright().start()
         browsers = []
         try:
             for _ in range(self.concurrent_browsers):
-                browser = await playwright.chromium.launch(headless=True)
-                browsers.append(browser)
-
-            logger.info(f"🔄 Processing {len(urls)} URLs with {len(browsers)} browsers")
-
-            results = []
+                browsers.append(await playwright.chromium.launch(headless=True))
+            results: list[dict] = []
             browser_index = 0
-
-            # Process in batches
             for i in range(0, len(urls), self.batch_size):
-                batch_urls = urls[i:i + self.batch_size]
-                logger.info(f"📦 Processing batch {i//self.batch_size + 1}: {len(batch_urls)} URLs")
-
-                # Distribute across browsers
+                batch = urls[i : i + self.batch_size]
+                logger.info(
+                    f"📦 Processing batch {i // self.batch_size + 1}: {len(batch)} URLs"
+                )
                 tasks = []
-                for url in batch_urls:
-                    browser = browsers[browser_index % len(browsers)]
+                for u in batch:
+                    b = browsers[browser_index % len(browsers)]
                     browser_index += 1
-                    tasks.append(self.process_single_url(browser, url))
-
-                # Process batch concurrently
+                    tasks.append(self.process_single_url(b, u))
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-
-                # Collect successful results
-                for result in batch_results:
-                    if isinstance(result, dict) and result.get("status") == "success":
-                        results.append(result)
-                        logger.info(f"✅ Success: {result['title'][:50]}...")
-
-                # Small delay between batches
-                await asyncio.sleep(0.5)
-
-            # Calculate metrics
-            processing_time = time.time() - self.session_start_time
-            success_rate = len(results) / len(urls) if urls else 0.0
-            articles_per_second = len(results) / processing_time if processing_time > 0 else 0.0
-
-            logger.info("🎉 Generic site crawl complete!")
-            logger.info(f"📊 {len(results)} articles from {len(urls)} URLs")
-            logger.info(f"⚡ Rate: {articles_per_second:.2f} articles/second")
-            logger.info(f"✅ Success Rate: {success_rate:.1%}")
-
+                for r in batch_results:
+                    if isinstance(r, dict) and r.get("status") == "success":
+                        results.append(r)
+                        logger.info(f"✅ Success: {r['title'][:50]}...")
+                await asyncio.sleep(0.4)
+            elapsed = time.time() - self.session_start_time
+            rate = len(results) / elapsed if elapsed else 0.0
+            logger.info(
+                f"🎉 Generic site crawl complete: {len(results)} articles (rate {rate:.2f}/s)"  # noqa: E501
+            )
             return results
-
         finally:
-            # Close all browsers
-            for browser in browsers:
-                await browser.close()
+            for b in browsers:
+                try:
+                    await b.close()
+                except Exception:  # noqa: BLE001
+                    pass
+            try:
+                await playwright.stop()
+            except Exception:  # noqa: BLE001
+                pass
 
 
 class MultiSiteCrawler:

@@ -1,3 +1,11 @@
+---
+title: GPU Acceleration Documentation
+description: Auto-generated description for GPU Acceleration Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GPU Acceleration Documentation
 
 ## Overview
@@ -84,20 +92,96 @@ def compile_tensorrt_engine(model_path: str, precision: str = 'fp16') -> str:
 
 ### 3. GPU Memory Management
 
-#### Memory Monitoring System
+### 4. NVIDIA Multi-Process Service (MPS)
+
+#### MPS Architecture Overview
 ```python
-def get_gpu_memory_usage() -> Dict[str, Any]:
-    """Real-time GPU memory monitoring
+# MPS provides GPU resource isolation and management
+class MPSManager:
+    """NVIDIA MPS for multi-process GPU sharing and isolation"""
+```
+
+**Key Benefits:**
+- **Process Isolation**: Each agent runs in separate MPS client context
+- **Resource Management**: Automatic GPU memory allocation per process
+- **Stability**: Prevents one agent from crashing the entire GPU context
+- **Debugging**: Per-client GPU usage tracking and error isolation
+- **Compatibility**: Seamless integration with existing PyTorch/CUDA code
+
+#### MPS Control and Monitoring
+```python
+def check_mps_status() -> Dict[str, Any]:
+    """Check NVIDIA MPS operational status
 
     Returns:
     {
-        'allocated_gb': 6.2,
-        'reserved_gb': 8.0,
-        'free_gb': 10.0,
-        'utilization_pct': 65.0
+        'enabled': True,
+        'control_process': True,
+        'pipe_dir': '/tmp/nvidia-mps',
+        'active_clients': 3
     }
     """
 ```
+
+**MPS Management Commands:**
+```bash
+# Start MPS control daemon
+nvidia-cuda-mps-control -d
+
+# Check MPS status
+curl -s http://localhost:8014/gpu/info | jq '.mps'
+
+# Monitor MPS clients
+ls /tmp/nvidia-mps/ | grep client
+
+# Stop MPS (if needed)
+echo quit | nvidia-cuda-mps-control
+```
+
+#### MPS Configuration
+```bash
+# Environment variables for MPS
+CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
+CUDA_MPS_LOG_DIRECTORY=/var/log/nvidia-mps
+CUDA_VISIBLE_DEVICES=0  # GPU device selection
+
+# GPU Orchestrator MPS settings
+ENABLE_MPS=true
+MPS_PIPE_DIR=/tmp/nvidia-mps
+```
+
+**MPS vs Direct Access Comparison:**
+
+| Feature | Direct GPU Access | NVIDIA MPS |
+|---------|------------------|------------|
+| **Performance** | Maximum (no overhead) | Near maximum (minimal proxy) |
+| **Isolation** | None - shared context | Full process isolation |
+| **Stability** | Risk of GPU hangs | Protected from crashes |
+| **Memory Management** | Manual allocation | Automatic per-process |
+| **Debugging** | Difficult | Per-client visibility |
+| **Resource Sharing** | Competitive access | Controlled allocation |
+
+#### Production MPS Deployment
+```yaml
+# Docker MPS configuration
+version: '3.8'
+services:
+  justnews-gpu-mps:
+    image: justnews:v4-gpu
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps
+    volumes:
+      - /tmp/nvidia-mps:/tmp/nvidia-mps:rw
+    command: nvidia-cuda-mps-control -d
+```
+
+**MPS Best Practices:**
+1. **Start MPS First**: Initialize MPS daemon before agents
+2. **Monitor Clients**: Track active MPS clients and resource usage
+3. **Pipe Directory**: Ensure `/tmp/nvidia-mps` has proper permissions
+4. **Error Handling**: Implement MPS-aware error recovery
+5. **Resource Limits**: Configure per-client memory limits when needed
 
 **Memory Management Features:**
 - **Automatic Cleanup**: GPU cache clearing after processing
@@ -500,3 +584,9 @@ except RuntimeError as e:
 **Version:** 1.0  
 **Authors:** JustNews Development Team</content>
 <parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_acceleration_guide.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

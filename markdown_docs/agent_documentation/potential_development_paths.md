@@ -1,3 +1,11 @@
+---
+title: Potential Development Paths
+description: Auto-generated description for Potential Development Paths
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Potential Development Paths
 
 This document captures a compact summary of recent analysis and recommendations about the project's crawlers, the new `sources` schema, and suggested engineering/product paths. It is intended as a snapshot for planning and as a checklist for short-term implementation work.
@@ -87,3 +95,9 @@ Which quick task should we start with? I recommend starting with crawler enrichm
 ---
 
 Generated: 2025-08-29
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -1,3 +1,11 @@
+---
+title: GitHub Copilot Instructions Update Summary - August 2, 2025
+description: Auto-generated description for GitHub Copilot Instructions Update Summary - August 2, 2025
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # GitHub Copilot Instructions Update Summary - August 2, 2025
 
 ## 🎯 **Key Updates Made to `.github/copilot-instructions.md`**
@@ -51,3 +59,9 @@ The GitHub Copilot instructions now provide comprehensive guidance for:
 
 *Updated: August 2, 2025*  
 *Commit: 1116c17 - "📋 UPDATE: Copilot Instructions for Production Deployment"*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

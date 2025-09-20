@@ -1,3 +1,11 @@
+---
+title: DEPRECATE DIALOGPT README
+description: Auto-generated description for DEPRECATE DIALOGPT README
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 Deprecate DialoGPT (deprecated) helper
 ==========================
 
@@ -36,3 +44,9 @@ Notes & limitations
 - This helper uses conservative text transformations and is intentionally simple. It will not perform AST-aware refactors for all edge cases.
 - After applying changes, run the test suite and start a few agents to ensure runtime behavior remains correct.
 - The default fallback model is `distilgpt2`. Set the environment variable `DIALOGPT_REPLACEMENT_MODEL` to change the runtime replacement.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

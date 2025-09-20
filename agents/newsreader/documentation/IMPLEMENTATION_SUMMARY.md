@@ -1,3 +1,11 @@
+---
+title: LLaVA NewsReader Agent Implementation Summary
+description: Auto-generated description for LLaVA NewsReader Agent Implementation Summary
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # LLaVA NewsReader Agent Implementation Summary
 
 ## ✅ Completed Implementation
@@ -200,3 +208,9 @@ print(f"Article: {result['article']}")
 ## ✅ Status: Production Ready
 
 The LLaVA NewsReader Agent is now successfully implemented and ready for integration with the main JustNews V4 system using the `rapids-25.06` environment.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

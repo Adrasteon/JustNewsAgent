@@ -1,3 +1,11 @@
+---
+title: Reasoning Agent Complete Implementation Documentation
+description: Auto-generated description for Reasoning Agent Complete Implementation Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Reasoning Agent Complete Implementation Documentation
 
 ## Overview
@@ -316,3 +324,9 @@ pytest -q tests/integration/test_reasoning_agent.py
 The Reasoning Agent represents a significant achievement in integrating enterprise-grade symbolic reasoning capabilities into the JustNews V4 architecture. With the complete Nucleoid GitHub implementation, the agent provides sophisticated logical operations, dependency tracking, and explainable reasoning that enhances the entire news analysis pipeline.
 
 The production-ready implementation offers robust error handling, comprehensive testing, and seamless integration with the MCP bus communication system, making it a cornerstone component for intelligent news processing and validation.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

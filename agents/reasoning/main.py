@@ -25,6 +25,7 @@ from pydantic import BaseModel
 
 from agents.common.schemas import NeuralAssessment, ReasoningInput
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -257,6 +258,10 @@ async def lifespan(app: FastAPI):
     logger.info("✅ Reasoning Agent shutdown complete")
 
 app = FastAPI(title="JustNews V4 Reasoning Agent (Nucleoid)", lifespan=lifespan)
+
+# Initialize metrics
+metrics = JustNewsMetrics("reasoning")
+app.middleware("http")(metrics.request_middleware)
 
 # Register shutdown endpoint if available
 try:
@@ -968,6 +973,13 @@ def health():
 def ready_endpoint():
     """Readiness endpoint."""
     return {"ready": ready}
+
+# Metrics endpoint
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    from fastapi import Response
+    return Response(content=metrics.get_metrics(), media_type="text/plain")
 
 # --- MCP Bus Integration ---
 @app.post("/call")

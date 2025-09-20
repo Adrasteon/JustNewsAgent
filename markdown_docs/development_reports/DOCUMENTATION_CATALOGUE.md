@@ -1,8 +1,16 @@
+---
+title: JustNewsAgent Documentation Catalogue
+description: Auto-generated description for JustNewsAgent Documentation Catalogue
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Documentation Catalogue
 
-**Version:** 2.0
-**Last Updated:** 2025-09-07
-**Total Documents:** 140
+**Version:** 2.1
+**Last Updated:** 2025-09-20
+**Total Documents:** 141
 **Categories:** 14
 
 ## Table of Contents
@@ -154,11 +162,12 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 ## API & Integration
 
 **Category ID:** api_integration
-**Priority:** medium
-**Documents:** 3
+**Priority:** high
+**Documents:** 4
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
+| [Public API Documentation](markdown_docs/agent_documentation/PUBLIC_API_DOCUMENTATION.md) | Complete documentation for the production-ready public API with authentication, rate limiting, and real-time data access... | api, security, authentication, public | production_ready |
 | [Phase 3 API Documentation](docs/PHASE3_API_DOCUMENTATION.md) | RESTful and GraphQL API specifications for archive access and knowledge graph queries... | api, rest, graphql | current |
 | [Phase 3 Archive Integration Plan](docs/phase3_archive_integration_plan.md) | Research-scale archiving infrastructure with provenance tracking and legal compliance... | archive, research, provenance | planning |
 | [Phase 3 Knowledge Graph](docs/PHASE3_KNOWLEDGE_GRAPH.md) | Entity extraction, disambiguation, clustering, and relationship analysis documentation... | knowledge-graph, entities, relationships | current |
@@ -299,10 +308,10 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Examples for systemd native deployment](deploy/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units....... | mcp, ai-agents, scout | current |
-| [JustNews native deployment (systemd)](deploy/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
+| [Examples for systemd native deployment](../agent_documentation/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units....... | mcp, ai-agents, scout | current |
+| [JustNews native deployment (systemd)](../agent_documentation/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
 systemd units and sim... | mcp, models, logging | current |
-| [Systemd scaffold for JustNews](deploy/systemd/README.md) | This folder contains a native deployment scaffold:...... | mcp, memory, reasoning | current |
+| [Systemd scaffold for JustNews](../agent_documentation/systemd/README.md) | This folder contains a native deployment scaffold:...... | mcp, memory, reasoning | current |
 
 ---
 
@@ -351,5 +360,11 @@ systemd units and sim... | mcp, models, logging | current |
 
 ## Maintenance Information
 
-**Last Catalogue Update:** 2025-09-07
-**Next Review Date:** 2025-10-07
+**Last Catalogue Update:** 2025-09-20
+**Next Review Date:** 2025-10-20
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

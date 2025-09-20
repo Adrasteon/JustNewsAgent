@@ -1,5 +1,5 @@
+#!/home/adra/miniconda3/condabin/conda run -n justnews-v2-py312 python3
 from common.observability import get_logger
-#!/usr/bin/env python3
 """
 Production BBC NewsReader Crawler - Robust Implementation
 
@@ -15,6 +15,7 @@ Features:
 
 import asyncio
 import json
+import logging
 
 from typing import List, Dict, Optional
 import time
@@ -31,8 +32,6 @@ from PIL import Image
 import io
 
 # Configure logging
-s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = get_logger(__name__)
 
 class ProductionBBCNewsReaderCrawler:

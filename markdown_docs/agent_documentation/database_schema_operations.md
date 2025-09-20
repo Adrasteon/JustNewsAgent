@@ -1,3 +1,11 @@
+---
+title: Database Schema & Operations Documentation
+description: Auto-generated description for Database Schema & Operations Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Database Schema & Operations Documentation
 
 ## Overview
@@ -511,3 +519,9 @@ normalized_embedding = np.array(embedding) / np.linalg.norm(embedding)
 **Version:** 1.0  
 **Authors:** JustNews Development Team</content>
 <parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/database_schema_operations.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

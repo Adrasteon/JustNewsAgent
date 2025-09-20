@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Production Multi-Agent GPU Manager for JustNewsAgent
 Replaces the shim implementation with production-ready GPU resource management
 
@@ -12,6 +11,8 @@ Features:
 - Real-time performance metrics
 - Atomic allocation operations
 """
+
+from common.observability import get_logger
 
 
 import subprocess

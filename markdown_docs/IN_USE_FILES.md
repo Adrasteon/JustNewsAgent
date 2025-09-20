@@ -1,3 +1,11 @@
+---
+title: JustNews V4 — In‑Use Files Inventory
+description: Auto-generated description for JustNews V4 — In‑Use Files Inventory
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews V4 — In‑Use Files Inventory
 
 Generated: 2025-08-23
@@ -228,3 +236,9 @@ Notes & next steps
 If this looks good I will keep the file as-is. If you want a different filename or to additionally commit a packaging manifest, tell me and I will add it.
 
 If this looks good I will commit this file to the repo (it is saved to `markdown_docs/IN_USE_FILES.md`). If you want a different filename or format, tell me which and I will update it.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

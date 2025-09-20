@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Documentation Catalogue System
+description: Auto-generated description for JustNewsAgent Documentation Catalogue System
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Documentation Catalogue System
 
 ## 🎯 Overview
@@ -261,6 +269,16 @@ python docs/catalogue_expansion.py --phase all
 # This automatically updates both JSON and Markdown formats
 ```
 
+### Linting and Index Generation
+```bash
+# Lint all markdown docs and auto-fix safe issues
+python docs/doc_management_tools/doc_linter.py --report --fix
+
+# Regenerate docs_index.json from frontmatter
+python docs/doc_management_tools/generate_docs_index.py --write
+```
+
+
 ---
 
 ## 📋 **Contributing to Documentation**
@@ -489,5 +507,20 @@ python docs/catalogue_maintenance.py --performance-report --profile
 
 **🎯 This centralized documentation system ensures that all JustNewsAgent documentation is discoverable, current, and properly interconnected. For the latest updates, check the [Project Status](docs/PROJECT_STATUS.md) or run `python docs/docs_navigator.py status`.**
 
-*Documentation Catalogue Version: 2.0 | Last Updated: September 7, 2025 | Documents Indexed: 140*</content>
-<parameter name="filePath">/home/adra/justnewsagent/JustNewsAgent/docs/README.md
+*Documentation Catalogue Version: 2.0 | Last Updated: September 7, 2025 | Documents Indexed: 140*
+
+---
+
+## 🛠️ Operations (Ops quick links)
+
+- Systemd operations guide: `../markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md`
+- GPU Orchestrator operations: `../markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md`
+- MCP Bus operations: `../markdown_docs/agent_documentation/MCP_BUS_OPERATIONS.md`
+- Preflight gating runbook: `../markdown_docs/agent_documentation/preflight_runbook.md`
+- Daily Ops Quick Reference: `../markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md`
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

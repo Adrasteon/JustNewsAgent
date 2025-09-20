@@ -14,11 +14,15 @@ from common.observability import get_logger
 # Configure centralized logging
 logger = get_logger(__name__)
 
-# Environment variables
-POSTGRES_HOST = os.environ.get("POSTGRES_HOST")
-POSTGRES_DB = os.environ.get("POSTGRES_DB")
-POSTGRES_USER = os.environ.get("POSTGRES_USER")
-POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
+# Environment variables (read at runtime, not import time)
+def get_db_config():
+    """Get database configuration from environment variables"""
+    return {
+        'host': os.environ.get("POSTGRES_HOST"),
+        'database': os.environ.get("POSTGRES_DB"),
+        'user': os.environ.get("POSTGRES_USER"),
+        'password': os.environ.get("POSTGRES_PASSWORD")
+    }
 
 # Connection pool configuration
 POOL_MIN_CONNECTIONS = int(os.environ.get("DB_POOL_MIN_CONNECTIONS", "2"))
@@ -38,13 +42,14 @@ def initialize_connection_pool():
         return _connection_pool
 
     try:
+        config = get_db_config()
         _connection_pool = pool.ThreadedConnectionPool(
             minconn=POOL_MIN_CONNECTIONS,
             maxconn=POOL_MAX_CONNECTIONS,
-            host=POSTGRES_HOST,
-            database=POSTGRES_DB,
-            user=POSTGRES_USER,
-            password=POSTGRES_PASSWORD,
+            host=config['host'],
+            database=config['database'],
+            user=config['user'],
+            password=config['password'],
             connect_timeout=3,
             options='-c search_path=public'
         )

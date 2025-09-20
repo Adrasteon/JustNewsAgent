@@ -1,3 +1,11 @@
+---
+title: Monitoring and Observability Documentation
+description: Auto-generated description for Monitoring and Observability Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Monitoring and Observability Documentation
 
 ## Overview
@@ -1258,3 +1266,9 @@ sudo iptables -L
 ---
 
 *This comprehensive monitoring and observability documentation covers all aspects of the JustNews V4 monitoring system. For specific implementation details, refer to the individual monitoring components and configuration files.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

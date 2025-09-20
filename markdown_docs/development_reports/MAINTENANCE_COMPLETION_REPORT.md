@@ -1,3 +1,11 @@
+---
+title: JustNews Documentation Maintenance Action Plan - COMPLETED
+description: Auto-generated description for JustNews Documentation Maintenance Action Plan - COMPLETED
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews Documentation Maintenance Action Plan - COMPLETED
 
 **Date**: September 7, 2025  
@@ -203,3 +211,9 @@ The JustNews documentation maintenance action plan has been **successfully compl
 **Implementation Team**: GitHub Copilot  
 **Completion Date**: September 7, 2025  
 **Status**: ✅ **MISSION ACCOMPLISHED**
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

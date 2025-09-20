@@ -1,3 +1,11 @@
+---
+title: Full GPU Implementation Action Plan
+description: Auto-generated description for Full GPU Implementation Action Plan
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Full GPU Implementation Action Plan
 
 Goal: take JustNewsAgent from the current hybrid/partial TensorRT implementation to a robust, reproducible, production-ready GPU-enhanced system that uses the central Model Store and respects the repo's updated ingestion/canonicalization DB schema.
@@ -125,3 +133,9 @@ Estimated timeline (conservative)
 - Sprint 3 (2–5 days): tests, benchmarks, ops runbook, slow rollout (Phases 5–6)
 
 Next step (recommended): I will create the minimal CI job and the unit tests in Phase 1 so we have a safe developer/test baseline. Confirm and I'll implement them now.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

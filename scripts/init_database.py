@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import os
-from common.observability import get_logger
 import sys
 
 from pathlib import Path
+
+# Add the project root to Python path FIRST
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from common.observability import get_logger
 from agents.common.database import execute_query, initialize_connection_pool
 from agents.common.auth_models import create_user_tables
-
-# Add the project root to Python path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
 
 """
 Database initialization script for JustNewsAgent Authentication System
@@ -19,8 +20,6 @@ Run this script once to set up the authentication database schema.
 """
 
 # Set up logging
-s - %(levelname)s - %(message)s'
-)
 logger = get_logger(__name__)
 
 def create_initial_admin_user():

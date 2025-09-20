@@ -12,9 +12,10 @@ EnvironmentFile=-/etc/justnews/%i.env
 User=adra
 Group=adra
 # Use an absolute working directory (systemd requires absolute paths)
-WorkingDirectory=/home/adra/JustNewsAgent
+WorkingDirectory=/home/adra/justnewsagent/JustNewsAgent
 # Start from a shell to allow cd into repo and use env var expansion safely
-ExecStartPre=/bin/bash -c '[ "${REQUIRE_BUS:-1}" = "0" ] || /usr/local/bin/wait_for_mcp.sh'
+# Skip MCP wait for mcp_bus and gpu_orchestrator (they must start before/without the bus)
+ExecStartPre=/bin/bash -c '[ "${REQUIRE_BUS:-1}" = "0" ] || [ "%i" = "mcp_bus" ] || [ "%i" = "gpu_orchestrator" ] || /usr/local/bin/wait_for_mcp.sh'
 ExecStart=/usr/local/bin/justnews-start-agent.sh %i
 Restart=on-failure
 RestartSec=3

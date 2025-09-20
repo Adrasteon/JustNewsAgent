@@ -1,3 +1,11 @@
+---
+title: JustNews Agent - Knowledge Graph Documentation
+description: Auto-generated description for JustNews Agent - Knowledge Graph Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNews Agent - Knowledge Graph Documentation
 
 ## Phase 3 Sprint 3-4: Advanced Knowledge Graph Features
@@ -955,3 +963,9 @@ search_results = kg.search_entities("tech company", limit=15)
 **Entity Extraction:** Multi-language support (English, Spanish, French)
 **Performance:** < 2 seconds per article, 92% accuracy</content>
 <parameter name="filePath">/home/adra/JustNewsAgent/docs/PHASE3_KNOWLEDGE_GRAPH.md
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

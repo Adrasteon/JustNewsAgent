@@ -1,3 +1,11 @@
+---
+title: Workspace Cleanup Summary - August 8, 2025
+description: Auto-generated description for Workspace Cleanup Summary - August 8, 2025
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Workspace Cleanup Summary - August 8, 2025
 
 ## Housekeeping Actions Completed ✅
@@ -54,3 +62,9 @@ Added additional patterns:
 
 ## Summary
 Successfully cleaned workspace of development clutter while preserving all valuable work. Ready for Git staging and commit operations.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

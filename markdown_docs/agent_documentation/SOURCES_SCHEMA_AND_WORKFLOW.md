@@ -1,3 +1,11 @@
+---
+title: Sources Schema and Workflow
+description: Auto-generated description for Sources Schema and Workflow
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Sources Schema and Workflow
 
 This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion workflows, canonicalization rules, and usage examples for the JustNews project.
@@ -134,3 +142,22 @@ ON CONFLICT DO NOTHING;
 ---
 
 For implementation help (migrations, triggers, or API endpoints) see the `scripts/` directory in this repo and contact the repository owner for deployment instructions.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+
+## Dataflow Overview
+
+```mermaid
+flowchart LR
+  CR["Crawler Agent"] -->|store_article| AR["public.articles table"]
+  AR -->|map provenance| ASM["public.article_source_map"]
+  ASM -->|assign source_id| ARSID["articles.source_id column"]
+  AR -->|vector search query| MS["Memory Agent: /vector_search_articles"]
+  MS -->|return top_k| AR
+  ARSID -->|recent lookup| MR["Memory Agent: /get_recent_articles"]
+```
++*This diagram shows the flow from crawl ingestion to storage and retrieval, including provenance mapping and queries for vector similarity and recent articles.*
+

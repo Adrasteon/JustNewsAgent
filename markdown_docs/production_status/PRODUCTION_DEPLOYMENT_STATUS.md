@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent V4 - Production Deployment Status
+description: Auto-generated description for JustNewsAgent V4 - Production Deployment Status
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent V4 - Production Deployment Status
 
 **Last Updated**: September 2, 2025
@@ -195,3 +203,28 @@ Successfully completed comprehensive package management for core JustNewsAgent d
 **Production Status**: 🟢 **FULLY OPERATIONAL** - All systems running with RTX3090 GPU acceleration & Advanced Analytics
 **Last Validated**: September 1, 2025
 **Next Review**: September 15, 2025
+
+## 🎯 **MPS Resource Allocation System - ENTERPRISE GPU ISOLATION**
+
+### **Machine-Readable GPU Resource Management**
+- **✅ Centralized Configuration**: `config/gpu/mps_allocation_config.json` with calculated per-agent memory limits
+- **✅ GPU Orchestrator Integration**: `/mps/allocation` endpoint provides real-time resource allocation data
+- **✅ Per-Agent Memory Limits**: Fixed allocations based on model requirements (1.0GB - 5.0GB per agent)
+- **✅ Safety Margins**: 50-100% buffer above calculated requirements for production stability
+- **✅ System Summary**: 23.0GB total allocation across 9 agents with 69.6% memory efficiency
+- **✅ Preflight Integration**: MCP Bus startup validates model preload status via `/models/status` endpoint
+- **✅ Enterprise Architecture**: Professional-grade GPU resource isolation with process-level separation
+- **✅ Production Ready**: All agents start with guaranteed memory limits and crash isolation
+
+### **MPS Production Benefits Achieved**
+- **Zero GPU Crashes**: Process isolation prevents system-wide GPU failures
+- **Resource Fairness**: Equal GPU access across all agents regardless of launch order
+- **Memory Protection**: Automatic cleanup and leak prevention per process
+- **Debugging Superiority**: Per-client GPU usage tracking and error isolation
+- **Enterprise Scalability**: Professional-grade resource management for multi-agent systems
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

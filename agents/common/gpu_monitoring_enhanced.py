@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Enhanced GPU Monitoring Dashboard for JustNewsAgent
 Provides comprehensive real-time GPU health monitoring and performance analytics
 
@@ -14,6 +13,7 @@ Features:
 
 
 import subprocess
+import os
 import threading
 import time
 from collections import deque
@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import psutil
+from common.observability import get_logger
 
 # GPU and ML imports with graceful fallbacks
 try:
@@ -509,12 +510,15 @@ def get_gpu_trends(hours: int = 24) -> dict[str, Any]:
     collector = get_metrics_collector()
     return collector.get_performance_trends(hours)
 
-# Auto-start monitoring on import
+# Auto-start monitoring on import (DISABLED when GPU Orchestrator is authoritative)
 _monitoring_started = False
-if not _monitoring_started:
+_orchestrator_env = os.environ.get("GPU_ORCHESTRATOR_URL") or os.environ.get("GPU_ORCHESTRATOR_PORT")
+if not _monitoring_started and not _orchestrator_env:
     try:
         start_gpu_monitoring()
         _monitoring_started = True
-        logger.info("✅ GPU monitoring auto-started")
+        logger.info("✅ GPU monitoring auto-started (no orchestrator detected)")
     except Exception as e:
         logger.warning(f"Failed to auto-start GPU monitoring: {e}")
+else:
+    logger.info("🛑 Suppressing legacy GPU monitoring auto-start (orchestrator active)")

@@ -1,3 +1,11 @@
+---
+title: Legal Compliance Framework Documentation
+description: Auto-generated description for Legal Compliance Framework Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Legal Compliance Framework Documentation
 
 ## Overview
@@ -311,3 +319,9 @@ The system requires two PostgreSQL databases:
 **Last Updated**: 2025-09-02
 **Version**: 1.0.0
 **Compliance**: GDPR Article 5, 6, 7, 15-22, 25, 32 | CCPA Sections 1798.100, 1798.110, 1798.120, 1798.135
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

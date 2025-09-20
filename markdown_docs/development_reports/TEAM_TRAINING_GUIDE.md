@@ -1,3 +1,11 @@
+---
+title: 🚀 JustNews V4 Documentation Quality Management - Team Training Guide
+description: Auto-generated description for 🚀 JustNews V4 Documentation Quality Management - Team Training Guide
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # 🚀 JustNews V4 Documentation Quality Management - Team Training Guide
 
 ## 📅 Training Session: September 7, 2025
@@ -344,3 +352,9 @@ chmod +x docs/docs/*.sh
 ---
 
 *This training guide ensures your team can effectively maintain JustNews V4's industry-leading documentation quality standards. Regular review and updates will keep the system optimized for long-term success.*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

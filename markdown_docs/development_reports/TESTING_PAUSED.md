@@ -1,3 +1,11 @@
+---
+title: Testing & Dependency Upgrade: Paused (2025-08-24)
+description: Auto-generated description for Testing & Dependency Upgrade: Paused (2025-08-24)
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # Testing & Dependency Upgrade: Paused (2025-08-24)
 
 Summary
@@ -42,3 +50,9 @@ Contact
 -------
 If you want me to continue, I can open the feature branch and start a guided upgrade to spaCy 4.x
 or revert the pre-release trial and freeze the current pinned environment for production use.
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

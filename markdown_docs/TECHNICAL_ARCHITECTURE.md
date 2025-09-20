@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent V4 - Technical Architecture
+description: Auto-generated description for JustNewsAgent V4 - Technical Architecture
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent V4 - Technical Architecture
 
 This document provides comprehensive technical details about the JustNewsAgent V4 system architecture, performance metrics, and implementation details.
@@ -12,6 +20,15 @@ This document provides comprehensive technical details about the JustNewsAgent V
 - **✅ Production GPU Operations**: Tensor operations validated at 1000x+ CPU performance
 - **✅ Security Compliance**: Latest PyTorch version with all security patches applied
 - **✅ Model Loading**: All AI models load successfully with GPU acceleration enabled
+
+### 🎯 **NVIDIA Multi-Process Service (MPS) - ENTERPRISE GPU ISOLATION**
+- **✅ MPS Control Daemon**: Active and managing GPU resource allocation
+- **✅ Process Isolation**: Each agent runs in separate MPS client context
+- **✅ Resource Management**: Automatic GPU memory per-process limits and allocation
+- **✅ Stability Enhancement**: Prevents one agent from crashing entire GPU context
+- **✅ Production Monitoring**: Real-time MPS status and client tracking
+- **✅ Enterprise Architecture**: Professional-grade GPU resource isolation
+- **✅ Zero Overhead**: Minimal performance impact with maximum stability gains
 
 ### 📊 **Current Technical Specifications - September 7, 2025**
 - **GPU**: NVIDIA RTX3090 (24GB GDDR6X, CUDA Capability 8.6)
@@ -170,6 +187,42 @@ Successfully completed comprehensive package management for core JustNewsAgent d
 | **Memory** | Vector Embeddings | 2-4GB | ✅ Production + Optimized | Optimized embeddings, advanced caching, semantic search |
 | **Reasoning** | Nucleoid (symbolic logic) | <1GB | ✅ Production | Fact validation, contradiction detection |
 | **Total System** | **Multi-Model Pipeline** | **29.6GB** | **RTX 3090 Optimized** | **Advanced GPU Management** |
+
+### NVIDIA MPS Architecture - Enterprise GPU Isolation
+
+**MPS Control Architecture:**
+- **MPS Control Daemon**: `nvidia-cuda-mps-control -d` manages GPU resource allocation
+- **Client Isolation**: Each agent connects as separate MPS client with dedicated context
+- **Resource Limits**: Automatic per-process GPU memory allocation and enforcement
+- **Stability Protection**: Process-level isolation prevents GPU context corruption
+- **Monitoring Integration**: Real-time MPS status via GPU Orchestrator API
+
+**MPS Resource Allocation System:**
+- **Machine-Readable Configuration**: `config/gpu/mps_allocation_config.json` with calculated memory limits
+- **Per-Agent Memory Limits**: Fixed allocations based on model requirements (1.0GB - 5.0GB per agent)
+- **Safety Margins**: 50-100% buffer above calculated requirements for stability
+- **GPU Orchestrator Integration**: `/mps/allocation` endpoint provides allocation data
+- **System Summary**: 23.0GB total allocation across 9 agents with 69.6% memory efficiency
+
+**MPS vs Direct Access Comparison:**
+
+| Feature | Direct GPU Access | NVIDIA MPS |
+|---------|------------------|------------|
+| **Performance** | Maximum (no overhead) | Near maximum (minimal proxy) |
+| **Isolation** | None - shared context | Full process isolation |
+| **Stability** | Risk of GPU hangs | Protected from crashes |
+| **Memory Management** | Manual allocation | Automatic per-process |
+| **Debugging** | Difficult | Per-client visibility |
+| **Resource Sharing** | Competitive access | Controlled allocation |
+| **Enterprise Ready** | Development grade | Production enterprise |
+
+**MPS Production Benefits:**
+- **Zero GPU Crashes**: Process isolation prevents system-wide GPU failures
+- **Resource Fairness**: Equal GPU access across all agents regardless of launch order
+- **Memory Protection**: Automatic cleanup and leak prevention per process
+- **Debugging Superiority**: Per-client GPU usage tracking and error isolation
+- **Enterprise Scalability**: Professional-grade resource management for multi-agent systems
+- **Fixed Resource Allocation**: Predictable memory usage with calculated limits per agent
 
 ### Strategic Architecture Design
 
@@ -902,3 +955,9 @@ This enterprise-grade security system provides **military-grade protection** aga
 ---
 
 *For additional technical details, see the complete documentation in [`markdown_docs/`](markdown_docs/) and architecture specifications in [`docs/`](docs/).*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

@@ -4,15 +4,24 @@ Main file for the MCP Bus.
 # main.py for MCP Message Bus
 import atexit
 import time
+import os
 from contextlib import asynccontextmanager
 
 import requests
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from common.observability import get_logger
+from common.metrics import JustNewsMetrics
 
 app = FastAPI()
+
+# Initialize metrics
+metrics = JustNewsMetrics("mcp_bus")
+
+# Add metrics middleware
+app.middleware("http")(metrics.request_middleware)
 
 ready = False
 
@@ -72,7 +81,10 @@ def call_tool(call: ToolCall):
 
     payload = {"args": call.args, "kwargs": call.kwargs}
     url = f"{agent_address}/{call.tool}"
-    timeout = (3, 10)  # (connect, read)
+    # Configurable timeouts via environment (defaults: connect 3s, read 120s for long-running tools)
+    connect_timeout = float(os.getenv("MCP_CALL_CONNECT_TIMEOUT", "3"))
+    read_timeout = float(os.getenv("MCP_CALL_READ_TIMEOUT", "120"))
+    timeout = (connect_timeout, read_timeout)
 
     # Simple retry with backoff
     last_error = None
@@ -110,15 +122,14 @@ def health():
 def ready_endpoint():
     return {"ready": ready}
 
+@app.get("/metrics")
+def metrics_endpoint():
+    """Prometheus metrics endpoint"""
+    return Response(metrics.get_metrics(), media_type="text/plain; charset=utf-8")
+
 @asynccontextmanager
 async def lifespan(app):
     logger.info("MCP_Bus is starting up.")
-    try:
-        response = requests.get("http://localhost:8000/register", timeout=(2, 5))
-        response.raise_for_status()
-        logger.info("MCP Bus connected successfully.")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to connect to MCP Bus: {e}")
     global ready
     ready = True
     yield
@@ -134,3 +145,13 @@ try:
 except Exception:
     # If assigning fails, the module will still run with a default no-op lifespan
     logger.debug("Could not attach custom lifespan to MCP Bus router; continuing without it.")
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+
+    host = os.environ.get("MCP_BUS_HOST", "0.0.0.0")
+    port = int(os.environ.get("MCP_BUS_PORT", 8000))
+
+    logger.info(f"Starting MCP Bus on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)

@@ -1,10 +1,19 @@
+---
+title: JustNewsAgent Canonical Port Mapping
+description: Auto-generated description for JustNewsAgent Canonical Port Mapping
+tags: [documentation]
+status: current
+last_updated: 2025-09-12
+---
+
 # JustNewsAgent Canonical Port Mapping
 
 ## 📋 Complete Port Usage Analysis
 
-*Generated on: September 7, 2025*
+*Generated on: September 9, 2025*
+*Last Updated: September 16, 2025 - Crawler Control (8016) added; port assignments updated*
 
-This document provides the canonical list of all ports used in the JustNewsAgent system, compiled from a comprehensive search of the entire codebase.
+This document provides the canonical list of all ports used in the JustNewsAgent system, compiled from a comprehensive search of the entire codebase and validated against running services.
 
 ---
 
@@ -22,21 +31,30 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 | **8007** | Memory Agent | Data persistence and retrieval | `MEMORY_AGENT_PORT=8007` | ✅ Active |
 | **8008** | Reasoning Agent | Logical reasoning and inference | `REASONING_AGENT_PORT=8008` | ✅ Active |
 | **8009** | NewsReader Agent | Content extraction and LLaVA visual analysis | `NEWSREADER_AGENT_PORT=8009` | ✅ Active |
-| **8013** | Balancer Agent | Load balancing and resource management | `BALANCER_AGENT_PORT=8013` | ✅ Active |
 
 ---
 
-## 🌐 API & Dashboard Services (8010-8022)
+## 🌐 API & Dashboard Services (8010-8014)
 
 | Port | Service | Purpose | Access URL | Status |
 |------|---------|---------|------------|--------|
-| **8010** | DB Worker / Editor UI | Database operations and content editing | `http://localhost:8010` | ✅ Active |
-| **8011** | GPU Dashboard | GPU monitoring and management | `http://localhost:8011/gpu/dashboard` | ✅ Active |
-| **8012** | Analytics Dashboard | System analytics and reporting | `http://localhost:8012/api/health` | ✅ Active |
-| **8013** | Analytics Dashboard (Alt) | Alternative analytics interface | `http://localhost:8013` | ✅ Active |
-| **8020** | GraphQL API | Advanced GraphQL query interface | `http://localhost:8020/graphql` | ✅ Active |
-| **8021** | REST Archive API | RESTful archive access and knowledge graph | `http://localhost:8021/health` | ✅ Active |
-| **8022** | Authentication API | JWT-based user authentication | `http://localhost:8021/auth/register` | ✅ Active (integrated into Archive API) |
+| **8010** | Balancer Agent | Load balancing and resource management | `http://localhost:8010/health` | ✅ Active |
+| **8011** | Analytics Agent | Advanced performance & analytics API | `http://localhost:8011/health` | ✅ Active |
+| **8012** | Archive Agent | Document storage and retrieval | `http://localhost:8012/health` | ✅ Active |
+| **8013** | Dashboard Agent | Web-based monitoring and management | `http://localhost:8013` | ✅ Active |
+| **8014** | GPU Orchestrator | Central GPU coordination and telemetry | `http://localhost:8014/health` | ✅ Active |
+| **8015** | Crawler Agent | Unified production crawling with AI analysis pipeline | `http://localhost:8015/health` | ✅ Active |
+| **8016** | Crawler Control | Web interface for crawler management and monitoring | `http://localhost:8016` | ✅ Active |
+
+---
+
+## 🔌 Extended API Services (8020-8022)
+
+| Port | Service | Purpose | Access URL | Status |
+|------|---------|---------|------------|--------|
+| **8020** | Archive GraphQL API | Advanced GraphQL query interface | `http://localhost:8020/graphql` | 🔄 Planned |
+| **8021** | Archive REST API | RESTful archive access and knowledge graph | `http://localhost:8021/health` | 🔄 Planned |
+| **8022** | Authentication API | JWT-based user authentication | `http://localhost:8021/auth/register` | 🔄 Planned |
 
 ---
 
@@ -44,7 +62,7 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 
 | Port | Service | Purpose | Configuration | Status |
 |------|---------|---------|---------------|--------|
-| **5432** | PostgreSQL | Main application database | `JUSTNEWS_DB_PORT=5432` | ✅ Active |
+| **5432** | PostgreSQL | Main application database | `POSTGRES_HOST=localhost`<br>`POSTGRES_DB=justnews`<br>`POSTGRES_USER=justnews_user`<br>`POSTGRES_PASSWORD=CHANGEME_DUMMY` | ✅ Active |
 
 ---
 
@@ -58,49 +76,62 @@ This document provides the canonical list of all ports used in the JustNewsAgent
 
 ## 📊 Port Distribution Summary
 
-- **Agent Services**: 8000-8009 (10 ports)
-- **API/Dashboard Services**: 8010-8022 (7 ports)
+- **Core Agent Services**: 8000-8009 (10 ports)
+- **API/Dashboard Services**: 8010-8015 (6 ports)
+- **Extended API Services**: 8020-8022 (3 ports, planned)
 - **Database**: 5432 (1 port)
 - **External Services**: 8080 (1 port)
-- **Total Ports Used**: 19
+- **Total Ports Used**: 17 (13 active, 4 planned)
 
 ---
 
 ## ⚠️ Important Notes
 
-### Port Conflicts
-- **Port 8009**: Originally assigned to NewsReader/Balancer but conflicts with main system agents
-- **Solution**: Authentication API integrated into Archive API on port 8021 to avoid conflicts
-- **✅ RESOLVED**: NewsReader and Balancer agents port conflict fixed - Balancer moved to port 8013
+### Port Conflicts - RESOLVED ✅
+- **Issue**: Analytics (metrics/analytics API) and Dashboard Agent originally collided on 8011
+- **Resolution**: Dashboard Agent moved to 8013 (September 9, 2025); Analytics remains on 8011
+- **Status**: All port conflicts resolved; documentation updated September 11, 2025
 
 ### Environment Variables
-Most agent ports can be configured via environment variables:
+All agent ports can be configured via environment variables:
 ```bash
+# Core services
 export MCP_BUS_PORT=8000
 export SCOUT_AGENT_PORT=8002
-export ANALYTICS_PORT=8012
-export DASHBOARD_PORT=8011
-# ... etc
+export ANALYST_AGENT_PORT=8004
+export MEMORY_AGENT_PORT=8007
+
+# Dashboard services
+export BALANCER_AGENT_PORT=8010
+export ANALYTICS_AGENT_PORT=8011
+export ARCHIVE_AGENT_PORT=8012
+export DASHBOARD_AGENT_PORT=8013
+export GPU_ORCHESTRATOR_PORT=8014
+
+# Database
+export POSTGRES_HOST=localhost
+export POSTGRES_DB=justnews
+export POSTGRES_USER=justnews_user
+export POSTGRES_PASSWORD=CHANGEME_DUMMY
 ```
 
 ### Service Dependencies
 - **MCP Bus (8000)**: Central coordination point for all agents
 - **All agents communicate through the MCP Bus**
-- **API services (8020-8021)**: Provide external access to the system
 - **Database (5432)**: Required for all data persistence operations
+- **PostgreSQL**: Uses dedicated `justnews` database with `justnews_user` credentials
 
 ---
 
-## 🔍 Search Methodology
+## 🔍 Validation Methodology
 
-This analysis was compiled from a comprehensive search of:
-- ✅ `localhost` references across all files
-- ✅ `127.0.0.1` IP address usage
-- ✅ Port number patterns (`:8000`, `:8001`, etc.)
-- ✅ Environment variable definitions
-- ✅ Configuration files and scripts
-- ✅ Documentation and README files
-- ✅ Source code port assignments
+This analysis was validated against:
+- ✅ **Running Services**: 15 services confirmed active via `systemctl` (added Crawler Agent)
+- ✅ **Health Checks**: 13/15 services responding to health endpoints (some planned endpoints still pending)
+- ✅ **Port Listening**: Verified via `netstat` and `ss` commands
+- ✅ **Configuration Files**: Cross-referenced with `/etc/justnews/*.env` files
+- ✅ **Source Code**: Validated against agent `main.py` port assignments
+- ✅ **Systemd Services**: Confirmed via `systemctl status` commands
 
 ---
 
@@ -125,9 +156,17 @@ This analysis was compiled from a comprehensive search of:
 
 - **Port Range Allocation**: System uses organized port ranges for different service types
 - **Environment Configuration**: All ports configurable via environment variables
-- **Conflict Resolution**: Authentication API integrated into Archive API on port 8021
+- **Conflict Resolution**: Dashboard moved to 8013 to resolve Analytics conflict; Crawler Agent added on 8015
+- **Database Setup**: PostgreSQL with dedicated user and database configuration
+- **Health Monitoring**: 13/15 services provide health check endpoints
 - **Documentation**: Keep this file updated when new services are added
 
 ---
 
-*This document serves as the authoritative reference for all port assignments in the JustNewsAgent system.*
+*This document serves as the authoritative reference for all port assignments in the JustNewsAgent system. Last validated: September 15, 2025*
+
+## See also
+
+- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
+- Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
+

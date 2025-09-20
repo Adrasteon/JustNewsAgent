@@ -27,7 +27,15 @@ AGENTS=(
   "critic|agents.critic.main:app|8006"
   "memory|agents.memory.main:app|8007"
   "reasoning|agents.reasoning.main:app|8008"
+  "newsreader|agents.newsreader.main:app|8009"
+  "db_worker|agents.db_worker.worker:app|8010"
+  "dashboard|agents.dashboard.main:app|8011"
+  "analytics|agents.analytics.dashboard:analytics_app|8012"
   "balancer|agents.balancer.main:app|8013"
+  # Newly added GPU orchestrator service (was missing previously)
+  "gpu_orchestrator|agents.gpu_orchestrator.main:app|8014"
+  "archive_graphql|agents.archive.archive_graphql:app|8020"
+  "archive_api|agents.archive.archive_api:app|8021"
 )
 
 PIDS=()
@@ -143,8 +151,8 @@ else
   # the BASE_MODEL_DIR/MODEL_STORE_ROOT env vars before invoking the script.
   DEFAULT_BASE_MODELS_DIR="${HOME}/.local/share/justnews"
 fi
-export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-$DEFAULT_BASE_MODELS_DIR/model_store}"
-export BASE_MODEL_DIR="${BASE_MODEL_DIR:-$DEFAULT_BASE_MODELS_DIR/agents}"
+export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-"$DEFAULT_BASE_MODELS_DIR/model_store"}"
+export BASE_MODEL_DIR="${BASE_MODEL_DIR:-"$DEFAULT_BASE_MODELS_DIR/agents"}"
 
 # Enforce strict ModelStore usage by default for production runs started via this script.
 # Set STRICT_MODEL_STORE=0 to allow fallbacks for development/testing.
@@ -157,16 +165,23 @@ export POSTGRES_DB="${POSTGRES_DB:-justnews}"
 export POSTGRES_USER="${POSTGRES_USER:-justnews_user}"
 export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password123}"
 
+# Mirror to JUSTNEWS_DB_* variables for scripts (e.g., news_outlets.py) if not explicitly set
+export JUSTNEWS_DB_HOST="${JUSTNEWS_DB_HOST:-$POSTGRES_HOST}"
+export JUSTNEWS_DB_PORT="${JUSTNEWS_DB_PORT:-5432}"
+export JUSTNEWS_DB_NAME="${JUSTNEWS_DB_NAME:-$POSTGRES_DB}"
+export JUSTNEWS_DB_USER="${JUSTNEWS_DB_USER:-$POSTGRES_USER}"
+export JUSTNEWS_DB_PASSWORD="${JUSTNEWS_DB_PASSWORD:-$POSTGRES_PASSWORD}"
+
 # Per-agent cache envs (only set if not already set)
-export SYNTHESIZER_MODEL_CACHE="${SYNTHESIZER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/synthesizer/models}"
-export MEMORY_MODEL_CACHE="${MEMORY_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/memory/models}"
-export CHIEF_EDITOR_MODEL_CACHE="${CHIEF_EDITOR_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/chief_editor/models}"
-export FACT_CHECKER_MODEL_CACHE="${FACT_CHECKER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/fact_checker/models}"
-export CRITIC_MODEL_CACHE="${CRITIC_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/critic/models}"
-export ANALYST_MODEL_CACHE="${ANALYST_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/analyst/models}"
-export BALANCER_MODEL_CACHE="${BALANCER_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/balancer/models}"
-export SCOUT_MODEL_CACHE="${SCOUT_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/scout/models}"
-export REASONING_MODEL_CACHE="${REASONING_MODEL_CACHE:-$DEFAULT_BASE_MODELS_DIR/agents/reasoning/models}"
+export SYNTHESIZER_MODEL_CACHE="${SYNTHESIZER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/synthesizer/models"}"
+export MEMORY_MODEL_CACHE="${MEMORY_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/memory/models"}"
+export CHIEF_EDITOR_MODEL_CACHE="${CHIEF_EDITOR_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/chief_editor/models"}"
+export FACT_CHECKER_MODEL_CACHE="${FACT_CHECKER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/fact_checker/models"}"
+export CRITIC_MODEL_CACHE="${CRITIC_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/critic/models"}"
+export ANALYST_MODEL_CACHE="${ANALYST_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/analyst/models"}"
+export BALANCER_MODEL_CACHE="${BALANCER_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/balancer/models"}"
+export SCOUT_MODEL_CACHE="${SCOUT_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/scout/models"}"
+export REASONING_MODEL_CACHE="${REASONING_MODEL_CACHE:-"$DEFAULT_BASE_MODELS_DIR/agents/reasoning/models"}"
 
 # Ensure directories exist (no sudo) and warn about permissions if not writable by current user
 mkdir -p "$MODEL_STORE_ROOT" || true
@@ -179,8 +194,8 @@ for d in "$BASE_MODEL_DIR" "$SYNTHESIZER_MODEL_CACHE" "$MEMORY_MODEL_CACHE" "$CH
   fi
 done
 
-echo "Checking ports 8000..8013 for running agents..."
-for port in $(seq 8000 8013); do
+echo "Checking ports 8000..8021 for running agents..."
+for port in $(seq 8000 8021); do
   if is_port_in_use "$port"; then
     echo "Port $port is currently in use. Attempting graceful shutdown..."
     if attempt_shutdown_port "$port"; then
@@ -202,6 +217,42 @@ for port in $(seq 8000 8013); do
   fi
 done
 
+# ------------------------------------------------------------
+# Optional pre-start sources seeding
+# Enable by setting AUTO_SEED_SOURCES=1 (idempotent: only runs if table empty or missing)
+# Requires: psql in PATH and scripts/news_outlets.py present.
+# ------------------------------------------------------------
+if [ "${AUTO_SEED_SOURCES:-0}" = "1" ]; then
+  echo "[startup] AUTO_SEED_SOURCES=1 → attempting sources table seed"
+  if command -v psql >/dev/null 2>&1; then
+    set +e
+    SOURCE_COUNT=$(psql "postgresql://$JUSTNEWS_DB_USER:$JUSTNEWS_DB_PASSWORD@$JUSTNEWS_DB_HOST:${JUSTNEWS_DB_PORT}/$JUSTNEWS_DB_NAME" -tAc "SELECT count(*) FROM public.sources" 2>/dev/null)
+    STATUS=$?
+    set -e
+    if [ $STATUS -ne 0 ] || [ -z "$SOURCE_COUNT" ]; then
+      echo "[startup] sources table absent or inaccessible – will attempt seed (creating table if necessary)"
+      NEED_SEED=1
+    elif [ "$SOURCE_COUNT" = "0" ]; then
+      echo "[startup] sources table empty – will seed"
+      NEED_SEED=1
+    else
+      echo "[startup] sources table already populated ($SOURCE_COUNT rows) – skip seeding"
+      NEED_SEED=0
+    fi
+    if [ "${NEED_SEED:-0}" = "1" ]; then
+      if [ -f "$SCRIPT_DIR/scripts/news_outlets.py" ]; then
+        echo "[startup] Seeding sources from potential_news_sources.md"
+        conda run --name "$CONDA_ENV" python "$SCRIPT_DIR/scripts/news_outlets.py" \
+          --file "$SCRIPT_DIR/markdown_docs/agent_documentation/potential_news_sources.md" || echo "[startup] WARNING: source seeding script failed"
+      else
+        echo "[startup] WARNING: scripts/news_outlets.py not found – cannot seed sources"
+      fi
+    fi
+  else
+    echo "[startup] WARNING: psql not installed – cannot auto-seed sources"
+  fi
+fi
+
 start_agent() {
   local name="$1" module="$2" port="$3"
   local out_log="$LOG_DIR/${name}.out.log"
@@ -219,10 +270,16 @@ wait_for_health() {
   local name="$1" port="$2"
   local deadline=$(( $(date +%s) + HEALTH_TIMEOUT ))
   local url="http://localhost:$port/health"
-  # MCP Bus uses /agents endpoint for a more meaningful readiness check
-  if [ "$name" = "mcp_bus" ]; then
-    url="http://localhost:$port/agents"
-  fi
+  # Custom health endpoints per agent (keep minimal logic here)
+  case "$name" in
+    mcp_bus)
+      url="http://localhost:$port/agents" # list agents implies bus is ready
+      ;;
+    analytics)
+      # Analytics dashboard exposes /api/health, not /health
+      url="http://localhost:$port/api/health"
+      ;;
+  esac
 
   echo "Waiting for $name to become healthy at $url (timeout ${HEALTH_TIMEOUT}s)"
   local attempts=0
