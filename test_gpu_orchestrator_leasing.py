@@ -25,7 +25,7 @@ def test_metrics_basic():
     body = r.text
     assert "gpu_orchestrator_uptime_seconds" in body
     # requests_total may be at least 1 due to this call
-    assert "gpu_orchestrator_requests_total" in body
+    assert "justnews_requests_total" in body
 
 
 def test_lease_cpu_fallback(monkeypatch):

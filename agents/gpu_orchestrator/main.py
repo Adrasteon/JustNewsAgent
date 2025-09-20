@@ -17,6 +17,10 @@ import uuid
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
+from prometheus_client import (
+    Counter, Gauge, Histogram, Summary,
+    CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
+)
 
 from common.observability import get_logger
 
@@ -95,6 +99,10 @@ def _purge_expired_leases() -> None:
 		ALLOCATIONS.pop(token, None)
 	if expired:
 		_METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get("lease_expired_total", 0) + len(expired)
+		lease_expired_counter.labels(
+			agent=metrics.agent_name,
+			agent_display_name=metrics.display_name
+		).inc(len(expired))
 
 
 class MCPBusClient:
@@ -250,6 +258,12 @@ async def lifespan(app: FastAPI):
 			_NVML_INIT_ERROR = str(e)
 			logger.warning(f"NVML initialization failed: {e}")
 
+	# Set NVML supported gauge
+	nvml_supported_gauge.labels(
+		agent=metrics.agent_name,
+		agent_display_name=metrics.display_name
+	).set(1 if _NVML_SUPPORTED else 0)
+
 	# Try registering to MCP Bus (best-effort)
 	try:
 		client = MCPBusClient()
@@ -282,6 +296,42 @@ app = FastAPI(title="GPU Orchestrator", lifespan=lifespan)
 
 # Initialize metrics
 metrics = JustNewsMetrics("gpu_orchestrator")
+
+# Set initial uptime
+uptime_gauge = Gauge(
+    'gpu_orchestrator_uptime_seconds',
+    'GPU orchestrator uptime in seconds',
+    ['agent', 'agent_display_name'],
+    registry=metrics.registry
+)
+uptime_gauge.labels(
+    agent=metrics.agent_name,
+    agent_display_name=metrics.display_name
+).set(time.time() - _START_TIME)
+
+# Add MPS-specific metrics
+mps_enabled_gauge = Gauge(
+    'gpu_orchestrator_mps_enabled',
+    'Whether NVIDIA MPS is enabled (1) or disabled (0)',
+    ['agent', 'agent_display_name'],
+    registry=metrics.registry
+)
+
+# Add additional GPU orchestrator specific metrics
+lease_expired_counter = Counter(
+    'gpu_orchestrator_lease_expired_total',
+    'Total number of GPU leases that have expired',
+    ['agent', 'agent_display_name'],
+    registry=metrics.registry
+)
+
+nvml_supported_gauge = Gauge(
+    'gpu_orchestrator_nvml_supported',
+    'Whether NVML is supported and enabled (1) or not (0)',
+    ['agent', 'agent_display_name'],
+    registry=metrics.registry
+)
+
 
 # Optional shared endpoints if available
 try:
@@ -326,6 +376,13 @@ def gpu_info():
 		mps = _detect_mps()
 		data["mps_enabled"] = bool(mps.get("enabled", False))
 		data["mps"] = mps
+		
+		# Update MPS metrics
+		mps_enabled_gauge.labels(
+			agent=metrics.agent_name,
+			agent_display_name=metrics.display_name
+		).set(1 if data["mps_enabled"] else 0)
+		
 		return data
 	except Exception as e:
 		logger.error(f"Failed to get GPU snapshot: {e}")

@@ -32,6 +32,7 @@ Minimum keys (examples):
 JUSTNEWS_PYTHON=/home/adra/miniconda3/envs/justnews-v2-py312/bin/python
 SERVICE_DIR=/home/adra/justnewsagent/JustNewsAgent
 JUSTNEWS_DB_URL=postgresql://user:pass@localhost:5432/justnews
+ENABLE_MPS=true
 ```
 
 Per-instance overrides (e.g., `/etc/justnews/analyst.env`):
@@ -41,6 +42,40 @@ CUDA_VISIBLE_DEVICES=0
 # EXEC_START can override the module if necessary
 # EXEC_START="$JUSTNEWS_PYTHON -m agents.analyst.main"
 ```
+
+## NVIDIA MPS Configuration (Enterprise GPU Isolation)
+
+Enable NVIDIA Multi-Process Service for GPU resource isolation across agents:
+
+### MPS Setup Steps
+
+1. **Start MPS Control Daemon** (run at system boot):
+```bash
+sudo nvidia-cuda-mps-control -d
+```
+
+2. **Verify MPS Operation**:
+```bash
+pgrep -x nvidia-cuda-mps-control
+ls -la /tmp/nvidia-mps/
+```
+
+3. **Environment Configuration**:
+   - Global: `ENABLE_MPS=true` in `/etc/justnews/global.env`
+   - GPU Orchestrator: `ENABLE_MPS=true` and `ENABLE_NVML=true` in `/etc/justnews/gpu_orchestrator.env`
+
+4. **Validate Configuration**:
+```bash
+curl -s http://127.0.0.1:8014/mps/allocation | jq '.mps_resource_allocation.system_summary'
+curl -s http://127.0.0.1:8014/gpu/info | jq '{mps_enabled, mps}'
+```
+
+### MPS Troubleshooting
+
+- **MPS daemon not running**: `sudo nvidia-cuda-mps-control -d`
+- **Pipe directory missing**: Check `/tmp/nvidia-mps/` permissions
+- **GPU isolation issues**: Verify MPS control process and client connections
+- **Memory limits**: Check `config/gpu/mps_allocation_config.json` and restart services
 
 ## Unit drop-ins
 

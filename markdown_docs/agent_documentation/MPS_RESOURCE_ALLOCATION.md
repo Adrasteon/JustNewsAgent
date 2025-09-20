@@ -220,3 +220,5 @@ nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv
 **Last Updated**: September 17, 2025
 **Total System Memory**: 23.0GB allocated, 16.0GB calculated
 **MPS Efficiency**: 69.6% memory utilization with safety margins
+
+**Deployment Note**: MPS configuration is now included in systemd environment examples and deployment guides.

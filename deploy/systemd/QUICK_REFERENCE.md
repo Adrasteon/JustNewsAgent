@@ -103,12 +103,37 @@ Global (`/etc/justnews/global.env`):
 JUSTNEWS_PYTHON=/home/adra/miniconda3/envs/justnews-v2-py312/bin/python
 SERVICE_DIR=/home/adra/justnewsagent/JustNewsAgent
 JUSTNEWS_DB_URL=postgresql://user:pass@localhost:5432/justnews
+ENABLE_MPS=true
 ```
 
 Per-instance (example `/etc/justnews/analyst.env`):
 
 ```
 CUDA_VISIBLE_DEVICES=0
+```
+
+## NVIDIA MPS Setup (Enterprise GPU Isolation)
+
+Enable NVIDIA Multi-Process Service for GPU resource isolation:
+
+1. **Start MPS Daemon** (run once at system boot):
+```bash
+sudo nvidia-cuda-mps-control -d
+```
+
+2. **Verify MPS Status**:
+```bash
+pgrep -x nvidia-cuda-mps-control
+ls -la /tmp/nvidia-mps/
+```
+
+3. **Environment Configuration**:
+   - Set `ENABLE_MPS=true` in `/etc/justnews/global.env`
+   - Set `ENABLE_MPS=true` and `ENABLE_NVML=true` in `/etc/justnews/gpu_orchestrator.env`
+
+4. **Check MPS Allocation**:
+```bash
+curl -s http://127.0.0.1:8014/mps/allocation | jq '.mps_resource_allocation.system_summary'
 ```
 
 ## Common operations
