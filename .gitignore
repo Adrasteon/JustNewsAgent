@@ -244,3 +244,7 @@ agents/reasoning/nucleoid_repo/
 
 # Safety: keep source code if any directory legitimately named huggingface contains .py files
 !**/huggingface/**/*.py
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

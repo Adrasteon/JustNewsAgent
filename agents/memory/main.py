@@ -371,32 +371,112 @@ def log_training_example_endpoint(example: TrainingExample):
         example.task, example.input, example.output, example.critique
     )
 
-# Improved error handling and logging
-@app.post("/store_article")
-def store_article_endpoint(call: ToolCall):
-    """Stores an article in the database."""
+@app.post("/ingest_article")
+def ingest_article_endpoint(request: dict):
+    """Handles article ingestion with sources and article_source_map operations.
+    
+    This endpoint replaces the db_worker functionality, handling the transactional
+    insertion of sources, article_source_map, and articles as expected by crawlers.
+    """
     try:
-        article_data = call.kwargs
-        if not article_data.get("content"):
-            raise ValueError("Missing required field: 'content'")
-        # Provide default metadata if missing to avoid 400s from crawlers that don't include metadata
-        if not article_data.get("metadata"):
-            article_data["metadata"] = {"source": "unknown"}
-
-        # Enqueue for async storage
+        # Handle MCP Bus format: {"args": [...], "kwargs": {...}}
+        if "args" in request and "kwargs" in request:
+            kwargs = request["kwargs"]
+        else:
+            # Direct call format
+            kwargs = request
+            
+        article_payload = kwargs.get("article_payload", {})
+        statements = kwargs.get("statements", [])
+        
+        if not article_payload:
+            raise HTTPException(status_code=400, detail="Missing article_payload")
+            
+        logger.info(f"Ingesting article: {article_payload.get('url')}")
+        
+        # Execute statements transactionally
+        chosen_source_id = None
         try:
-            storage_queue.put_nowait({"content": article_data["content"], "metadata": article_data["metadata"]})
-            logger.info("Article enqueued for async storage")
-            return {"status": "enqueued"}
+            # Use the database connection utilities
+            from agents.common.database import execute_query_single
+            
+            for sql, params in statements:
+                try:
+                    # Execute each statement - the crawler builds the right SQL
+                    if "RETURNING id" in sql.upper():
+                        # For statements that return IDs (like source upsert)
+                        result = execute_query_single(sql, tuple(params))
+                        if result and 'id' in result:
+                            chosen_source_id = result['id']
+                    else:
+                        # For regular inserts
+                        execute_query(sql, tuple(params), fetch=False)
+                except Exception as stmt_e:
+                    # Handle duplicate key errors for sources gracefully
+                    if "unique constraint" in str(stmt_e).lower() or "duplicate key" in str(stmt_e).lower():
+                        logger.debug(f"Source already exists, skipping insert: {stmt_e}")
+                        # Try to get the existing source ID
+                        if "sources" in sql and "domain" in str(params):
+                            domain = params[1] if len(params) > 1 else None
+                            if domain:
+                                existing_source = execute_query_single("SELECT id FROM sources WHERE domain = %s", (domain,))
+                                if existing_source:
+                                    chosen_source_id = existing_source['id']
+                                    logger.debug(f"Using existing source ID: {chosen_source_id}")
+                    else:
+                        # Re-raise non-duplicate errors
+                        raise stmt_e
+                    
         except Exception as e:
-            logger.error(f"Failed to enqueue article: {e}")
-            raise
-    except ValueError as ve:
-        logger.warning(f"Validation error in store_article: {ve}")
-        raise HTTPException(status_code=400, detail=str(ve))
+            logger.error(f"Database transaction failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+            
+        # Now save the article content using the memory agent's save_article function
+        try:
+            content = article_payload.get("content", "")
+            metadata = {
+                "url": article_payload.get("url"),
+                "title": article_payload.get("title"),
+                "domain": article_payload.get("domain"),
+                "publisher_meta": article_payload.get("publisher_meta", {}),
+                "confidence": article_payload.get("confidence", 0.5),
+                "paywall_flag": article_payload.get("paywall_flag", False),
+                "extraction_metadata": article_payload.get("extraction_metadata", {}),
+                "timestamp": article_payload.get("timestamp"),
+                "url_hash": article_payload.get("url_hash"),
+                "canonical": article_payload.get("canonical"),
+            }
+            
+            if content:  # Only save if there's actual content
+                save_result = save_article(content, metadata, embedding_model=embedding_model)
+                logger.info(f"Article saved with ID: {save_result.get('article_id')}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to save article content: {e}")
+            # Don't fail the whole ingestion if content saving fails
+            
+        resp = {"status": "ok", "url": article_payload.get('url')}
+        if chosen_source_id is not None:
+            resp['chosen_source_id'] = chosen_source_id
+        return resp
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"An error occurred in store_article: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        logger.error(f"Ingestion failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}")
+
+# Improved error handling and logging
+@app.get("/get_article_count")
+def get_article_count_endpoint():
+    """Get total count of articles in database."""
+    try:
+        from agents.common.database import execute_query_single
+        result = execute_query_single("SELECT COUNT(*) as count FROM articles")
+        return {"count": result.get("count", 0) if result else 0}
+    except Exception as e:
+        logger.error(f"Error getting article count: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving article count: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

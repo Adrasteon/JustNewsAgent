@@ -395,7 +395,7 @@ class UltraFastBBCCrawler:
             for browser in browsers:
                 await browser.close()
 
-    async def run_ultra_fast_crawl(self, target_articles: int = 200):
+    async def run_ultra_fast_crawl(self, target_articles: int = 200, skip_ingestion: bool = False):
         """Main ultra-fast crawling function"""
 
         start_time = time.time()
@@ -443,82 +443,83 @@ class UltraFastBBCCrawler:
         # Dispatch ingest requests to DB worker via MCP Bus (best-effort).
         MCP_BUS_URL = os.environ.get('MCP_BUS_URL', 'http://localhost:8000')
 
-        async def dispatch_ingest(article: dict):
-            # Build article payload and DB statements
-            # If article is paywalled, snapshot and enqueue for human review instead of ingesting
-            if article.get('paywall_flag'):
-                try:
-                    html_stub = article.get('content', '')
-                    metadata = {
-                        'title': article.get('title'),
-                        'domain': article.get('domain'),
-                        'url': article.get('url'),
-                        'timestamp': article.get('timestamp')
-                    }
-                    evidence_path = snapshot_paywalled_page(article.get('url'), html_stub, metadata)
-                    enqueue_human_review(evidence_path, reviewer='chief_editor')
-                    logger.info(f"Paywalled article snapshot saved and enqueued for review: {article.get('url')}")
-                except Exception as e:
-                    logger.warning(f"Failed to snapshot/enqueue paywalled article {article.get('url')}: {e}")
-                return
+        if not skip_ingestion:
+            async def dispatch_ingest(article: dict):
+                # Build article payload and DB statements
+                # If article is paywalled, snapshot and enqueue for human review instead of ingesting
+                if article.get('paywall_flag'):
+                    try:
+                        html_stub = article.get('content', '')
+                        metadata = {
+                            'title': article.get('title'),
+                            'domain': article.get('domain'),
+                            'url': article.get('url'),
+                            'timestamp': article.get('timestamp')
+                        }
+                        evidence_path = snapshot_paywalled_page(article.get('url'), html_stub, metadata)
+                        enqueue_human_review(evidence_path, reviewer='chief_editor')
+                        logger.info(f"Paywalled article snapshot saved and enqueued for review: {article.get('url')}")
+                    except Exception as e:
+                        logger.warning(f"Failed to snapshot/enqueue paywalled article {article.get('url')}: {e}")
+                    return
 
-            article_payload = {
-                'url': article.get('url'),
-                'url_hash': article.get('url_hash'),
-                'domain': article.get('domain'),
-                'canonical': article.get('canonical'),
-                'publisher_meta': {'publisher': 'BBC'},
-                'confidence': article.get('confidence', 0.5),
-                'paywall_flag': article.get('paywall_flag', False),
-                'extraction_metadata': article.get('extraction_metadata', {}),
-                'timestamp': article.get('timestamp'),
-                # article_id is not created here; let DB worker or orchestrator assign
-            }
-
-            source_sql, source_params = build_source_upsert(article_payload)
-            asm_sql, asm_params = build_article_source_map_insert(article_payload.get('article_id', 1), article_payload)
-
-            # Convert params tuples to lists for JSON serialization
-            statements = [ [source_sql, list(source_params)], [asm_sql, list(asm_params)] ]
-
-            payload = {
-                'agent': 'db_worker',
-                'tool': 'handle_ingest',
-                'args': [],
-                'kwargs': {
-                    'article_payload': article_payload,
-                    'statements': statements
+                article_payload = {
+                    'url': article.get('url'),
+                    'url_hash': article.get('url_hash'),
+                    'domain': article.get('domain'),
+                    'canonical': article.get('canonical'),
+                    'publisher_meta': {'publisher': 'BBC'},
+                    'confidence': article.get('confidence', 0.5),
+                    'paywall_flag': article.get('paywall_flag', False),
+                    'extraction_metadata': article.get('extraction_metadata', {}),
+                    'timestamp': article.get('timestamp'),
+                    # article_id is not created here; let DB worker or orchestrator assign
                 }
-            }
 
-            loop = asyncio.get_running_loop()
+                source_sql, source_params = build_source_upsert(article_payload)
+                asm_sql, asm_params = build_article_source_map_insert(article_payload.get('article_id', 1), article_payload)
 
-            def do_call():
-                try:
-                    resp = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=(2, 10))
-                    resp.raise_for_status()
-                    return resp.json()
-                except Exception as e:
-                    logger.warning(f"DB worker call failed for {article.get('url')}: {e}")
-                    return None
+                # Convert params tuples to lists for JSON serialization
+                statements = [ [source_sql, list(source_params)], [asm_sql, list(asm_params)] ]
 
-            res = await loop.run_in_executor(None, do_call)
-            if res:
-                logger.info(f"Ingest dispatched for {article.get('url')}: {res}")
+                payload = {
+                    'agent': 'memory',
+                    'tool': 'ingest_article',
+                    'args': [],
+                    'kwargs': {
+                        'article_payload': article_payload,
+                        'statements': statements
+                    }
+                }
 
-        # Fire off ingestion tasks concurrently (not awaiting per-article network delays)
-        try:
-            tasks = [dispatch_ingest(a) for a in results]
-            await asyncio.gather(*tasks, return_exceptions=True)
-        except Exception as e:
-            logger.warning(f"Error dispatching ingest tasks: {e}")
+                loop = asyncio.get_running_loop()
+
+                def do_call():
+                    try:
+                        resp = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=(2, 10))
+                        resp.raise_for_status()
+                        return resp.json()
+                    except Exception as e:
+                        logger.warning(f"DB worker call failed for {article.get('url')}: {e}")
+                        return None
+
+                res = await loop.run_in_executor(None, do_call)
+                if res:
+                    logger.info(f"Ingest dispatched for {article.get('url')}: {res}")
+
+            # Fire off ingestion tasks concurrently (not awaiting per-article network delays)
+            try:
+                tasks = [dispatch_ingest(a) for a in results]
+                await asyncio.gather(*tasks, return_exceptions=True)
+            except Exception as e:
+                logger.warning(f"Error dispatching ingest tasks: {e}")
 
         return summary
 
 async def main():
     """Run ultra-fast crawler"""
     crawler = UltraFastBBCCrawler(concurrent_browsers=3, batch_size=15)
-    await crawler.run_ultra_fast_crawl(target_articles=100)
+    await crawler.run_ultra_fast_crawl(target_articles=100, skip_ingestion=False)
 
 if __name__ == "__main__":
     asyncio.run(main())

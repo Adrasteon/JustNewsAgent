@@ -400,7 +400,7 @@ def get_sources_by_domain(domains: list[str]) -> list[dict[str, Any]]:
         return sources
 
     except Exception as e:
-        logger.error(f"❌ Failed to query sources by domain: {e}")
+        logger.warning(f"⚠️ Failed to query sources by domain (continuing without database): {e}")
         return []
 
 def update_source_crawling_strategy(source_id: int, strategy: str, performance_data: dict) -> bool:
@@ -478,7 +478,7 @@ def record_crawling_performance(source_id: int, performance_data: dict) -> bool:
                 return True
 
     except Exception as e:
-        logger.error(f"❌ Failed to record crawling performance: {e}")
+        logger.warning(f"⚠️ Failed to record crawling performance (continuing without performance tracking): {e}")
         return False
 
 def get_source_performance_history(source_id: int, limit: int = 10) -> list[dict[str, Any]]:
@@ -497,7 +497,7 @@ def get_source_performance_history(source_id: int, limit: int = 10) -> list[dict
         return performance
 
     except Exception as e:
-        logger.error(f"❌ Failed to get performance history: {e}")
+        logger.warning(f"⚠️ Failed to get performance history (continuing without performance data): {e}")
         return []
 
 def get_optimal_sources_for_strategy(strategy: str, limit: int = 10) -> list[dict[str, Any]]:

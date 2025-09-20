@@ -482,8 +482,8 @@ class UltraFastBBCCrawler:
             statements = [ [source_sql, list(source_params)], [asm_sql, list(asm_params)] ]
 
             payload = {
-                'agent': 'db_worker',
-                'tool': 'handle_ingest',
+                'agent': 'memory',
+                'tool': 'ingest_article',
                 'args': [],
                 'kwargs': {
                     'article_payload': article_payload,
