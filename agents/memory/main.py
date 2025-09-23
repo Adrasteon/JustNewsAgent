@@ -26,6 +26,7 @@ from agents.common.database import close_connection_pool, initialize_connection_
 from agents.common.database import execute_query
 from agents.common.database import get_db_connection as get_pooled_connection
 from agents.memory.tools import (
+    get_all_article_ids,
     get_embedding_model,
     log_training_example,
     save_article,
@@ -72,6 +73,8 @@ class ToolCall(BaseModel):
     args: list
     kwargs: dict
 
+import time
+
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
@@ -80,14 +83,27 @@ class MCPBusClient:
         registration_data = {
             "name": agent_name,
             "address": agent_address,
+            "tools": tools,
         }
-        try:
-            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
-            response.raise_for_status()
-            logger.info(f"Successfully registered {agent_name} with MCP Bus.")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to register {agent_name} with MCP Bus: {e}")
-            raise
+        
+        max_retries = 5
+        backoff_factor = 2
+        
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(3, 10))
+                response.raise_for_status()
+                logger.info(f"Successfully registered {agent_name} with MCP Bus.")
+                return
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Attempt {attempt + 1}/{max_retries} failed to register {agent_name} with MCP Bus: {e}")
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** attempt
+                    logger.info(f"Retrying in {sleep_time} seconds...")
+                    time.sleep(sleep_time)
+                else:
+                    logger.error(f"Failed to register {agent_name} with MCP Bus after {max_retries} attempts.")
+                    raise
 
 # Use connection pooling for database connections
 def get_db_connection():
@@ -146,6 +162,7 @@ async def lifespan(app: FastAPI):
             tools=[
                 "save_article",
                 "get_article",
+                "get_all_article_ids",
                 "vector_search_articles",
                 "log_training_example",
             ],
@@ -253,9 +270,14 @@ try:
 except Exception:
     logger.debug("reload endpoint not registered for memory")
 
+from fastapi import Request
+
+# ... existing code ...
+
 @app.get("/health")
-def health():
-    """Health check endpoint."""
+@app.post("/health")
+async def health(request: Request):
+    """Health check endpoint that accepts optional body."""
     return {"status": "ok"}
 
 
@@ -291,17 +313,47 @@ def save_article_endpoint(request: dict):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error saving article: {str(e)}")
 
-@app.get("/get_article/{article_id}")
-def get_article_endpoint(article_id: int):
-    """Retrieves an article from the database."""
+from fastapi import Request
+
+# ... existing code ...
+
+@app.post("/get_article")
+async def get_article_endpoint(request: Request):
+    """
+    Retrieves an article from the database. This endpoint is designed
+    to be called from the MCP Bus and manually parses the JSON payload
+    to avoid Pydantic deserialization issues.
+    """
     try:
+        payload = await request.json()
+        retrieval_id = None
+        
+        # The payload from the bus is a dict: {"args": [], "kwargs": {...}}
+        if "kwargs" in payload and "article_id" in payload["kwargs"]:
+            retrieval_id = int(payload["kwargs"]["article_id"])
+
+        if retrieval_id is None:
+            raise HTTPException(status_code=400, detail="article_id must be provided in the 'kwargs' of the tool call payload")
+
         from agents.common.database import execute_query_single
-        article = execute_query_single("SELECT * FROM articles WHERE id = %s", (article_id,))
+        article = execute_query_single("SELECT * FROM articles WHERE id = %s", (retrieval_id,))
         if not article:
             raise HTTPException(status_code=404, detail="Article not found")
         return article
+    except HTTPException:
+        raise  # Re-raise known HTTP exceptions
     except Exception as e:
+        logger.error(f"Error retrieving article: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving article: {str(e)}")
+
+@app.post("/get_all_article_ids")
+async def get_all_article_ids_endpoint(request: Request):
+    """Retrieves all article IDs from the database."""
+    logger.info("Received request for get_all_article_ids_endpoint")
+    from agents.memory.tools import get_all_article_ids
+    result = get_all_article_ids()
+    logger.info(f"Returning result from get_all_article_ids_endpoint: {result}")
+    return result
 
 @app.post("/vector_search_articles")
 def vector_search_articles_endpoint(request: dict):
@@ -449,15 +501,21 @@ def ingest_article_endpoint(request: dict):
             
             if content:  # Only save if there's actual content
                 save_result = save_article(content, metadata, embedding_model=embedding_model)
-                logger.info(f"Article saved with ID: {save_result.get('article_id')}")
+                if save_result.get("status") == "duplicate":
+                    logger.info(f"Article already exists, skipping: {article_payload.get('url')}")
+                    # Return success status for duplicates since ingestion was technically successful
+                    resp = {"status": "ok", "url": article_payload.get('url'), "duplicate": True, "existing_id": save_result.get("article_id")}
+                else:
+                    logger.info(f"Article saved with ID: {save_result.get('article_id')}")
+                    resp = {"status": "ok", "url": article_payload.get('url')}
+            else:
+                logger.warning(f"No content to save for article: {article_payload.get('url')}")
+                resp = {"status": "ok", "url": article_payload.get('url'), "no_content": True}
             
         except Exception as e:
             logger.warning(f"Failed to save article content: {e}")
             # Don't fail the whole ingestion if content saving fails
-            
-        resp = {"status": "ok", "url": article_payload.get('url')}
-        if chosen_source_id is not None:
-            resp['chosen_source_id'] = chosen_source_id
+            resp = {"status": "ok", "url": article_payload.get('url'), "content_save_error": str(e)}
         return resp
         
     except HTTPException:
@@ -477,6 +535,38 @@ def get_article_count_endpoint():
     except Exception as e:
         logger.error(f"Error getting article count: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving article count: {str(e)}")
+
+@app.post("/get_sources")
+def get_sources_endpoint(request: dict):
+    """Get list of sources from the database.
+    
+    Args:
+        limit: Maximum number of sources to return (default: 10)
+        
+    Returns:
+        List of source dictionaries with domain, name, etc.
+    """
+    try:
+        # Handle MCP Bus format: {"args": [...], "kwargs": {...}}
+        if "args" in request and "kwargs" in request:
+            kwargs = request["kwargs"]
+        else:
+            # Direct call format
+            kwargs = request
+            
+        limit = kwargs.get("limit", 10)
+        
+        from agents.common.database import execute_query
+        sources = execute_query(
+            "SELECT id, url, domain, name, description, country, language FROM sources ORDER BY id LIMIT %s", 
+            (limit,)
+        )
+        
+        return {"sources": sources}
+        
+    except Exception as e:
+        logger.error(f"Error getting sources: {e}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving sources: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

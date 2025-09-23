@@ -26,6 +26,8 @@ from urllib.parse import urljoin, urlparse
 
 try:  # pragma: no cover
     from crawl4ai import AsyncWebCrawler  # type: ignore
+    from crawl4ai import LLMConfig  # type: ignore
+    from crawl4ai.extraction_strategy import LLMExtractionStrategy  # type: ignore
     _CRAWL4AI_AVAILABLE = True
 except Exception:  # noqa: BLE001
     _CRAWL4AI_AVAILABLE = False
@@ -366,10 +368,15 @@ class GenericSiteCrawler:
             )
             if use_crawl4ai:
                 try:
+                    # Configure for local Ollama LLM instead of cloud OpenAI
+                    llm_config = LLMConfig(
+                        provider="ollama/llama2:7b",
+                        base_url="http://localhost:11434"
+                    )
                     async with AsyncWebCrawler(verbose=False) as crawler:
                         result = await crawler.arun(
                             url=url,
-                            extraction_strategy="LLMExtractionStrategy",
+                            extraction_strategy=LLMExtractionStrategy(llm_config=llm_config),
                             css_selector="main, article, .content, .story-body, [role='main']",  # noqa: E501
                             user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
                         )

@@ -106,7 +106,7 @@ async def unified_production_crawl_endpoint(call: ToolCall, background_tasks: Ba
     # Initialize job status
     crawl_jobs[job_id] = {"status": "pending"}
     # Extract parameters
-    domains = call.args[0] if call.args else []
+    domains = call.args[0] if call.args else call.kwargs.get("domains", [])
     max_articles = call.kwargs.get("max_articles_per_site", 25)
     concurrent = call.kwargs.get("concurrent_sites", 3)
     logger.info(f"Enqueueing background crawl job {job_id} for {len(domains)} domains")
@@ -115,9 +115,9 @@ async def unified_production_crawl_endpoint(call: ToolCall, background_tasks: Ba
         from agents.crawler.unified_production_crawler import UnifiedProductionCrawler
         try:
             crawl_jobs[job_id]["status"] = "running"
-            crawler = UnifiedProductionCrawler()
-            await crawler._load_ai_models()
-            result = await crawler.run_unified_crawl(domains, max_articles, concurrent)
+            async with UnifiedProductionCrawler() as crawler:
+                await crawler._load_ai_models()
+                result = await crawler.run_unified_crawl(domains, max_articles, concurrent)
             # Store result in job status
             crawl_jobs[job_id] = {"status": "completed", "result": result}
             logger.info(f"Background crawl {job_id} complete. Articles: {len(result.get('articles', []))}")

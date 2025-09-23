@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import time
 import uuid
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 from prometheus_client import (
@@ -111,17 +111,25 @@ class MCPBusClient:
 
 	def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
 		import requests
+		import time
 
 		registration_data = {
 			"name": agent_name,
 			"address": agent_address,
+			"tools": tools,
 		}
-		try:
-			response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
-			response.raise_for_status()
-			logger.info(f"Registered {agent_name} with MCP Bus")
-		except requests.exceptions.RequestException as e:
-			logger.warning(f"MCP Bus unavailable for registration: {e}")
+		
+		for attempt in range(5): # Retry up to 5 times
+			try:
+				response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
+				response.raise_for_status()
+				logger.info(f"Successfully registered {agent_name} with MCP Bus on attempt {attempt + 1}")
+				return
+			except requests.exceptions.RequestException as e:
+				logger.warning(f"MCP Bus unavailable for registration (attempt {attempt + 1}/5): {e}")
+				time.sleep(2 ** attempt) # Exponential backoff
+		
+		logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
 
 
 def _run_nvidia_smi() -> Optional[str]:
@@ -353,7 +361,8 @@ except Exception:
 app.middleware("http")(metrics.request_middleware)
 
 @app.get("/health")
-def health():
+@app.post("/health")
+async def health(request: Request):
 	_inc("policy_get_requests_total")  # reuse counter group for simplicity
 	return {"status": "ok", "safe_mode": SAFE_MODE}
 
@@ -369,20 +378,28 @@ def gpu_info():
 	"""Return current GPU telemetry (read-only)."""
 	try:
 		_inc("gpu_info_requests_total")
+		logger.info("Fetching GPU snapshot...")
 		data = get_gpu_snapshot()
+		logger.info(f"GPU snapshot data: {data}")
+
 		if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
 			data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
-		# Include MPS status (best-effort)
+			logger.warning(f"NVML not supported: {data['nvml_init_error']}")
+
+		logger.info("Detecting MPS status...")
 		mps = _detect_mps()
+		logger.info(f"MPS detection result: {mps}")
+
 		data["mps_enabled"] = bool(mps.get("enabled", False))
 		data["mps"] = mps
-		
+
 		# Update MPS metrics
 		mps_enabled_gauge.labels(
 			agent=metrics.agent_name,
 			agent_display_name=metrics.display_name
 		).set(1 if data["mps_enabled"] else 0)
-		
+
+		logger.info("Returning GPU telemetry data.")
 		return data
 	except Exception as e:
 		logger.error(f"Failed to get GPU snapshot: {e}")
@@ -511,8 +528,25 @@ def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Op
 		ok = False
 		err: Optional[str] = None
 
+		# Special handling for spaCy models
+		if model_id.startswith("en_core_web_"):
+			try:
+				import spacy
+				try:
+					spacy.load(model_id)
+					ok = True
+					logger.info(f"Successfully validated existing spaCy model: {model_id}")
+				except OSError:
+					logger.warning(f"spaCy model '{model_id}' not found. Attempting download.")
+					from spacy.cli import download
+					download(model_id)
+					spacy.load(model_id) # Verify download
+					ok = True
+					logger.info(f"Successfully downloaded and validated spaCy model: {model_id}")
+			except Exception as e:
+				err = f"spaCy model load/download failed: {e}"
 		# Prefer sentence-transformers path when obvious
-		if model_id.startswith("sentence-transformers/"):
+		elif model_id.startswith("sentence-transformers/"):
 			try:
 				# Use model-store aware loader with explicit agent to avoid caller detection issues
 				from agents.common.model_loader import load_sentence_transformer

@@ -1,20 +1,21 @@
 ---
-title: JustNewsAgent V4 - Technical Architecture
+title: JustNewsAgent V4 - Technical Architecture (MPS-Enabled v2.1.0)
 description: Auto-generated description for JustNewsAgent V4 - Technical Architecture
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-09-22
 ---
 
 # JustNewsAgent V4 - Technical Architecture
 
 This document provides comprehensive technical details about the JustNewsAgent V4 system architecture, performance metrics, and implementation details.
 
-## 🎯 **MAJOR BREAKTHROUGH - RTX3090 GPU Production Readiness Achieved - September 7, 2025**
+## 🎯 **MAJOR BREAKTHROUGH - RTX3090 GPU Production Readiness Achieved - September 22, 2025**
 
 ### 🏆 **RTX3090 GPU Support - FULLY IMPLEMENTED & PRODUCTION READY**
 - **✅ PyTorch 2.6.0+cu124**: Upgraded from 2.5.1 to resolve CVE-2025-32434 security vulnerability
 - **✅ CUDA 12.4 Support**: Full compatibility with NVIDIA RTX3090 (24GB GDDR6X, 23.6GB available)
+- **✅ MPS Support**: NVIDIA CUDA Multi Process Service for enterprise GPU isolation + Metal Performance Shaders for Apple Silicon GPUs (M1/M2/M3/M4 chips)
 - **✅ GPU Memory Management**: Intelligent allocation with 2-8GB per agent and conflict prevention
 - **✅ Scout Engine GPU Integration**: Direct GPU access with robust fallback mechanisms
 - **✅ Production GPU Operations**: Tensor operations validated at 1000x+ CPU performance
@@ -30,16 +31,18 @@ This document provides comprehensive technical details about the JustNewsAgent V
 - **✅ Enterprise Architecture**: Professional-grade GPU resource isolation
 - **✅ Zero Overhead**: Minimal performance impact with maximum stability gains
 
-### 📊 **Current Technical Specifications - September 7, 2025**
-- **GPU**: NVIDIA RTX3090 (24GB GDDR6X, CUDA Capability 8.6)
-- **PyTorch**: 2.8.0+cu128 (CUDA 12.8, Latest Production)
-- **CUDA**: 12.8 (Full RTX3090 Compatibility)
+### 📊 **Current Technical Specifications - September 22, 2025**
+- **GPU**: NVIDIA RTX3090 (24GB GDDR6X, CUDA Capability 8.6) + Apple Silicon MPS (M1/M2/M3/M4)
+- **PyTorch**: 2.8.0+cu128 (CUDA 12.8, Latest Production) + MPS backend for Apple Silicon
+- **CUDA**: 12.8 (Full RTX3090 Compatibility) - NVIDIA GPUs only
+- **MPS**: NVIDIA CUDA Multi Process Service - enterprise GPU isolation (NVIDIA GPUs) + Metal Performance Shaders - Apple Silicon GPUs only (M1/M2/M3/M4 chips)
 - **RAPIDS**: 25.04 (GPU-Accelerated Data Science)
 - **Python**: 3.12.11 (Conda Environment: justnews-v2-prod)
 - **Memory Allocation**: 2-8GB per agent (23.6GB total available)
+- **MPS Efficiency**: 69.6% memory utilization across 9 agents
 - **Performance**: 50-120 articles/sec GPU, 5-12 articles/sec CPU fallback
 - **Package Management**: TensorRT, PyCUDA, BERTopic, spaCy production-ready
-- **Status**: 5/5 production tests passed, fully operational with GPU acceleration
+- **Status**: 5/5 production tests passed, cross-platform GPU system
 
 ## 📦 **Package Management & Environment Optimization - PRODUCTION READY**
 
@@ -186,7 +189,7 @@ Successfully completed comprehensive package management for core JustNewsAgent d
 | **Chief Editor** | DialoGPT-medium | 2GB | ✅ Production + Optimized | Orchestration optimization, resource management |
 | **Memory** | Vector Embeddings | 2-4GB | ✅ Production + Optimized | Optimized embeddings, advanced caching, semantic search |
 | **Reasoning** | Nucleoid (symbolic logic) | <1GB | ✅ Production | Fact validation, contradiction detection |
-| **Total System** | **Multi-Model Pipeline** | **29.6GB** | **RTX 3090 Optimized** | **Advanced GPU Management** |
+| **Total System** | **Multi-Model Pipeline** | **23.0GB** | **MPS-Enabled Production** | **Cross-Platform GPU Management** |
 
 ### NVIDIA MPS Architecture - Enterprise GPU Isolation
 
@@ -197,12 +200,31 @@ Successfully completed comprehensive package management for core JustNewsAgent d
 - **Stability Protection**: Process-level isolation prevents GPU context corruption
 - **Monitoring Integration**: Real-time MPS status via GPU Orchestrator API
 
+### NVIDIA MPS Architecture - Enterprise GPU Isolation
+
+**MPS Control Architecture:**
+- **MPS Control Daemon**: `nvidia-cuda-mps-control -d` manages GPU resource allocation
+- **Client Isolation**: Each agent connects as separate MPS client with dedicated context
+- **Resource Limits**: Automatic per-process GPU memory allocation and enforcement
+- **Stability Protection**: Process-level isolation prevents GPU context corruption
+- **Monitoring Integration**: Real-time MPS status via GPU Orchestrator API
+- **Cross-Platform Support**: Unified device management for CUDA (NVIDIA) and MPS (Apple Silicon)
+
 **MPS Resource Allocation System:**
 - **Machine-Readable Configuration**: `config/gpu/mps_allocation_config.json` with calculated memory limits
 - **Per-Agent Memory Limits**: Fixed allocations based on model requirements (1.0GB - 5.0GB per agent)
 - **Safety Margins**: 50-100% buffer above calculated requirements for stability
 - **GPU Orchestrator Integration**: `/mps/allocation` endpoint provides allocation data
+- **Device Selection Logic**: Priority-based allocation (CUDA first, then MPS) with backward compatibility
 - **System Summary**: 23.0GB total allocation across 9 agents with 69.6% memory efficiency
+
+**GPU Backend Architecture:**
+
+| Backend | Hardware Support | PyTorch Support | Status |
+|---------|------------------|-----------------|--------|
+| **CUDA** | NVIDIA GPUs (RTX/RTX 30xx/40xx/Axx/Txx) | `torch.cuda` | ✅ Production |
+| **MPS** | Apple Silicon (M1/M2/M3/M4 chips) | `torch.backends.mps` | ✅ Production |
+| **CPU** | All platforms | `torch.cpu` | ✅ Fallback |
 
 **MPS vs Direct Access Comparison:**
 
@@ -540,6 +562,10 @@ robots_compliance = config.get('crawling.obey_robots_txt')
 # Get GPU configuration
 gpu_enabled = config.get('gpu.enabled')
 max_memory = config.get('gpu.memory_management.max_memory_per_agent_gb')
+
+# Get MPS allocation configuration
+mps_config = config.get('gpu.mps_allocation')
+device_selection = config.get('gpu.device_selection.priority_order')
 
 # Get database configuration
 db_host = config.get('database.host')

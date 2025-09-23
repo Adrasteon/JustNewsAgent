@@ -233,54 +233,73 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                try:
-                    from agents.common.model_loader import load_transformers_model
-                    model, tokenizer = load_transformers_model(
-                        news_config["model_name"],
-                        agent='scout',
-                        cache_dir=None,
-                        model_class=AutoModelForSequenceClassification,
-                        tokenizer_class=AutoTokenizer,
-                    )
+                # Use GPU orchestrator for model management
+                gpu_mgr = get_gpu_manager()
+                model_key = f"scout_news_classifier"
+
+                # Check if model already exists in registry
+                existing_pipeline = gpu_mgr.get(model_key)
+                if existing_pipeline:
+                    self.pipelines["news_classifier"] = existing_pipeline
+                    self.models["news_classifier"] = True
+                    self.tokenizers["news_classifier"] = True  # Mark as available
+                    logger.info("✅ News Classification Model loaded from GPU orchestrator registry")
+                else:
                     try:
-                        model = model.to(self.device)
+                        from agents.common.model_loader import load_transformers_model
+                        model, tokenizer = load_transformers_model(
+                            news_config["model_name"],
+                            agent='scout',
+                            cache_dir=None,
+                            model_class=AutoModelForSequenceClassification,
+                            tokenizer_class=AutoTokenizer,
+                        )
+                        try:
+                            model = model.to(self.device)
+                        except Exception:
+                            pass
+                        self.models["news_classifier"] = model
+                        self.tokenizers["news_classifier"] = tokenizer
                     except Exception:
-                        pass
-                    self.models["news_classifier"] = model
-                    self.tokenizers["news_classifier"] = tokenizer
-                except Exception:
-                    self.models["news_classifier"] = AutoModelForSequenceClassification.from_pretrained(
-                        news_config["model_name"],
-                        num_labels=news_config["num_labels"],
-                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                        trust_remote_code=True,
-                        use_auth_token=False
-                    ).to(self.device)
+                        self.models["news_classifier"] = AutoModelForSequenceClassification.from_pretrained(
+                            news_config["model_name"],
+                            num_labels=news_config["num_labels"],
+                            dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            trust_remote_code=True,
+                            use_auth_token=False
+                        ).to(self.device)
 
-                    self.tokenizers["news_classifier"] = AutoTokenizer.from_pretrained(
-                        news_config["model_name"],
-                        trust_remote_code=True,
-                        use_fast=True  # Use fast tokenizer to avoid deprecation
+                        self.tokenizers["news_classifier"] = AutoTokenizer.from_pretrained(
+                            news_config["model_name"],
+                            trust_remote_code=True,
+                            use_fast=True  # Use fast tokenizer to avoid deprecation
+                        )
+
+                    self.pipelines["news_classifier"] = pipeline(
+                        "text-classification",
+                        model=self.models["news_classifier"],
+                        tokenizer=self.tokenizers["news_classifier"],
+                        revision=news_config.get("revision", "main"),  # Use revision for production stability
+                        device=0 if self.device.startswith("cuda") else -1,
+                        top_k=None,  # Updated API - replaces return_all_scores=True
+                        batch_size=1,
+                        truncation=True,
+                        max_length=512
                     )
 
-                self.pipelines["news_classifier"] = pipeline(
-                    "text-classification",
-                    model=self.models["news_classifier"],
-                    tokenizer=self.tokenizers["news_classifier"],
-                    revision=news_config.get("revision", "main"),  # Use revision for production stability
-                    device=0 if self.device.startswith("cuda") else -1,
-                    top_k=None,  # Updated API - replaces return_all_scores=True
-                    batch_size=1,
-                    truncation=True,
-                    max_length=512
-                )
+                    # Register with GPU orchestrator
+                    gpu_mgr.register_model(model_key, self.pipelines["news_classifier"])
+                    gpu_mgr.register_model(f"{model_key}_model", self.models["news_classifier"])
+                    gpu_mgr.register_model(f"{model_key}_tokenizer", self.tokenizers["news_classifier"])
+                    logger.info("✅ News Classification Model loaded and registered with GPU orchestrator")
 
-            logger.info("✅ News Classification Model loaded successfully")
+            logger.info("✅ News Classification Model ready")
 
         except Exception as e:
             logger.error(f"❌ Failed to load News Classification Model: {e}")
             self.models["news_classifier"] = None
             self.pipelines["news_classifier"] = None
+            self.tokenizers["news_classifier"] = None
 
         try:
             # 2. Content Quality Assessment Model (BERT-based) - Production Ready
@@ -290,54 +309,73 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                try:
-                    from agents.common.model_loader import load_transformers_model
-                    model, tokenizer = load_transformers_model(
-                        quality_config["model_name"],
-                        agent='scout',
-                        cache_dir=None,
-                        model_class=AutoModelForSequenceClassification,
-                        tokenizer_class=AutoTokenizer,
-                    )
+                # Use GPU orchestrator for model management
+                gpu_mgr = get_gpu_manager()
+                model_key = f"scout_quality_assessor"
+
+                # Check if model already exists in registry
+                existing_pipeline = gpu_mgr.get(model_key)
+                if existing_pipeline:
+                    self.pipelines["quality_assessor"] = existing_pipeline
+                    self.models["quality_assessor"] = True
+                    self.tokenizers["quality_assessor"] = True  # Mark as available
+                    logger.info("✅ Quality Assessment Model loaded from GPU orchestrator registry")
+                else:
                     try:
-                        model = model.to(self.device)
+                        from agents.common.model_loader import load_transformers_model
+                        model, tokenizer = load_transformers_model(
+                            quality_config["model_name"],
+                            agent='scout',
+                            cache_dir=None,
+                            model_class=AutoModelForSequenceClassification,
+                            tokenizer_class=AutoTokenizer,
+                        )
+                        try:
+                            model = model.to(self.device)
+                        except Exception:
+                            pass
+                        self.models["quality_assessor"] = model
+                        self.tokenizers["quality_assessor"] = tokenizer
                     except Exception:
-                        pass
-                    self.models["quality_assessor"] = model
-                    self.tokenizers["quality_assessor"] = tokenizer
-                except Exception:
-                    self.models["quality_assessor"] = AutoModelForSequenceClassification.from_pretrained(
-                        quality_config["model_name"],
-                        num_labels=quality_config["num_labels"],
-                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                        ignore_mismatched_sizes=True,  # Allow different number of labels
-                        trust_remote_code=True
-                    ).to(self.device)
+                        self.models["quality_assessor"] = AutoModelForSequenceClassification.from_pretrained(
+                            quality_config["model_name"],
+                            num_labels=quality_config["num_labels"],
+                            dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            ignore_mismatched_sizes=True,  # Allow different number of labels
+                            trust_remote_code=True
+                        ).to(self.device)
 
-                    self.tokenizers["quality_assessor"] = AutoTokenizer.from_pretrained(
-                        quality_config["model_name"],
-                        trust_remote_code=True,
-                        use_fast=True
+                        self.tokenizers["quality_assessor"] = AutoTokenizer.from_pretrained(
+                            quality_config["model_name"],
+                            trust_remote_code=True,
+                            use_fast=True
+                        )
+
+                    self.pipelines["quality_assessor"] = pipeline(
+                        "text-classification",
+                        model=self.models["quality_assessor"],
+                        tokenizer=self.tokenizers["quality_assessor"],
+                        revision=quality_config.get("revision", "main"),  # Use revision for production stability
+                        device=0 if self.device.startswith("cuda") else -1,
+                        top_k=None,  # Updated API
+                        batch_size=1,
+                        truncation=True,
+                        max_length=512
                     )
 
-                self.pipelines["quality_assessor"] = pipeline(
-                    "text-classification",
-                    model=self.models["quality_assessor"],
-                    tokenizer=self.tokenizers["quality_assessor"],
-                    revision=quality_config.get("revision", "main"),  # Use revision for production stability
-                    device=0 if self.device.startswith("cuda") else -1,
-                    top_k=None,  # Updated API
-                    batch_size=1,
-                    truncation=True,
-                    max_length=512
-                )
+                    # Register with GPU orchestrator
+                    gpu_mgr.register_model(model_key, self.pipelines["quality_assessor"])
+                    gpu_mgr.register_model(f"{model_key}_model", self.models["quality_assessor"])
+                    gpu_mgr.register_model(f"{model_key}_tokenizer", self.tokenizers["quality_assessor"])
+                    logger.info("✅ Quality Assessment Model loaded and registered with GPU orchestrator")
 
-            logger.info("✅ Quality Assessment Model loaded successfully")
+            logger.info("✅ Quality Assessment Model ready")
 
         except Exception as e:
             logger.error(f"❌ Failed to load Quality Assessment Model: {e}")
             self.models["quality_assessor"] = None
             self.pipelines["quality_assessor"] = None
+            self.tokenizers["quality_assessor"] = None
 
         try:
             # 3. Sentiment Analysis Model (RoBERTa) - Production Ready
@@ -347,29 +385,43 @@ class NextGenGPUScoutEngine:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
 
-                if PIPELINE_AVAILABLE:
-                    # Load sentiment analysis pipeline directly (optimized)
-                    self.pipelines["sentiment_analyzer"] = pipeline(
-                        "sentiment-analysis",
-                        model=sentiment_config["model_name"],
-                        revision=sentiment_config.get("revision", "main"),  # Use revision for production stability
-                        device=0 if self.device.startswith("cuda") else -1,
-                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                        top_k=None,  # Updated API
-                        batch_size=sentiment_config["batch_size"],
-                        truncation=True,
-                        max_length=512
-                    )
+                # Use GPU orchestrator for model management
+                gpu_mgr = get_gpu_manager()
+                model_key = f"scout_sentiment_analyzer"
 
-                    # Mark as loaded for tracking
+                # Check if model already exists in registry
+                existing_pipeline = gpu_mgr.get(model_key)
+                if existing_pipeline:
+                    self.pipelines["sentiment_analyzer"] = existing_pipeline
                     self.models["sentiment_analyzer"] = True
+                    logger.info("✅ Sentiment Analysis Model loaded from GPU orchestrator registry")
                 else:
-                    logger.warning("⚠️ Sentiment analysis pipeline not available due to transformers compatibility issue")
-                    self.models["sentiment_analyzer"] = None
-                    self.pipelines["sentiment_analyzer"] = None
+                    if PIPELINE_AVAILABLE:
+                        # Load sentiment analysis pipeline directly (optimized)
+                        pipeline_obj = pipeline(
+                            "sentiment-analysis",
+                            model=sentiment_config["model_name"],
+                            revision=sentiment_config.get("revision", "main"),  # Use revision for production stability
+                            device=0 if self.device.startswith("cuda") else -1,
+                            dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            top_k=None,  # Updated API
+                            batch_size=sentiment_config["batch_size"],
+                            truncation=True,
+                            max_length=512
+                        )
+
+                        # Register with GPU orchestrator
+                        gpu_mgr.register_model(model_key, pipeline_obj)
+                        self.pipelines["sentiment_analyzer"] = pipeline_obj
+                        self.models["sentiment_analyzer"] = True
+                        logger.info("✅ Sentiment Analysis Model loaded and registered with GPU orchestrator")
+                    else:
+                        logger.warning("⚠️ Sentiment analysis pipeline not available due to transformers compatibility issue")
+                        self.models["sentiment_analyzer"] = None
+                        self.pipelines["sentiment_analyzer"] = None
 
             if self.models["sentiment_analyzer"]:
-                logger.info("✅ Sentiment Analysis Model loaded successfully")
+                logger.info("✅ Sentiment Analysis Model ready")
             else:
                 logger.warning("⚠️ Sentiment Analysis Model not available")
 
@@ -385,64 +437,90 @@ class NextGenGPUScoutEngine:
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                try:
-                    from agents.common.model_loader import load_transformers_model
-                    model, tokenizer = load_transformers_model(
-                        bias_config["model_name"],
-                        agent='scout',
-                        cache_dir=None,
-                        model_class=AutoModelForSequenceClassification,
-                        tokenizer_class=AutoTokenizer,
-                    )
+
+                # Use GPU orchestrator for model management
+                gpu_mgr = get_gpu_manager()
+                model_key = f"scout_bias_detector"
+
+                # Check if model already exists in registry
+                existing_pipeline = gpu_mgr.get(model_key)
+                if existing_pipeline:
+                    self.pipelines["bias_detector"] = existing_pipeline
+                    self.models["bias_detector"] = True
+                    self.tokenizers["bias_detector"] = True  # Mark as available
+                    logger.info("✅ Bias Detection Model loaded from GPU orchestrator registry")
+                else:
                     try:
-                        model = model.to(self.device)
+                        from agents.common.model_loader import load_transformers_model
+                        model, tokenizer = load_transformers_model(
+                            bias_config["model_name"],
+                            agent='scout',
+                            cache_dir=None,
+                            model_class=AutoModelForSequenceClassification,
+                            tokenizer_class=AutoTokenizer,
+                        )
+                        try:
+                            model = model.to(self.device)
+                        except Exception:
+                            pass
+                        self.models["bias_detector"] = model
+                        self.tokenizers["bias_detector"] = tokenizer
+                        self.pipelines["bias_detector"] = pipeline(
+                            "text-classification",
+                            model=self.models["bias_detector"],
+                            tokenizer=self.tokenizers["bias_detector"],
+                            revision=bias_config.get("revision", "main"),  # Use revision for production stability
+                            device=0 if self.device.startswith("cuda") else -1,
+                            top_k=None,
+                            batch_size=1,
+                            truncation=True,
+                            max_length=512
+                        )
+
+                        # Register with GPU orchestrator
+                        gpu_mgr.register_model(model_key, self.pipelines["bias_detector"])
+                        gpu_mgr.register_model(f"{model_key}_model", model)
+                        gpu_mgr.register_model(f"{model_key}_tokenizer", tokenizer)
+                        logger.info("✅ Bias Detection Model loaded and registered with GPU orchestrator")
                     except Exception:
-                        pass
-                    self.models["bias_detector"] = model
-                    self.tokenizers["bias_detector"] = tokenizer
-                    self.pipelines["bias_detector"] = pipeline(
-                        "text-classification",
-                        model=self.models["bias_detector"],
-                        tokenizer=self.tokenizers["bias_detector"],
-                        revision=bias_config.get("revision", "main"),  # Use revision for production stability
-                        device=0 if self.device.startswith("cuda") else -1,
-                        top_k=None,
-                        batch_size=1,
-                        truncation=True,
-                        max_length=512
-                    )
-                except Exception:
-                    self.models["bias_detector"] = AutoModelForSequenceClassification.from_pretrained(
-                        bias_config["model_name"],
-                        num_labels=bias_config["num_labels"],
-                        torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
-                        trust_remote_code=True
-                    ).to(self.device)
+                        self.models["bias_detector"] = AutoModelForSequenceClassification.from_pretrained(
+                            bias_config["model_name"],
+                            num_labels=bias_config["num_labels"],
+                            dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            trust_remote_code=True
+                        ).to(self.device)
 
-                    self.tokenizers["bias_detector"] = AutoTokenizer.from_pretrained(
-                        bias_config["model_name"],
-                        trust_remote_code=True,
-                        use_fast=True
-                    )
+                        self.tokenizers["bias_detector"] = AutoTokenizer.from_pretrained(
+                            bias_config["model_name"],
+                            trust_remote_code=True,
+                            use_fast=True
+                        )
 
-                    self.pipelines["bias_detector"] = pipeline(
-                        "text-classification",
-                        model=self.models["bias_detector"],
-                        tokenizer=self.tokenizers["bias_detector"],
-                        revision=bias_config.get("revision", "main"),  # Use revision for production stability
-                        device=0 if self.device.startswith("cuda") else -1,
-                        top_k=None,
-                        batch_size=1,
-                        truncation=True,
-                        max_length=512
-                    )
+                        self.pipelines["bias_detector"] = pipeline(
+                            "text-classification",
+                            model=self.models["bias_detector"],
+                            tokenizer=self.tokenizers["bias_detector"],
+                            revision=bias_config.get("revision", "main"),  # Use revision for production stability
+                            device=0 if self.device.startswith("cuda") else -1,
+                            top_k=None,
+                            batch_size=1,
+                            truncation=True,
+                            max_length=512
+                        )
 
-            logger.info("✅ Bias Detection Model loaded successfully")
+                        # Register with GPU orchestrator
+                        gpu_mgr.register_model(model_key, self.pipelines["bias_detector"])
+                        gpu_mgr.register_model(f"{model_key}_model", self.models["bias_detector"])
+                        gpu_mgr.register_model(f"{model_key}_tokenizer", self.tokenizers["bias_detector"])
+                        logger.info("✅ Bias Detection Model loaded and registered with GPU orchestrator")
+
+            logger.info("✅ Bias Detection Model ready")
 
         except Exception as e:
             logger.error(f"❌ Failed to load Bias Detection Model: {e}")
             self.models["bias_detector"] = None
             self.pipelines["bias_detector"] = None
+            self.tokenizers["bias_detector"] = None
 
         try:
             # 5. Visual Analysis Model (LLaVA) - Production Ready
@@ -471,7 +549,7 @@ class NextGenGPUScoutEngine:
                     except Exception:
                         self.models["visual_analyzer"] = LlavaNextForConditionalGeneration.from_pretrained(
                             visual_config["model_name"],
-                            torch_dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
+                            dtype=torch.float16 if self.device.startswith("cuda") else torch.float32,
                             low_cpu_mem_usage=True,
                             trust_remote_code=True
                         ).to(self.device)
@@ -492,23 +570,8 @@ class NextGenGPUScoutEngine:
             logger.warning(f"⚠️ Visual Analysis Model not available: {e}")
             self.models["visual_analyzer"] = None
 
-        # Register models with production GPU manager
-        if PRODUCTION_GPU_AVAILABLE and self.gpu_allocated:
-            try:
-                gpu_mgr = get_gpu_manager()
-                for model_name, model in self.models.items():
-                    if model is not None:
-                        gpu_mgr.register_model(f"scout_v2_{model_name}", model)
-
-                for pipeline_name, pipeline_obj in self.pipelines.items():
-                    if pipeline_obj is not None:
-                        gpu_mgr.register_model(f"scout_v2_pipeline_{pipeline_name}", pipeline_obj)
-
-                logger.info("🧹 Scout models registered with production GPU manager")
-            except Exception as e:
-                logger.warning(f"⚠️ Failed to register models with GPU manager: {e}")
-        elif self.device.startswith("cuda"):
-            logger.info("📋 Production GPU manager not available, models not registered")
+        # Model registration is handled individually in each loading section above
+        logger.info("🎯 Scout GPU orchestrator integration complete")
 
     def classify_news_content(self, text: str, url: str = "", use_ensemble: bool = True) -> dict[str, Any]:
         """
@@ -565,7 +628,7 @@ class NextGenGPUScoutEngine:
                     non_news_score = predictions.get('score', 0.0)
 
             # Determine classification
-            is_news = news_score > non_news_score
+            is_news = news_score > (non_news_score * 0.9)  # Lower the bar for news classification
             confidence = max(news_score, non_news_score)
 
             # Content type classification

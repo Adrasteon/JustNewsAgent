@@ -9,7 +9,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Service definitions in startup order
 SERVICES=(
-    "gpu_orchestrator" # GPU Orchestrator (port 8014) — start first for gating
+    "gpu_orchestrator" # GPU Orchestrator (port 8014) — MUST start before mcp_bus
     "mcp_bus"
     "chief_editor"
     "scout"
@@ -177,28 +177,26 @@ disable_services() {
 start_services() {
     log_info "Starting JustNews services in order..."
 
-    # 1) GPU Orchestrator first (ensures model preload gating succeeds)
+    # 1) GPU Orchestrator first
     log_info "Starting GPU Orchestrator (justnews@gpu_orchestrator)..."
     systemctl start "justnews@gpu_orchestrator"
     if ! wait_for_service "gpu_orchestrator" 60; then
         log_error "gpu_orchestrator did not become active in time. Aborting."
         return 1
     fi
-    # Prefer explicit READY endpoint if available
     if ! wait_for_http "http://127.0.0.1:8014/ready" 120; then
         log_warning "gpu_orchestrator READY endpoint not ready within timeout; continuing cautiously"
     else
         log_success "gpu_orchestrator reports READY"
     fi
-
-    # 2) MCP Bus next (depends on orchestrator for preflight gating)
+    
+    # 2) MCP Bus next
     log_info "Starting MCP Bus (justnews@mcp_bus)..."
     systemctl start "justnews@mcp_bus"
     if ! wait_for_service "mcp_bus" 30; then
         log_error "MCP Bus failed to start. Aborting."
         return 1
     fi
-    # Optional HTTP health check for bus
     if ! wait_for_http "http://127.0.0.1:8000/health" 30; then
         log_warning "MCP Bus HTTP health not ready within timeout"
     fi
@@ -207,8 +205,6 @@ start_services() {
     for service in "${SERVICES[@]:2}"; do
         log_info "Starting justnews@${service}..."
         systemctl start "justnews@${service}"
-
-        # Brief wait for each service
         sleep 2
     done
 

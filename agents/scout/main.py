@@ -65,7 +65,7 @@ async def lifespan(app: FastAPI):
                 "intelligent_source_discovery", "intelligent_content_crawl",
                 "intelligent_batch_analysis", "enhanced_newsreader_crawl",
                 "production_crawl_ultra_fast", "get_production_crawler_info",
-                "production_crawl_dynamic"
+                "production_crawl_dynamic", "analyze_sentiment", "detect_bias"
             ],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -281,6 +281,46 @@ def log_feedback(call: ToolCall):
         return feedback_data
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze_sentiment")
+def analyze_sentiment_endpoint(call: ToolCall):
+    """Analyze sentiment in provided text content."""
+    try:
+        from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
+        text = call.kwargs.get("text")
+        if not text:
+            raise HTTPException(status_code=400, detail="Text parameter required")
+
+        # Use cached engine instance to avoid GPU memory issues
+        if not hasattr(analyze_sentiment_endpoint, '_engine'):
+            analyze_sentiment_endpoint._engine = NextGenGPUScoutEngine(enable_training=False)
+
+        engine = analyze_sentiment_endpoint._engine
+        result = engine.analyze_sentiment(text)
+        return result
+    except Exception as e:
+        logger.error(f"An error occurred in analyze_sentiment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/detect_bias")
+def detect_bias_endpoint(call: ToolCall):
+    """Detect bias in provided text content."""
+    try:
+        from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
+        text = call.kwargs.get("text")
+        if not text:
+            raise HTTPException(status_code=400, detail="Text parameter required")
+
+        # Use cached engine instance to avoid GPU memory issues
+        if not hasattr(detect_bias_endpoint, '_engine'):
+            detect_bias_endpoint._engine = NextGenGPUScoutEngine(enable_training=False)
+
+        engine = detect_bias_endpoint._engine
+        result = engine.detect_bias(text)
+        return result
+    except Exception as e:
+        logger.error(f"An error occurred in detect_bias: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # =============================================================================

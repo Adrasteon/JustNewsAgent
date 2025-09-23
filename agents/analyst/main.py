@@ -24,11 +24,9 @@ from .tools import (
 
 # Import security utilities
 try:
-    from ..scout.security_utils import (
+    from .security_utils import (
         log_security_event,
-        rate_limit,
         sanitize_content,
-        security_wrapper,
         validate_content_size,
     )
     SECURITY_AVAILABLE = True
@@ -38,12 +36,8 @@ except ImportError:
         return len(content) < 1000000  # 1MB limit
     def sanitize_content(content: str) -> str:
         return content
-    def rate_limit(key: str) -> bool:
-        return True
     def log_security_event(event: str, details: dict):
         pass
-    def security_wrapper(func):
-        return func
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -61,6 +55,8 @@ class ToolCall(BaseModel):
     args: list
     kwargs: dict
 
+import time
+
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
@@ -69,14 +65,27 @@ class MCPBusClient:
         registration_data = {
             "name": agent_name,
             "address": agent_address,
+            "tools": tools,
         }
-        try:
-            response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
-            response.raise_for_status()
-            logger.info(f"Successfully registered {agent_name} with MCP Bus.")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Failed to register {agent_name} with MCP Bus: {e}")
-            raise
+        
+        max_retries = 5
+        backoff_factor = 2
+        
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(3, 10))
+                response.raise_for_status()
+                logger.info(f"Successfully registered {agent_name} with MCP Bus.")
+                return
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Attempt {attempt + 1}/{max_retries} failed to register {agent_name} with MCP Bus: {e}")
+                if attempt < max_retries - 1:
+                    sleep_time = backoff_factor ** attempt
+                    logger.info(f"Retrying in {sleep_time} seconds...")
+                    time.sleep(sleep_time)
+                else:
+                    logger.error(f"Failed to register {agent_name} with MCP Bus after {max_retries} attempts.")
+                    raise
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -167,8 +176,9 @@ except Exception:
     logger.debug("reload endpoint not registered for analyst")
 
 @app.get("/health")
-def health():
-    """Health check endpoint."""
+@app.post("/health")
+async def health(request: Request):
+    """Health check endpoint that accepts optional body."""
     return {
         "status": "ok",
         "security_enabled": SECURITY_AVAILABLE,
@@ -190,7 +200,6 @@ def metrics_endpoint():
 # These endpoints provide the Analyst Agent with its own sentiment analysis capabilities
 
 @app.post("/score_bias")
-@security_wrapper
 def score_bias_endpoint(call: ToolCall):
     """Score bias in provided text content."""
     try:
@@ -202,10 +211,6 @@ def score_bias_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("score_bias"):
-            log_security_event('rate_limit_exceeded', {'function': 'score_bias_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         from .tools import score_bias
         logger.info(f"Calling score_bias with args: {call.args} and kwargs: {call.kwargs}")
         return score_bias(*call.args, **call.kwargs)
@@ -214,7 +219,6 @@ def score_bias_endpoint(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/score_sentiment")
-@security_wrapper
 def score_sentiment_endpoint(call: ToolCall):
     """Score sentiment in provided text content."""
     try:
@@ -226,10 +230,6 @@ def score_sentiment_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("score_sentiment"):
-            log_security_event('rate_limit_exceeded', {'function': 'score_sentiment_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         from .tools import score_sentiment
         logger.info(f"Calling score_sentiment with args: {call.args} and kwargs: {call.kwargs}")
         return score_sentiment(*call.args, **call.kwargs)
@@ -238,7 +238,6 @@ def score_sentiment_endpoint(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze_sentiment_and_bias")
-@security_wrapper
 def analyze_sentiment_and_bias_endpoint(call: ToolCall):
     """Analyze both sentiment and bias in provided text content."""
     try:
@@ -250,19 +249,19 @@ def analyze_sentiment_and_bias_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("analyze_sentiment_and_bias"):
-            log_security_event('rate_limit_exceeded', {'function': 'analyze_sentiment_and_bias_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         from .tools import analyze_sentiment_and_bias
         logger.info(f"Calling analyze_sentiment_and_bias with args: {call.args} and kwargs: {call.kwargs}")
-        return analyze_sentiment_and_bias(*call.args, **call.kwargs)
+        result = analyze_sentiment_and_bias(*call.args, **call.kwargs)
+        logger.info(f"analyze_sentiment_and_bias completed successfully")
+        return result
     except Exception as e:
         logger.error(f"An error occurred in analyze_sentiment_and_bias: {e}")
+        logger.error(f"Error details: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze_sentiment")
-@security_wrapper
 def analyze_sentiment_endpoint(call: ToolCall):
     """Analyze sentiment in provided text content."""
     try:
@@ -274,10 +273,6 @@ def analyze_sentiment_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("analyze_sentiment"):
-            log_security_event('rate_limit_exceeded', {'function': 'analyze_sentiment_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         from .tools import analyze_sentiment
         logger.info(f"Calling analyze_sentiment with args: {call.args} and kwargs: {call.kwargs}")
         return analyze_sentiment(*call.args, **call.kwargs)
@@ -286,7 +281,6 @@ def analyze_sentiment_endpoint(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/detect_bias")
-@security_wrapper
 def detect_bias_endpoint(call: ToolCall):
     """Detect bias in provided text content."""
     try:
@@ -298,10 +292,6 @@ def detect_bias_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("detect_bias"):
-            log_security_event('rate_limit_exceeded', {'function': 'detect_bias_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         from .tools import detect_bias
         logger.info(f"Calling detect_bias with args: {call.args} and kwargs: {call.kwargs}")
         return detect_bias(*call.args, **call.kwargs)
@@ -310,7 +300,6 @@ def detect_bias_endpoint(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/identify_entities")
-@security_wrapper
 def identify_entities_endpoint(call: ToolCall):
     """Identifies entities in a given text."""
     try:
@@ -322,24 +311,15 @@ def identify_entities_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("identify_entities"):
-            log_security_event('rate_limit_exceeded', {'function': 'identify_entities_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         return identify_entities(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in identify_entities: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/log_feedback")
-@security_wrapper
 def log_feedback_endpoint(call: ToolCall):
     """Logs feedback."""
     try:
-        if not rate_limit("log_feedback"):
-            log_security_event('rate_limit_exceeded', {'function': 'log_feedback_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         feedback = call.kwargs.get("feedback", {})
         log_feedback("log_feedback", feedback)
         return {"status": "logged"}
@@ -361,7 +341,6 @@ def log_feedback_endpoint(call: ToolCall):
 
 # Engine information endpoint
 @app.post("/analyze_text_statistics")
-@security_wrapper
 def analyze_text_statistics_endpoint(call: ToolCall):
     """Analyzes text statistics including readability and complexity."""
     try:
@@ -373,17 +352,12 @@ def analyze_text_statistics_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("analyze_text_statistics"):
-            log_security_event('rate_limit_exceeded', {'function': 'analyze_text_statistics_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         return analyze_text_statistics(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in analyze_text_statistics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/extract_key_metrics")
-@security_wrapper
 def extract_key_metrics_endpoint(call: ToolCall):
     """Extracts key numerical and statistical metrics from text."""
     try:
@@ -395,17 +369,12 @@ def extract_key_metrics_endpoint(call: ToolCall):
 
             call.kwargs['text'] = sanitize_content(call.kwargs['text'])
 
-        if not rate_limit("extract_key_metrics"):
-            log_security_event('rate_limit_exceeded', {'function': 'extract_key_metrics_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
-
         return extract_key_metrics(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in extract_key_metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/analyze_content_trends")
-@security_wrapper
 def analyze_content_trends_endpoint(call: ToolCall):
     """Analyzes trends across multiple content pieces."""
     try:
@@ -419,10 +388,6 @@ def analyze_content_trends_endpoint(call: ToolCall):
                             log_security_event('content_size_exceeded', {'function': 'analyze_content_trends_endpoint', 'item': i})
                             raise HTTPException(status_code=400, detail=f"Content item {i} size exceeds maximum allowed limit")
                         content_list[i] = sanitize_content(content)
-
-        if not rate_limit("analyze_content_trends"):
-            log_security_event('rate_limit_exceeded', {'function': 'analyze_content_trends_endpoint'})
-            raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
         return analyze_content_trends(*call.args, **call.kwargs)
     except Exception as e:

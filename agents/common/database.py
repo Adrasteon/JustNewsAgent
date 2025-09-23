@@ -17,12 +17,32 @@ logger = get_logger(__name__)
 # Environment variables (read at runtime, not import time)
 def get_db_config():
     """Get database configuration from environment variables"""
-    return {
+    # First try individual POSTGRES_* variables
+    config = {
         'host': os.environ.get("POSTGRES_HOST"),
         'database': os.environ.get("POSTGRES_DB"),
         'user': os.environ.get("POSTGRES_USER"),
         'password': os.environ.get("POSTGRES_PASSWORD")
     }
+    
+    # If any are missing, try to parse DATABASE_URL
+    if not all(config.values()):
+        database_url = os.environ.get("DATABASE_URL")
+        if database_url:
+            logger.info("Parsing database configuration from DATABASE_URL")
+            try:
+                from urllib.parse import urlparse
+                parsed = urlparse(database_url)
+                config['host'] = parsed.hostname or config['host']
+                config['database'] = parsed.path.lstrip('/') or config['database']
+                config['user'] = parsed.username or config['user']
+                config['password'] = parsed.password or config['password']
+                if parsed.port:
+                    config['port'] = parsed.port
+            except Exception as e:
+                logger.warning(f"Failed to parse DATABASE_URL: {e}")
+    
+    return config
 
 # Connection pool configuration
 POOL_MIN_CONNECTIONS = int(os.environ.get("DB_POOL_MIN_CONNECTIONS", "2"))

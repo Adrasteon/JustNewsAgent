@@ -50,6 +50,8 @@ try:
         KeywordRelevanceScorer,
         PathDepthScorer,
     )
+    from crawl4ai import LLMConfig  # type: ignore
+    from crawl4ai.extraction_strategy import LLMExtractionStrategy  # type: ignore
     CRAWL4AI_NATIVE_AVAILABLE = True
     logger.info("✅ Native Crawl4AI components loaded for advanced deep crawling")
 except ImportError as e:
@@ -475,7 +477,7 @@ async def enhanced_deep_crawl_site(*args, **kwargs):
     
     Parameters:
     - url (str): Target website URL
-    - max_depth (int): Maximum crawl depth (default: 3, user requested)
+    - max_depth (int): Maximum crawl depth (default: 4, user requested)
     - max_pages (int): Maximum pages to crawl (default: 100, user requested) 
     - word_count_threshold (int): Minimum words per page (default: 500, user requested)
     - quality_threshold (float): Scout intelligence quality threshold (default: 0.6)
@@ -484,7 +486,7 @@ async def enhanced_deep_crawl_site(*args, **kwargs):
 
     # Extract parameters
     url = kwargs.get("url", args[0] if args else "")
-    max_depth = kwargs.get("max_depth", 3)  # User requested depth
+    max_depth = kwargs.get("max_depth", 4)  # User requested depth
     max_pages = kwargs.get("max_pages", 100)  # User requested limit
     word_count_threshold = kwargs.get("word_count_threshold", 500)  # User requested threshold
     quality_threshold = kwargs.get("quality_threshold", 0.6)
@@ -727,10 +729,15 @@ def crawl_url(*args, **kwargs):
             import asyncio
 
             async def native_crawl():
+                # Configure for local Ollama LLM instead of cloud OpenAI
+                llm_config = LLMConfig(
+                    provider="ollama/llama2:7b",
+                    base_url="http://localhost:11434"
+                )
                 async with AsyncWebCrawler(verbose=False) as crawler:
                     result = await crawler.arun(
                         url=url,
-                        extraction_strategy="LLMExtractionStrategy",
+                        extraction_strategy=LLMExtractionStrategy(llm_config=llm_config),
                         css_selector="main, article, .content, .story-body, [role='main']",
                         user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
                     )
@@ -857,10 +864,15 @@ def enhanced_newsreader_crawl(*args, **kwargs):
             import asyncio
 
             async def native_crawl():
+                # Configure for local Ollama LLM instead of cloud OpenAI
+                llm_config = LLMConfig(
+                    provider="ollama/llama2:7b",
+                    base_url="http://localhost:11434"
+                )
                 async with AsyncWebCrawler(verbose=False) as crawler:
                     result = await crawler.arun(
                         url=url,
-                        extraction_strategy="LLMExtractionStrategy",
+                        extraction_strategy=LLMExtractionStrategy(llm_config=llm_config),
                         css_selector="main, article, .content, .story-body, [role='main']",
                         user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36'
                     )
@@ -1078,7 +1090,7 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
         }
         
         response = requests.post(
-            "http://localhost:8009/unified_production_crawl",
+            "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=300  # 5 minutes timeout for crawling
         )
@@ -1151,7 +1163,7 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
         }
         
         response = requests.post(
-            "http://localhost:8009/unified_production_crawl",
+            "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=600  # 10 minutes timeout for AI-enhanced crawling
         )
@@ -1202,7 +1214,7 @@ def get_production_crawler_info():
         payload = {"args": [], "kwargs": {}}
         
         response = requests.post(
-            "http://localhost:8009/get_crawler_info",
+            "http://localhost:8015/get_crawler_info",
             json=payload,
             timeout=30
         )
@@ -1266,7 +1278,7 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
         }
         
         response = requests.post(
-            "http://localhost:8009/unified_production_crawl",
+            "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=900  # 15 minutes timeout for dynamic crawling
         )
@@ -1279,6 +1291,15 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
                 "domains": len(result.get("domain_breakdown", {})),
                 "total_articles": result.get("total_articles", 0),
                 "aps": result.get("articles_per_second", 0)
+            })
+            return result
+        elif response.status_code == 202:
+            # Async operation accepted
+            result = response.json()
+            result["accessed_via"] = "scout_agent"
+            log_feedback("production_crawl_dynamic_async", {
+                "job_id": result.get("job_id"),
+                "status": "accepted"
             })
             return result
         else:

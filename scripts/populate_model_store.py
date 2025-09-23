@@ -59,6 +59,31 @@ def snapshot_download(repo_id: str, target: Path):
     return False
 
 
+def download_spacy_model(model: str, target: Path) -> bool:
+    """Download and extract a spacy model to a target directory."""
+    import subprocess
+    import sys
+    try:
+        print(f"Downloading spacy model: {model}")
+        # It's easier to download and then move.
+        subprocess.check_call([sys.executable, "-m", "spacy", "download", model])
+        
+        import spacy
+        nlp = spacy.load(model)
+        model_path = nlp.path
+        
+        model_target_path = target / model
+        if model_target_path.exists():
+            shutil.rmtree(model_target_path)
+            
+        shutil.copytree(model_path, model_target_path)
+        print(f"Copied spacy model {model} from {model_path} to {model_target_path}")
+        return True
+    except Exception as e:
+        print(f"Failed to download or place spacy model {model}: {e}")
+        return False
+
+
 def populate():
     agent_map = load_map()
     ensure_dir(MODEL_STORE_ROOT)
@@ -80,7 +105,10 @@ def populate():
         for m in models:
             # Normalize HF ids (sentence-transformers may include path)
             try:
-                ok = snapshot_download(m, version_dir)
+                if m.startswith("en_"): # Simple check for spacy model
+                    ok = download_spacy_model(m, version_dir)
+                else:
+                    ok = snapshot_download(m, version_dir)
                 print(f"Downloaded {m}: {ok}")
             except Exception as e:
                 print(f"Failed to download {m}: {e}")

@@ -87,6 +87,18 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
             If not provided, a new model will be created via get_embedding_model().
     """
     try:
+        # Check for duplicates based on URL first
+        article_url = metadata.get("url") if metadata else None
+        if article_url:
+            # Check if article with this URL already exists
+            existing_article = execute_query_single(
+                "SELECT id FROM articles WHERE metadata->>'url' = %s",
+                (article_url,)
+            )
+            if existing_article:
+                logger.info(f"Article with URL {article_url} already exists (ID: {existing_article['id']}), skipping duplicate")
+                return {"status": "duplicate", "article_id": existing_article['id'], "message": "Article already exists"}
+
         # Use provided model if available to avoid re-loading model per-call
         if embedding_model is None:
             embedding_model = get_embedding_model()
@@ -132,9 +144,9 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
         )
 
         log_feedback("save_article", {"status": "success", "article_id": next_id})
-        
+
         result = {"status": "success", "article_id": next_id, "id": next_id}
-        
+
         # Collect prediction for training
         try:
             from training_system import collect_prediction
@@ -159,16 +171,34 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
         return {"error": str(e)}
 
 def get_article(article_id: int) -> dict:
-    """Retrieves an article from the memory agent."""
-    url = f"http://localhost:{MEMORY_AGENT_PORT}/get_article/{article_id}"
+    """Retrieves an article from the database by its ID."""
     try:
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.warning(f"get_article: memory agent request failed: {e}")
-        # Fallback: return a minimal stub so tests expecting a dict don't hang
-        return {"id": article_id, "error": "memory_agent_unavailable"}
+        article = execute_query_single(
+            "SELECT id, content, metadata FROM articles WHERE id = %s",
+            (article_id,)
+        )
+        if article:
+            return article
+        else:
+            return {"id": article_id, "error": "not_found"}
+    except Exception as e:
+        logger.error(f"Error retrieving article {article_id}: {e}")
+        return {"id": article_id, "error": "database_error"}
+
+def get_all_article_ids() -> dict:
+    """Retrieves all article IDs from the database."""
+    logger.info("Executing get_all_article_ids tool")
+    try:
+        rows = execute_query("SELECT id FROM articles")
+        if rows:
+            logger.info(f"Found {len(rows)} article IDs")
+            return {"article_ids": [row['id'] for row in rows]}
+        else:
+            logger.info("No article IDs found")
+            return {"article_ids": []}
+    except Exception as e:
+        logger.error(f"Error retrieving all article IDs: {e}")
+        return {"error": "database_error"}
 
 def vector_search_articles(query: str, top_k: int = 5) -> list:
     """Performs a vector search for articles using the memory agent."""

@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Enhanced GPU Resource Allocation Optimizer
 Advanced performance optimization for GPU resource allocation with learning capabilities
 
@@ -10,6 +9,8 @@ Features:
 - Agent-specific optimization profiles
 - Real-time performance adaptation
 """
+
+from common.observability import get_logger
 
 import json
 import threading

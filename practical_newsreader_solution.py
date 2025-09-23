@@ -80,7 +80,7 @@ class PracticalNewsReader:
                 model_id,
                 quantization_config=quantization_config,
                 device_map="auto",
-                torch_dtype=torch.float16,
+                dtype=torch.float16,
                 trust_remote_code=True,
                 low_cpu_mem_usage=True
             )
@@ -112,7 +112,7 @@ class PracticalNewsReader:
                 model_id,
                 quantization_config=quantization_config,
                 device_map="auto",
-                torch_dtype=torch.float16,
+                dtype=torch.float16,
             )
 
             memory_usage = self.get_memory_usage()
@@ -143,7 +143,7 @@ class PracticalNewsReader:
                 model_id,
                 quantization_config=quantization_config,
                 device_map="auto",
-                torch_dtype=torch.float16,
+                dtype=torch.float16,
                 low_cpu_mem_usage=True
             )
 

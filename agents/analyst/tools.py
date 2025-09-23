@@ -1,16 +1,14 @@
 """
 Specialized Analyst Agent Tools - Production Ready
-Focused on quantitative analysis, entity extraction, and statistical insights
+Focused on quantitative analysis, entity extraction, and statistical insights. This agent is self-contained and performs all analysis locally using its own models.
 
 SPECIALIZATION:
 - Entity extraction and recognition using spaCy NER models
-- Numerical data analysis and statistics  
+- Numerical data analysis and statistics
 - Trend analysis and pattern detection
 - Performance metrics and KPIs
 - Text complexity and readability analysis
-
-NOTE: Sentiment and bias analysis has been centralized in Scout V2 Agent
-Use Scout V2 endpoints for sentiment/bias analysis.
+- GPU-accelerated sentiment and bias analysis
 """
 
 import importlib.util
@@ -263,8 +261,8 @@ def _extract_entities_patterns(text: str) -> list[dict[str, Any]]:
             entities.append({
                 "text": entity_text,
                 "label": "UNKNOWN",
-                "start": match.start(),
-                "end": match.end(),
+                "start": int(match.start()),  # Convert to Python int
+                "end": int(match.end()),      # Convert to Python int
                 "confidence": 0.5,
                 "description": "Pattern-based extraction"
             })
@@ -326,8 +324,8 @@ def identify_entities(text: str) -> dict[str, Any]:
                 entities.append({
                     "text": ent.text,
                     "label": ent.label_,
-                    "start": ent.start_char,
-                    "end": ent.end_char,
+                    "start": int(ent.start_char),  # Convert to Python int
+                    "end": int(ent.end_char),      # Convert to Python int
                     "confidence": 0.9,  # Default confidence for spaCy
                     "description": _spacy_explain(ent.label_) if HAS_SPACY else ent.label_
                 })
@@ -345,9 +343,9 @@ def identify_entities(text: str) -> dict[str, Any]:
                     entities.append({
                         "text": result["word"],
                         "label": result["entity_group"],
-                        "start": result["start"],
-                        "end": result["end"],
-                        "confidence": round(result["score"], 3),
+                        "start": int(result["start"]),    # Convert to Python int
+                        "end": int(result["end"]),        # Convert to Python int
+                        "confidence": float(result["score"]),  # Convert numpy float to Python float
                         "description": result["entity_group"]
                     })
                 processing_method = "transformer"
@@ -1039,7 +1037,7 @@ def _generate_analysis_recommendations(sentiment_result: dict, bias_result: dict
 
 def analyze_sentiment(text: str) -> dict[str, Any]:
     """
-    Analyze sentiment of text content using AI models or heuristics.
+    Analyze sentiment of text content using local GPU-accelerated models.
     This function provides sentiment analysis capabilities to the Analyst Agent.
     
     Args:
@@ -1054,23 +1052,58 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
     logger.info(f"😊 Analyzing sentiment for {len(text)} characters")
 
     try:
-        # Try to use Scout Agent's sentiment analysis if available
-        try:
-            from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
-            scout_engine = NextGenGPUScoutEngine(enable_training=False)
-            if scout_engine.models.get("sentiment_analyzer"):
-                result = scout_engine.analyze_sentiment(text)
-                log_feedback("analyze_sentiment", {
-                    "method": "scout_ai_model",
-                    "dominant_sentiment": result.get("dominant_sentiment"),
-                    "confidence": result.get("confidence")
-                })
-                return result
-        except Exception as e:
-            logger.debug(f"Scout sentiment analysis not available, using local analysis: {e}")
+        # Use local GPU-accelerated analyst
+        from .gpu_analyst import get_gpu_analyst
+        gpu_analyst = get_gpu_analyst()
+        
+        # Get GPU sentiment score
+        sentiment_score = gpu_analyst.score_sentiment_gpu(text)
+        
+        if sentiment_score is not None:
+            # Convert score to sentiment analysis format
+            if sentiment_score > 0.6:
+                dominant_sentiment = "positive"
+                confidence = min(sentiment_score, 0.9)
+            elif sentiment_score < 0.4:
+                dominant_sentiment = "negative"
+                confidence = min(1.0 - sentiment_score, 0.9)
+            else:
+                dominant_sentiment = "neutral"
+                confidence = 0.7
+            
+            # Determine intensity
+            if confidence > 0.8:
+                intensity = "strong"
+            elif confidence > 0.6:
+                intensity = "moderate"
+            else:
+                intensity = "mild"
+            
+            result = {
+                "dominant_sentiment": dominant_sentiment,
+                "confidence": float(confidence),
+                "intensity": intensity,
+                "sentiment_scores": {
+                    "positive": float(sentiment_score),
+                    "negative": float(1.0 - sentiment_score),
+                    "neutral": float(0.5)
+                },
+                "method": "gpu_accelerated",
+                "model_name": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+                "analysis_timestamp": datetime.now().isoformat(),
+                "reasoning": f"GPU-accelerated sentiment analysis (score: {sentiment_score:.3f})"
+            }
+        else:
+            # Fallback to heuristic analysis
+            logger.debug("GPU sentiment analysis not available, using heuristic fallback")
+            result = _heuristic_sentiment_analysis(text)
 
-        # Fallback to local heuristic analysis
-        return _heuristic_sentiment_analysis(text)
+        log_feedback("analyze_sentiment", {
+            "method": result.get("method", "unknown"),
+            "dominant_sentiment": result.get("dominant_sentiment"),
+            "confidence": result.get("confidence")
+        })
+        return result
 
     except Exception as e:
         logger.error(f"❌ Sentiment analysis failed: {e}")
@@ -1079,7 +1112,7 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
 
 def detect_bias(text: str) -> dict[str, Any]:
     """
-    Detect bias in text content using AI models or heuristics.
+    Detect bias in text content using local GPU-accelerated models.
     This function provides bias detection capabilities to the Analyst Agent.
     
     Args:
@@ -1094,23 +1127,54 @@ def detect_bias(text: str) -> dict[str, Any]:
     logger.info(f"⚖️ Detecting bias in {len(text)} characters")
 
     try:
-        # Try to use Scout Agent's bias detection if available
-        try:
-            from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
-            scout_engine = NextGenGPUScoutEngine(enable_training=False)
-            if scout_engine.models.get("bias_detector"):
-                result = scout_engine.detect_bias(text)
-                log_feedback("detect_bias", {
-                    "method": "scout_ai_model",
-                    "has_bias": result.get("has_bias"),
-                    "bias_level": result.get("bias_level")
-                })
-                return result
-        except Exception as e:
-            logger.debug(f"Scout bias detection not available, using local analysis: {e}")
+        # Use local GPU-accelerated analyst
+        from .gpu_analyst import get_gpu_analyst
+        gpu_analyst = get_gpu_analyst()
+        
+        # Get GPU bias score
+        bias_score = gpu_analyst.score_bias_gpu(text)
+        
+        if bias_score is not None:
+            # Convert score to bias detection format
+            if bias_score > 0.7:
+                bias_level = "high"
+                has_bias = True
+            elif bias_score > 0.4:
+                bias_level = "medium"
+                has_bias = True
+            elif bias_score > 0.2:
+                bias_level = "low"
+                has_bias = True
+            else:
+                bias_level = "minimal"
+                has_bias = False
+            
+            confidence = min(bias_score + 0.3, 0.9)
+            
+            result = {
+                "has_bias": has_bias,
+                "bias_score": float(bias_score),
+                "bias_level": bias_level,
+                "confidence": float(confidence),
+                "political_bias": float(bias_score * 0.6),  # Estimate political component
+                "emotional_bias": float(bias_score * 0.8),  # Estimate emotional component
+                "factual_bias": float(bias_score * 0.7),    # Estimate factual component
+                "reasoning": f"GPU-accelerated bias detection (score: {bias_score:.3f})",
+                "method": "gpu_accelerated",
+                "model_used": "unitary/toxic-bert",
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            # Fallback to heuristic analysis
+            logger.debug("GPU bias detection not available, using heuristic fallback")
+            result = _heuristic_bias_detection(text)
 
-        # Fallback to local heuristic analysis
-        return _heuristic_bias_detection(text)
+        log_feedback("detect_bias", {
+            "method": result.get("method", "unknown"),
+            "has_bias": result.get("has_bias"),
+            "bias_level": result.get("bias_level")
+        })
+        return result
 
     except Exception as e:
         logger.error(f"❌ Bias detection failed: {e}")

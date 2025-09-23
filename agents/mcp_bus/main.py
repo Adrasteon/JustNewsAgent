@@ -80,7 +80,9 @@ def call_tool(call: ToolCall):
         raise HTTPException(status_code=503, detail=f"Circuit open for agent {agent_name}")
 
     payload = {"args": call.args, "kwargs": call.kwargs}
-    url = f"{agent_address}/{call.tool}"
+    # Correctly join the agent address and the tool path
+    url = f"{agent_address.rstrip('/')}/{call.tool.lstrip('/')}"
+    
     # Configurable timeouts via environment (defaults: connect 3s, read 120s for long-running tools)
     connect_timeout = float(os.getenv("MCP_CALL_CONNECT_TIMEOUT", "3"))
     read_timeout = float(os.getenv("MCP_CALL_READ_TIMEOUT", "120"))
@@ -94,7 +96,7 @@ def call_tool(call: ToolCall):
             response.raise_for_status()
             # Success: reset failures
             cb_state[agent_name] = {"fails": 0, "open_until": 0}
-            return response.json()
+            return {"status": "success", "data": response.json()}
         except requests.exceptions.RequestException as e:
             last_error = str(e)
             time.sleep(0.2 * (2 ** attempt))
@@ -148,7 +150,6 @@ except Exception:
 
 if __name__ == "__main__":
     import uvicorn
-    import os
 
     host = os.environ.get("MCP_BUS_HOST", "0.0.0.0")
     port = int(os.environ.get("MCP_BUS_PORT", 8000))

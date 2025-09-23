@@ -182,7 +182,7 @@ class ChiefEditorV2Engine:
                 self.config.bert_model,
                 cache_dir=self.config.cache_dir,
                 num_labels=5,  # Quality scores 1-5
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
             ).to(self.device)
 
             self.tokenizers['bert'] = BertTokenizer.from_pretrained(
@@ -216,7 +216,7 @@ class ChiefEditorV2Engine:
                 self.config.distilbert_model,
                 cache_dir=self.config.cache_dir,
                 num_labels=8,  # News categories
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
             ).to(self.device)
 
             self.tokenizers['distilbert'] = DistilBertTokenizer.from_pretrained(
@@ -272,7 +272,7 @@ class ChiefEditorV2Engine:
             self.models['t5'] = T5ForConditionalGeneration.from_pretrained(
                 self.config.t5_model,
                 cache_dir=self.config.cache_dir,
-                torch_dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
+                dtype=torch.float16 if self.device.type == 'cuda' else torch.float32
             ).to(self.device)
 
             self.tokenizers['t5'] = T5Tokenizer.from_pretrained(

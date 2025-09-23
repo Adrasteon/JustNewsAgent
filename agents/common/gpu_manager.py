@@ -134,7 +134,13 @@ def request_agent_gpu(agent_name: str, memory_gb: float = 2.0) -> int | None:
     if PRODUCTION_AVAILABLE:
         result = _request_agent_gpu(agent_name, memory_gb)
         if isinstance(result, dict):
-            return result.get('gpu_device', 0) if result.get('status') == 'allocated' else None
+            device = result.get('gpu_device', 0)
+            # Convert device ID to int for backward compatibility
+            if isinstance(device, str) and device.startswith('cuda:'):
+                return int(device.split(':')[1])
+            elif device == 'mps':
+                return -1  # MPS not supported in old API
+            return device if isinstance(device, int) else 0
         return result
     else:
         return _request_agent_gpu(agent_name, memory_gb)
