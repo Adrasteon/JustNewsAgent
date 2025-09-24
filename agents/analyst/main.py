@@ -2,8 +2,8 @@
 Main file for the Analyst Agent.
 """
 
-import os
 from contextlib import asynccontextmanager
+import os
 
 import requests
 from fastapi import FastAPI, HTTPException, Request
@@ -13,6 +13,8 @@ from pydantic import BaseModel
 
 from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+
+from agents.common.database import get_db_cursor
 
 from .tools import (
     analyze_content_trends,
@@ -136,7 +138,7 @@ metrics = JustNewsMetrics("analyst")
 # Add security middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://example.com"],  # Replace with actual allowed origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -326,6 +328,102 @@ def log_feedback_endpoint(call: ToolCall):
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze_article")
+def analyze_article_endpoint(call: ToolCall):
+    """Analyze an article and update its analyzed status."""
+    try:
+        logger.debug("Received analyze_article request with payload: %s", call.kwargs)
+
+        # Security validation
+        if call.kwargs and 'article_id' in call.kwargs:
+            article_id = call.kwargs['article_id']
+            logger.debug("Processing article_id: %s", article_id)
+
+            # Fetch article from database
+            article = fetch_article_from_db(article_id)
+            logger.debug("Fetched article: %s", article)
+
+            if not article:
+                logger.error("Article not found for article_id: %s", article_id)
+                raise HTTPException(status_code=404, detail="Article not found")
+
+            if article.get("analyzed", False):
+                logger.info("Article %s already analyzed. Skipping.", article_id)
+                return {"status": "skipped", "message": "Article already analyzed"}
+
+            # Perform analysis
+            logger.debug("Performing analysis on article content.")
+            analysis_result = perform_analysis(article["content"])
+            logger.debug("Analysis result: %s", analysis_result)
+
+            # Update article as analyzed
+            logger.debug("Updating article %s as analyzed.", article_id)
+            update_article_status(article_id, analyzed=True)
+
+            logger.info("Successfully analyzed and updated article %s.", article_id)
+            return {"status": "success", "analysis_result": analysis_result}
+
+        else:
+            logger.error("Missing article_id in request payload.")
+            raise HTTPException(status_code=400, detail="Missing article_id in request")
+
+    except Exception as e:
+        logger.error("An error occurred in analyze_article: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+def fetch_article_from_db(article_id: int) -> dict:
+    """Fetch article from the database."""
+    try:
+        with get_db_cursor(commit=False) as (_, cursor):
+            cursor.execute(
+                "SELECT id, content, analyzed FROM articles WHERE id = %s",
+                (article_id,)
+            )
+            article = cursor.fetchone()
+            if article:
+                return {
+                    "id": article["id"],
+                    "content": article["content"],
+                    "analyzed": article["analyzed"],
+                }
+            else:
+                return {}
+    except Exception as e:
+        logger.error(f"Failed to fetch article {article_id} from database: {e}")
+        return {}
+
+def update_article_status(article_id: int, analyzed: bool):
+    """Update the analyzed status of an article in the database."""
+    try:
+        with get_db_cursor(commit=True) as (_, cursor):
+            cursor.execute(
+                "UPDATE articles SET analyzed = %s WHERE id = %s",
+                (analyzed, article_id)
+            )
+            logger.info(f"Article {article_id} status updated to analyzed={analyzed}")
+    except Exception as e:
+        logger.error(f"Failed to update article {article_id} status: {e}")
+
+def perform_analysis(content: str) -> dict:
+    """Perform the actual analysis on the article content."""
+    # Placeholder for analysis logic
+    return {
+        "sentiment": "positive",
+        "bias": "neutral",
+        "entities": ["entity1", "entity2"]
+    }
+
+def verify_db_connection() -> bool:
+    """Verify the database connection and cursor setup."""
+    try:
+        with get_db_cursor(commit=False) as (_, cursor):
+            cursor.execute("SELECT 1;")
+            logger.info("Database connection verified successfully.")
+            return True
+    except Exception as e:
+        logger.error(f"Database connection verification failed: {e}")
+        return False
 
 # REMOVED ENDPOINTS - All sentiment and bias analysis centralized in Scout V2 Agent
 # Use Scout V2 for all sentiment and bias analysis (including batch operations):

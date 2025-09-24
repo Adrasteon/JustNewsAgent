@@ -649,7 +649,9 @@ if __name__ == "__main__":
         else:
             print("\n⚠️  Some engines failed to build, fallback will be used")
         
-        sys.exit(0)
+        # Exit condition replaced with a controlled return
+        print("Exiting TensorRT engine build sequence.")
+        return None
     
     # Test TensorRT acceleration
     print("🚀 Testing TensorRT Acceleration")

@@ -821,5 +821,17 @@
         "status": "current"
       }
     ]
+  },
+  {
+    "category": "Database Documentation",
+    "files": [
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/docs/database_overview.md",
+        "title": "JustNews Database Overview (Preliminary)",
+        "description": "Comprehensive breakdown of the JustNews database schema, tables, and data flow during system execution phases.",
+        "last_updated": "2025-09-24",
+        "status": "current"
+      }
+    ]
   }
 ]

@@ -28,7 +28,7 @@ try:
     import numpy as np
     import torch
     GPU_AVAILABLE = torch.cuda.is_available()
-    MPS_AVAILABLE = torch.backends.mps.is_available() if hasattr(torch.backends, 'mps') else False
+    MPS_AVAILABLE = hasattr(torch, 'backends') and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
     TORCH_AVAILABLE = True
 except ImportError:
     GPU_AVAILABLE = False

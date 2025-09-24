@@ -134,6 +134,16 @@ async def lifespan(app):
     logger.info("MCP_Bus is starting up.")
     global ready
     ready = True
+
+    # Notify GPU Orchestrator
+    orchestrator_url = "http://localhost:8014/notify_ready"
+    try:
+        response = requests.post(orchestrator_url, timeout=10)
+        response.raise_for_status()
+        logger.info("Successfully notified GPU Orchestrator that MCP Bus is ready.")
+    except requests.RequestException as e:
+        logger.error(f"Failed to notify GPU Orchestrator: {e}")
+
     yield
     logger.info("MCP_Bus is shutting down.")
 

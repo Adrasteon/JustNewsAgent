@@ -21,7 +21,7 @@ from typing import Any
 
 import requests
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from agents.common.schemas import NeuralAssessment, ReasoningInput
 from common.observability import get_logger
@@ -284,7 +284,7 @@ class NucleoidEngine:
         self.nucleoid: Any | None = None
         self.facts_store = {}  # Store facts for retrieval
         self.rules_store = []  # Store rules for retrieval
-        self.session_id = "reasoning_session"
+        self.session_id = "reasoning"
         self._setup_nucleoid()
 
     def _setup_nucleoid(self):
@@ -585,11 +585,17 @@ class ToolCall(BaseModel):
     args: list[Any] = []
     kwargs: dict[str, Any] = {}
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 class Fact(BaseModel):
     data: dict[str, Any]
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 class Facts(BaseModel):
     facts: list[dict[str, Any]]
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class Rule(BaseModel):
     rule: str

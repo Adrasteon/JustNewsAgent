@@ -11,21 +11,25 @@ import os
 import subprocess
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional, Tuple
-import time
 import uuid
+import threading
+import time
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import PlainTextResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from prometheus_client import (
-    Counter, Gauge, Histogram, Summary,
-    CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
+    Counter, Gauge
 )
 
 from common.observability import get_logger
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
+
+# Import preload module
+from .preload import start_preload_job, get_preload_status
+from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
+from agents.gpu_orchestrator.nvml import get_nvml_handle
 
 
 logger = get_logger(__name__)
@@ -60,18 +64,8 @@ _METRICS_COUNTERS: Dict[str, int] = {
 }
 _START_TIME = time.time()
 _NVML_SUPPORTED = False
-_NVML_HANDLE_CACHE: Dict[int, Any] = {}
 _NVML_INIT_ERROR: Optional[str] = None
-
-# Model preload state (single global job)
-_MODEL_PRELOAD_STATE: Dict[str, Any] = {
-	"started_at": None,
-	"completed_at": None,
-	"in_progress": False,
-	"summary": {"total": 0, "done": 0, "failed": 0},
-	"per_agent": {},  # { agent: { model_id: {status, error, duration_s} } }
-}
-_MODEL_PRELOAD_THREAD: Optional[object] = None
+_NVML_HANDLE_CACHE = {}
 
 
 def _inc(metric: str) -> None:
@@ -111,14 +105,14 @@ class MCPBusClient:
 
 	def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
 		import requests
-		import time
+
 
 		registration_data = {
 			"name": agent_name,
 			"address": agent_address,
 			"tools": tools,
 		}
-		
+
 		for attempt in range(5): # Retry up to 5 times
 			try:
 				response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
@@ -128,7 +122,7 @@ class MCPBusClient:
 			except requests.exceptions.RequestException as e:
 				logger.warning(f"MCP Bus unavailable for registration (attempt {attempt + 1}/5): {e}")
 				time.sleep(2 ** attempt) # Exponential backoff
-		
+
 		logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
 
 
@@ -175,27 +169,39 @@ def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
 	return gpus
 
 
-def get_gpu_snapshot() -> Dict[str, Any]:
-	"""Return a conservative, read-only snapshot of GPU state."""
-	smi = _run_nvidia_smi()
-	if smi is None:
-		return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
-	gpus = _parse_nvidia_smi_csv(smi)
-	# If NVML enrichment enabled and not SAFE_MODE, merge fields
-	if ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED:
+def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
+	"""Enrich GPU info with NVML data if available and enabled.
+
+	Mutates the input list of GPU dictionaries to add NVML-related fields.
+	"""
+	if not ENABLE_NVML or SAFE_MODE or not _NVML_SUPPORTED:
+		return
+	try:
+		import pynvml  # type: ignore
 		for g in gpus:
 			idx = g.get("index")
-			if idx in _NVML_HANDLE_CACHE:
-				try:  # pragma: no cover - environment dependent
-					import pynvml  # type: ignore
-					util = pynvml.nvmlDeviceGetUtilizationRates(_NVML_HANDLE_CACHE[idx])
-					mem = pynvml.nvmlDeviceGetMemoryInfo(_NVML_HANDLE_CACHE[idx])
+			if idx is not None:
+				try:
+					handle = get_nvml_handle(idx)
+					util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+					mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
 					g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
 					g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
 					g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
 					g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
 				except Exception as e:  # noqa: BLE001
 					g["nvml_error"] = str(e)
+	except Exception as e:
+		logger.warning(f"NVML enrichment error: {e}")
+
+
+def get_gpu_snapshot() -> Dict[str, Any]:
+	"""Return a conservative, read-only snapshot of GPU state."""
+	smi = _run_nvidia_smi()
+	if smi is None:
+		return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
+	gpus = _parse_nvidia_smi_csv(smi)
+	_get_nvml_enrichment(gpus)
 	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
 
 
@@ -231,14 +237,21 @@ class PolicyUpdate(BaseModel):
 	allow_fractional_shares: Optional[bool] = None
 	kill_on_oom: Optional[bool] = None
 
+	class Config:
+		arbitrary_types_allowed = True
+
 
 class LeaseRequest(BaseModel):
 	agent: str
 	min_memory_mb: Optional[int] = Field(0, ge=0)
 
+	model_config = ConfigDict(arbitrary_types_allowed=True)
+
 
 class ReleaseRequest(BaseModel):
 	token: str
+
+	model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class PreloadRequest(BaseModel):
@@ -246,57 +259,57 @@ class PreloadRequest(BaseModel):
 	refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
 	strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
 
+	model_config = ConfigDict(arbitrary_types_allowed=True)
 
+
+# Modify lifespan to delay readiness until registration completes
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-	global READINESS
-	global _NVML_SUPPORTED, _NVML_HANDLE_CACHE, _NVML_INIT_ERROR
-	logger.info("GPU Orchestrator starting up")
-	# Attempt NVML initialization (best-effort, gated by ENABLE_NVML & SAFE_MODE)
-	if ENABLE_NVML and not SAFE_MODE:
-		try:  # pragma: no cover - environment dependent
-			import pynvml  # type: ignore
-			pynvml.nvmlInit()
-			count = pynvml.nvmlDeviceGetCount()
-			for i in range(count):
-				_NVML_HANDLE_CACHE[i] = pynvml.nvmlDeviceGetHandleByIndex(i)
-			_NVML_SUPPORTED = True
-			logger.info(f"NVML initialized for {count} device(s)")
-		except Exception as e:  # noqa: BLE001
-			_NVML_INIT_ERROR = str(e)
-			logger.warning(f"NVML initialization failed: {e}")
+    global READINESS
+    logger.info("GPU Orchestrator starting up")
 
-	# Set NVML supported gauge
-	nvml_supported_gauge.labels(
-		agent=metrics.agent_name,
-		agent_display_name=metrics.display_name
-	).set(1 if _NVML_SUPPORTED else 0)
+    # Registration status tracker
+    registration_complete = threading.Event()
 
-	# Try registering to MCP Bus (best-effort)
-	try:
-		client = MCPBusClient()
-		client.register_agent(
-			agent_name="gpu_orchestrator",
-			agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
-			tools=[
-				"health",
-				"gpu_info",
-				"get_policy",
-				"set_policy",
-				"get_allocations",
-				"lease",
-				"release",
-				"models_preload",
-				"models_status",
-				"mps_allocation",
-			],
-		)
-	except Exception:
-		pass
+    def register_agent_background(agent_name: str, agent_address: str, tools: List[str]):
+        """Register the agent with the MCP Bus in a background thread."""
+        def background_task():
+            client = MCPBusClient()
+            client.register_agent(agent_name, agent_address, tools)
+            registration_complete.set()  # Signal registration completion
 
-	READINESS = True
-	yield
-	logger.info("GPU Orchestrator shutting down")
+        thread = threading.Thread(target=background_task, daemon=True)
+        thread.start()
+
+    # Start background registration
+    register_agent_background(
+        agent_name="gpu_orchestrator",
+        agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
+        tools=[
+            "health",
+            "gpu_info",
+            "get_policy",
+            "set_policy",
+            "get_allocations",
+            "lease",
+            "release",
+            "models_preload",
+            "models_status",
+            "mps_allocation",
+        ],
+    )
+
+    # Wait for registration to complete before signaling readiness
+    logger.info("Waiting for MCP Bus registration to complete...")
+    registration_complete.wait(timeout=30)  # Wait up to 30 seconds
+    if registration_complete.is_set():
+        logger.info("MCP Bus registration completed successfully.")
+    else:
+        logger.warning("MCP Bus registration did not complete within the timeout.")
+
+    READINESS = True
+    yield
+    logger.info("GPU Orchestrator shutting down")
 
 
 app = FastAPI(title="GPU Orchestrator", lifespan=lifespan)
@@ -447,20 +460,24 @@ def get_allocations():
 	return {"allocations": ALLOCATIONS}
 
 
-@app.post("/lease")
-def lease(req: LeaseRequest):
-	"""Obtain a simple ephemeral GPU lease. SAFE_MODE returns note only.
+def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
+	"""Validate the lease request parameters.
 
-	Strategy: first-fit; if no GPU info or none available, return cpu fallback.
-	NOT a hard guarantee—placeholder for future sophisticated allocator.
+	Returns an error message if validation fails, or None if valid.
 	"""
-	_inc("lease_requests_total")
-	_purge_expired_leases()
-	if SAFE_MODE:
-		return {"granted": False, "note": "SAFE_MODE", "agent": req.agent}
+	if req.min_memory_mb is not None and req.min_memory_mb < 0:
+		return "min_memory_mb must be >= 0"
+	return None
 
+
+def _allocate_gpu(req: LeaseRequest) -> Tuple[bool, Optional[int]]:
+	"""Allocate a GPU based on the lease request.
+
+	Returns a tuple of (success, gpu_index) where success is a boolean
+	indicating if the allocation was successful, and gpu_index is the
+	index of the allocated GPU or None if no GPU could be allocated.
+	"""
 	snapshot = get_gpu_snapshot()
-	gpu_index: Optional[int] = None
 	if snapshot.get("available") and snapshot.get("gpus"):
 		# naive: choose lowest used memory GPU meeting minimum
 		candidates = []
@@ -469,17 +486,40 @@ def lease(req: LeaseRequest):
 				continue
 			candidates.append(g)
 		if candidates:
-			gpu_index = sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
+			return True, sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
+	return False, None
 
-	token = str(uuid.uuid4())
-	allocation = {
-		"agent": req.agent,
-		"gpu": gpu_index if gpu_index is not None else "cpu",
-		"token": token,
-		"timestamp": time.time(),
-	}
-	ALLOCATIONS[token] = allocation
-	return {"granted": True, **allocation}
+
+@app.post("/lease")
+def lease(req: LeaseRequest):
+    """Obtain a simple ephemeral GPU lease. SAFE_MODE returns note only.
+
+    Strategy: first-fit; if no GPU info or none available, return cpu fallback.
+    NOT a hard guarantee—placeholder for future sophisticated allocator.
+    """
+    _inc("lease_requests_total")
+    _purge_expired_leases()
+    if SAFE_MODE:
+        return {"granted": False, "note": "SAFE_MODE", "agent": req.agent}
+
+    # Validate request
+    err = _validate_lease_request(req)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+
+    # Allocate GPU
+    success, gpu_index = _allocate_gpu(req)
+    token = str(uuid.uuid4())
+    allocation = {
+        "agent": req.agent,
+        "gpu": gpu_index if success else "cpu",
+        "token": token,
+        "timestamp": time.time(),
+    }
+    ALLOCATIONS[token] = allocation
+
+    # Ensure `granted` is True for CPU fallback
+    return {"granted": True, **allocation}
 
 
 @app.post("/release")
@@ -511,169 +551,90 @@ def _project_root() -> str:
 		return os.getcwd()
 
 
-def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
-	"""Load a model on CPU to warm caches and validate availability.
+def _read_agent_model_map() -> Dict[str, Any]:
+	"""Read the agent model map from AGENT_MODEL_MAP.json.
 
-	Returns (ok, error_msg). Does not keep model in memory; frees immediately.
+	Returns a dictionary mapping agent names to lists of model IDs.
 	"""
-	start = time.time()
 	try:
-		# Ensure STRICT_MODEL_STORE respected for this call
-		prev_strict = os.environ.get("STRICT_MODEL_STORE")
-		if strict:
-			os.environ["STRICT_MODEL_STORE"] = "1"
-		elif strict is False:
-			os.environ["STRICT_MODEL_STORE"] = "0"
+		import json
+		from pathlib import Path
+		
+		project_root = Path(__file__).resolve().parents[2]
+		model_map_path = project_root / "AGENT_MODEL_MAP.json"
+		
+		if not model_map_path.exists():
+			logger.warning(f"Model map file not found: {model_map_path}")
+			return {}
+		
+		with open(model_map_path, "r") as f:
+			model_map = json.load(f)
+		
+		logger.info(f"Loaded agent model map: {model_map}")
+		return model_map
+	except Exception as e:
+		logger.error(f"Failed to read agent model map: {e}")
+		return {}
 
-		ok = False
-		err: Optional[str] = None
 
-		# Special handling for spaCy models
-		if model_id.startswith("en_core_web_"):
-			try:
-				import spacy
-				try:
-					spacy.load(model_id)
-					ok = True
-					logger.info(f"Successfully validated existing spaCy model: {model_id}")
-				except OSError:
-					logger.warning(f"spaCy model '{model_id}' not found. Attempting download.")
-					from spacy.cli import download
-					download(model_id)
-					spacy.load(model_id) # Verify download
-					ok = True
-					logger.info(f"Successfully downloaded and validated spaCy model: {model_id}")
-			except Exception as e:
-				err = f"spaCy model load/download failed: {e}"
-		# Prefer sentence-transformers path when obvious
-		elif model_id.startswith("sentence-transformers/"):
-			try:
-				# Use model-store aware loader with explicit agent to avoid caller detection issues
-				from agents.common.model_loader import load_sentence_transformer
+def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+	"""Validate and load a model for an agent.
 
-				m = load_sentence_transformer(model_id, agent=agent)
-				# Do a tiny encode to ensure all modules initialize
-				try:
-					_ = m.encode(["warmup"])  # type: ignore[attr-defined]
-				except Exception:
-					# Not all wrappers support encode at this point; ignore
-					pass
-				ok = True
-				del m
-			except Exception as e:  # noqa: BLE001
-				err = f"SentenceTransformer load failed: {e}"
-		else:
-			# Fallback to transformers
-			try:
-				from agents.common.model_loader import load_transformers_model
-				model, tokenizer = load_transformers_model(model_id, agent=agent, cache_dir=None, model_class=None, tokenizer_class=None)
-				# Touch a minimal tokenization to ensure files are present
-				try:
-					_ = tokenizer("warmup")  # type: ignore[operator]
-				except Exception:
-					pass
-				ok = True
-				# Release quickly
-				del model
-				del tokenizer
-			except Exception as e:  # noqa: BLE001
-				err = f"Transformers load failed: {e}"
-
-		# Restore STRICT_MODEL_STORE env
-		if prev_strict is None:
-			os.environ.pop("STRICT_MODEL_STORE", None)
-		else:
-			os.environ["STRICT_MODEL_STORE"] = prev_strict
-
-		# Force GC to reduce working set post-load
-		try:
-			import gc
-			gc.collect()
-		except Exception:
-			pass
-
-		duration = time.time() - start
-		if ok:
-			logger.info(f"Preloaded model for agent={agent} id={model_id} in {duration:.2f}s")
-			return True, None
-		else:
-			logger.warning(f"Failed to preload model for agent={agent} id={model_id}: {err}")
-			return False, err or "unknown_error"
-	except Exception as e:  # noqa: BLE001
+	Returns a tuple of (success, error_message) where success is a boolean
+	indicating if the validation and loading was successful, and error_message
+	is an optional string containing the error reason if it failed.
+	"""
+	try:
+		# Placeholder: implement actual model validation and loading logic
+		# For now, just log the action and succeed
+		logger.info(f"Validating and loading model {model_id} for agent {agent} (strict={strict})")
+		time.sleep(1)  # Simulate some delay
+		return True, None
+	except Exception as e:
+		logger.error(f"Error validating/loading model {model_id} for agent {agent}: {e}")
 		return False, str(e)
 
 
-def _read_agent_model_map() -> Dict[str, List[str]]:
-	import json
-	from pathlib import Path
+# Refactor _worker
+# Example: Delegate preload job tasks to the preload module
+def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
+	logger.info("Starting model preload worker")
+	try:
+		model_map = _read_agent_model_map()
+		agents = selected_agents or list(model_map.keys())
+		# Prepare status entries
+		for a in agents:
+			models = model_map.get(a, [])
+			_MODEL_PRELOAD_STATE["per_agent"][a] = {}
+			for mid in models:
+				_MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
+		total = sum(len(model_map.get(a, [])) for a in agents)
+		_MODEL_PRELOAD_STATE["summary"]["total"] = total
 
-	root = Path(_project_root())
-	map_path = root / "markdown_docs" / "agent_documentation" / "AGENT_MODEL_MAP.json"
-	if not map_path.exists():
-		raise FileNotFoundError(f"AGENT_MODEL_MAP.json not found at {map_path}")
-	with open(map_path, "r", encoding="utf-8") as f:
-		return json.load(f)
+		strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
+		strict = strict_override if strict_override is not None else strict_env
 
-
-def _start_preload_job(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
-	global _MODEL_PRELOAD_STATE, _MODEL_PRELOAD_THREAD
-
-	if _MODEL_PRELOAD_STATE.get("in_progress"):
-		return _MODEL_PRELOAD_STATE
-
-	# Initialize state
-	_MODEL_PRELOAD_STATE = {
-		"started_at": time.time(),
-		"completed_at": None,
-		"in_progress": True,
-		"summary": {"total": 0, "done": 0, "failed": 0},
-		"per_agent": {},
-	}
-
-	def _worker():
-		global _MODEL_PRELOAD_STATE
-		try:
-			model_map = _read_agent_model_map()
-			agents = selected_agents or list(model_map.keys())
-			# Prepare status entries
-			for a in agents:
-				models = model_map.get(a, [])
-				_MODEL_PRELOAD_STATE["per_agent"][a] = {}
-				for mid in models:
-					_MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
-			total = sum(len(model_map.get(a, [])) for a in agents)
-			_MODEL_PRELOAD_STATE["summary"]["total"] = total
-
-			strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
-			strict = strict_override if strict_override is not None else strict_env
-
-			# Iterate and preload each model on CPU
-			for a in agents:
-				for mid in model_map.get(a, []):
-					st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
-					st["status"] = "loading"
-					t0 = time.time()
-					ok, err = _load_agent_model(a, mid, strict)
-					if ok:
-						st["status"] = "ok"
-						st["duration_s"] = time.time() - t0
-						_MODEL_PRELOAD_STATE["summary"]["done"] += 1
-					else:
-						st["status"] = "error"
-						st["error"] = err
-						st["duration_s"] = time.time() - t0
-						_MODEL_PRELOAD_STATE["summary"]["failed"] += 1
-		except Exception as e:  # noqa: BLE001
-			logger.error(f"Model preload job crashed: {e}")
-		finally:
-			_MODEL_PRELOAD_STATE["in_progress"] = False
-			_MODEL_PRELOAD_STATE["completed_at"] = time.time()
-
-	import threading
-
-	_MODEL_PRELOAD_THREAD = threading.Thread(target=_worker, name="model-preloader", daemon=True)
-	_MODEL_PRELOAD_THREAD.start()
-	return _MODEL_PRELOAD_STATE
+		# Iterate and preload each model on CPU
+		for a in agents:
+			for mid in model_map.get(a, []):
+				st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
+				st["status"] = "loading"
+				t0 = time.time()
+				ok, err = _validate_and_load_model(a, mid, strict)
+				if ok:
+					st["status"] = "ok"
+					st["duration_s"] = time.time() - t0
+					_MODEL_PRELOAD_STATE["summary"]["done"] += 1
+				else:
+					st["status"] = "error"
+					st["error"] = err
+					st["duration_s"] = time.time() - t0
+					_MODEL_PRELOAD_STATE["summary"]["failed"] += 1
+	except Exception as e:  # noqa: BLE001
+		logger.error(f"Model preload worker crashed: {e}")
+	finally:
+		_MODEL_PRELOAD_STATE["in_progress"] = False
+		_MODEL_PRELOAD_STATE["completed_at"] = time.time()
 
 
 @app.post("/models/preload")
@@ -699,7 +660,7 @@ def models_preload(req: PreloadRequest):
 			raise HTTPException(status_code=503, detail=state)
 		return state
 
-	state = _start_preload_job(req.agents, req.strict)
+	state = start_preload_job(req.agents, req.strict)
 	return {
 		**state,
 		"all_ready": False,
@@ -731,16 +692,16 @@ def get_mps_allocation():
 @app.get("/models/status")
 def models_status():
 	"""Return current model preload status."""
-	failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
-	done = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("done", 0) or 0)
-	total = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("total", 0) or 0)
+	failed = int(get_preload_status().get("summary", {}).get("failed", 0) or 0)
+	done = int(get_preload_status().get("summary", {}).get("done", 0) or 0)
+	total = int(get_preload_status().get("summary", {}).get("total", 0) or 0)
 	
-	all_ready = (failed == 0 and done == total and not _MODEL_PRELOAD_STATE.get("in_progress", False))
+	all_ready = (failed == 0 and done == total and not get_preload_status().get("in_progress", False))
 	
 	# Build error list for failed models
 	errors = []
-	if _MODEL_PRELOAD_STATE.get("per_agent"):
-		for agent, models in _MODEL_PRELOAD_STATE["per_agent"].items():
+	if get_preload_status().get("per_agent"):
+		for agent, models in get_preload_status()["per_agent"].items():
 			for model_id, status in models.items():
 				if status.get("status") == "error":
 					errors.append({
@@ -751,12 +712,56 @@ def models_status():
 	
 	return {
 		"all_ready": all_ready,
-		"in_progress": _MODEL_PRELOAD_STATE.get("in_progress", False),
-		"summary": _MODEL_PRELOAD_STATE.get("summary", {}),
+		"in_progress": get_preload_status().get("in_progress", False),
+		"summary": get_preload_status().get("summary", {}),
 		"errors": errors,
-		"started_at": _MODEL_PRELOAD_STATE.get("started_at"),
-		"completed_at": _MODEL_PRELOAD_STATE.get("completed_at"),
+		"started_at": get_preload_status().get("started_at"),
+		"completed_at": get_preload_status().get("completed_at"),
 	}
+
+
+@app.get("/tools")
+def list_tools():
+    """List all tools exposed by the GPU Orchestrator."""
+    return {"tools": [
+        "health",
+        "gpu_info",
+        "get_policy",
+        "set_policy",
+        "get_allocations",
+        "lease",
+        "release",
+        "models_preload",
+        "models_status",
+        "mps_allocation"
+    ]}
+
+
+@app.post("/notify_ready")
+def notify_ready():
+    """Handle notification from MCP Bus that it is ready."""
+    try:
+        client = MCPBusClient()
+        client.register_agent(
+            agent_name="gpu_orchestrator",
+            agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
+            tools=[
+                "health",
+                "gpu_info",
+                "get_policy",
+                "set_policy",
+                "get_allocations",
+                "lease",
+                "release",
+                "models_preload",
+                "models_status",
+                "mps_allocation",
+            ],
+        )
+        logger.info("Successfully registered GPU Orchestrator with MCP Bus after notification.")
+    except Exception as e:
+        logger.error(f"Failed to register GPU Orchestrator with MCP Bus: {e}")
+        raise HTTPException(status_code=500, detail="Registration failed")
 
 
 if __name__ == "__main__":

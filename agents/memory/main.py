@@ -19,7 +19,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 # Import database utilities
 from agents.common.database import close_connection_pool, initialize_connection_pool
@@ -59,19 +59,28 @@ class Article(BaseModel):
     content: str
     metadata: dict
 
+    class Config:
+        arbitrary_types_allowed = True
+
 class TrainingExample(BaseModel):
     task: str
     input: dict
     output: dict
     critique: str
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 class VectorSearch(BaseModel):
     query: str
     top_k: int = 5
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
 class ToolCall(BaseModel):
     args: list
     kwargs: dict
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 import time
 
@@ -272,8 +281,6 @@ except Exception:
 
 from fastapi import Request
 
-# ... existing code ...
-
 @app.get("/health")
 @app.post("/health")
 async def health(request: Request):
@@ -314,8 +321,6 @@ def save_article_endpoint(request: dict):
         raise HTTPException(status_code=400, detail=f"Error saving article: {str(e)}")
 
 from fastapi import Request
-
-# ... existing code ...
 
 @app.post("/get_article")
 async def get_article_endpoint(request: Request):

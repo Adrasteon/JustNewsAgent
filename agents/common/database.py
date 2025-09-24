@@ -115,15 +115,18 @@ def get_db_cursor(commit: bool = False):
     with get_db_connection() as conn:
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
+            logger.debug("Acquired database cursor.")
             yield conn, cursor
             if commit:
                 conn.commit()
+                logger.debug("Transaction committed.")
         except Exception as e:
             conn.rollback()
             logger.error(f"Database operation error: {e}")
             raise
         finally:
             cursor.close()
+            logger.debug("Database cursor closed.")
 
 def execute_query(query: str, params: tuple = None, fetch: bool = True) -> list | None:
     """

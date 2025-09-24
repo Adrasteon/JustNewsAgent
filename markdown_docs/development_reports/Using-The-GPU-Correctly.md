@@ -463,6 +463,14 @@ The configuration detailed in this document has been **production-validated** wi
 - ✅ **Critical crash point passed** (5th image processing)
 - ✅ **SystemD service stable** with correct configuration
 
+## Recent Updates
+
+### September 23, 2025
+- **GPU Utilization Validation**: Conducted segmented testing to confirm GPU usage.
+- **Real-Time Monitoring**: Utilized `nvidia-smi` to observe GPU activity during tests.
+- **Identified Issues**: `/gpu/info` endpoint failures logged for future resolution.
+- **Next Steps**: Address endpoint communication issues and enhance test coverage.
+
 ## 📚 Related Documentation
 
 - **Technical Architecture**: `markdown_docs/TECHNICAL_ARCHITECTURE.md`

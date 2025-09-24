@@ -56,6 +56,14 @@ pgrep -x nvidia-cuda-mps-control
 ls -la /tmp/nvidia-mps/
 ```
 
+## Recent Updates
+
+### September 23, 2025
+- **Test Analyst Segmented Script**: Updated to validate GPU utilization during segmented testing.
+- **Real-Time GPU Monitoring**: Confirmed GPU activity using `nvidia-smi` during test execution.
+- **Pending Issues**: `/gpu/info` endpoint failures (502 Bad Gateway) require further investigation.
+- **Next Steps**: Documented in TODOs for future resolution.
+
 ## Preflight gating
 - Gate script enforces `all_ready=true` before agents start.
 - ExecStartPre runs: `deploy/systemd/preflight.sh --gate-only <instance>`

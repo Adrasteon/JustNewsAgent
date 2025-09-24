@@ -28,7 +28,8 @@ CREATE TABLE articles (
     content TEXT NOT NULL,
     metadata JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    embedding NUMERIC[]
+    embedding NUMERIC[],
+    analyzed BOOLEAN DEFAULT FALSE -- New column to track analysis status
 );
 ```
 
@@ -37,6 +38,7 @@ CREATE TABLE articles (
 - **Vector Embeddings**: NUMERIC[] array for similarity search
 - **JSONB Metadata**: Flexible metadata storage (source, entities, scores)
 - **Timestamps**: Automatic creation tracking
+- **Analysis Tracking**: New `analyzed` column to indicate if the article has been processed.
 
 ### Training Examples Table
 Continuous learning data storage:
