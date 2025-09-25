@@ -6,10 +6,13 @@ status: current
 last_updated: 2025-09-12
 ---
 
-# JustNewsAgent V4 🤖
+# JustNewsAgent v0.8.0 🤖
 
+[![Version](https://img.shields.io/badge/version-0.8.0--beta-orange.svg)]()
 [![License: Apache 2.0](### 📊 **System Status**
-- **Status:** Production Ready with Unified Startup System & Enterprise GPU Management
+- **Status:** Beta Release Candidate - Production Ready with Unified Startup System & Enterprise GPU Management
+- **Version:** 0.8.0 (Beta)
+- **Release Date:** September 25, 2025
 - **GPU Utilization:** Optimized across all agents (2-8GB per agent) with NVIDIA MPS resource isolation
 - **Performance:** 730+ articles/sec GPU processing, seamless CPU fallback with automatic switching
 - **Reliability:** 99.9% uptime with comprehensive error handling and post-reboot auto-recovery

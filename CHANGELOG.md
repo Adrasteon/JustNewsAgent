@@ -10,7 +10,7 @@ last_updated: 2025-09-12
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2025-09-25 - **UNIFIED STARTUP SYSTEM & POST-REBOOT RECOVERY COMPLETE**
+## [0.8.0] - 2025-09-25 - **BETA RELEASE CANDIDATE**
 
 ### 🚀 **Unified Startup System - ENTERPRISE PRODUCTION DEPLOYMENT**
 - **✅ Complete Directory Reorganization**: Unified startup architecture implemented under `deploy/systemd/` structure
