@@ -25,6 +25,65 @@ curl -s http://127.0.0.1:8014/models/status | jq '{in_progress, all_ready, summa
 # MPS status and allocation
 curl -s http://127.0.0.1:8014/gpu/info | jq '{mps_enabled, mps}'
 curl -s http://127.0.0.1:8014/mps/allocation | jq '.mps_resource_allocation.system_summary'
+
+# Comprehensive system status
+./justnews-system-status.sh
+```
+
+## Unified Startup Management
+```bash
+# One-command cold start (post-reboot)
+sudo ./deploy/systemd/cold_start.sh
+
+# One-command fresh restart (recommended)
+sudo ./deploy/systemd/reset_and_start.sh
+
+# Manual orchestrator-first startup
+sudo systemctl enable --now justnews@gpu_orchestrator
+curl -fsS http://127.0.0.1:8014/ready
+sudo ./deploy/systemd/enable_all.sh start
+sudo ./deploy/systemd/health_check.sh
+```
+
+## Manage services
+```bash
+sudo systemctl status justnews@scout.service
+sudo systemctl restart justnews@scout.service
+sudo journalctl -u justnews@scout.service -e
+```
+
+## Preflight
+```bash
+# Gate-only (systemd pre-start)
+deploy/systemd/preflight.sh --gate-only mcp_bus
+
+# Full validation (interactive ops)
+sudo deploy/systemd/preflight.sh
+
+# NOPASSWD helper
+sudo deploy/systemd/setup_preflight_nopasswd.sh --install
+```
+
+## Orchestrator
+```bash
+# Start warmup
+curl -s -X POST -H 'Content-Type: application/json' \
+ -d '{"refresh": false}' http://127.0.0.1:8014/models/preload
+# Status
+curl -s http://127.0.0.1:8014/models/status | jq
+
+# MPS status
+curl -s http://127.0.0.1:8014/gpu/info | jq '.mps'
+# MPS control daemon
+pgrep -x nvidia-cuda-mps-control || echo "MPS daemon not running"
+```
+
+## MCP Bus
+```bash
+# Agents
+curl -s http://127.0.0.1:8000/agents | jq
+# Health
+curl -s http://127.0.0.1:8000/health
 ```
 
 ## Manage services

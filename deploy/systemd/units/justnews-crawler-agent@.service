@@ -24,7 +24,7 @@ Environment=UNIFIED_CRAWLER_AI_ANALYSIS=true
 Environment=UNIFIED_CRAWLER_PERFORMANCE_MONITORING=true
 
 # Start the Crawler agent
-ExecStart=/home/adra/miniconda3/condabin/conda run -n justnews-v2-py312 python -m agents.crawler.main
+ExecStart=/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/scripts/justnews-start-agent.sh %i
 ExecReload=/bin/kill -HUP $MAINPID
 
 # Resource limits for production crawling

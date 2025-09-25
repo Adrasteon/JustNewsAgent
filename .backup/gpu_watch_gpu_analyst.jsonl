@@ -1,0 +1,547 @@
+{
+  "start_time": "2025-09-10T17:39:08+01:00",
+  "interval_sec": 1,
+  "samples": [
+  {\n    "time": "2025-09-10T17:39:08+01:00",\n    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2373,"memory_total_mib":24576,"utilization_percent":2,"temperature_c":29,"power_watts":18.93}],\n    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]\n  },
+  {
+    "time": "2025-09-10T17:39:10+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2396,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":34.61}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:11+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2395,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":36.80}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:12+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2394,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":34.92}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:13+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2394,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.28}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:14+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2358,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.36}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:15+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2349,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":34.86}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:16+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2364,"memory_total_mib":24576,"utilization_percent":22,"temperature_c":30,"power_watts":31.63}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:17+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2364,"memory_total_mib":24576,"utilization_percent":3,"temperature_c":29,"power_watts":23.05}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:18+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2386,"memory_total_mib":24576,"utilization_percent":45,"temperature_c":29,"power_watts":24.97}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:20+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2386,"memory_total_mib":24576,"utilization_percent":42,"temperature_c":30,"power_watts":34.14}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:21+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2387,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.68}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:22+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2387,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.88}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:23+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2386,"memory_total_mib":24576,"utilization_percent":41,"temperature_c":30,"power_watts":35.41}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:24+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2375,"memory_total_mib":24576,"utilization_percent":3,"temperature_c":29,"power_watts":28.45}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:25+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2374,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.67}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:26+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2374,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":21.28}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:27+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2396,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":31.21}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:28+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2394,"memory_total_mib":24576,"utilization_percent":24,"temperature_c":30,"power_watts":36.90}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:30+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2393,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":36.00}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:31+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2394,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.85}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:32+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2371,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.77}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:33+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2370,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":33.96}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:34+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2369,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":36.42}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:35+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2379,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":29,"power_watts":30.48}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:36+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2379,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.91}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:37+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2377,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.49}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:39+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2377,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.40}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:40+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2377,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":18.71}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:41+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2373,"memory_total_mib":24576,"utilization_percent":30,"temperature_c":29,"power_watts":23.65}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:42+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2403,"memory_total_mib":24576,"utilization_percent":45,"temperature_c":29,"power_watts":28.36}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:43+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2402,"memory_total_mib":24576,"utilization_percent":42,"temperature_c":30,"power_watts":35.35}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:44+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2399,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":36.97}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:45+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2399,"memory_total_mib":24576,"utilization_percent":44,"temperature_c":30,"power_watts":34.48}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:46+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2376,"memory_total_mib":24576,"utilization_percent":42,"temperature_c":30,"power_watts":36.03}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:47+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2384,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":29,"power_watts":32.12}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:49+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2382,"memory_total_mib":24576,"utilization_percent":7,"temperature_c":29,"power_watts":23.90}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:50+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2354,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.68}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:51+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2354,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.61}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:52+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.40}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:53+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.51}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:54+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.07}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:55+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.62}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:56+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":20.29}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:57+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.24}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:39:58+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":18.96}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:00+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.11}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:01+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.83}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:02+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.75}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:03+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.33}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:04+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":7,"temperature_c":29,"power_watts":19.68}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:05+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.17}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:06+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.96}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:07+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":7,"temperature_c":29,"power_watts":19.42}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:08+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.00}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:10+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.32}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:11+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.50}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:12+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.76}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:13+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":7,"temperature_c":29,"power_watts":19.67}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:14+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.71}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:15+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.41}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:16+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.80}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:17+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.61}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:18+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.14}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:19+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.09}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:21+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.28}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:22+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":7,"temperature_c":29,"power_watts":20.84}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:23+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2341,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.60}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:24+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2340,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.27}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:25+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2349,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":26.01}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:26+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2368,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":23.22}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:27+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2385,"memory_total_mib":24576,"utilization_percent":49,"temperature_c":29,"power_watts":33.99}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:28+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2383,"memory_total_mib":24576,"utilization_percent":25,"temperature_c":30,"power_watts":37.13}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:29+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2382,"memory_total_mib":24576,"utilization_percent":25,"temperature_c":30,"power_watts":35.50}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:31+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2382,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":36.81}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:32+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2352,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":34.77}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:33+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2351,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.85}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:34+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2351,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":35.63}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:35+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2355,"memory_total_mib":24576,"utilization_percent":44,"temperature_c":30,"power_watts":35.59}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:36+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2361,"memory_total_mib":24576,"utilization_percent":26,"temperature_c":29,"power_watts":32.87}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:37+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2359,"memory_total_mib":24576,"utilization_percent":47,"temperature_c":29,"power_watts":28.43}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:38+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2358,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":23.50}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:39+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2358,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.48}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:41+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2358,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":19.44}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:42+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2303,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":21.17}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:43+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2326,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":29,"power_watts":34.26}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:44+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2350,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.07}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:45+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2348,"memory_total_mib":24576,"utilization_percent":22,"temperature_c":30,"power_watts":35.28}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:46+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2347,"memory_total_mib":24576,"utilization_percent":42,"temperature_c":30,"power_watts":35.93}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:47+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2347,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":36.77}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:48+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2311,"memory_total_mib":24576,"utilization_percent":45,"temperature_c":30,"power_watts":34.22}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:49+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2311,"memory_total_mib":24576,"utilization_percent":21,"temperature_c":30,"power_watts":37.08}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:51+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2311,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":35.69}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:52+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2316,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.91}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:53+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2316,"memory_total_mib":24576,"utilization_percent":22,"temperature_c":30,"power_watts":37.07}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:54+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2330,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":30,"power_watts":34.45}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:55+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2329,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":37.23}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:56+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2329,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.74}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:57+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2331,"memory_total_mib":24576,"utilization_percent":47,"temperature_c":30,"power_watts":36.07}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:58+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2321,"memory_total_mib":24576,"utilization_percent":4,"temperature_c":30,"power_watts":33.56}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:40:59+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2321,"memory_total_mib":24576,"utilization_percent":12,"temperature_c":29,"power_watts":19.73}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:01+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2321,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":19.51}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:02+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2321,"memory_total_mib":24576,"utilization_percent":12,"temperature_c":29,"power_watts":20.36}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:03+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2316,"memory_total_mib":24576,"utilization_percent":0,"temperature_c":29,"power_watts":23.30}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:04+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2316,"memory_total_mib":24576,"utilization_percent":25,"temperature_c":29,"power_watts":32.83}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:05+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2351,"memory_total_mib":24576,"utilization_percent":8,"temperature_c":29,"power_watts":30.45}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:06+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2349,"memory_total_mib":24576,"utilization_percent":43,"temperature_c":29,"power_watts":34.32}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:07+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2348,"memory_total_mib":24576,"utilization_percent":25,"temperature_c":30,"power_watts":37.27}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  },
+  {
+    "time": "2025-09-10T17:41:08+01:00",
+    "gpus": [,{"index":0,"name":"NVIDIA GeForce RTX 3090","memory_used_mib":2348,"memory_total_mib":24576,"utilization_percent":20,"temperature_c":30,"power_watts":35.44}],
+    "processes": [,{"pid":60570,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":412},{"pid":62097,"process_name":"/home/adra/miniconda3/envs/justnews-v2-py312/bin/python","used_memory_mib":1428} ]
+  }
+]
+}

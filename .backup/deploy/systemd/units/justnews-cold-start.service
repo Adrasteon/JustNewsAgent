@@ -1,0 +1,13 @@
+[Unit]
+Description=JustNews cold start (one-shot bring-up after reboot)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/bin/bash -lc '/usr/local/bin/justnews-cold-start.sh'
+
+[Install]
+WantedBy=multi-user.target

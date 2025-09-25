@@ -1,0 +1,198 @@
+{
+  "timestamp": 1756653704.237281,
+  "checks": {
+    "project_structure": {
+      "status": "passed",
+      "details": {
+        "project_root": "/home/adra/JustNewsAgent",
+        "required_paths_checked": 8,
+        "missing_paths": [
+          ".env"
+        ],
+        "structure_valid": false
+      }
+    },
+    "dependencies": {
+      "status": "passed",
+      "details": {
+        "dependencies_checked": [
+          "python3",
+          "conda",
+          "nvidia-smi",
+          "git"
+        ],
+        "installed": [
+          "python3",
+          "conda",
+          "nvidia-smi",
+          "git"
+        ],
+        "missing": [],
+        "all_available": true
+      }
+    },
+    "gpu_hardware": {
+      "status": "passed",
+      "details": {
+        "vendor": "nvidia",
+        "count": 1,
+        "devices": [
+          {
+            "id": 0,
+            "memory_mb": 24576,
+            "memory_gb": 24.0
+          }
+        ]
+      }
+    },
+    "conda_environment": {
+      "status": "passed",
+      "details": {
+        "environment_name": "justnews-v2-py312",
+        "exists": true,
+        "active": true,
+        "python_version": "Python 3.12.11"
+      }
+    },
+    "configuration_files": {
+      "status": "passed",
+      "details": {
+        "config_files": {
+          "gpu_config.json": {
+            "exists": true,
+            "valid_json": true,
+            "size_bytes": 1150
+          },
+          "environment_config.json": {
+            "exists": true,
+            "valid_json": true,
+            "size_bytes": 893
+          },
+          "model_config.json": {
+            "exists": true,
+            "valid_json": true,
+            "size_bytes": 2553
+          }
+        },
+        "all_valid": true
+      }
+    },
+    "configuration_loading": {
+      "status": "passed",
+      "details": {
+        "config_loaded": true,
+        "config_keys": [
+          "gpu_manager",
+          "gpu_devices",
+          "performance",
+          "monitoring"
+        ],
+        "environment_info": {
+          "detected_environment": null,
+          "runtime_environment": null,
+          "effective_environment": null,
+          "hostname": "LinuxBox",
+          "environment_variables": {
+            "JUSTNEWS_ENV": null,
+            "ENV": null
+          },
+          "detection_method": "default"
+        },
+        "available_profiles": 5,
+        "profiles": [
+          "default",
+          "high_performance",
+          "memory_conservative",
+          "debug",
+          "custom_high_end"
+        ]
+      }
+    },
+    "environment_variables": {
+      "status": "passed",
+      "details": {
+        "environment_variables": {
+          "JUSTNEWS_ENV": {
+            "set": false,
+            "value": ""
+          },
+          "GPU_CONFIG_PROFILE": {
+            "set": false,
+            "value": ""
+          },
+          "PYTHONPATH": {
+            "set": true,
+            "value": "/home/adra/JustNewsAgent/agents/common::/home/adra/JustNewsAgent"
+          },
+          "GPU_VENDOR": {
+            "set": false,
+            "value": ""
+          },
+          "GPU_COUNT": {
+            "set": false,
+            "value": ""
+          }
+        },
+        "env_file_exists": false,
+        "env_file_path": "/home/adra/JustNewsAgent/.env"
+      }
+    },
+    "gpu_monitoring": {
+      "status": "passed",
+      "details": {
+        "monitoring_available": false,
+        "error": "cannot import name 'GPUMonitoringSystem' from 'gpu_monitoring_enhanced' (/home/adra/JustNewsAgent/agents/common/gpu_monitoring_enhanced.py)"
+      }
+    },
+    "configuration_profiles": {
+      "status": "passed",
+      "details": {
+        "profiles_tested": 5,
+        "profile_results": {
+          "default": {
+            "loaded": true,
+            "max_memory_gb": 8.0
+          },
+          "high_performance": {
+            "loaded": true,
+            "max_memory_gb": 12.0
+          },
+          "memory_conservative": {
+            "loaded": true,
+            "max_memory_gb": 4.0
+          },
+          "debug": {
+            "loaded": true,
+            "max_memory_gb": 6.0
+          },
+          "custom_high_end": {
+            "loaded": true,
+            "max_memory_gb": 16.0
+          }
+        }
+      }
+    },
+    "performance_settings": {
+      "status": "passed",
+      "details": {
+        "settings": {
+          "batch_size_optimization": true,
+          "memory_preallocation": false,
+          "async_operations": true,
+          "max_memory_per_agent_gb": 8.0,
+          "health_check_interval": 30.0
+        },
+        "issues": [],
+        "valid": true
+      }
+    }
+  },
+  "summary": {
+    "total_checks": 10,
+    "passed": 10,
+    "failed": 0,
+    "errors": 0,
+    "success_rate": 100.0,
+    "overall_status": "passed"
+  }
+}

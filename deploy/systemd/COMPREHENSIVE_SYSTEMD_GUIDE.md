@@ -238,7 +238,9 @@ Install the service/timer pair to trigger a cold start shortly after boot:
 
 ```
 sudo cp deploy/systemd/scripts/justnews-cold-start.sh /usr/local/bin/
+sudo cp deploy/systemd/scripts/justnews-boot-smoke.sh /usr/local/bin/
 sudo chmod +x /usr/local/bin/justnews-cold-start.sh
+sudo chmod +x /usr/local/bin/justnews-boot-smoke.sh
 sudo cp deploy/systemd/units/justnews-cold-start.service /etc/systemd/system/
 sudo cp deploy/systemd/units/justnews-cold-start.timer /etc/systemd/system/
 sudo systemctl daemon-reload

@@ -24,6 +24,13 @@
         "status": "active"
       },
       {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/ANALYST_AGENT_DOCUMENTATION.md",
+        "title": "Analyst Agent Documentation",
+        "description": "Complete documentation for the JustNews Analyst Agent including GPU acceleration, troubleshooting, and operations",
+        "last_updated": "2025-09-25",
+        "status": "current"
+      },
+      {
         "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/api_documentation.md",
         "title": "API Documentation",
         "description": "Auto-generated description for API Documentation",
@@ -505,6 +512,13 @@
         "status": "current"
       },
       {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU_ANALYSIS_RESOLUTION_REPORT.md",
+        "title": "GPU Analysis Debugging and Resolution Report",
+        "description": "Comprehensive documentation of the GPU analysis issue resolution process, root causes, solutions, and prevention measures",
+        "last_updated": "2025-09-25",
+        "status": "current"
+      },
+      {
         "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/MAINTENANCE_COMPLETION_REPORT.md",
         "title": "JustNews Documentation Maintenance Action Plan - COMPLETED",
         "description": "Auto-generated description for JustNews Documentation Maintenance Action Plan - COMPLETED",
@@ -818,6 +832,18 @@
         "title": "PostgreSQL Integration (Systemd)",
         "description": "DB configuration and readiness validation for production.",
         "last_updated": "2025-09-12",
+        "status": "current"
+      }
+    ]
+  },
+  {
+    "category": "Database Documentation",
+    "files": [
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/docs/database_overview.md",
+        "title": "JustNews Database Overview (Preliminary)",
+        "description": "Comprehensive breakdown of the JustNews database schema, tables, and data flow during system execution phases.",
+        "last_updated": "2025-09-24",
         "status": "current"
       }
     ]
