@@ -1,0 +1,36 @@
+{
+  "scout": [
+    "google/bert_uncased_L-2_H-128_A-2",
+    "cardiffnlp/twitter-roberta-base-sentiment-latest",
+    "martin-ha/toxic-comment-model"
+  ],
+  "fact_checker": [
+    "distilbert-base-uncased",
+    "roberta-base",
+    "sentence-transformers/all-mpnet-base-v2"
+  ],
+  "memory": [
+    "sentence-transformers/all-MiniLM-L6-v2"
+  ],
+  "synthesizer": [
+    "distilgpt2",
+    "google/flan-t5-small"
+  ],
+  "critic": [
+    "unitary/unbiased-toxic-roberta",
+    "unitary/toxic-bert"
+  ],
+  "analyst": [
+    "google/bert_uncased_L-2_H-128_A-2",
+    "en_core_web_sm"
+  ],
+  "newsreader": [
+    "sentence-transformers/all-MiniLM-L6-v2"
+  ],
+  "balancer": [
+    "google/bert_uncased_L-2_H-128_A-2"
+  ],
+  "chief_editor": [
+    "distilbert-base-uncased"
+  ]
+}

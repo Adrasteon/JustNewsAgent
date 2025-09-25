@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "entity_id": "Q22906897",
+      "name": "Microsoft Corporation v. United States of America",
+      "description": "2015 Supreme Court case about data privacy and extraterritoriality",
+      "knowledge_base": "wikidata",
+      "url": "https://www.wikidata.org/wiki/Q22906897",
+      "confidence": 0.8,
+      "aliases": [],
+      "metadata": {
+        "match_type": "label",
+        "language": "en"
+      }
+    }
+  ],
+  "cached_at": "2025-09-08T11:48:03.015908"
+}

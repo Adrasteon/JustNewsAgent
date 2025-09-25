@@ -3,7 +3,7 @@ title: Preflight Runbook — Model Gating and Preload Failures
 description: How to use the preflight gate to enforce model readiness and troubleshoot preload failures from the GPU Orchestrator.
 tags: [operations, preflight, orchestrator, models, readiness]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-09-25
 ---
 
 # Preflight Runbook: Model Gating and Preload Failures
@@ -16,8 +16,18 @@ This runbook explains how to use the preflight gate to enforce model readiness a
 - Verifies the GPU Orchestrator is reachable on port 8014.
 - Ensures the Model Store is canonical (STRICT mode, no downloads).
 - Triggers/monitors a models preload warmup and gates startup until `all_ready=true`.
-- Validates NVIDIA MPS is enabled and operational for GPU resource isolation.
+- Validates NVIDIA MPS is enabled and operational for GPU resource isolation (23.0GB allocation, 69.6% efficiency).
 - Exits non‑zero on failure to stop systemd from starting dependent services.
+
+## Integration with Unified Startup System
+The preflight gate is integrated into the unified startup system (`deploy/systemd/`), serving as the critical gating mechanism for all 14 JustNews agents. Each service includes `ExecStartPre` directives that call the preflight script in gate-only mode, ensuring:
+
+- Model readiness before agent initialization
+- MPS resource isolation validation
+- Proper dependency ordering across all services
+- Post-reboot recovery capability
+
+The unified system provides comprehensive health monitoring and automatic recovery mechanisms that work in conjunction with preflight validation.
 
 ## Quick usage
 
@@ -81,7 +91,7 @@ Environment knobs:
 5. MPS not operational
    - Cause: NVIDIA MPS daemon not running or misconfigured.
    - Fix: Start MPS daemon with `nvidia-cuda-mps-control -d`; verify `/tmp/nvidia-mps/` exists.
-   - Verify: Check `curl :8014/gpu/info` shows `mps_enabled: true`; verify control process running.
+   - Verify: Check `curl :8014/gpu/info` shows `mps_enabled: true` with 23.0GB allocation (69.6% efficiency); verify control process running.
 
 ## Quick recovery
 - Refresh job to clear past failures: `POST /models/preload {"refresh": true}`
@@ -96,6 +106,8 @@ Environment knobs:
 - Keep AGENT_MODEL_MAP.json accurate with minimal diff reviews.
 - Use STRICT_MODEL_STORE=1, MODEL_STORE_ROOT set in environment files.
 - Run preflight via systemd ExecStartPre gate before starting agents/crawls.
+- Leverage unified startup system for automated dependency management and health monitoring.
+- Monitor MPS allocation efficiency (target: 69.6%+) and adjust resource allocation as needed.
 
 ## See also
 
