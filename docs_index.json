@@ -24,6 +24,13 @@
         "status": "active"
       },
       {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/ANALYST_AGENT_DOCUMENTATION.md",
+        "title": "Analyst Agent Documentation",
+        "description": "Complete documentation for the JustNews Analyst Agent including GPU acceleration, troubleshooting, and operations",
+        "last_updated": "2025-09-25",
+        "status": "current"
+      },
+      {
         "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/api_documentation.md",
         "title": "API Documentation",
         "description": "Auto-generated description for API Documentation",
@@ -502,6 +509,13 @@
         "title": "GPU Usage Audit Report - JustNewsAgent",
         "description": "Auto-generated description for GPU Usage Audit Report - JustNewsAgent",
         "last_updated": "2025-09-12",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU_ANALYSIS_RESOLUTION_REPORT.md",
+        "title": "GPU Analysis Debugging and Resolution Report",
+        "description": "Comprehensive documentation of the GPU analysis issue resolution process, root causes, solutions, and prevention measures",
+        "last_updated": "2025-09-25",
         "status": "current"
       },
       {

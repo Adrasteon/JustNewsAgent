@@ -253,8 +253,17 @@ def analyze_sentiment_and_bias_endpoint(call: ToolCall):
 
         from .tools import analyze_sentiment_and_bias
         logger.info(f"Calling analyze_sentiment_and_bias with args: {call.args} and kwargs: {call.kwargs}")
+        
+        # Debug: Check GPU analyst status
+        from .gpu_analyst import get_gpu_analyst
+        gpu_analyst = get_gpu_analyst()
+        logger.info(f"GPU analyst status - models_loaded: {gpu_analyst.models_loaded}, gpu_available: {gpu_analyst.gpu_available}")
+        safe, reason = gpu_analyst.is_gpu_safe_to_use()
+        logger.info(f"GPU safe to use: {safe}, reason: {reason}")
+        
         result = analyze_sentiment_and_bias(*call.args, **call.kwargs)
         logger.info(f"analyze_sentiment_and_bias completed successfully")
+        logger.info(f"Result methods - sentiment: {result.get('sentiment_analysis', {}).get('method')}, bias: {result.get('bias_analysis', {}).get('method')}")
         return result
     except Exception as e:
         logger.error(f"An error occurred in analyze_sentiment_and_bias: {e}")
