@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import uuid
 import threading
 import time
+import logging
 
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, ConfigDict
@@ -31,6 +32,9 @@ from .preload import start_preload_job, get_preload_status
 from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
 from agents.gpu_orchestrator.nvml import get_nvml_handle
 
+
+# Ensure the log level is set to DEBUG to capture all debug messages
+logging.basicConfig(level=logging.DEBUG)
 
 logger = get_logger(__name__)
 
@@ -578,21 +582,24 @@ def _read_agent_model_map() -> Dict[str, Any]:
 
 
 def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
-	"""Validate and load a model for an agent.
+    """Validate and load a model for an agent.
 
-	Returns a tuple of (success, error_message) where success is a boolean
-	indicating if the validation and loading was successful, and error_message
-	is an optional string containing the error reason if it failed.
-	"""
-	try:
-		# Placeholder: implement actual model validation and loading logic
-		# For now, just log the action and succeed
-		logger.info(f"Validating and loading model {model_id} for agent {agent} (strict={strict})")
-		time.sleep(1)  # Simulate some delay
-		return True, None
-	except Exception as e:
-		logger.error(f"Error validating/loading model {model_id} for agent {agent}: {e}")
-		return False, str(e)
+    Returns a tuple of (success, error_message) where success is a boolean
+    indicating if the validation and loading was successful, and error_message
+    is an optional string containing the error reason if it failed.
+    """
+    try:
+        # Attempt to load the model using the mocked function
+        from agents.common.model_loader import load_sentence_transformer
+        logger.info(f"Validating and loading model {model_id} for agent {agent} (strict={strict})")
+        success, error = load_sentence_transformer(model_id, agent=agent)
+        logger.debug(f"load_sentence_transformer returned: success={success}, error={error}")
+        if not success:
+            raise RuntimeError(error)
+        return True, None
+    except Exception as e:
+        logger.error(f"Error validating/loading model {model_id} for agent {agent}: {e}")
+        return False, str(e)
 
 
 # Refactor _worker
@@ -614,13 +621,19 @@ def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool
 		strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
 		strict = strict_override if strict_override is not None else strict_env
 
+		logger.debug(f"Initial _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
+
 		# Iterate and preload each model on CPU
 		for a in agents:
 			for mid in model_map.get(a, []):
 				st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
+				logger.debug(f"Processing model {mid} for agent {a}")
+				logger.debug(f"Before invoking _validate_and_load_model: {st}")
+				logger.debug(f"_MODEL_PRELOAD_STATE summary before: {_MODEL_PRELOAD_STATE['summary']}")
 				st["status"] = "loading"
 				t0 = time.time()
 				ok, err = _validate_and_load_model(a, mid, strict)
+				logger.debug(f"_validate_and_load_model result: ok={ok}, err={err}")
 				if ok:
 					st["status"] = "ok"
 					st["duration_s"] = time.time() - t0
@@ -630,11 +643,15 @@ def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool
 					st["error"] = err
 					st["duration_s"] = time.time() - t0
 					_MODEL_PRELOAD_STATE["summary"]["failed"] += 1
+				logger.debug(f"Updated _MODEL_PRELOAD_STATE for agent {a}, model {mid}: {st}")
+				logger.debug(f"_MODEL_PRELOAD_STATE summary after: {_MODEL_PRELOAD_STATE['summary']}")
+			logger.debug(f"_MODEL_PRELOAD_STATE after processing agent {a}: {_MODEL_PRELOAD_STATE}")
 	except Exception as e:  # noqa: BLE001
 		logger.error(f"Model preload worker crashed: {e}")
 	finally:
 		_MODEL_PRELOAD_STATE["in_progress"] = False
 		_MODEL_PRELOAD_STATE["completed_at"] = time.time()
+		logger.debug(f"Final _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
 
 
 @app.post("/models/preload")
@@ -661,6 +678,8 @@ def models_preload(req: PreloadRequest):
 		return state
 
 	state = start_preload_job(req.agents, req.strict)
+	logger.debug(f"_MODEL_PRELOAD_STATE during /models/preload: {_MODEL_PRELOAD_STATE}")
+	logger.debug(f"_MODEL_PRELOAD_STATE before response: {_MODEL_PRELOAD_STATE}")
 	return {
 		**state,
 		"all_ready": False,
@@ -762,6 +781,48 @@ def notify_ready():
     except Exception as e:
         logger.error(f"Failed to register GPU Orchestrator with MCP Bus: {e}")
         raise HTTPException(status_code=500, detail="Registration failed")
+
+
+@app.on_event("startup")
+async def orchestrator_startup():
+    logger.info("Starting GPU Orchestrator...")
+    initialize_nvml()  # Explicitly call the NVML initialization function
+    logger.info("GPU Orchestrator startup sequence complete.")
+
+
+@app.on_event("startup")
+def initialize_nvml():
+    global _NVML_SUPPORTED, _NVML_INIT_ERROR
+    logger.debug("Checking ENABLE_NVML environment variable...")
+    enable_nvml = os.environ.get("ENABLE_NVML", "false").lower() == "true"
+    logger.debug(f"ENABLE_NVML is set to: {enable_nvml}")
+
+    if not enable_nvml:
+        logger.info("NVML is disabled via environment variable.")
+        return
+
+    logger.debug("Attempting to initialize NVML during startup...")
+    try:
+        import pynvml  # type: ignore
+        pynvml.nvmlInit()
+        _NVML_SUPPORTED = True
+        logger.debug("NVML initialized successfully during startup.")
+
+        # Log detailed GPU information
+        device_count = pynvml.nvmlDeviceGetCount()
+        logger.debug(f"Number of devices detected: {device_count}")
+        for i in range(device_count):
+            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+            name = pynvml.nvmlDeviceGetName(handle)
+            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+            logger.debug(f"Device {i}: {name.decode('utf-8')}")
+            logger.debug(f"  Total memory: {memory_info.total / 1024**2} MB")
+            logger.debug(f"  Used memory: {memory_info.used / 1024**2} MB")
+            logger.debug(f"  Free memory: {memory_info.free / 1024**2} MB")
+    except Exception as e:
+        _NVML_SUPPORTED = False
+        _NVML_INIT_ERROR = str(e)
+        logger.error(f"NVML initialization failed during startup: {e}")
 
 
 if __name__ == "__main__":

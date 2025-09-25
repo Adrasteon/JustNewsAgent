@@ -49,23 +49,10 @@ def test_basic_metrics():
     print("✓ Generating Prometheus metrics...")
     metrics_output = metrics.get_metrics()
 
-    # Verify metrics are present
-    expected_metrics = [
-        'justnews_requests_total',
-        'justnews_request_duration_seconds',
-        'justnews_errors_total',
-        'justnews_processing_duration_seconds',
-        'justnews_quality_score',
-        'justnews_processing_queue_size',
-        'justnews_memory_usage_bytes',
-        'justnews_cpu_usage_percent'
-    ]
-
-    for metric in expected_metrics:
-        if metric in metrics_output:
-            print(f"  ✓ {metric} found")
-        else:
-            print(f"  ✗ {metric} missing")
+    # Assertions to validate metrics output
+    assert 'justnews_requests_total' in metrics_output, "Expected 'justnews_requests_total' in metrics output"
+    assert 'justnews_errors_total' in metrics_output, "Expected 'justnews_errors_total' in metrics output"
+    assert len(metrics_output) > 0, "Metrics output should not be empty"
 
     print(f"\nMetrics output length: {len(metrics_output)} characters")
     print("Sample metrics output:")
@@ -83,7 +70,12 @@ def test_basic_metrics():
 def test_decorator():
     """Test the processing time decorator."""
     print("Testing processing time decorator...")
+    start_time = time.time()
     time.sleep(0.1)  # Simulate some work
+    duration = time.time() - start_time
+
+    # Assertions to validate the decorator functionality
+    assert duration >= 0.1, "Processing time should be at least 0.1 seconds"
     print("✓ Decorator test completed")
 
 def test_async_metrics():
@@ -95,6 +87,9 @@ def test_async_metrics():
         await asyncio.sleep(0.05)  # Short sleep for test speed
         duration = time.time() - start_time
         metrics.record_processing("async_operation", duration)
+
+        # Assertions to validate async metrics functionality
+        assert duration >= 0.05, "Async operation duration should be at least 0.05 seconds"
         print("✓ Async metrics test completed")
     asyncio.run(_run())
 

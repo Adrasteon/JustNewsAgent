@@ -17,7 +17,17 @@ logger = get_logger(__name__)
 # Environment variables (read at runtime, not import time)
 def get_db_config():
     """Get database configuration from environment variables"""
-    # First try individual POSTGRES_* variables
+    # Load global.env file first
+    env_file_path = '/etc/justnews/global.env'
+    if os.path.exists(env_file_path):
+        logger.info(f"Loading environment variables from {env_file_path}")
+        with open(env_file_path) as f:
+            for line in f:
+                if line.strip() and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    os.environ[key] = value
+
+    # Then try individual POSTGRES_* variables
     config = {
         'host': os.environ.get("POSTGRES_HOST"),
         'database': os.environ.get("POSTGRES_DB"),
@@ -62,7 +72,10 @@ def initialize_connection_pool():
         return _connection_pool
 
     try:
+        # Add debug prints to log resolved database configuration
         config = get_db_config()
+        logger.debug(f"Resolved database configuration: {config}")
+
         _connection_pool = pool.ThreadedConnectionPool(
             minconn=POOL_MIN_CONNECTIONS,
             maxconn=POOL_MAX_CONNECTIONS,

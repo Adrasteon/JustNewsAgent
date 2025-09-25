@@ -96,7 +96,7 @@
       "client_timeout_seconds": 300,
       "memory_enforcement": "strict",
       "isolation_level": "process",
-      "resource_sharing": "fair"
+      "resource_sharing": "enabled"
     },
     "monitoring": {
       "memory_tracking": true,

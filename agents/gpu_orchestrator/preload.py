@@ -16,7 +16,13 @@ def start_preload_job(agents=None, strict=None):
     _MODEL_PRELOAD_STATE["started_at"] = time.time()
     _MODEL_PRELOAD_STATE["in_progress"] = True
     _MODEL_PRELOAD_STATE["per_agent"] = {agent: {} for agent in (agents or [])}
-    _MODEL_PRELOAD_STATE["summary"] = {"total": len(agents or []), "done": 0, "failed": 0}
+    # Preserve existing state in summary
+    existing_summary = _MODEL_PRELOAD_STATE.get("summary", {"total": 0, "done": 0, "failed": 0})
+    _MODEL_PRELOAD_STATE["summary"] = {
+        "total": existing_summary["total"] + len(agents or []),
+        "done": existing_summary["done"],
+        "failed": existing_summary["failed"],
+    }
 
     for agent in (agents or []):
         success, error = _load_agent_model(agent, "test_model", strict)

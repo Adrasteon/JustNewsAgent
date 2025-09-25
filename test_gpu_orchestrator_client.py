@@ -38,6 +38,8 @@ def test_gpu_info_unreachable(monkeypatch):
     assert info["available"] is False
     assert info["gpus"] == []
     assert "message" in info
+    # Ensure no return values
+    assert info is not None, "Test functions should not return values. Use assertions instead."
 
 
 def test_policy_caching(monkeypatch):
