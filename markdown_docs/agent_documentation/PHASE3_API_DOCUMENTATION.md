@@ -61,7 +61,7 @@ GET /health
       "knowledge_graph": true,
       "archive": false
     },
-    "version": "3.0.0"
+    "version": "0.8.0"
   },
   "message": "API is operational",
   "timestamp": "2025-09-01T17:34:39.312650"

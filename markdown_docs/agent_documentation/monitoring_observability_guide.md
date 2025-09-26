@@ -178,7 +178,7 @@ Response:
 {
   "status": "healthy",
   "timestamp": "2024-01-15T10:30:45Z",
-  "version": "4.0.0",
+  "version": "0.8.0",
   "uptime_seconds": 3600
 }
 ```

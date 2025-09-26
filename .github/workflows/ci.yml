@@ -70,3 +70,27 @@ jobs:
           flags: unittests
           name: codecov-umbrella
         continue-on-error: true
+
+  version-compliance:
+    name: Version Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run version compliance validation
+        run: |
+          python scripts/validate_version_compliance.py
+
+      - name: Run version consistency check
+        run: |
+          python scripts/validate_versions.py

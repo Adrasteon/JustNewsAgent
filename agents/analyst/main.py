@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.version_utils import get_version
 
 from agents.common.database import get_db_cursor
 
@@ -184,7 +185,7 @@ async def health(request: Request):
     return {
         "status": "ok",
         "security_enabled": SECURITY_AVAILABLE,
-        "version": "2.0"
+        "version": get_version()
     }
 
 @app.get("/ready")

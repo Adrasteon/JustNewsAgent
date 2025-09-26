@@ -692,7 +692,7 @@ GET /
 ```json
 {
   "agent": "NewsReader (Unified)",
-  "version": "3.0.0",
+  "version": "0.8.0",
   "capabilities": [
     "news_extraction",
     "visual_analysis",
@@ -1154,7 +1154,7 @@ X-API-Version: v4
 ```json
 {
   "api_version": "v4",
-  "agent_version": "4.0.0",
+  "agent_version": "0.8.0",
   "compatibility": ["v3", "v4"]
 }
 ```

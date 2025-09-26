@@ -47,7 +47,7 @@ The master configuration file (`config/system_config.json`) contains all system 
 {
   "system": {
     "name": "JustNewsAgent",
-    "version": "4.0",
+    "version": "0.8.0",
     "environment": "justnews-v2-py312",
     "log_level": "INFO",
     "debug_mode": false
@@ -67,7 +67,7 @@ The master configuration file (`config/system_config.json`) contains all system 
 ```json
 "system": {
   "name": "JustNewsAgent",
-  "version": "4.0",
+  "version": "0.8.0",
   "environment": "justnews-v2-py312",
   "conda_environment": "justnews-v2-py312",
   "log_level": "INFO",
