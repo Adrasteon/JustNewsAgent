@@ -174,6 +174,9 @@ async def lifespan(app: FastAPI):
                 "get_all_article_ids",
                 "vector_search_articles",
                 "log_training_example",
+                "get_sources",
+                "get_recent_articles",
+                "get_article_count",
             ],
         )
         logger.info("Registered tools with MCP Bus.")
@@ -530,20 +533,40 @@ def ingest_article_endpoint(request: dict):
         raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}")
 
 # Improved error handling and logging
-@app.get("/get_article_count")
-def get_article_count_endpoint():
-    """Get total count of articles in database."""
+
+def _get_article_count() -> int:
+    """Return the total article count from the database."""
     try:
         from agents.common.database import execute_query_single
+
         result = execute_query_single("SELECT COUNT(*) as count FROM articles")
-        return {"count": result.get("count", 0) if result else 0}
-    except Exception as e:
-        logger.error(f"Error getting article count: {e}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving article count: {str(e)}")
+        count_value = result.get("count", 0) if result else 0
+        return int(count_value)
+    except Exception as exc:  # pragma: no cover - database access
+        logger.error(f"Error getting article count: {exc}")
+        raise RuntimeError("Error retrieving article count") from exc
+
+
+@app.get("/get_article_count")
+def get_article_count_endpoint():
+    """Get total count of articles in database (HTTP GET)."""
+    try:
+        return {"count": _get_article_count()}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.post("/get_article_count")
+def get_article_count_tool(_: ToolCall) -> dict[str, int]:
+    """MCP-compatible tool wrapper for retrieving article counts."""
+    try:
+        return {"count": _get_article_count()}
+    except RuntimeError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 @app.post("/get_sources")
 def get_sources_endpoint(request: dict):
-    """Get list of sources from the database.
+    """Get list of sources from the database (excluding paywalled sources).
     
     Args:
         limit: Maximum number of sources to return (default: 10)
@@ -563,7 +586,13 @@ def get_sources_endpoint(request: dict):
         
         from agents.common.database import execute_query
         sources = execute_query(
-            "SELECT id, url, domain, name, description, country, language FROM sources ORDER BY id LIMIT %s", 
+            """SELECT id, url, domain, name, description, country, language 
+               FROM sources 
+               WHERE last_verified IS NOT NULL 
+               AND last_verified > now() - interval '30 days'
+               AND (paywall IS NULL OR paywall = false)
+               ORDER BY last_verified DESC, name ASC 
+               LIMIT %s""", 
             (limit,)
         )
         

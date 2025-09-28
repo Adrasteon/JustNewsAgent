@@ -26,43 +26,27 @@ import json
 import os
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
-import requests  # for MCP bus calls
+from typing import Any, Dict, List
 
 # Database imports
 from common.observability import get_logger
+from common.mcp_client import AsyncMCPClient
 from .sites.generic_site_crawler import GenericSiteCrawler, MultiSiteCrawler, SiteConfig
 from .crawler_utils import (
-    CanonicalMetadata,
-    ModalDismisser,
     RateLimiter,
     RobotsChecker,
-    get_active_sources,
     get_sources_by_domain,
-    update_source_crawling_strategy,
-    record_crawling_performance,
     get_source_performance_history,
-    get_optimal_sources_for_strategy,
     create_crawling_performance_table,
     initialize_connection_pool,
 )
 from .performance_monitoring import (
-    PerformanceMetrics,
     PerformanceOptimizer,
     get_performance_monitor,
     start_performance_monitoring,
-    stop_performance_monitoring,
-    export_performance_metrics
 )
 
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
-
-def call_analyst_tool(tool: str, *args, **kwargs) -> Any:
-    payload = {"agent": "analyst", "tool": tool, "args": list(args), "kwargs": kwargs}
-    resp = requests.post(f"{MCP_BUS_URL}/call", json=payload)
-    resp.raise_for_status()
-    return resp.json().get("data")
 
 logger = get_logger(__name__)
 
@@ -95,7 +79,6 @@ class UnifiedProductionCrawler:
         self.performance_monitor = get_performance_monitor()
         self.performance_optimizer = PerformanceOptimizer(self.performance_monitor)
         # Initialize performance metrics tracking
-        import time
         self.performance_metrics = {
             "start_time": time.time(),
             "articles_processed": 0,
@@ -120,16 +103,30 @@ class UnifiedProductionCrawler:
         # Strategy optimization cache
         self.strategy_cache = {}
         self.performance_history = {}
-        
+
         # Background cleanup management
         self.cleanup_task = None
         self._start_background_cleanup()
 
-    def _start_background_cleanup(self):
-        """Start background cleanup task - disabled to prevent conflicts with async context manager"""
-        # Background cleanup disabled - cleanup is now handled by async context manager
-        # which is more reliable and prevents process accumulation
-        pass
+        # Async MCP client for non-blocking bus interactions
+        self._async_mcp_client = AsyncMCPClient(base_url=MCP_BUS_URL)
+
+    def _start_background_cleanup(self) -> None:
+        """Optionally start periodic cleanup when explicitly enabled."""
+        cleanup_enabled = os.environ.get("UNIFIED_CRAWLER_ENABLE_PERIODIC_CLEANUP", "false").lower() == "true"
+        if not cleanup_enabled:
+            self.cleanup_task = None
+            return
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            logger.debug("Event loop not running; skipping periodic cleanup startup")
+            self.cleanup_task = None
+            return
+
+        self.cleanup_task = loop.create_task(self._periodic_cleanup())
+        logger.debug("Started periodic cleanup task")
 
     async def _periodic_cleanup(self):
         """Run periodic cleanup every 30 seconds"""
@@ -141,18 +138,19 @@ class UnifiedProductionCrawler:
                 logger.debug(f"Periodic cleanup failed: {e}")
                 await asyncio.sleep(30)
 
-    async def _cleanup_orphaned_processes(self):
-        """Aggressively cleanup orphaned browser processes - only kill very old processes"""
+    async def _cleanup_orphaned_processes(self) -> None:
+        """Aggressively cleanup orphaned browser processes - only kill very old processes."""
         try:
             import subprocess
             import signal
-            import os
-            
+
             # Kill Chrome processes older than 10 minutes (very conservative)
             try:
                 result = subprocess.run(
-                    ['pgrep', '-f', 'chrome'], 
-                    capture_output=True, text=True, timeout=3
+                    ['pgrep', '-f', 'chrome'],
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
                 )
                 if result.returncode == 0:
                     pids = result.stdout.strip().split('\n')
@@ -164,7 +162,9 @@ class UnifiedProductionCrawler:
                             # Check process age
                             stat_result = subprocess.run(
                                 ['ps', '-o', 'etimes=', '-p', pid],
-                                capture_output=True, text=True, timeout=2
+                                capture_output=True,
+                                text=True,
+                                timeout=2,
                             )
                             if stat_result.returncode == 0:
                                 etime = int(stat_result.stdout.strip())
@@ -181,12 +181,14 @@ class UnifiedProductionCrawler:
                 logger.debug("Chrome cleanup timed out")
             except Exception as e:
                 logger.debug(f"Chrome cleanup failed: {e}")
-                
+
             # Kill Playwright driver processes older than 15 minutes
             try:
                 result = subprocess.run(
-                    ['pgrep', '-f', 'playwright.*run-driver'], 
-                    capture_output=True, text=True, timeout=3
+                    ['pgrep', '-f', 'playwright.*run-driver'],
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
                 )
                 if result.returncode == 0:
                     pids = result.stdout.strip().split('\n')
@@ -197,7 +199,9 @@ class UnifiedProductionCrawler:
                             # Check if Playwright driver is very old
                             stat_result = subprocess.run(
                                 ['ps', '-o', 'etimes=', '-p', pid],
-                                capture_output=True, text=True, timeout=2
+                                capture_output=True,
+                                text=True,
+                                timeout=2,
                             )
                             if stat_result.returncode == 0:
                                 etime = int(stat_result.stdout.strip())
@@ -210,7 +214,7 @@ class UnifiedProductionCrawler:
                 logger.debug("Playwright cleanup timed out")
             except Exception as e:
                 logger.debug(f"Playwright cleanup failed: {e}")
-                
+
         except Exception as e:
             logger.warning(f"Orphaned process cleanup failed: {e}")
 
@@ -225,6 +229,11 @@ class UnifiedProductionCrawler:
     async def _cleanup(self):
         """Cleanup all resources"""
         try:
+            await self._async_mcp_client.aclose()
+        except Exception as exc:
+            logger.debug(f"Failed to close async MCP client: {exc}")
+
+        try:
             # Cancel background cleanup task
             if self.cleanup_task and not self.cleanup_task.done():
                 self.cleanup_task.cancel()
@@ -232,31 +241,73 @@ class UnifiedProductionCrawler:
                     await self.cleanup_task
                 except asyncio.CancelledError:
                     pass
-            
+
             # Final aggressive cleanup - kill all browser processes from this session
             await self._cleanup_orphaned_processes()
-            
+
             # Force kill any remaining processes - be more aggressive here
             import subprocess
             try:
                 # Kill all Chrome processes (they should all be from this crawler instance)
-                subprocess.run(['pkill', '-9', '-f', 'chrome'], 
-                             timeout=10, capture_output=True)
+                subprocess.run(
+                    ['pkill', '-9', '-f', 'chrome'],
+                    timeout=10,
+                    capture_output=True,
+                )
                 # Kill Playwright drivers
-                subprocess.run(['pkill', '-9', '-f', 'playwright.*run-driver'], 
-                             timeout=10, capture_output=True)
+                subprocess.run(
+                    ['pkill', '-9', '-f', 'playwright.*run-driver'],
+                    timeout=10,
+                    capture_output=True,
+                )
                 logger.info("Forced cleanup of all browser processes from crawler session")
             except subprocess.TimeoutExpired:
                 logger.warning("Force cleanup timed out")
             except Exception as e:
                 logger.debug(f"Force cleanup failed: {e}")
-                
+
         except Exception as e:
             logger.warning(f"Resource cleanup failed: {e}")
 
     async def _load_ai_models(self):
         """No-op stub: AI model loading handled by GPU Orchestrator"""
         return
+
+    async def _call_mcp_tool(
+        self,
+        agent: str,
+        tool: str,
+        *,
+        args: list[Any] | None = None,
+        kwargs: Dict[str, Any] | None = None,
+        timeout: tuple[float, float] | None = None,
+    ) -> Any:
+        """Proxy MCP tool calls through the async client without blocking the event loop."""
+
+        return await self._async_mcp_client.call(
+            agent,
+            tool,
+            args=args or [],
+            kwargs=kwargs or {},
+            timeout=timeout,
+        )
+
+    async def _call_analyst_tool(
+        self,
+        tool: str,
+        *args: Any,
+        timeout: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Convenience wrapper for analyst agent tool invocations."""
+
+        return await self._call_mcp_tool(
+            "analyst",
+            tool,
+            args=list(args),
+            kwargs=kwargs,
+            timeout=timeout,
+        )
 
     async def _determine_optimal_strategy(self, site_config: SiteConfig) -> str:
         """
@@ -301,15 +352,6 @@ class UnifiedProductionCrawler:
                     return best_strategy
 
         # Fallback to rule-based strategy selection
-        ultra_fast_domains = [
-            'bbc.com', 'bbc.co.uk', 'cnn.com', 'reuters.com',
-            'apnews.com', 'npr.org', 'nytimes.com', 'washingtonpost.com'
-        ]
-
-        ai_enhanced_domains = [
-            'wsj.com', 'ft.com', 'economist.com', 'newyorker.com',
-            'theatlantic.com', 'foreignaffairs.com'
-        ]
 
         # 1. Check for pre-defined ultra-fast sites
         # These are high-volume, well-structured sites with dedicated parsers
@@ -403,9 +445,9 @@ class UnifiedProductionCrawler:
         if not content or len(content) < 100:
             return article
         try:
-            sentiment_score = call_analyst_tool('score_sentiment', content)
+            sentiment_score = await self._call_analyst_tool('score_sentiment', content)
             article['sentiment'] = {'score': sentiment_score}
-            topics = call_analyst_tool('extract_topics', content)
+            topics = await self._call_analyst_tool('extract_topics', content)
             article['topics'] = topics
             article['ai_analysis_applied'] = True
         except Exception as e:
@@ -525,20 +567,14 @@ class UnifiedProductionCrawler:
         return summary
 
     async def _ingest_articles(self, articles: List[Dict]) -> Dict[str, int]:
-        """
-        Ingest articles to database via memory agent MCP calls
-        
-        Returns:
-            Dict with counts: {'new_articles': int, 'duplicates': int, 'errors': int}
-        """
-        MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
+        """Ingest articles to database via memory agent without blocking the loop."""
+
         new_articles = 0
         duplicates = 0
         errors = 0
 
         for article in articles:
             try:
-                # Prepare article payload for ingestion
                 article_payload = {
                     'url': article.get('url', ''),
                     'title': article.get('title', ''),
@@ -546,15 +582,13 @@ class UnifiedProductionCrawler:
                     'domain': article.get('domain', ''),
                     'publisher_meta': article.get('publisher_meta', {}),
                     'confidence': article.get('confidence', 0.5),
-                    'paywall_flag': article.get('paywall_flag', False),
+                    'paywall_flag': article.get('paywall_flag', False) or article.get('domain') == 'reuters.com',
                     'extraction_metadata': article.get('extraction_metadata', {}),
                     'timestamp': article.get('timestamp'),
                     'url_hash': article.get('url_hash'),
                     'canonical': article.get('canonical'),
                 }
 
-                # Build SQL statements for source upsert and article insertion
-                # This mirrors the logic from the site-specific crawlers
                 source_sql = """
                 INSERT INTO sources (name, domain, url, last_verified, metadata)
                 VALUES (%s, %s, %s, NOW(), %s)
@@ -568,30 +602,30 @@ class UnifiedProductionCrawler:
                     json.dumps({'crawling_strategy': 'unified_crawler', 'last_crawled': article.get('timestamp')})
                 )
 
-                # Article insertion SQL (will be handled by memory agent)
-                # The memory agent handles the article insertion via save_article
+                statements = [[source_sql, list(source_params)]]
 
-                statements = [
-                    [source_sql, list(source_params)]
-                ]
-
-                payload = {
-                    'agent': 'memory',
-                    'tool': 'ingest_article',
-                    'args': [],
-                    'kwargs': {
+                result = await self._call_mcp_tool(
+                    'memory',
+                    'ingest_article',
+                    kwargs={
                         'article_payload': article_payload,
-                        'statements': statements
-                    }
-                }
+                        'statements': statements,
+                    },
+                    timeout=(2, 10),
+                )
 
-                # Make MCP bus call to memory agent
-                response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=(2, 10))
-                response.raise_for_status()
-                result = response.json()
+                payload = result if isinstance(result, dict) else {}
 
-                if result.get('status') == 'ok':
-                    if result.get('duplicate', False):
+                if payload.get('status') == 'ok':
+                    if payload.get('duplicate', False):
+                        duplicates += 1
+                        logger.debug(f"Duplicate article skipped: {article.get('url')}")
+                    else:
+                        new_articles += 1
+                        logger.debug(f"New article ingested: {article.get('url')}")
+                elif payload.get('data', {}).get('status') == 'ok':
+                    data_payload = payload['data']
+                    if data_payload.get('duplicate', False):
                         duplicates += 1
                         logger.debug(f"Duplicate article skipped: {article.get('url')}")
                     else:
@@ -599,68 +633,17 @@ class UnifiedProductionCrawler:
                         logger.debug(f"New article ingested: {article.get('url')}")
                 else:
                     errors += 1
-                    logger.warning(f"Failed to ingest article {article.get('url')}: {result}")
+                    logger.warning(f"Failed to ingest article {article.get('url')}: {payload}")
 
-            except Exception as e:
+            except Exception as exc:
                 errors += 1
-                logger.warning(f"Error ingesting article {article.get('url', 'unknown')}: {e}")
-                continue
+                logger.warning(f"Error ingesting article {article.get('url', 'unknown')}: {exc}")
 
-        return {'new_articles': new_articles, 'duplicates': duplicates, 'errors': errors}
-
-    async def __aenter__(self):
-        """Async context manager entry"""
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit - cleanup resources"""
-        await self._cleanup()
-
-    async def _cleanup(self):
-        """Cleanup all resources"""
-        try:
-            # Force cleanup of any remaining browser processes
-            import subprocess
-            import signal
-            import os
-            
-            # Kill any orphaned Chrome/Playwright processes
-            try:
-                # Find and kill Chrome processes older than 5 minutes
-                result = subprocess.run(
-                    ['pgrep', '-f', 'chrome'], 
-                    capture_output=True, text=True, timeout=5
-                )
-                if result.returncode == 0:
-                    pids = result.stdout.strip().split('\n')
-                    for pid in pids:
-                        try:
-                            # Check if process is old
-                            stat_result = subprocess.run(
-                                ['ps', '-o', 'etimes=', '-p', pid],
-                                capture_output=True, text=True, timeout=2
-                            )
-                            if stat_result.returncode == 0:
-                                etime = int(stat_result.stdout.strip())
-                                if etime > 300:  # 5 minutes
-                                    os.kill(int(pid), signal.SIGTERM)
-                                    logger.info(f"Cleaned up old Chrome process {pid}")
-                        except Exception:
-                            pass
-            except Exception as e:
-                logger.debug(f"Chrome cleanup failed: {e}")
-                
-            # Kill Playwright driver processes
-            try:
-                subprocess.run(['pkill', '-f', 'playwright.*run-driver'], 
-                             timeout=5, capture_output=True)
-                logger.info("Cleaned up Playwright driver processes")
-            except Exception as e:
-                logger.debug(f"Playwright cleanup failed: {e}")
-                
-        except Exception as e:
-            logger.warning(f"Resource cleanup failed: {e}")
-
+        return {
+            'new_articles': new_articles,
+            'duplicates': duplicates,
+            'errors': errors,
+        }
 
 # Expose async wrapper for the FastAPI unified_production_crawl endpoint
 async def unified_production_crawl(domains: List[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> Dict[str, Any]:
@@ -683,21 +666,23 @@ def get_crawler_info(*args, **kwargs) -> Dict[str, Any]:
     Get information about the crawler configuration and capabilities.
     This is a standalone function for external access to crawler info.
     """
-    crawler = UnifiedProductionCrawler()
-    
+    from agents.crawler.performance_monitoring import get_performance_monitor
+
+    monitor = get_performance_monitor()
+
     return {
         "crawler_type": "UnifiedProductionCrawler",
         "version": "3.0",
         "capabilities": [
             "ultra_fast_crawling",
-            "ai_enhanced_crawling", 
+            "ai_enhanced_crawling",
             "generic_crawling",
             "multi_site_concurrent_crawling",
             "performance_monitoring",
             "database_driven_source_management"
         ],
         "supported_strategies": ["ultra_fast", "ai_enhanced", "generic"],
-        "performance_metrics": crawler.get_performance_report(),
+        "performance_metrics": monitor.get_current_metrics(),
         "database_connected": True,  # Assume connected if no exception
         "timestamp": datetime.now().isoformat()
     }

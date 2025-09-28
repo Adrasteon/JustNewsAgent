@@ -28,7 +28,7 @@ from common.observability import get_logger
 from common.metrics import JustNewsMetrics
 
 # Import preload module
-from .preload import start_preload_job, get_preload_status
+from .preload import start_preload_job, get_preload_status, load_agent_model_map
 from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
 from agents.gpu_orchestrator.nvml import get_nvml_handle
 
@@ -556,29 +556,11 @@ def _project_root() -> str:
 
 
 def _read_agent_model_map() -> Dict[str, Any]:
-	"""Read the agent model map from AGENT_MODEL_MAP.json.
-
-	Returns a dictionary mapping agent names to lists of model IDs.
-	"""
-	try:
-		import json
-		from pathlib import Path
-		
-		project_root = Path(__file__).resolve().parents[2]
-		model_map_path = project_root / "AGENT_MODEL_MAP.json"
-		
-		if not model_map_path.exists():
-			logger.warning(f"Model map file not found: {model_map_path}")
-			return {}
-		
-		with open(model_map_path, "r") as f:
-			model_map = json.load(f)
-		
-		logger.info(f"Loaded agent model map: {model_map}")
-		return model_map
-	except Exception as e:
-		logger.error(f"Failed to read agent model map: {e}")
-		return {}
+	"""Read the agent model map from AGENT_MODEL_MAP.json."""
+	model_map = load_agent_model_map()
+	if not model_map:
+		logger.warning("Agent model map is empty; model preload will be a no-op")
+	return model_map
 
 
 def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
@@ -692,50 +674,72 @@ def get_mps_allocation():
 	try:
 		import json
 		from pathlib import Path
-		
+
 		project_root = Path(__file__).resolve().parents[2]
 		config_path = project_root / "config" / "gpu" / "mps_allocation_config.json"
-		
+
 		if not config_path.exists():
-			return {"error": "MPS allocation configuration not found", "path": str(config_path)}
-		
-		with open(config_path, "r") as f:
-			config = json.load(f)
-		
+			return {
+				"error": "MPS allocation configuration not found",
+				"path": str(config_path),
+			}
+
+		with open(config_path, "r", encoding="utf-8") as config_file:
+			config = json.load(config_file)
+
 		return config
-	except Exception as e:
-		logger.error(f"Failed to load MPS allocation config: {e}")
-		return {"error": str(e)}
+	except Exception as exc:  # noqa: BLE001
+		logger.error("Failed to load MPS allocation config: %s", exc)
+		return {"error": str(exc)}
 
 
 @app.get("/models/status")
 def models_status():
 	"""Return current model preload status."""
-	failed = int(get_preload_status().get("summary", {}).get("failed", 0) or 0)
-	done = int(get_preload_status().get("summary", {}).get("done", 0) or 0)
-	total = int(get_preload_status().get("summary", {}).get("total", 0) or 0)
-	
-	all_ready = (failed == 0 and done == total and not get_preload_status().get("in_progress", False))
-	
-	# Build error list for failed models
-	errors = []
-	if get_preload_status().get("per_agent"):
-		for agent, models in get_preload_status()["per_agent"].items():
-			for model_id, status in models.items():
-				if status.get("status") == "error":
-					errors.append({
-						"agent": agent,
-						"model": model_id,
-						"error": status.get("error")
-					})
-	
+	status_snapshot = get_preload_status()
+	per_agent = status_snapshot.get("per_agent", {}) or {}
+
+	computed_total = 0
+	computed_done = 0
+	computed_failed = 0
+	errors: List[Dict[str, Any]] = []
+
+	for agent, models in per_agent.items():
+		for model_id, model_status in models.items():
+			computed_total += 1
+			if model_status.get("status") == "ok":
+				computed_done += 1
+			elif model_status.get("status") == "error":
+				computed_failed += 1
+				errors.append({
+					"agent": agent,
+					"model": model_id,
+					"error": model_status.get("error"),
+				})
+
+	if computed_total == 0 and status_snapshot.get("summary"):
+		fallback = status_snapshot["summary"]
+		computed_total = int(fallback.get("total", 0) or 0)
+		computed_done = int(fallback.get("done", 0) or 0)
+		computed_failed = int(fallback.get("failed", 0) or 0)
+
+	all_ready = (
+		computed_failed == 0
+		and computed_done == computed_total
+		and not status_snapshot.get("in_progress", False)
+	)
+
 	return {
 		"all_ready": all_ready,
-		"in_progress": get_preload_status().get("in_progress", False),
-		"summary": get_preload_status().get("summary", {}),
+		"in_progress": status_snapshot.get("in_progress", False),
+		"summary": {
+			"total": computed_total,
+			"done": computed_done,
+			"failed": computed_failed,
+		},
 		"errors": errors,
-		"started_at": get_preload_status().get("started_at"),
-		"completed_at": get_preload_status().get("completed_at"),
+		"started_at": status_snapshot.get("started_at"),
+		"completed_at": status_snapshot.get("completed_at"),
 	}
 
 

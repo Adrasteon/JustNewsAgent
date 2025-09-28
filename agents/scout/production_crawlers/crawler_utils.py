@@ -361,7 +361,7 @@ def execute_query_single(query: str, params: tuple = None) -> dict[str, Any] | N
             return dict(row) if row else None
 
 def get_active_sources() -> list[dict[str, Any]]:
-    """Get all active news sources from the database"""
+    """Get all active news sources from the database (excluding paywalled sources)"""
     try:
         sources = execute_query("""
             SELECT id, url, domain, name, description, metadata,
@@ -369,10 +369,11 @@ def get_active_sources() -> list[dict[str, Any]]:
             FROM public.sources
             WHERE last_verified IS NOT NULL
             AND last_verified > now() - interval '30 days'
+            AND (paywall IS NULL OR paywall = false)
             ORDER BY last_verified DESC, name ASC
         """)
 
-        logger.info(f"✅ Found {len(sources)} active sources in database")
+        logger.info(f"✅ Found {len(sources)} active sources in database (excluding paywalled)")
         return sources
 
     except Exception as e:

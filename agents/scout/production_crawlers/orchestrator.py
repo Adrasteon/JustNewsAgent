@@ -191,7 +191,7 @@ class ProductionCrawlerOrchestrator:
         return results
 
     async def get_available_sources(self) -> list[dict[str, Any]]:
-        """Get all available sources from database"""
+        """Get all available sources from database (excluding paywalled sources)"""
         try:
             sources = get_active_sources()
             return [{

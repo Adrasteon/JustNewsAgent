@@ -61,8 +61,11 @@ def tool_endpoint(call: ToolCall) -> Dict[str, Any]:
 ## Developer Workflows
 
 ### Environment Setup
-- Use `activate_environment.sh` to activate the development environment.
-- Install dependencies using `pip install -r requirements.txt`.
+- Use `activate_environment.sh` to activate the development environment (it activates the conda environment used in CI).
+- Install dependencies using a conda-first strategy (preferred):
+  - Create the environment from the repo spec: `conda env create -f environment.yml` (or `mamba env create -f environment.yml` for faster installs).
+  - Activate the environment: `conda activate justnews-v2-py312`.
+  - The repo's `environment.yml` contains a `pip:` subsection to install packages that must come from pip; use pip only as a fallback for packages not available from conda-forge (e.g., NVIDIA TensorRT). If needed run `pip install -r requirements.txt` after activating the conda env.
 
 ### Running Tests
 - Use `pytest` for running tests:

@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """Generic multi-site crawler with Crawl4AI-first strategy.
 
@@ -10,34 +8,46 @@ This module provides:
 
 Strategy:
 1. Prefer Crawl4AI for link discovery & article extraction (fast, cleaner text)
-2. Gracefully fall back to Playwright when Crawl4AI fails or disabled
+2. Gracefully fall back to Crawl4AI screenshot + LLaVA when direct extraction fails
 3. Emit canonical metadata objects expected by downstream agents
 """
 
+from __future__ import annotations
+
 import asyncio
 import json
-import os
 import random
 import re
 import time
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 try:  # pragma: no cover
-    from crawl4ai import AsyncWebCrawler  # type: ignore
-    from crawl4ai import LLMConfig  # type: ignore
+    from crawl4ai import (  # type: ignore
+        AsyncWebCrawler,
+        CacheMode,
+        CrawlerRunConfig,
+        LLMConfig,
+        VirtualScrollConfig,
+    )
     from crawl4ai.extraction_strategy import LLMExtractionStrategy  # type: ignore
     _CRAWL4AI_AVAILABLE = True
 except Exception:  # noqa: BLE001
+    AsyncWebCrawler = None  # type: ignore
+    CacheMode = None  # type: ignore
+    CrawlerRunConfig = None  # type: ignore
+    LLMConfig = None  # type: ignore
+    VirtualScrollConfig = None  # type: ignore
+    LLMExtractionStrategy = None  # type: ignore
     _CRAWL4AI_AVAILABLE = False
 
-from playwright.async_api import async_playwright
-
 # from ...tools import _record_scout_performance  # Removed - not needed in Crawler agent
+from common.observability import get_logger
+
+from ...newsreader.tools import extract_news_from_url
 from ..crawler_utils import (
     CanonicalMetadata,
-    ModalDismisser,
     RateLimiter,
     RobotsChecker,
     get_active_sources,
@@ -99,7 +109,11 @@ class SiteConfig:
 
 
 class GenericSiteCrawler:
-    """Crawler for a single site (Crawl4AI preferred, Playwright fallback)."""
+    """Crawler for a single site using Crawl4AI-first strategy with AI fallback."""
+
+    _DATE_PATTERN = re.compile(r"/[0-9]{4}/[0-9]{2}/[0-9]{2}/")
+    _EXCLUDED_KEYWORDS = ("video", "live", "audio", "sport", "gallery", "podcast")
+    _ARTICLE_KEYWORDS = ("article", "story", "news")
 
     def __init__(
         self,
@@ -115,450 +129,419 @@ class GenericSiteCrawler:
         self.processed_urls: set[str] = set()
         self.session_start_time = time.time()
 
-    async def get_article_urls(self, max_urls: int = 40) -> list[str]:
-        """Discover candidate article URLs.
+    def _normalize_href(self, href: str, base: str) -> str | None:
+        value = href.strip()
+        if not value:
+            return None
+        if value.startswith("/"):
+            value = urljoin(base, value)
+        if not value.startswith("http"):
+            return None
+        return value.split("#")[0]
 
-        Order of attempts:
-        1. Crawl4AI (if available & not forced Playwright)
-        2. Playwright DOM discovery
-        """
-        use_crawl4ai = (
-            _CRAWL4AI_AVAILABLE
-            and os.environ.get("GENERIC_CRAWLER_USE_PLAYWRIGHT", "0") != "1"
-        )
+    def _looks_like_article(self, href: str) -> bool:
+        lower = href.lower()
+        if any(token in lower for token in self._EXCLUDED_KEYWORDS):
+            return False
+        if self._DATE_PATTERN.search(href):
+            return True
+        return any(token in lower for token in self._ARTICLE_KEYWORDS)
+
+    def _extract_links_from_html(self, html: str, base: str, max_urls: int) -> list[str]:
+        candidates = re.findall(r'href=["\']([^"\']+)["\']', html)
         urls: list[str] = []
+        seen: set[str] = set()
+
+        for candidate in candidates:
+            normalized = self._normalize_href(candidate, base)
+            if not normalized or normalized in seen:
+                continue
+            if not self._looks_like_article(normalized):
+                continue
+            urls.append(normalized)
+            seen.add(normalized)
+            if len(urls) >= max_urls:
+                break
+
+        return urls
+
+    def _create_virtual_scroll_config(self) -> Any:
+        if not VirtualScrollConfig:
+            return None
+        return VirtualScrollConfig(scroll_count=30, scroll_by=800, wait_after_scroll=0.6)
+
+    def _create_run_config(
+        self,
+        virtual_config: Any,
+    ) -> Any:
+        if not CrawlerRunConfig:
+            return None
+
+        kwargs: dict[str, Any] = {}
+        if CacheMode:
+            kwargs["cache_mode"] = CacheMode.BYPASS
+        if virtual_config:
+            kwargs["virtual_scroll_config"] = virtual_config
+        if not kwargs:
+            return None
+        return CrawlerRunConfig(**kwargs)
+
+    async def _run_crawl(
+        self,
+    *,
+    url: str,
+    config: Any = None,
+    **kwargs: Any,
+    ) -> Any:
+        if not AsyncWebCrawler:
+            raise RuntimeError("Crawl4AI not available")
+
+        async with AsyncWebCrawler(verbose=False) as crawler:
+            if config is not None:
+                return await crawler.arun(url=url, config=config, **kwargs)
+            return await crawler.arun(url=url, **kwargs)
+
+    async def _discover_urls_with_virtual_scroll(
+        self, max_urls: int, base: str
+    ) -> list[str]:
+        if not (_CRAWL4AI_AVAILABLE and AsyncWebCrawler):
+            return []
+
+        try:
+            virtual_config = self._create_virtual_scroll_config()
+            run_config = self._create_run_config(virtual_config)
+            result = await self._run_crawl(
+                url=self.site_config.url,
+                config=run_config,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug(
+                "Crawl4AI virtual scroll discovery failed for %s: %s",
+                self.site_config.name,
+                exc,
+            )
+            return []
+
+        html = (
+            getattr(result, "raw_html", None)
+            or getattr(result, "cleaned_html", "")
+        )
+        urls = self._extract_links_from_html(html, base, max_urls)
+        if urls:
+            logger.info(
+                "✅ [Crawl4AI+Scroll] Found %d URLs for %s",
+                len(urls),
+                self.site_config.name,
+            )
+        return urls
+
+    async def get_article_urls(self, max_urls: int = 40) -> list[str]:
+        """Discover candidate article URLs using Crawl4AI strategies."""
+        if not (_CRAWL4AI_AVAILABLE and AsyncWebCrawler):
+            logger.error("❌ Crawl4AI not available for URL discovery")
+            return []
+
         base = self.site_config.get_base_url()
 
-        if use_crawl4ai:
-            try:  # pragma: no cover - network
-                async with AsyncWebCrawler(verbose=False) as crawler:
-                    result = await crawler.arun(url=self.site_config.url)
-                html = getattr(result, "raw_html", None) or getattr(
-                    result, "cleaned_html", ""
+        try:  # pragma: no cover - network
+            result = await self._run_crawl(url=self.site_config.url)
+            html = (
+                getattr(result, "raw_html", None)
+                or getattr(result, "cleaned_html", "")
+            )
+            urls = self._extract_links_from_html(html, base, max_urls)
+            if urls:
+                logger.info(
+                    "✅ [Crawl4AI] Found %d URLs for %s",
+                    len(urls),
+                    self.site_config.name,
                 )
-                for match in re.findall(r'href=["\']([^"\']+)["\']', html):
-                    href = match.strip()
-                    if href.startswith("/"):
-                        href = urljoin(base, href)
-                    if not href.startswith("http"):
-                        continue
-                    if any(
-                        key in href.lower()
-                        for key in [
-                            "video",
-                            "live",
-                            "audio",
-                            "sport",
-                            "gallery",
-                            "podcast",
-                        ]
-                    ):
-                        continue
-                    if re.search(r"/[0-9]{4}/[0-9]{2}/[0-9]{2}/", href) or any(
-                        token in href.lower() for token in ["article", "story", "news"]
-                    ):
-                        urls.append(href.split("#")[0])
-                    if len(urls) >= max_urls:
-                        break
-                urls = list(dict.fromkeys(urls))  # de-dupe, preserve order
-                if urls:
-                    logger.info(
-                        f"✅ [Crawl4AI] Found {len(urls)} URLs for {self.site_config.name}"
-                    )
-                    return urls[:max_urls]
-            except Exception as e:  # noqa: BLE001
-                logger.debug(
-                    f"Crawl4AI link discovery failed for {self.site_config.name}: {e}"  # noqa: E501
-                )
-
-        # Fallback: Playwright DOM evaluation
-        playwright = await async_playwright().start()
-        browser = await playwright.chromium.launch(headless=True)
-        try:
-            context = await browser.new_context(
-                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+                return urls
+        except Exception as exc:  # noqa: BLE001
+            logger.debug(
+                "Crawl4AI link discovery failed for %s: %s",
+                self.site_config.name,
+                exc,
             )
-            page = await context.new_page()
-            await page.goto(self.site_config.url, timeout=15000)
-            await ModalDismisser.dismiss_modals(page)
-            await asyncio.sleep(1.0)
-            anchors = await page.locator("a").element_handles()
-            for a in anchors:
-                try:
-                    href = await a.get_attribute("href")
-                    if not href:
-                        continue
-                    if href.startswith("/"):
-                        href = urljoin(base, href)
-                    if not href.startswith("http"):
-                        continue
-                    if any(
-                        skip in href.lower()
-                        for skip in [
-                            "video",
-                            "live",
-                            "audio",
-                            "sport",
-                            "gallery",
-                            "podcast",
-                        ]
-                    ):
-                        continue
-                    if re.search(r"/[0-9]{4}/[0-9]{2}/[0-9]{2}/", href) or any(
-                        token in href.lower() for token in ["article", "story", "news"]
-                    ):
-                        urls.append(href.split("#")[0])
-                    if len(urls) >= max_urls:
-                        break
-                except Exception:  # noqa: BLE001
-                    continue
-            urls = list(dict.fromkeys(urls))
-            logger.info(
-                f"✅ [Playwright] Found {len(urls)} article URLs from {self.site_config.name}"  # noqa: E501
+
+        fallback_urls = await self._discover_urls_with_virtual_scroll(max_urls, base)
+        if fallback_urls:
+            return fallback_urls
+
+        logger.warning("⚠️ No URLs discovered for %s", self.site_config.name)
+        return []
+
+    def _build_crawl_kwargs(self, url: str) -> dict[str, Any]:
+        kwargs: dict[str, Any] = {
+            "url": url,
+            "css_selector": "main, article, .content, .story-body, [role='main']",
+            "user_agent": (
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/118.0 Safari/537.36"
+            ),
+        }
+
+        if LLMConfig and LLMExtractionStrategy:
+            llm_config = LLMConfig(
+                provider="ollama/llama2:7b",
+                base_url="http://localhost:11434",
             )
-            return urls[:max_urls]
-        except Exception as e:  # noqa: BLE001
-            logger.error(
-                f"❌ Failed to get URLs from {self.site_config.name}: {e}"  # noqa: E501
+            kwargs["extraction_strategy"] = LLMExtractionStrategy(
+                llm_config=llm_config
             )
-            return []
-        finally:
-            # Robust browser cleanup for URL discovery
-            logger.debug(f"🧹 Cleaning up browser for URL discovery from {self.site_config.name}")
-            cleanup_errors = []
-            
-            try:
-                if browser and not browser.is_connected():
-                    logger.debug("Browser already closed")
-                else:
-                    # Close all pages first
-                    try:
-                        pages = browser.contexts[0].pages if browser.contexts else []
-                        for page in pages:
-                            try:
-                                await page.close()
-                            except Exception as e:
-                                logger.debug(f"Error closing page: {e}")
-                    except Exception as e:
-                        logger.debug(f"Error closing pages: {e}")
-                    
-                    # Close all contexts
-                    try:
-                        for context in browser.contexts:
-                            try:
-                                await context.close()
-                            except Exception as e:
-                                logger.debug(f"Error closing context: {e}")
-                    except Exception as e:
-                        logger.debug(f"Error closing contexts: {e}")
-                    
-                    # Close browser
-                    try:
-                        await browser.close()
-                        logger.debug("✅ Browser closed successfully")
-                    except Exception as e:
-                        logger.warning(f"❌ Error closing browser: {e}")
-                        cleanup_errors.append(f"browser: {e}")
-            except Exception as e:
-                logger.warning(f"❌ Unexpected error during browser cleanup: {e}")
-                cleanup_errors.append(f"browser_unexpected: {e}")
-            
-            # Stop playwright
-            try:
-                await playwright.stop()
-                logger.debug("✅ Playwright stopped successfully")
-            except Exception as e:
-                logger.warning(f"❌ Error stopping playwright: {e}")
-                cleanup_errors.append(f"playwright: {e}")
-            
-            if cleanup_errors:
-                logger.warning(f"⚠️ URL discovery cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
-            else:
-                logger.debug("✅ URL discovery browser cleaned up successfully")
+        return kwargs
 
-    async def extract_content(self, page) -> dict[str, Any]:
-        """Extract article title + content via configured selectors."""
-        try:
-            title = ""
-            for selector in self.site_config.title_selectors:
-                try:
-                    element = page.locator(selector).first
-                    title_candidate = await element.text_content()
-                    if title_candidate and len(title_candidate.strip()) > 10:
-                        title = title_candidate.strip()
-                        break
-                except Exception:  # noqa: BLE001
-                    continue
+    def _parse_crawl_result(
+        self,
+        result: Any,
+        url: str,
+        start_time: float,
+        llm_enabled: bool,
+    ) -> dict[str, Any] | None:
+        candidate_blocks = [
+            getattr(result, "cleaned_html", ""),
+            getattr(result, "markdown", ""),
+            getattr(result, "extracted_content", ""),
+            getattr(result, "raw_markdown", ""),
+        ]
+        raw_content = next((block for block in candidate_blocks if block), "")
 
-            content_parts: list[str] = []
-            for selector in self.site_config.content_selectors:
-                try:
-                    elements = page.locator(selector)
-                    count = await elements.count()
-                    for i in range(min(count, 8)):
-                        try:
-                            text = await elements.nth(i).text_content()
-                            if text and len(text.strip()) > 20:
-                                content_parts.append(text.strip())
-                        except Exception:  # noqa: BLE001
-                            continue
-                    if len(content_parts) > 3:
-                        break
-                except Exception:  # noqa: BLE001
-                    continue
-
-            content = " ".join(content_parts)
-            canonical, paywall_flag = await CanonicalMetadata.extract_canonical_and_paywall(page)  # noqa: E501
-            return {
-                "title": title,
-                "content": content,
-                "canonical": canonical,
-                "paywall_flag": paywall_flag,
-                "extraction_method": "generic_dom",
-                "extraction_metadata": {
-                    "site_config": self.site_config.name,
-                    "content_length": len(content),
-                    "paragraphs_found": len(content_parts),
-                },
-            }
-        except Exception as e:  # noqa: BLE001
-            logger.warning(f"Content extraction failed: {e}")
-            return {
-                "title": "Error",
-                "content": f"Extraction failed: {e}",
-                "canonical": None,
-                "paywall_flag": False,
-                "extraction_method": "error",
-                "extraction_metadata": {"error": str(e)},
-            }
-
-    async def process_single_url(self, browser, url: str) -> dict | None:
-        if url in self.processed_urls:
+        clean_text = re.sub(r"<[^>]+>", " ", raw_content)
+        clean_text = re.sub(r"\s+", " ", clean_text).strip()
+        if len(clean_text) <= 80:
             return None
+
+        title = getattr(result, "title", "") or f"{self.site_config.name} Article"
+        canonical = getattr(result, "canonical_url", None)
+
+        metadata = CanonicalMetadata.generate_metadata(
+            url=url,
+            title=title[:300],
+            content=clean_text[:12000],
+            extraction_method="crawl4ai_generic",
+            status="success",
+            paywall_flag=False,
+            confidence=0.72,
+            publisher=self.site_config.name,
+            crawl_mode="generic_site",
+            news_score=0.72,
+            canonical=canonical,
+        )
+        metadata.setdefault("extraction_metadata", {}).update(
+            {
+                "strategy": "crawl4ai",
+                "processing_time_s": time.time() - start_time,
+                "text_length": len(clean_text),
+                "llm_strategy": llm_enabled,
+            }
+        )
+        return metadata
+
+    def _build_robots_metadata(self, url: str, start_time: float) -> dict[str, Any]:
+        elapsed = time.time() - start_time
+        metadata = CanonicalMetadata.generate_metadata(
+            url=url,
+            title="Robots.txt Disallowed",
+            content="Crawling not allowed by robots.txt",
+            extraction_method="robots_guard",
+            status="disallowed",
+            paywall_flag=False,
+            confidence=0.0,
+            publisher=self.site_config.name,
+            crawl_mode="generic_site",
+            news_score=0.0,
+        )
+        metadata.setdefault("extraction_metadata", {}).update(
+            {
+                "robots_disallowed": True,
+                "processing_time_s": elapsed,
+            }
+        )
+        return metadata
+
+    def _build_failure_metadata(self, url: str, start_time: float, reason: str) -> dict[str, Any]:
+        elapsed = time.time() - start_time
+        metadata = CanonicalMetadata.generate_metadata(
+            url=url,
+            title="Extraction Failed",
+            content="",
+            extraction_method="none_available",
+            status="error",
+            paywall_flag=False,
+            confidence=0.0,
+            publisher=self.site_config.name,
+            crawl_mode="generic_site",
+            news_score=0.0,
+            error=reason,
+        )
+        metadata.setdefault("extraction_metadata", {}).update(
+            {"processing_time_s": elapsed}
+        )
+        return metadata
+
+    async def _llava_fallback(
+        self, url: str, start_time: float
+    ) -> dict[str, Any] | None:
+        try:
+            result = await extract_news_from_url(url=url)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("LLaVA fallback failed for %s: %s", url, exc)
+            return None
+
+        if not (result.get("success") and result.get("article")):
+            return None
+
+        title = (
+            result.get("headline")
+            or f"{self.site_config.name} Article"
+        ).strip()
+        content = (result.get("article") or "").strip()
+
+        metadata = CanonicalMetadata.generate_metadata(
+            url=url,
+            title=title[:300],
+            content=content[:12000],
+            extraction_method="llava_fallback",
+            status="success",
+            paywall_flag=False,
+            confidence=0.68,
+            publisher=self.site_config.name,
+            crawl_mode="generic_site",
+            news_score=0.68,
+            canonical=None,
+        )
+        metadata.setdefault("extraction_metadata", {}).update(
+            {
+                "llava_fallback": True,
+                "screenshot_path": result.get("screenshot_path"),
+                "llava_confidence": result.get("confidence_score"),
+                "processing_time_s": time.time() - start_time,
+            }
+        )
+        return metadata
+
+    async def _try_crawl4ai(
+        self,
+        url: str,
+        start_time: float,
+    ) -> dict[str, Any] | None:
+        if not (_CRAWL4AI_AVAILABLE and AsyncWebCrawler):
+            return None
+
+        crawl_kwargs = self._build_crawl_kwargs(url)
+        llm_enabled = "extraction_strategy" in crawl_kwargs
+
+        try:  # pragma: no cover - network heavy
+            result = await self._run_crawl(**crawl_kwargs)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Crawl4AI extraction failed for %s: %s", url, exc)
+            return None
+
+        return self._parse_crawl_result(result, url, start_time, llm_enabled)
+
+    async def process_single_url(self, url: str) -> dict[str, Any] | None:
+        if url in self.processed_urls:
+            logger.debug("Skipping already processed URL: %s", url)
+            return None
+
         self.processed_urls.add(url)
         start_time = time.time()
-        try:
-            if not self.robots_checker.check_robots_txt(url):
-                logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
-                processing_time = time.time() - start_time
-                # _record_scout_performance({  # Commented out - Scout-specific performance tracking
-                #     "agent_name": "scout",
-                #     "operation": "process_single_url",
-                #     "processing_time_s": processing_time,
-                #     "batch_size": 1,
-                #     "success": False,
-                #     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-                # })
-                return CanonicalMetadata.generate_metadata(
-                    url=url,
-                    title="Robots.txt Disallowed",
-                    content="Crawling not allowed by robots.txt",
-                    extraction_method="disallowed",
-                    status="disallowed",
-                    paywall_flag=False,
-                    confidence=0.0,
-                    publisher=self.site_config.name,
-                    crawl_mode="generic_site",
-                    news_score=0.0,
-                )
-            await self.rate_limiter.wait_if_needed(self.site_config.domain)
-            use_crawl4ai = (
-                _CRAWL4AI_AVAILABLE
-                and os.environ.get("GENERIC_CRAWLER_USE_PLAYWRIGHT", "0") != "1"
-            )
-            if use_crawl4ai:
-                try:
-                    # Configure for local Ollama LLM instead of cloud OpenAI
-                    llm_config = LLMConfig(
-                        provider="ollama/llama2:7b",
-                        base_url="http://localhost:11434"
-                    )
-                    async with AsyncWebCrawler(verbose=False) as crawler:
-                        result = await crawler.arun(
-                            url=url,
-                            extraction_strategy=LLMExtractionStrategy(llm_config=llm_config),
-                            css_selector="main, article, .content, .story-body, [role='main']",  # noqa: E501
-                            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-                        )
-                        content = (
-                            result.cleaned_html
-                            or result.markdown
-                            or result.extracted_content
-                            or ""
-                        )
-                        clean_text = re.sub(r"<[^>]+>", " ", content)
-                        clean_text = re.sub(r"\s+", " ", clean_text).strip()
-                        title = getattr(result, "title", "") or (
-                            self.site_config.name + " Article"
-                        )
-                        if len(clean_text) > 80 and len(title) > 5:
-                            processing_time = time.time() - start_time
-                            # _record_scout_performance({  # Commented out - Scout-specific performance tracking
-                            #     "agent_name": "scout",
-                            #     "operation": "process_single_url",
-                            #     "processing_time_s": processing_time,
-                            #     "batch_size": 1,
-                            #     "success": True,
-                            #     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-                            # })
-                            return CanonicalMetadata.generate_metadata(
-                                url=url,
-                                title=title[:300],
-                                content=clean_text[:12000],
-                                extraction_method="crawl4ai_generic",
-                                status="success",
-                                paywall_flag=False,
-                                confidence=0.72,
-                                publisher=self.site_config.name,
-                                crawl_mode="generic_site",
-                                news_score=0.72,
-                                canonical=None,
-                            )
-                except Exception as e:  # noqa: BLE001
-                    logger.debug(
-                        f"Crawl4AI extraction failed for {url}: {e} – falling back to Playwright"  # noqa: E501
-                    )
-            # Fallback: Playwright
-            context = None
-            try:
-                context = await browser.new_context(
-                    viewport={"width": 1024, "height": 768},
-                    user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-                )
-                page = await context.new_page()
-                await page.goto(url, wait_until="domcontentloaded", timeout=12000)
-                await ModalDismisser.dismiss_modals(page)
-                await asyncio.sleep(1.5)
-                content_data = await self.extract_content(page)
-                await context.close()
-                context = None  # Mark as closed
-                await asyncio.sleep(random.uniform(1.0, 3.0))
-            finally:
-                # Ensure context is closed even if exception occurs
-                if context:
-                    try:
-                        await context.close()
-                        logger.debug(f"✅ Context closed for {url}")
-                    except Exception as e:
-                        logger.debug(f"Error closing context for {url}: {e}")
-        except Exception as e:  # noqa: BLE001
-            logger.warning(f"Failed to process {url}: {e}")
-            processing_time = time.time() - start_time
-            # _record_scout_performance({  # Commented out - Scout-specific performance tracking
-            #     "agent_name": "scout",
-            #     "operation": "process_single_url",
-            #     "processing_time_s": processing_time,
-            #     "batch_size": 1,
-            #     "success": False,
-            #     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-            # })
-            return CanonicalMetadata.generate_metadata(
-                url=url,
-                title="Error",
-                content=f"Processing failed: {e}",
-                extraction_method="error",
-                status="error",
-                paywall_flag=False,
-                confidence=0.0,
-                publisher=self.site_config.name,
-                crawl_mode="generic_site",
-                news_score=0.0,
-                error=str(e),
-            )
 
-    async def crawl_site(self, max_articles: int = 25) -> list[dict]:
-        logger.info(
-            f"🚀 Starting generic crawl of {self.site_config.name} for {max_articles} articles"
+        if not self.robots_checker.check_robots_txt(url):
+            logger.info("⚠️ Robots.txt disallows crawling: %s", url)
+            return self._build_robots_metadata(url, start_time)
+
+        await self.rate_limiter.wait_if_needed(self.site_config.domain)
+
+        crawl_metadata = await self._try_crawl4ai(url, start_time)
+        if crawl_metadata:
+            return crawl_metadata
+
+        fallback_metadata = await self._llava_fallback(url, start_time)
+        if fallback_metadata:
+            return fallback_metadata
+
+        logger.warning(
+            "Extraction failed for %s after %.2fs",
+            url,
+            time.time() - start_time,
         )
-        urls = await self.get_article_urls(max_urls=max_articles * 2)
-        if not urls:
-            logger.warning(f"❌ No URLs found for {self.site_config.name}")
-            return []
-        playwright = await async_playwright().start()
-        browsers = []
-        try:
-            for _ in range(self.concurrent_browsers):
-                browsers.append(await playwright.chromium.launch(headless=True))
-            results: list[dict] = []
-            browser_index = 0
-            for i in range(0, len(urls), self.batch_size):
-                batch = urls[i : i + self.batch_size]
-                logger.info(
-                    f"📦 Processing batch {i // self.batch_size + 1}: {len(batch)} URLs"
-                )
-                tasks = []
-                for u in batch:
-                    b = browsers[browser_index % len(browsers)]
-                    browser_index += 1
-                    tasks.append(self.process_single_url(b, u))
-                batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-                for r in batch_results:
-                    if isinstance(r, dict) and r.get("status") == "success":
-                        results.append(r)
-                        logger.info(f"✅ Success: {r['title'][:50]}...")
-                await asyncio.sleep(0.4)
-            elapsed = time.time() - self.session_start_time
-            rate = len(results) / elapsed if elapsed else 0.0
-            logger.info(
-                f"🎉 Generic site crawl complete: {len(results)} articles (rate {rate:.2f}/s)"  # noqa: E501
-            )
-            return results
-        finally:
-            # Robust browser cleanup - ensure all browsers are closed
-            logger.info(f"🧹 Cleaning up {len(browsers)} browsers for {self.site_config.name}")
-            cleanup_errors = []
-            
-            for i, b in enumerate(browsers):
-                try:
-                    if b and not b.is_connected():
-                        logger.debug(f"Browser {i} already closed")
-                        continue
-                    
-                    # Close all pages first
-                    try:
-                        pages = b.contexts[0].pages if b.contexts else []
-                        for page in pages:
-                            try:
-                                page.close()
-                            except Exception as e:
-                                logger.debug(f"Error closing page: {e}")
-                    except Exception as e:
-                        logger.debug(f"Error closing pages: {e}")
-                    
-                    # Close all contexts
-                    try:
-                        for context in b.contexts:
-                            try:
-                                context.close()
-                            except Exception as e:
-                                logger.debug(f"Error closing context: {e}")
-                    except Exception as e:
-                        logger.debug(f"Error closing contexts: {e}")
-                    
-                    # Close browser
-                    try:
-                        await b.close()
-                        logger.debug(f"✅ Browser {i} closed successfully")
-                    except Exception as e:
-                        logger.warning(f"❌ Error closing browser {i}: {e}")
-                        cleanup_errors.append(f"browser_{i}: {e}")
-                        
-                except Exception as e:
-                    logger.warning(f"❌ Unexpected error during browser {i} cleanup: {e}")
-                    cleanup_errors.append(f"browser_{i}_unexpected: {e}")
-            
-            # Stop playwright
-            try:
-                await playwright.stop()
-                logger.debug("✅ Playwright stopped successfully")
-            except Exception as e:
-                logger.warning(f"❌ Error stopping playwright: {e}")
-                cleanup_errors.append(f"playwright: {e}")
-            
-            if cleanup_errors:
-                logger.warning(f"⚠️ Browser cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
+        return self._build_failure_metadata(
+            url,
+            start_time,
+            "Failed to extract via Crawl4AI and LLaVA",
+        )
+
+    async def _gather_articles(
+        self,
+        urls: list[str],
+        max_articles: int,
+    ) -> tuple[list[dict[str, Any]], int, int]:
+        semaphore = asyncio.Semaphore(max(1, self.concurrent_browsers))
+        results: list[dict[str, Any]] = []
+        disallowed = 0
+        failures = 0
+
+        async def worker(target_url: str) -> dict[str, Any] | None:
+            async with semaphore:
+                return await self.process_single_url(target_url)
+
+        tasks = [asyncio.create_task(worker(url)) for url in urls]
+        raw_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for item in raw_results:
+            if isinstance(item, Exception):
+                failures += 1
+                logger.debug("Task raised exception: %s", item)
+                continue
+            if not isinstance(item, dict):
+                continue
+
+            status = item.get("status")
+            if status == "success" and len(results) < max_articles:
+                results.append(item)
+            elif status == "disallowed":
+                disallowed += 1
             else:
-                logger.info("✅ All browsers cleaned up successfully")
+                failures += 1
+
+        return results, disallowed, failures
+
+    def _log_crawl_summary(
+        self,
+        successes: int,
+        disallowed: int,
+        failures: int,
+        elapsed: float,
+    ) -> None:
+        rate = successes / elapsed if elapsed else 0.0
+        logger.info(
+            "🎉 Generic site crawl complete: %d success, %d disallowed, %d failed "
+            "(rate %.2f/s)",
+            successes,
+            disallowed,
+            failures,
+            rate,
+        )
+
+    async def crawl_site(self, max_articles: int = 25) -> list[dict[str, Any]]:
+        logger.info(
+            "🚀 Starting generic crawl of %s for up to %d articles",
+            self.site_config.name,
+            max_articles,
+        )
+
+        urls = await self.get_article_urls(max_urls=max_articles * 3)
+        if not urls:
+            logger.warning("❌ No URLs found for %s", self.site_config.name)
+            return []
+
+        random.shuffle(urls)
+        start_time = time.time()
+
+        results, disallowed, failures = await self._gather_articles(urls, max_articles)
+        self._log_crawl_summary(len(results), disallowed, failures, time.time() - start_time)
+        return results
 
 
 class MultiSiteCrawler:
@@ -633,7 +616,7 @@ class MultiSiteCrawler:
 
         # Flatten results for easier processing
         all_articles = []
-        for domain, articles in site_results.items():
+        for _domain, articles in site_results.items():
             all_articles.extend(articles)
 
         processing_time = time.time() - start_time

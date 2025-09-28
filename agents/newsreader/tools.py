@@ -962,8 +962,9 @@ async def extract_news_from_url(url: str, screenshot_path: str | None = None) ->
 async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.png") -> dict[str, Any]:
     """
     Legacy compatibility function for screenshot capture
-    
-    This function now uses the REAL Playwright screenshot system
+
+    This helper delegates to the Crawl4AI-powered screenshot pipeline
+    implemented inside the NewsReader V2 engine.
     """
 
     try:

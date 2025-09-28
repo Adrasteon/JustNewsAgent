@@ -3,6 +3,7 @@ import json
 import os
 import time
 import warnings
+from base64 import b64decode
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import Enum
@@ -10,7 +11,13 @@ from typing import Any
 
 import torch
 from PIL import Image
-from playwright.async_api import async_playwright
+
+try:
+    from crawl4ai import AsyncWebCrawler, CacheMode, CrawlerRunConfig  # type: ignore
+except Exception:  # pragma: no cover
+    AsyncWebCrawler = None  # type: ignore
+    CacheMode = None  # type: ignore
+    CrawlerRunConfig = None  # type: ignore
 
 from common.observability import get_logger
 
@@ -19,7 +26,7 @@ NewsReader V2 Engine - TRUE Multi-Modal Vision Processing
 Architecture: LLaVA + Screenshot Processing (OCR & CLIP DISABLED - Testing Redundancy)
 
 CORE FUNCTIONALITY: Screenshot-based webpage processing using LLaVA
-- Takes screenshots of webpages
+- Takes Crawl4AI-powered screenshots of webpages
 - Uses LLaVA vision-language model to analyze screenshots
 - Extracts headlines and article content from visual analysis
 - Streamlined architecture: OCR disabled (redundant), CLIP disabled (redundant), Layout Parser disabled (redundant)
@@ -134,7 +141,7 @@ class NewsReaderV2Engine:
     
     CORE: Screenshot-based webpage processing using LLaVA
     Features:
-    - Playwright screenshot capture with optimizations
+    - Crawl4AI screenshot capture with optimizations
     - LLaVA vision-language analysis of screenshots
     - Enhanced OCR and layout analysis
     - GPU acceleration with CPU fallbacks
@@ -452,66 +459,55 @@ class NewsReaderV2Engine:
         self.models['layout_parser'] = None
 
     def _initialize_screenshot_system(self):
-        """Initialize Playwright screenshot capture system"""
+        """Initialize Crawl4AI screenshot capture configuration"""
         try:
-            # Verify playwright is available
+            if AsyncWebCrawler is None or CrawlerRunConfig is None:
+                raise RuntimeError("Crawl4AI not available for screenshot capture")
+
             self.models['screenshot_system'] = {
-                'headless': self.config.headless,
-                'timeout': self.config.screenshot_timeout,
-                'quality': self.config.screenshot_quality,
-                'browser_args': [
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-background-timer-throttling',
-                    '--disable-backgrounding-occluded-windows',
-                    '--disable-renderer-backgrounding'
-                ]
+                'wait_for': 1.5,
+                'cache_mode': CacheMode.BYPASS if CacheMode else None,
             }
-            logger.info("✅ Screenshot capture system initialized")
+            logger.info("✅ Crawl4AI screenshot configuration initialized")
 
         except Exception as e:
             logger.error(f"Error initializing screenshot system: {e}")
             self.models['screenshot_system'] = None
 
     async def capture_webpage_screenshot(self, url: str, screenshot_path: str = "page_v2.png") -> str:
-        """
-        CORE FUNCTIONALITY: Capture screenshot of webpage for LLaVA analysis
-        
-        This is the key differentiator - taking screenshots and using LLaVA's
-        vision capabilities to understand webpage content
-        """
+        """Capture screenshot of webpage for LLaVA analysis using Crawl4AI"""
         logger.info(f"📸 Capturing screenshot for URL: {url}")
         start_time = time.time()
 
+        if AsyncWebCrawler is None or CrawlerRunConfig is None:
+            raise RuntimeError("Crawl4AI is not available for screenshot capture")
+
+        run_config_kwargs = {
+            "cache_mode": CacheMode.BYPASS if CacheMode else None,
+            "screenshot": True,
+            "screenshot_wait_for": self.models.get('screenshot_system', {}).get('wait_for', 1.5),
+        }
+
+        # Remove None values to avoid Crawl4AI validation errors
+        run_config_kwargs = {k: v for k, v in run_config_kwargs.items() if v is not None}
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(
-                    headless=self.config.headless,
-                    args=self.models['screenshot_system']['browser_args']
+            async with AsyncWebCrawler(verbose=False) as crawler:
+                result = await crawler.arun(
+                    url=url,
+                    config=CrawlerRunConfig(**run_config_kwargs)
                 )
 
-                page = await browser.new_page()
+            screenshot_data = getattr(result, "screenshot", None)
+            if not getattr(result, "success", False) or not screenshot_data:
+                raise RuntimeError(result.error_message if hasattr(result, "error_message") else "Screenshot capture failed")
 
-                # Navigate with timeout
-                await page.goto(
-                    url,
-                    wait_until="domcontentloaded",
-                    timeout=self.config.screenshot_timeout
-                )
-
-                # Wait for content to load
-                await page.wait_for_timeout(2000)
-
-                # Capture screenshot
-                await page.screenshot(
-                    path=screenshot_path,
-                    full_page=False  # Viewport only for faster processing
-                )
-
-                await browser.close()
+            os.makedirs(os.path.dirname(os.path.abspath(screenshot_path)), exist_ok=True)
+            with open(screenshot_path, "wb") as screenshot_file:
+                screenshot_file.write(b64decode(screenshot_data))
 
             elapsed_time = time.time() - start_time
-            logger.info(f"✅ Screenshot saved: {screenshot_path} ({elapsed_time:.2f}s)")
+            logger.info(f"✅ Screenshot saved via Crawl4AI: {screenshot_path} ({elapsed_time:.2f}s)")
 
             return screenshot_path
 
