@@ -23,6 +23,8 @@ import time
 from datetime import datetime
 from typing import Any, List
 from urllib.parse import urljoin, urlparse
+import uuid
+from pathlib import Path
 
 try:  # pragma: no cover
     from crawl4ai import AsyncWebCrawler  # type: ignore
@@ -43,6 +45,18 @@ from ..crawler_utils import (
 )
 
 logger = get_logger(__name__)
+
+
+# Feature flag for visual ingestion (shadow mode)
+NEWSREADER_INGESTION_VISUAL = os.environ.get("NEWSREADER_INGESTION_VISUAL", "false").lower() in ("1", "true", "yes")
+SESSION_BUNDLES_DIR = Path(os.environ.get("SESSION_BUNDLES_DIR", "./data/session_bundles"))
+
+# Ensure session bundles dir exists (best-effort)
+try:
+    SESSION_BUNDLES_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    # If filesystem is readonly in some contexts, continue without failing
+    pass
 
 
 class SiteConfig:
@@ -318,12 +332,12 @@ class GenericSiteCrawler:
                 and os.environ.get("GENERIC_CRAWLER_USE_PLAYWRIGHT", "0") != "1"
             )
             if use_crawl4ai:
-                try:
+                try:  # pragma: no cover - network
                     async with AsyncWebCrawler(verbose=False) as crawler:
                         result = await crawler.arun(
                             url=url,
                             extraction_strategy="LLMExtractionStrategy",
-                            css_selector="main, article, .content, .story-body, [role='main']",  # noqa: E501
+                            css_selector="main, article, .content, .story-body, [role='main']",
                             user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
                         )
                         content = (
@@ -347,6 +361,19 @@ class GenericSiteCrawler:
                                 "success": True,
                                 "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
                             })
+
+                            # Schedule visual shadow ingestion if enabled (non-blocking)
+                            if NEWSREADER_INGESTION_VISUAL:
+                                try:
+                                    asyncio.create_task(
+                                        self._schedule_newsreader_shadow(url, None, self.site_config, {
+                                            'extraction_method': 'crawl4ai_generic',
+                                            'content_length': len(clean_text)
+                                        })
+                                    )
+                                except Exception as e:
+                                    logger.debug(f"Failed to schedule NewsReader shadow task: {e}")
+
                             return CanonicalMetadata.generate_metadata(
                                 url=url,
                                 title=title[:300],
@@ -362,7 +389,7 @@ class GenericSiteCrawler:
                             )
                 except Exception as e:  # noqa: BLE001
                     logger.debug(
-                        f"Crawl4AI extraction failed for {url}: {e} – falling back to Playwright"  # noqa: E501
+                        f"Crawl4AI extraction failed for {url}: {e} – falling back to Playwright"
                     )
             # Fallback: Playwright
             context = await browser.new_context(
@@ -374,6 +401,20 @@ class GenericSiteCrawler:
             await ModalDismisser.dismiss_modals(page)
             await asyncio.sleep(1.5)
             content_data = await self.extract_content(page)
+
+            # If visual ingestion is enabled, capture a screenshot BEFORE closing context
+            screenshot_path = None
+            if NEWSREADER_INGESTION_VISUAL:
+                try:
+                    session_id = uuid.uuid4().hex
+                    domain_safe = (self.site_config.domain or 'site').replace('/', '_')
+                    screenshot_dir = SESSION_BUNDLES_DIR / domain_safe
+                    screenshot_dir.mkdir(parents=True, exist_ok=True)
+                    screenshot_path = str(screenshot_dir / f"screenshot_{session_id}.png")
+                    await page.screenshot(path=screenshot_path, full_page=True)
+                except Exception as e:
+                    logger.debug(f"Screenshot capture failed for {url}: {e}")
+
             await context.close()
             await asyncio.sleep(random.uniform(1.0, 3.0))
             if (
@@ -389,6 +430,16 @@ class GenericSiteCrawler:
                     "success": True,
                     "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
                 })
+
+                # Schedule NewsReader shadow ingestion if enabled
+                if NEWSREADER_INGESTION_VISUAL:
+                    try:
+                        asyncio.create_task(
+                            self._schedule_newsreader_shadow(url, screenshot_path, self.site_config, content_data["extraction_metadata"])
+                        )
+                    except Exception as e:
+                        logger.debug(f"Failed to schedule NewsReader shadow task: {e}")
+
                 return CanonicalMetadata.generate_metadata(
                     url=url,
                     title=content_data["title"],
@@ -400,18 +451,7 @@ class GenericSiteCrawler:
                     publisher=self.site_config.name,
                     crawl_mode="generic_site",
                     news_score=0.7,
-                    canonical=content_data["canonical"],
                 )
-            processing_time = time.time() - start_time
-            _record_scout_performance({
-                "agent_name": "scout",
-                "operation": "process_single_url",
-                "processing_time_s": processing_time,
-                "batch_size": 1,
-                "success": False,
-                "throughput_items_per_s": 1 / processing_time if processing_time > 0 else 0,
-            })
-            return None
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to process {url}: {e}")
             processing_time = time.time() - start_time
@@ -436,6 +476,50 @@ class GenericSiteCrawler:
                 news_score=0.0,
                 error=str(e),
             )
+
+    async def _schedule_newsreader_shadow(self, url: str, screenshot_path: str | None, site_config, extraction_metadata: dict | None = None) -> None:
+        """Background task that calls NewsReader in shadow mode and writes a session bundle to disk."""
+        try:
+            # Dynamic import to avoid hard dependency
+            from agents.newsreader.tools import process_article_content
+        except Exception as e:
+            logger.debug(f"NewsReader not available for shadow processing: {e}")
+            return
+
+        session = {
+            "session_id": uuid.uuid4().hex,
+            "site": site_config.name if site_config else None,
+            "domain": site_config.domain if site_config else None,
+            "url": url,
+            "timestamp": datetime.utcnow().isoformat(),
+            "extraction_metadata": extraction_metadata or {},
+            "screenshot_path": screenshot_path,
+            "processing_result": None,
+        }
+
+        try:
+            # Call NewsReader (will accept dict with url + optional screenshot_path)
+            content_arg = {"url": url}
+            if screenshot_path:
+                content_arg["screenshot_path"] = screenshot_path
+
+            result = await process_article_content(content_arg, content_type="webpage", processing_mode="comprehensive")
+            session["processing_result"] = result
+        except Exception as e:
+            logger.debug(f"NewsReader shadow processing failed for {url}: {e}")
+            session["processing_result"] = {"error": str(e)}
+
+        try:
+            # Persist session bundle as JSON (one file per session)
+            domain_safe = (site_config.domain or 'site').replace('/', '_')
+            session_dir = SESSION_BUNDLES_DIR / domain_safe
+            session_dir.mkdir(parents=True, exist_ok=True)
+            file_path = session_dir / f"session_{session['session_id']}.json"
+            with open(file_path, 'w', encoding='utf-8') as fh:
+                json.dump(session, fh, ensure_ascii=False, indent=2)
+            logger.info(f"Saved NewsReader shadow session bundle: {file_path}")
+        except Exception as e:
+            logger.debug(f"Failed to write session bundle for {url}: {e}")
 
     async def crawl_site(self, max_articles: int = 25) -> list[dict]:
         logger.info(
