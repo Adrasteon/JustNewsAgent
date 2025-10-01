@@ -49,22 +49,22 @@ LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))  #
 # In-memory state (intentionally simple/minimal for safety)
 READINESS: bool = False
 POLICY: Dict[str, Any] = {
-	"max_memory_per_agent_mb": 2048,
-	"allow_fractional_shares": True,
-	"kill_on_oom": False,
-	"safe_mode_read_only": SAFE_MODE,
+    "max_memory_per_agent_mb": 2048,
+    "allow_fractional_shares": True,
+    "kill_on_oom": False,
+    "safe_mode_read_only": SAFE_MODE,
 }
 ALLOCATIONS: Dict[str, Dict[str, Any]] = {}
 
 # Simple in-process metrics (avoid external deps). Prometheus exposition via /metrics.
 _METRICS_COUNTERS: Dict[str, int] = {
-	"requests_total": 0,
-	"gpu_info_requests_total": 0,
-	"policy_get_requests_total": 0,
-	"policy_post_requests_total": 0,
-	"lease_requests_total": 0,
-	"release_requests_total": 0,
-	"lease_expired_total": 0,
+    "requests_total": 0,
+    "gpu_info_requests_total": 0,
+    "policy_get_requests_total": 0,
+    "policy_post_requests_total": 0,
+    "lease_requests_total": 0,
+    "release_requests_total": 0,
+    "lease_expired_total": 0,
 }
 _START_TIME = time.time()
 _NVML_SUPPORTED = False
@@ -73,197 +73,197 @@ _NVML_HANDLE_CACHE = {}
 
 
 def _inc(metric: str) -> None:
-	_METRICS_COUNTERS[metric] = _METRICS_COUNTERS.get(metric, 0) + 1
-	_METRICS_COUNTERS["requests_total"] = _METRICS_COUNTERS.get("requests_total", 0) + 1
+    _METRICS_COUNTERS[metric] = _METRICS_COUNTERS.get(metric, 0) + 1
+    _METRICS_COUNTERS["requests_total"] = _METRICS_COUNTERS.get("requests_total", 0) + 1
 
 
 def _purge_expired_leases() -> None:
-	"""Remove expired leases based on LEASE_TTL_SECONDS.
+    """Remove expired leases based on LEASE_TTL_SECONDS.
 
-	Executed opportunistically at read/write endpoints to avoid background threads.
-	"""
-	if LEASE_TTL_SECONDS <= 0 or not ALLOCATIONS:
-		return
-	now = time.time()
-	expired: List[str] = []
-	for token, alloc in list(ALLOCATIONS.items()):
-		try:
-			started = float(alloc.get("timestamp", now))
-		except Exception:  # noqa: BLE001
-			started = now
-		if now - started > LEASE_TTL_SECONDS:
-			expired.append(token)
-	for token in expired:
-		ALLOCATIONS.pop(token, None)
-	if expired:
-		_METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get("lease_expired_total", 0) + len(expired)
-		lease_expired_counter.labels(
-			agent=metrics.agent_name,
-			agent_display_name=metrics.display_name
-		).inc(len(expired))
+    Executed opportunistically at read/write endpoints to avoid background threads.
+    """
+    if LEASE_TTL_SECONDS <= 0 or not ALLOCATIONS:
+        return
+    now = time.time()
+    expired: List[str] = []
+    for token, alloc in list(ALLOCATIONS.items()):
+        try:
+            started = float(alloc.get("timestamp", now))
+        except Exception:  # noqa: BLE001
+            started = now
+        if now - started > LEASE_TTL_SECONDS:
+            expired.append(token)
+    for token in expired:
+        ALLOCATIONS.pop(token, None)
+    if expired:
+        _METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get("lease_expired_total", 0) + len(expired)
+        lease_expired_counter.labels(
+            agent=metrics.agent_name,
+            agent_display_name=metrics.display_name,
+        ).inc(len(expired))
 
 
 class MCPBusClient:
-	def __init__(self, base_url: str = MCP_BUS_URL):
-		self.base_url = base_url
+    def __init__(self, base_url: str = MCP_BUS_URL):
+        self.base_url = base_url
 
-	def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
-		import requests
+    def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
+        import requests
 
 
-		registration_data = {
-			"name": agent_name,
-			"address": agent_address,
-			"tools": tools,
-		}
+        registration_data = {
+            "name": agent_name,
+            "address": agent_address,
+            "tools": tools,
+        }
 
-		for attempt in range(5): # Retry up to 5 times
-			try:
-				response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
-				response.raise_for_status()
-				logger.info(f"Successfully registered {agent_name} with MCP Bus on attempt {attempt + 1}")
-				return
-			except requests.exceptions.RequestException as e:
-				logger.warning(f"MCP Bus unavailable for registration (attempt {attempt + 1}/5): {e}")
-				time.sleep(2 ** attempt) # Exponential backoff
+        for attempt in range(5): # Retry up to 5 times
+            try:
+                response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
+                response.raise_for_status()
+                logger.info(f"Successfully registered {agent_name} with MCP Bus on attempt {attempt + 1}")
+                return
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"MCP Bus unavailable for registration (attempt {attempt + 1}/5): {e}")
+                time.sleep(2 ** attempt) # Exponential backoff
 
-		logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
+        logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
 
 
 def _run_nvidia_smi() -> Optional[str]:
-	"""Run nvidia-smi and return raw XML or CSV output, or None if unavailable."""
-	# Prefer CSV for simpler parsing at this stage
-	cmd = [
-		"nvidia-smi",
-		"--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw",
-		"--format=csv,noheader,nounits",
-	]
-	try:
-		output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True, timeout=3)
-		return output
-	except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
-		logger.debug(f"nvidia-smi unavailable or failed: {e}")
-		return None
+    """Run nvidia-smi and return raw XML or CSV output, or None if unavailable."""
+    # Prefer CSV for simpler parsing at this stage
+    cmd = [
+        "nvidia-smi",
+        "--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw",
+        "--format=csv,noheader,nounits",
+    ]
+    try:
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True, timeout=3)
+        return output
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+        logger.debug(f"nvidia-smi unavailable or failed: {e}")
+        return None
 
 
 def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
-	gpus: List[Dict[str, Any]] = []
-	for line in csv_text.strip().splitlines():
-		parts = [p.strip() for p in line.split(",")]
-		if len(parts) < 7:
-			continue
-		try:
-			gpus.append(
-				{
-					"index": int(parts[0]),
-					"name": parts[1],
-					"memory_total_mb": float(parts[2]),
-					"memory_used_mb": float(parts[3]),
-					"utilization_gpu_pct": float(parts[4]),
-					"temperature_c": float(parts[5]),
-					"power_draw_w": float(parts[6]),
-					"memory_utilization_pct": (
-						(float(parts[3]) / float(parts[2]) * 100.0) if float(parts[2]) > 0 else 0.0
-					),
-				}
-			)
-		except ValueError:
-			# Skip malformed rows
-			continue
-	return gpus
+    gpus: List[Dict[str, Any]] = []
+    for line in csv_text.strip().splitlines():
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) < 7:
+            continue
+        try:
+            gpus.append(
+                {
+                    "index": int(parts[0]),
+                    "name": parts[1],
+                    "memory_total_mb": float(parts[2]),
+                    "memory_used_mb": float(parts[3]),
+                    "utilization_gpu_pct": float(parts[4]),
+                    "temperature_c": float(parts[5]),
+                    "power_draw_w": float(parts[6]),
+                    "memory_utilization_pct": (
+                        (float(parts[3]) / float(parts[2]) * 100.0) if float(parts[2]) > 0 else 0.0
+                    ),
+                }
+            )
+        except ValueError:
+            # Skip malformed rows
+            continue
+    return gpus
 
 
 def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
-	"""Enrich GPU info with NVML data if available and enabled.
+    """Enrich GPU info with NVML data if available and enabled.
 
-	Mutates the input list of GPU dictionaries to add NVML-related fields.
-	"""
-	if not ENABLE_NVML or SAFE_MODE or not _NVML_SUPPORTED:
-		return
-	try:
-		import pynvml  # type: ignore
-		for g in gpus:
-			idx = g.get("index")
-			if idx is not None:
-				try:
-					handle = get_nvml_handle(idx)
-					util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-					mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-					g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
-					g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
-					g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
-					g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
-				except Exception as e:  # noqa: BLE001
-					g["nvml_error"] = str(e)
-	except Exception as e:
-		logger.warning(f"NVML enrichment error: {e}")
+    Mutates the input list of GPU dictionaries to add NVML-related fields.
+    """
+    if not ENABLE_NVML or SAFE_MODE or not _NVML_SUPPORTED:
+        return
+    try:
+        import pynvml  # type: ignore
+        for g in gpus:
+            idx = g.get("index")
+            if idx is not None:
+                try:
+                    handle = get_nvml_handle(idx)
+                    util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                    mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                    g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
+                    g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
+                    g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
+                    g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
+                except Exception as e:  # noqa: BLE001
+                    g["nvml_error"] = str(e)
+    except Exception as e:
+        logger.warning(f"NVML enrichment error: {e}")
 
 
 def get_gpu_snapshot() -> Dict[str, Any]:
-	"""Return a conservative, read-only snapshot of GPU state."""
-	smi = _run_nvidia_smi()
-	if smi is None:
-		return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
-	gpus = _parse_nvidia_smi_csv(smi)
-	_get_nvml_enrichment(gpus)
-	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
+    """Return a conservative, read-only snapshot of GPU state."""
+    smi = _run_nvidia_smi()
+    if smi is None:
+        return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
+    gpus = _parse_nvidia_smi_csv(smi)
+    _get_nvml_enrichment(gpus)
+    return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
 
 
 def _detect_mps() -> Dict[str, Any]:
-	"""Best-effort NVIDIA MPS detection.
+    """Best-effort NVIDIA MPS detection.
 
-	Returns a dict with:
-	- enabled: bool
-	- pipe_dir: str | None
-	- control_process: bool (whether nvidia-cuda-mps-control appears active)
-	"""
-	pipe_dir = os.environ.get("CUDA_MPS_PIPE_DIRECTORY", "/tmp/nvidia-mps")
-	control_process = False
-	enabled = False
-	try:
-		out = subprocess.run([
-			"pgrep", "-x", "nvidia-cuda-mps-control"
-		], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1)
-		control_process = (out.returncode == 0)
-	except Exception:
-		control_process = False
-	try:
-		if pipe_dir and os.path.exists(pipe_dir):
-			enabled = True
-	except Exception:
-		enabled = False
-	enabled = enabled or control_process
-	return {"enabled": bool(enabled), "pipe_dir": pipe_dir, "control_process": bool(control_process)}
+    Returns a dict with:
+    - enabled: bool
+    - pipe_dir: str | None
+    - control_process: bool (whether nvidia-cuda-mps-control appears active)
+    """
+    pipe_dir = os.environ.get("CUDA_MPS_PIPE_DIRECTORY", "/tmp/nvidia-mps")
+    control_process = False
+    enabled = False
+    try:
+        out = subprocess.run([
+            "pgrep", "-x", "nvidia-cuda-mps-control"
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1)
+        control_process = (out.returncode == 0)
+    except Exception:
+        control_process = False
+    try:
+        if pipe_dir and os.path.exists(pipe_dir):
+            enabled = True
+    except Exception:
+        enabled = False
+    enabled = enabled or control_process
+    return {"enabled": bool(enabled), "pipe_dir": pipe_dir, "control_process": bool(control_process)}
 
 
 class PolicyUpdate(BaseModel):
-	max_memory_per_agent_mb: Optional[int] = Field(None, ge=256, description="Per-agent memory cap in MB")
-	allow_fractional_shares: Optional[bool] = None
-	kill_on_oom: Optional[bool] = None
+    max_memory_per_agent_mb: Optional[int] = Field(None, ge=256, description="Per-agent memory cap in MB")
+    allow_fractional_shares: Optional[bool] = None
+    kill_on_oom: Optional[bool] = None
 
-	class Config:
-		arbitrary_types_allowed = True
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class LeaseRequest(BaseModel):
-	agent: str
-	min_memory_mb: Optional[int] = Field(0, ge=0)
+    agent: str
+    min_memory_mb: Optional[int] = Field(0, ge=0)
 
-	model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class ReleaseRequest(BaseModel):
-	token: str
+    token: str
 
-	model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class PreloadRequest(BaseModel):
-	agents: Optional[List[str]] = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
-	refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
-	strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
+    agents: Optional[List[str]] = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
+    refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
+    strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
 
-	model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # Modify lifespan to delay readiness until registration completes
