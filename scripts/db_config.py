@@ -2,6 +2,7 @@
 
 Usage: from scripts.db_config import get_db_conn
 """
+
 from __future__ import annotations
 
 import os
@@ -36,12 +37,14 @@ def get_db_conn():
                         if len(parts) != 5:
                             continue
                         h, p, db, u, pw = parts
-                        host_match = (h == params["host"] or h == "*")
-                        port_match = (str(p) == str(params["port"]) or p == "*")
-                        db_match = (db == params["dbname"] or db == "*")
+                        host_match = h == params["host"] or h == "*"
+                        port_match = str(p) == str(params["port"]) or p == "*"
+                        db_match = db == params["dbname"] or db == "*"
                         if host_match and port_match and db_match:
                             # If the script explicitly set JUSTNEWS_DB_USER, prefer it.
-                            explicit_user = os.environ.get("JUSTNEWS_DB_USER") is not None
+                            explicit_user = (
+                                os.environ.get("JUSTNEWS_DB_USER") is not None
+                            )
                             if explicit_user:
                                 if u == params["user"] or u == "*":
                                     params["password"] = pw

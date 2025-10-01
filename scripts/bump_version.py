@@ -13,13 +13,14 @@ Examples:
     python scripts/bump_version.py 1.0.0 --dry-run --verbose
 """
 
-import sys
+import argparse
 import os
 import re
-import argparse
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional
 import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 
 class VersionBumper:
     """Automates version updates across the JustNewsAgent codebase"""
@@ -32,13 +33,14 @@ class VersionBumper:
         self.files_modified: List[str] = []
 
         # Validate version format
-        if not re.match(r'^\d+\.\d+\.\d+$', new_version):
+        if not re.match(r"^\d+\.\d+\.\d+$", new_version):
             raise ValueError(f"Invalid version format: {new_version}. Expected: x.y.z")
 
         # Load current version
         try:
             sys.path.insert(0, str(self.project_root))
             from justnews import __version__ as current_version
+
             self.current_version = current_version
             if self.verbose:
                 print(f"📋 Current version: {current_version}")
@@ -47,7 +49,9 @@ class VersionBumper:
             raise RuntimeError(f"Cannot load current version: {e}")
 
         if current_version == new_version:
-            raise ValueError(f"New version {new_version} is the same as current version")
+            raise ValueError(
+                f"New version {new_version} is the same as current version"
+            )
 
     def log(self, message: str):
         """Log a message if verbose mode is enabled"""
@@ -56,7 +60,7 @@ class VersionBumper:
 
     def backup_file(self, file_path: Path) -> Path:
         """Create a backup of a file"""
-        backup_path = file_path.with_suffix(file_path.suffix + '.backup')
+        backup_path = file_path.with_suffix(file_path.suffix + ".backup")
         if not self.dry_run:
             backup_path.write_text(file_path.read_text())
         self.log(f"Created backup: {backup_path}")
@@ -77,14 +81,14 @@ class VersionBumper:
         new_content = re.sub(
             r'(__version__\s*=\s*)["\']([^"\']+)["\']',
             f'\\1"{self.new_version}"',
-            content
+            content,
         )
 
         # Update VERSION_INFO version
         new_content = re.sub(
             r'("version":\s*)["\']([^"\']+)["\']',
             f'\\1"{self.new_version}"',
-            new_content
+            new_content,
         )
 
         if not self.dry_run:
@@ -107,10 +111,14 @@ class VersionBumper:
         content = readme_file.read_text()
 
         # Update version badge - simple replacement
-        new_content = content.replace(f'version-{self.current_version}', f'version-{self.new_version}')
+        new_content = content.replace(
+            f"version-{self.current_version}", f"version-{self.new_version}"
+        )
 
         # Update version text - simple replacement
-        new_content = new_content.replace(f'**Version:** {self.current_version}', f'**Version:** {self.new_version}')
+        new_content = new_content.replace(
+            f"**Version:** {self.current_version}", f"**Version:** {self.new_version}"
+        )
 
         if content != new_content and not self.dry_run:
             self.backup_file(readme_file)
@@ -124,10 +132,7 @@ class VersionBumper:
         """Update version references in documentation files"""
         self.log("Updating documentation version references...")
 
-        doc_files = [
-            "docs/RELEASE_PROCESS.md",
-            "CHANGELOG.md"
-        ]
+        doc_files = ["docs/RELEASE_PROCESS.md", "CHANGELOG.md"]
 
         for doc_file in doc_files:
             file_path = self.project_root / doc_file
@@ -141,7 +146,7 @@ class VersionBumper:
             new_content = re.sub(
                 rf'"version":\s*"{re.escape(self.current_version)}"',
                 f'"version": "{self.new_version}"',
-                content
+                content,
             )
 
             if content != new_content and not self.dry_run:
@@ -168,7 +173,7 @@ class VersionBumper:
             new_content = re.sub(
                 rf'"version":\s*"{re.escape(self.current_version)}"',
                 f'"version": "{self.new_version}"',
-                content
+                content,
             )
 
             if content != new_content and not self.dry_run:
@@ -197,7 +202,7 @@ class VersionBumper:
                 rf'(version\s*=\s*)["\']{re.escape(self.current_version)}["\']',
                 f'\\1"{self.new_version}"',
                 content,
-                flags=re.IGNORECASE
+                flags=re.IGNORECASE,
             )
 
             if content != new_content and not self.dry_run:
@@ -252,29 +257,45 @@ class VersionBumper:
                 print("🎉 VERSION BUMP COMPLETED SUCCESSFULLY!")
                 print("\nNext steps:")
                 print("1. Run tests: pytest")
-                print("2. Validate version: python scripts/validate_version_compliance.py")
+                print(
+                    "2. Validate version: python scripts/validate_version_compliance.py"
+                )
                 print("3. Update CHANGELOG.md with release notes")
-                print("4. Commit changes: git add . && git commit -m 'Bump version to {self.new_version}'")
+                print(
+                    "4. Commit changes: git add . && git commit -m 'Bump version to {self.new_version}'"
+                )
         else:
             print("⚠️  Some updates failed - please check errors above")
 
         return all_success
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Bump version across JustNewsAgent codebase")
+    parser = argparse.ArgumentParser(
+        description="Bump version across JustNewsAgent codebase"
+    )
     parser.add_argument("new_version", help="New version number (format: x.y.z)")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be changed without modifying files")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be changed without modifying files",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
 
     args = parser.parse_args()
 
     try:
-        bumper = VersionBumper(args.new_version, dry_run=args.dry_run, verbose=args.verbose)
+        bumper = VersionBumper(
+            args.new_version, dry_run=args.dry_run, verbose=args.verbose
+        )
         success = bumper.run_all_updates()
         sys.exit(0 if success else 1)
     except Exception as e:
         print(f"❌ Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

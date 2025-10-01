@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 import os
 import sys
-
 from pathlib import Path
 
 # Add the project root to Python path FIRST
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from common.observability import get_logger
-from agents.common.database import execute_query, initialize_connection_pool
 from agents.common.auth_models import create_user_tables
+from agents.common.database import execute_query, initialize_connection_pool
+from common.observability import get_logger
 
 """
 Database initialization script for JustNewsAgent Authentication System
@@ -22,9 +21,10 @@ Run this script once to set up the authentication database schema.
 # Set up logging
 logger = get_logger(__name__)
 
+
 def create_initial_admin_user():
     """Create an initial admin user for testing"""
-    from agents.common.auth_models import create_user, UserCreate, UserRole
+    from agents.common.auth_models import UserCreate, UserRole, create_user
 
     try:
         admin_user = UserCreate(
@@ -32,7 +32,7 @@ def create_initial_admin_user():
             username="admin",
             full_name="System Administrator",
             password="Admin123!@#",
-            role=UserRole.ADMIN
+            role=UserRole.ADMIN,
         )
 
         user_id = create_user(admin_user)
@@ -47,6 +47,7 @@ def create_initial_admin_user():
 
     except Exception as e:
         logger.error(f"❌ Error creating initial admin user: {e}")
+
 
 def create_knowledge_graph_tables():
     """Create tables for knowledge graph data if they don't exist"""
@@ -120,7 +121,7 @@ def create_knowledge_graph_tables():
         """,
         """
         CREATE INDEX IF NOT EXISTS idx_relationships_target ON relationships(target_entity_id)
-        """
+        """,
     ]
 
     for i, query in enumerate(queries, 1):
@@ -130,6 +131,7 @@ def create_knowledge_graph_tables():
         except Exception as e:
             logger.error(f"❌ Error creating knowledge graph table {i}: {e}")
             raise
+
 
 def main():
     """Main initialization function"""
@@ -141,13 +143,17 @@ def main():
         "POSTGRES_HOST",
         "POSTGRES_DB",
         "POSTGRES_USER",
-        "POSTGRES_PASSWORD"
+        "POSTGRES_PASSWORD",
     ]
 
     missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
     if missing_vars:
-        logger.error(f"❌ Missing required environment variables: {', '.join(missing_vars)}")
-        logger.error("Please set these environment variables before running this script:")
+        logger.error(
+            f"❌ Missing required environment variables: {', '.join(missing_vars)}"
+        )
+        logger.error(
+            "Please set these environment variables before running this script:"
+        )
         for var in missing_vars:
             logger.error(f"  export {var}=<value>")
         sys.exit(1)
@@ -186,6 +192,7 @@ def main():
         logger.error(f"❌ Database initialization failed: {e}")
         logger.error("Please check your database configuration and try again.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

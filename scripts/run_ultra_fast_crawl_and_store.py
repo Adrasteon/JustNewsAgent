@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Run ultra-fast BBC crawl and store articles via memory agent"""
+
 import asyncio
 import json
 import os
@@ -15,20 +16,23 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
 
-MCP_MEMORY_URL = os.environ.get("MEMORY_AGENT_URL", "http://localhost:8007/store_article")
+MCP_MEMORY_URL = os.environ.get(
+    "MEMORY_AGENT_URL", "http://localhost:8007/store_article"
+)
+
 
 async def run_and_store():
     orchestrator = ProductionCrawlerOrchestrator()
-    if 'bbc' not in orchestrator.get_available_sites():
+    if "bbc" not in orchestrator.get_available_sites():
         print("BBC crawler not available")
         return
 
     print("Starting ultra-fast crawl for 50 articles...")
-    result = await orchestrator.crawl_site_ultra_fast('bbc', target_articles=50)
-    count = result.get('count', 0)
+    result = await orchestrator.crawl_site_ultra_fast("bbc", target_articles=50)
+    count = result.get("count", 0)
     print(f"Crawl finished: count={count}")
 
-    articles = result.get('articles', [])
+    articles = result.get("articles", [])
     saved = 0
 
     def post_with_retries(url, json_payload, timeout=15, max_attempts=3):
@@ -47,8 +51,8 @@ async def run_and_store():
                 backoff *= 2
 
     for a in articles:
-        content = a.get('content') or ''
-        metadata = a.get('metadata')
+        content = a.get("content") or ""
+        metadata = a.get("metadata")
 
         # Validate content
         if not content or not content.strip():
@@ -70,8 +74,8 @@ async def run_and_store():
             r = post_with_retries(MCP_MEMORY_URL, payload, timeout=15, max_attempts=3)
             resp = r.json()
             # If the endpoint enqueued the article, count as saved for this run
-            status = resp.get('status')
-            article_id = resp.get('article_id')
+            status = resp.get("status")
+            article_id = resp.get("article_id")
             print(f"Stored article id: {article_id} status: {status}")
             saved += 1
         except Exception:
@@ -79,5 +83,6 @@ async def run_and_store():
 
     print(f"Saved {saved}/{len(articles)} articles")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(run_and_store())

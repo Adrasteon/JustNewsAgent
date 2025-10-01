@@ -8,19 +8,26 @@ This script expects the Crawler Agent to be running locally and will POST to /un
 """
 
 import argparse
-import requests
 import time
 
-MCP_CRAWLER_URL = 'http://localhost:8015'
+import requests
+
+MCP_CRAWLER_URL = "http://localhost:8015"
 
 
 def enqueue_crawl(domains, max_articles=25, concurrent=3):
     endpoint = f"{MCP_CRAWLER_URL}/unified_production_crawl"
-    payload = {"args": [domains], "kwargs": {"max_articles_per_site": max_articles, "concurrent_sites": concurrent}}
+    payload = {
+        "args": [domains],
+        "kwargs": {
+            "max_articles_per_site": max_articles,
+            "concurrent_sites": concurrent,
+        },
+    }
     resp = requests.post(endpoint, json=payload, timeout=10)
     resp.raise_for_status()
     data = resp.json()
-    return data.get('job_id')
+    return data.get("job_id")
 
 
 def poll_status(job_id, interval=5):
@@ -29,25 +36,25 @@ def poll_status(job_id, interval=5):
         resp = requests.get(endpoint, timeout=5)
         if resp.status_code == 200:
             data = resp.json()
-            status = data.get('status')
+            status = data.get("status")
             print(f"Job {job_id} status: {status}")
-            if status in ('completed', 'failed'):
+            if status in ("completed", "failed"):
                 return data
         else:
             print(f"Failed to get status: {resp.status_code}")
         time.sleep(interval)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('domains', help='Comma-separated list of domains to crawl')
-    parser.add_argument('--max-articles', type=int, default=25)
-    parser.add_argument('--concurrent', type=int, default=3)
+    parser.add_argument("domains", help="Comma-separated list of domains to crawl")
+    parser.add_argument("--max-articles", type=int, default=25)
+    parser.add_argument("--concurrent", type=int, default=3)
     args = parser.parse_args()
 
-    domains = args.domains.split(',')
-    print('Enqueueing crawl for:', domains)
+    domains = args.domains.split(",")
+    print("Enqueueing crawl for:", domains)
     job_id = enqueue_crawl(domains, args.max_articles, args.concurrent)
-    print('Enqueued job:', job_id)
+    print("Enqueued job:", job_id)
     result = poll_status(job_id)
-    print('Job finished:', result)
+    print("Job finished:", result)

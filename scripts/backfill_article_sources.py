@@ -4,6 +4,7 @@
 2. Creates functional indexes for domains and lower(domain).
 3. Backfills articles.source_id from the highest-confidence mapping in article_source_map.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -18,17 +19,20 @@ def sha256_hex(s: str) -> str:
 def ensure_columns_and_indexes(conn):
     with conn.cursor() as cur:
         # Add url_hash column if missing
-        cur.execute("""
+        cur.execute(
+            """
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='sources' AND column_name='url_hash') THEN
                 ALTER TABLE public.sources ADD COLUMN url_hash TEXT;
             END IF;
         END$$;
-        """)
+        """
+        )
 
         # Create index on domain lower(domain)
-        cur.execute("""
+        cur.execute(
+            """
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'sources_domain_lower_idx') THEN
@@ -38,23 +42,30 @@ def ensure_columns_and_indexes(conn):
                 CREATE INDEX sources_url_hash_idx ON public.sources (url_hash);
             END IF;
         END$$;
-        """)
+        """
+        )
         conn.commit()
 
 
 def populate_url_hash(conn):
     with conn.cursor() as cur:
-        cur.execute("SELECT id, url FROM public.sources WHERE url_hash IS NULL OR url_hash = ''")
+        cur.execute(
+            "SELECT id, url FROM public.sources WHERE url_hash IS NULL OR url_hash = ''"
+        )
         rows = cur.fetchall()
         for id_, url in rows:
-            cur.execute("UPDATE public.sources SET url_hash = %s WHERE id = %s", (sha256_hex(url), id_))
+            cur.execute(
+                "UPDATE public.sources SET url_hash = %s WHERE id = %s",
+                (sha256_hex(url), id_),
+            )
         conn.commit()
 
 
 def backfill_articles_source_id(conn):
     with conn.cursor() as cur:
         # For each article, pick the highest-confidence mapping
-        cur.execute("""
+        cur.execute(
+            """
         WITH ranked AS (
           SELECT article_id, source_id,
             ROW_NUMBER() OVER (PARTITION BY article_id ORDER BY confidence DESC, detected_at DESC) AS rn
@@ -64,7 +75,8 @@ def backfill_articles_source_id(conn):
         SET source_id = r.source_id
         FROM ranked r
         WHERE r.rn = 1 AND a.id = r.article_id AND (a.source_id IS DISTINCT FROM r.source_id);
-        """)
+        """
+        )
         conn.commit()
 
 
@@ -79,5 +91,5 @@ def main():
         conn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

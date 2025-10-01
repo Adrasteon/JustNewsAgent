@@ -2,43 +2,66 @@
 """
 Script to run a unified production crawl against all sources in the JustNews database.
 """
+
 import os
 import sys
+
 # Ensure project root is in sys.path for module imports
-project_root = os.environ.get("JUSTNEWS_ROOT") or os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+project_root = os.environ.get("JUSTNEWS_ROOT") or os.path.dirname(
+    os.path.dirname(os.path.realpath(__file__))
+)
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Auto-load global.env if environment variables are missing
-env_file = os.path.join(project_root, 'deploy', 'systemd', 'env', 'global.env')
+env_file = os.path.join(project_root, "deploy", "systemd", "env", "global.env")
 if os.path.exists(env_file):
-    with open(env_file, 'r') as f:
+    with open(env_file, "r") as f:
         for line in f:
-            if '=' in line and not line.strip().startswith('#'):
-                key, val = line.strip().split('=', 1)
+            if "=" in line and not line.strip().startswith("#"):
+                key, val = line.strip().split("=", 1)
                 os.environ.setdefault(key, val)
 
-import asyncio
-import requests
-import psycopg2
-from common.observability import log_error
 import argparse
+import asyncio
 
-from agents.scout.production_crawlers.unified_production_crawler import UnifiedProductionCrawler  # still imported for fallback
+import psycopg2
+import requests
+
+from agents.scout.production_crawlers.unified_production_crawler import (  # still imported for fallback
+    UnifiedProductionCrawler,
+)
+from common.observability import log_error
 
 # CLI argument parsing
 parser = argparse.ArgumentParser(description="Run unified production crawl via MCP Bus")
-parser.add_argument("--max-sites", type=int, default=3, help="Max concurrent sites to crawl")
-parser.add_argument("--articles-per-site", type=int, default=25, help="Max articles per site to collect")
-parser.add_argument("--domain-limit", type=int, default=0, help="Limit total domains to crawl (0=no limit)")
+parser.add_argument(
+    "--max-sites", type=int, default=3, help="Max concurrent sites to crawl"
+)
+parser.add_argument(
+    "--articles-per-site", type=int, default=25, help="Max articles per site to collect"
+)
+parser.add_argument(
+    "--domain-limit",
+    type=int,
+    default=0,
+    help="Limit total domains to crawl (0=no limit)",
+)
 args = parser.parse_args()
 
 # MCP Bus endpoint
 mcp_bus_url = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 
 # Agent endpoints
-CRAWLER_AGENT_URL = os.environ.get("CRAWLER_AGENT_URL", f"http://localhost:{os.environ.get('CRAWLER_AGENT_PORT', '8015')}")
-MEMORY_AGENT_URL = os.environ.get("MEMORY_AGENT_URL", f"http://localhost:{os.environ.get('MEMORY_AGENT_PORT', '8007')}")
+CRAWLER_AGENT_URL = os.environ.get(
+    "CRAWLER_AGENT_URL",
+    f"http://localhost:{os.environ.get('CRAWLER_AGENT_PORT', '8015')}",
+)
+MEMORY_AGENT_URL = os.environ.get(
+    "MEMORY_AGENT_URL",
+    f"http://localhost:{os.environ.get('MEMORY_AGENT_PORT', '8007')}",
+)
+
 
 def fetch_domains():
     # Assumes DATABASE_URL is set in global.env
@@ -51,6 +74,7 @@ def fetch_domains():
     domains = [row[0] for row in cur.fetchall()]
     conn.close()
     return domains
+
 
 async def main():
     try:
@@ -73,10 +97,10 @@ async def main():
                     "args": [domains],
                     "kwargs": {
                         "max_articles_per_site": args.articles_per_site,
-                        "concurrent_sites": args.max_sites
-                    }
+                        "concurrent_sites": args.max_sites,
+                    },
                 },
-                timeout=(5, 300)
+                timeout=(5, 300),
             )
             resp.raise_for_status()
             result = resp.json()
@@ -86,8 +110,14 @@ async def main():
             # Direct call to Crawler Agent
             dresp = requests.post(
                 f"{CRAWLER_AGENT_URL}/unified_production_crawl",
-                json={"args": [domains], "kwargs": {"max_articles_per_site": args.articles_per_site, "concurrent_sites": args.max_sites}},
-                timeout=(5, 300)
+                json={
+                    "args": [domains],
+                    "kwargs": {
+                        "max_articles_per_site": args.articles_per_site,
+                        "concurrent_sites": args.max_sites,
+                    },
+                },
+                timeout=(5, 300),
             )
             dresp.raise_for_status()
             result = dresp.json()
@@ -100,8 +130,13 @@ async def main():
             try:
                 mresp = requests.post(
                     f"{mcp_bus_url}/call",
-                    json={"agent": "memory", "tool": "store_article", "args": [art], "kwargs": {}},
-                    timeout=(2, 30)
+                    json={
+                        "agent": "memory",
+                        "tool": "store_article",
+                        "args": [art],
+                        "kwargs": {},
+                    },
+                    timeout=(2, 30),
                 )
                 mresp.raise_for_status()
                 stored += 1
@@ -110,6 +145,7 @@ async def main():
         print(f"Enqueued {stored}/{len(articles)} articles via MCP Bus to Memory Agent")
     except Exception as e:
         log_error(e, context="mcp_crawl")
+
 
 if __name__ == "__main__":
     try:

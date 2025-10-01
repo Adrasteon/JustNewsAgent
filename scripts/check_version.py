@@ -3,15 +3,16 @@
 Version validation script for JustNewsAgent
 """
 
-import sys
 import os
+import sys
 
 # Add the project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
 try:
-    from justnews import __version__, VERSION_INFO
+    from justnews import VERSION_INFO, __version__
+
     print(f"✅ JustNewsAgent Version: {__version__}")
     print(f"📊 Status: {VERSION_INFO['status']}")
     print(f"📅 Release Date: {VERSION_INFO['release_date']}")

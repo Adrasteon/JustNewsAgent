@@ -34,11 +34,12 @@ Security Notes:
   - Ensure secrets rotation plan removes any accidental persistence.
   - Search for "apply_test_db_env_fallback" to locate usages during cleanup.
 """
+
 from __future__ import annotations
 
-from typing import List, Dict, Optional
-import os
 import logging
+import os
+from typing import Dict, List, Optional
 
 # Constants
 _DISABLE_FLAG = "JUSTNEWS_DISABLE_TEST_DB_FALLBACK"
@@ -122,12 +123,14 @@ def apply_test_db_env_fallback(logger: Optional[logging.Logger] = None) -> List[
     if applied:
         _logger = logger or logging.getLogger("dev_db_fallback")
         _logger.warning(
-            "⚠️ USING TEMP HARD-CODED TEST DB VARS (REMOVE BEFORE PROD): %s", ",".join(applied)
+            "⚠️ USING TEMP HARD-CODED TEST DB VARS (REMOVE BEFORE PROD): %s",
+            ",".join(applied),
         )
         _logger.warning(
             "This is a temporary unblocker for the crawler; replace with secure env management."
         )
 
     return applied
+
 
 __all__ = ["apply_test_db_env_fallback"]

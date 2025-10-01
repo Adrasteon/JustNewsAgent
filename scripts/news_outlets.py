@@ -6,6 +6,7 @@ Usage:
 
   python scripts/news_outlets.py --file markdown_docs/agent_documentation/potential_news_sources.md
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,9 +53,9 @@ def parse_markdown_table_rows(md: str) -> Iterable[tuple[str, str, str]]:
                     name = cols[1]
                     desc = cols[2]
                     # cleanup backticks
-                    url = url.strip(' `')
-                    name = name.strip(' `')
-                    desc = desc.strip(' `')
+                    url = url.strip(" `")
+                    name = name.strip(" `")
+                    desc = desc.strip(" `")
                     yield (url, name, desc)
                 i += 1
         else:
@@ -96,7 +97,16 @@ def upsert_outlets(rows: Iterable[tuple[str, str, str]], conn) -> list[int]:
         for url, name, desc in rows:
             domain = domain_from_url(url)
             metadata = {"source": "potential_news_sources.md"}
-            cur.execute(UPSERT_SQL, {"url": url, "domain": domain, "name": name, "description": desc, "metadata": psycopg2.extras.Json(metadata)})
+            cur.execute(
+                UPSERT_SQL,
+                {
+                    "url": url,
+                    "domain": domain,
+                    "name": name,
+                    "description": desc,
+                    "metadata": psycopg2.extras.Json(metadata),
+                },
+            )
             try:
                 row = cur.fetchone()
                 if row:
@@ -117,29 +127,49 @@ def create_provenance_mappings(conn, source_rows: list[tuple[str, str, str]]):
         # Build domain -> source_id map
         cur.execute("SELECT id, domain FROM public.sources")
         sources = cur.fetchall()
-        domain_map = {s['domain'].lower(): s['id'] for s in sources if s['domain']}
+        domain_map = {s["domain"].lower(): s["id"] for s in sources if s["domain"]}
 
         # Find articles with URLs matching known domains
-        cur.execute("SELECT id, metadata FROM public.articles WHERE metadata->>'url' IS NOT NULL")
+        cur.execute(
+            "SELECT id, metadata FROM public.articles WHERE metadata->>'url' IS NOT NULL"
+        )
         articles = cur.fetchall()
         insert_sql = "INSERT INTO public.article_source_map (article_id, source_id, confidence, detected_at, metadata) VALUES (%s, %s, %s, now(), %s) ON CONFLICT DO NOTHING"
         for a in articles:
-            meta = a['metadata'] or {}
-            url = meta.get('url')
+            meta = a["metadata"] or {}
+            url = meta.get("url")
             if not url:
                 continue
             domain = domain_from_url(url)
             sid = domain_map.get(domain)
             if sid:
-                cur.execute(insert_sql, (a['id'], sid, 0.95, psycopg2.extras.Json({'matched_by': 'domain_match'})))
+                cur.execute(
+                    insert_sql,
+                    (
+                        a["id"],
+                        sid,
+                        0.95,
+                        psycopg2.extras.Json({"matched_by": "domain_match"}),
+                    ),
+                )
         conn.commit()
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--file", "-f", required=True, help="Path to potential_news_sources.md")
-    parser.add_argument("--map-articles", action="store_true", help="Attempt to map existing articles to sources by domain and insert into article_source_map and update articles.source_id")
-    parser.add_argument("--dry-run", action="store_true", help="Parse and show rows but do not write to DB")
+    parser.add_argument(
+        "--file", "-f", required=True, help="Path to potential_news_sources.md"
+    )
+    parser.add_argument(
+        "--map-articles",
+        action="store_true",
+        help="Attempt to map existing articles to sources by domain and insert into article_source_map and update articles.source_id",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Parse and show rows but do not write to DB",
+    )
     args = parser.parse_args(argv)
 
     path = args.file

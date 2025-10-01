@@ -13,18 +13,19 @@ Options:
     --verbose   Show detailed output for all checks
 """
 
-import sys
+import argparse
+import json
 import os
 import re
-import json
-import argparse
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Set
 import subprocess
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
 
 class VersionComplianceValidator:
     """Validates version consistency across the JustNewsAgent codebase"""
@@ -39,6 +40,7 @@ class VersionComplianceValidator:
         # Load central version
         try:
             from justnews import __version__ as central_version
+
             self.expected_version = central_version
             if self.verbose:
                 print(f"📋 Central version loaded: {central_version}")
@@ -65,20 +67,30 @@ class VersionComplianceValidator:
         # Check __version__ definition
         version_match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
         if not version_match:
-            self.errors.append("No __version__ definition found in justnews/__init__.py")
+            self.errors.append(
+                "No __version__ definition found in justnews/__init__.py"
+            )
             return False
 
         file_version = version_match.group(1)
         if file_version != self.expected_version:
-            self.errors.append(f"Version mismatch: central={self.expected_version}, file={file_version}")
+            self.errors.append(
+                f"Version mismatch: central={self.expected_version}, file={file_version}"
+            )
             return False
 
         # Check VERSION_INFO consistency
-        version_info_match = re.search(r'VERSION_INFO\s*=\s*\{[^}]*"version":\s*["\']([^"\']+)["\'][^}]*\}', content, re.DOTALL)
+        version_info_match = re.search(
+            r'VERSION_INFO\s*=\s*\{[^}]*"version":\s*["\']([^"\']+)["\'][^}]*\}',
+            content,
+            re.DOTALL,
+        )
         if version_info_match:
             info_version = version_info_match.group(1)
             if info_version != self.expected_version:
-                self.errors.append(f"VERSION_INFO version mismatch: {info_version} != {self.expected_version}")
+                self.errors.append(
+                    f"VERSION_INFO version mismatch: {info_version} != {self.expected_version}"
+                )
                 return False
 
         self.log("✅ Central version definition is consistent")
@@ -96,25 +108,29 @@ class VersionComplianceValidator:
         content = readme_file.read_text()
 
         # Check version badge
-        badge_pattern = r'!\[Version\]\([^)]*\)\s*badge/version-([^-\s]+)'
+        badge_pattern = r"!\[Version\]\([^)]*\)\s*badge/version-([^-\s]+)"
         badge_match = re.search(badge_pattern, content)
 
         if badge_match:
             badge_version = badge_match.group(1)
             if badge_version != self.expected_version:
-                self.errors.append(f"README badge version mismatch: {badge_version} != {self.expected_version}")
+                self.errors.append(
+                    f"README badge version mismatch: {badge_version} != {self.expected_version}"
+                )
                 return False
         else:
             self.warnings.append("Version badge not found in README.md")
 
         # Check version text
-        version_text_pattern = r'-\s*\*\*Version:\*\*\s*([0-9]+\.[0-9]+\.[0-9]+)'
+        version_text_pattern = r"-\s*\*\*Version:\*\*\s*([0-9]+\.[0-9]+\.[0-9]+)"
         text_match = re.search(version_text_pattern, content)
 
         if text_match:
             text_version = text_match.group(1)
             if text_version != self.expected_version:
-                self.errors.append(f"README version text mismatch: {text_version} != {self.expected_version}")
+                self.errors.append(
+                    f"README version text mismatch: {text_version} != {self.expected_version}"
+                )
                 return False
 
         self.log("✅ README.md version references are consistent")
@@ -125,10 +141,7 @@ class VersionComplianceValidator:
         self.log("Checking documentation version references...")
 
         # Files that should contain version references
-        doc_files = [
-            "docs/RELEASE_PROCESS.md",
-            "CHANGELOG.md"
-        ]
+        doc_files = ["docs/RELEASE_PROCESS.md", "CHANGELOG.md"]
 
         issues_found = False
 
@@ -141,11 +154,15 @@ class VersionComplianceValidator:
             content = file_path.read_text()
 
             # Find all version references (excluding external tool versions)
-            version_refs = re.findall(r'"version":\s*"([0-9]+\.[0-9]+\.[0-9]+)"', content)
+            version_refs = re.findall(
+                r'"version":\s*"([0-9]+\.[0-9]+\.[0-9]+)"', content
+            )
 
             for ref in version_refs:
                 if ref != self.expected_version:
-                    self.errors.append(f"{doc_file}: Version reference {ref} != {self.expected_version}")
+                    self.errors.append(
+                        f"{doc_file}: Version reference {ref} != {self.expected_version}"
+                    )
                     issues_found = True
 
         if not issues_found:
@@ -168,11 +185,15 @@ class VersionComplianceValidator:
             content = md_file.read_text()
 
             # Find JSON version references (exclude Docker versions)
-            json_versions = re.findall(r'"version":\s*"([0-9]+\.[0-9]+\.[0-9]+)"', content)
+            json_versions = re.findall(
+                r'"version":\s*"([0-9]+\.[0-9]+\.[0-9]+)"', content
+            )
 
             for version in json_versions:
                 if version != self.expected_version:
-                    self.errors.append(f"{md_file.name}: JSON version {version} != {self.expected_version}")
+                    self.errors.append(
+                        f"{md_file.name}: JSON version {version} != {self.expected_version}"
+                    )
                     issues_found = True
 
         if not issues_found:
@@ -185,7 +206,9 @@ class VersionComplianceValidator:
 
         # This would require services to be running
         # For now, just check that the code references are consistent
-        self.warnings.append("API endpoint validation requires running services - run manual validation")
+        self.warnings.append(
+            "API endpoint validation requires running services - run manual validation"
+        )
         return True
 
     def check_package_dependencies(self) -> bool:
@@ -201,13 +224,17 @@ class VersionComplianceValidator:
                 content = file_path.read_text()
 
                 # Look for version references
-                version_matches = re.findall(r'version\s*=\s*["\']([^"\']+)["\']', content, re.IGNORECASE)
+                version_matches = re.findall(
+                    r'version\s*=\s*["\']([^"\']+)["\']', content, re.IGNORECASE
+                )
 
                 for match in version_matches:
                     if match == self.expected_version:
                         self.log(f"✅ {setup_file} version is consistent")
                     else:
-                        self.errors.append(f"{setup_file}: version {match} != {self.expected_version}")
+                        self.errors.append(
+                            f"{setup_file}: version {match} != {self.expected_version}"
+                        )
                         return False
 
         return True
@@ -258,10 +285,17 @@ class VersionComplianceValidator:
             print(f"⚠️  {len(self.errors)} errors found, {len(self.warnings)} warnings")
             return False
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Validate version compliance across JustNewsAgent")
-    parser.add_argument("--fix", action="store_true", help="Automatically fix version inconsistencies")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    parser = argparse.ArgumentParser(
+        description="Validate version compliance across JustNewsAgent"
+    )
+    parser.add_argument(
+        "--fix", action="store_true", help="Automatically fix version inconsistencies"
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
 
     args = parser.parse_args()
 
@@ -274,6 +308,7 @@ def main():
         print("Auto-fix not yet implemented - please fix manually")
 
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

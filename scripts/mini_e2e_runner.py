@@ -43,15 +43,15 @@ Usage Examples:
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import shutil
 import signal
 import subprocess
 import sys
 import time
-import json
-import shutil
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     import requests  # type: ignore

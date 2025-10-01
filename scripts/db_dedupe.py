@@ -1,17 +1,18 @@
 """Small helper for DB-side dedupe using crawled_urls table.
 Provides: ensure_table(conn) and register_url(conn, url, url_hash=None)
 """
+
 import hashlib
 
 
 def _hash_url(url: str) -> str:
-    return hashlib.sha256(url.encode('utf-8')).hexdigest()
+    return hashlib.sha256(url.encode("utf-8")).hexdigest()
 
 
 def ensure_table(conn) -> None:
     """Ensure the crawled_urls table exists in the database."""
     with conn.cursor() as cur:
-        cur.execute(open('scripts/migrations/0001_create_crawled_urls.sql').read())
+        cur.execute(open("scripts/migrations/0001_create_crawled_urls.sql").read())
     conn.commit()
 
 

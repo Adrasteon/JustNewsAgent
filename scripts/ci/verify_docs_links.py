@@ -9,13 +9,13 @@ Checks:
 
 Exit code 0 on success, 1 on any failure.
 """
+
 from __future__ import annotations
 
 import json
 import sys
 from pathlib import Path
 from typing import List, Tuple
-
 
 REQUIRED_REL_PATHS = [
     "deploy/systemd/README.md",
@@ -154,7 +154,10 @@ def check_catalogue(root: Path) -> Tuple[bool, str]:
     categories = data.get("categories", [])
     dep = next((c for c in categories if c.get("id") == "deployment_systemd"), None)
     if not dep:
-        return False, "Category 'deployment_systemd' not found in docs_catalogue_v2.json"
+        return (
+            False,
+            "Category 'deployment_systemd' not found in docs_catalogue_v2.json",
+        )
     listed = {doc.get("path") for doc in dep.get("documents", [])}
     missing = [p for p in REQUIRED_REL_PATHS if p not in listed]
     if missing:
@@ -218,12 +221,13 @@ def main() -> int:
 
     # Extended operator-simplicity checks
     ext_errors: List[str] = []
+
     # Validate a set of artifacts with shared logic
     def validate_artifact(key: str, needle: str):
         spec = REQUIRED_ARTIFACTS[key]
         path = root / spec["path"]
         if not path.is_file():
-            ext_errors.append(f"Missing {key.replace('_',' ')}: {spec['path']}")
+            ext_errors.append(f"Missing {key.replace('_', ' ')}: {spec['path']}")
             return
         try:
             mode = path.stat().st_mode
@@ -269,7 +273,9 @@ def main() -> int:
             print(f" - {e}")
         return 1
 
-    print("[docs-verify] PASS: systemd docs present and wired in catalogue/index + operator simplicity checks")
+    print(
+        "[docs-verify] PASS: systemd docs present and wired in catalogue/index + operator simplicity checks"
+    )
     return 0
 
 

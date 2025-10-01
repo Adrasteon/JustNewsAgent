@@ -34,7 +34,7 @@ def iter_agents(agents_root: Path) -> Iterable[Path]:
     if not agents_root.is_dir():
         return []
     for entry in sorted(agents_root.iterdir()):
-        if entry.name.startswith('.'):
+        if entry.name.startswith("."):
             continue
         if entry.is_dir():
             yield entry
@@ -50,13 +50,13 @@ def ensure_parent(path: Path) -> None:
 
 
 def perform_migration(agent_dir: Path, target_base: Path, dry_run: bool = True) -> None:
-    src_models = agent_dir / 'models'
+    src_models = agent_dir / "models"
     if not src_models.exists():
         print(f"[SKIP] {agent_dir.name}: no models/ directory")
         return
 
-    target_agent_models = target_base / agent_dir.name / 'models'
-    tmp_suffix = f'.tmp.{os.getpid()}'
+    target_agent_models = target_base / agent_dir.name / "models"
+    tmp_suffix = f".tmp.{os.getpid()}"
     tmp_target = target_agent_models.with_name(target_agent_models.name + tmp_suffix)
 
     print(f"\n[PLAN] Agent: {agent_dir.name}")
@@ -105,16 +105,32 @@ def perform_migration(agent_dir: Path, target_base: Path, dry_run: bool = True) 
         shutil.rmtree(src_models)
 
     print(f"  [LINK] {agent_dir / 'models'} -> {target_agent_models}")
-    os.symlink(str(target_agent_models), str(agent_dir / 'models'))
+    os.symlink(str(target_agent_models), str(agent_dir / "models"))
 
 
 def main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(description="Mirror per-agent models to a large-volume target and symlink them back.")
-    parser.add_argument('--agents', default='agents', help='Path to agents directory (default: agents)')
-    parser.add_argument('--target', required=False, help='Target base directory on the large volume (overrides DATA_DRIVE_TARGET env var).')
-    parser.add_argument('--dry-run', action='store_true', help='Show actions without performing them')
-    parser.add_argument('--yes', action='store_true', help='Perform actions (required to actually migrate)')
-    parser.add_argument('--agent', default=None, help='Only migrate a single agent by name')
+    parser = argparse.ArgumentParser(
+        description="Mirror per-agent models to a large-volume target and symlink them back."
+    )
+    parser.add_argument(
+        "--agents", default="agents", help="Path to agents directory (default: agents)"
+    )
+    parser.add_argument(
+        "--target",
+        required=False,
+        help="Target base directory on the large volume (overrides DATA_DRIVE_TARGET env var).",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show actions without performing them"
+    )
+    parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="Perform actions (required to actually migrate)",
+    )
+    parser.add_argument(
+        "--agent", default=None, help="Only migrate a single agent by name"
+    )
     args = parser.parse_args(argv)
 
     agents_root = Path(args.agents).resolve()
@@ -122,17 +138,19 @@ def main(argv: list[str]) -> int:
     # Determine target: CLI --target wins, then DATA_DRIVE_TARGET env var, then default to
     # the canonical data path which includes the `agents/` prefix so final model folders
     # will be: /media/adra/Data/justnews/agents/<agent>/models
-    env_target = os.environ.get('DATA_DRIVE_TARGET')
+    env_target = os.environ.get("DATA_DRIVE_TARGET")
     if args.target:
         target_base = Path(args.target).resolve()
     elif env_target:
         target_base = Path(env_target).resolve()
     else:
         # Default canonical data drive path (includes agents/ prefix)
-        target_base = Path('/media/adra/Data/justnews/agents').resolve()
+        target_base = Path("/media/adra/Data/justnews/agents").resolve()
 
     if not args.dry_run and not args.yes:
-        print("Refusing to run: pass --yes to perform actions (or use --dry-run to preview).")
+        print(
+            "Refusing to run: pass --yes to perform actions (or use --dry-run to preview)."
+        )
         return 2
 
     agents = list(iter_agents(agents_root))
@@ -154,5 +172,5 @@ def main(argv: list[str]) -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))

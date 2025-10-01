@@ -25,7 +25,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-AGENTS_DIR = Path(__file__).resolve().parents[1] / 'agents'
+AGENTS_DIR = Path(__file__).resolve().parents[1] / "agents"
 
 WRAPPER_TEMPLATE = '''# Auto-generated safe wrapper main.py
 """
@@ -92,61 +92,68 @@ app = _find_app()
 def scan_agents(agents_dir: Path) -> dict[str, dict[str, bool]]:
     results: dict[str, dict[str, bool]] = {}
     if not agents_dir.exists():
-        raise FileNotFoundError(f'Agents directory not found: {agents_dir}')
+        raise FileNotFoundError(f"Agents directory not found: {agents_dir}")
 
     for child in sorted(agents_dir.iterdir()):
         if not child.is_dir():
             continue
-        if child.name.startswith('.'):
+        if child.name.startswith("."):
             continue
 
         files = {p.name for p in child.iterdir() if p.is_file()}
-        has_main = 'main.py' in files
-        has_tools = 'tools.py' in files
-        has_engine = any(n.endswith('_engine.py') or n.endswith('_v2_engine.py') or 'engine' in n for n in files)
+        has_main = "main.py" in files
+        has_tools = "tools.py" in files
+        has_engine = any(
+            n.endswith("_engine.py") or n.endswith("_v2_engine.py") or "engine" in n
+            for n in files
+        )
 
         results[child.name] = {
-            'path': str(child),
-            'has_main_py': has_main,
-            'has_tools_py': has_tools,
-            'has_engine_py': has_engine,
-            'files': sorted(files),
+            "path": str(child),
+            "has_main_py": has_main,
+            "has_tools_py": has_tools,
+            "has_engine_py": has_engine,
+            "files": sorted(files),
         }
 
     return results
 
 
 def create_wrapper_main(agent_path: Path) -> None:
-    target = agent_path / 'main.py'
+    target = agent_path / "main.py"
     if target.exists():
-        print(f'Skipping {target}: already exists')
+        print(f"Skipping {target}: already exists")
         return
     target.write_text(WRAPPER_TEMPLATE)
-    print(f'Created wrapper: {target}')
+    print(f"Created wrapper: {target}")
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--create-wrappers', action='store_true', help='Create safe wrapper main.py files for agents missing main.py')
+    parser.add_argument(
+        "--create-wrappers",
+        action="store_true",
+        help="Create safe wrapper main.py files for agents missing main.py",
+    )
     args = parser.parse_args(argv)
 
     agents_dir = AGENTS_DIR
-    print(f'Scanning agents directory: {agents_dir}')
+    print(f"Scanning agents directory: {agents_dir}")
     report = scan_agents(agents_dir)
 
     missing_main = []
     for name, info in report.items():
         status = []
-        status.append('main.py' if info['has_main_py'] else 'NO main.py')
-        status.append('tools.py' if info['has_tools_py'] else 'NO tools.py')
-        status.append('engine' if info['has_engine_py'] else 'NO engine')
+        status.append("main.py" if info["has_main_py"] else "NO main.py")
+        status.append("tools.py" if info["has_tools_py"] else "NO tools.py")
+        status.append("engine" if info["has_engine_py"] else "NO engine")
         print(f"- {name}: {', '.join(status)}")
-        if not info['has_main_py']:
+        if not info["has_main_py"]:
             missing_main.append(name)
 
-    print('\nSummary:')
-    print(f'  agents scanned: {len(report)}')
-    print(f'  missing main.py: {len(missing_main)}')
+    print("\nSummary:")
+    print(f"  agents scanned: {len(report)}")
+    print(f"  missing main.py: {len(missing_main)}")
 
     if args.create_wrappers and missing_main:
         for name in missing_main:
@@ -156,5 +163,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())

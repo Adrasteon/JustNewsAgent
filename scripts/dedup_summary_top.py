@@ -13,10 +13,14 @@ except Exception as e:
 
 rows.sort(key=lambda x: int(x["size"]), reverse=True)
 
+
 def preview(s: str) -> str:
     s = s.strip().replace("\n", " ").replace('"', "'")
     return s if len(s) <= 120 else s[:117] + "..."
 
+
 print("cluster_id,size,rep_id,rep_title_preview")
 for row in rows[:20]:
-    print(f'{row["cluster_id"]},{row["size"]},{row["representative_id"]},"{preview(row["representative_title"]) }"')
+    print(
+        f'{row["cluster_id"]},{row["size"]},{row["representative_id"]},"{preview(row["representative_title"])}"'
+    )

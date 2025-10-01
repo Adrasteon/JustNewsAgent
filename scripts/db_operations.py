@@ -39,6 +39,7 @@ def show_menu():
     print("8. Exit")
     print()
 
+
 def show_database_stats():
     """Show database statistics"""
     print("\n📊 Database Statistics:")
@@ -50,7 +51,9 @@ def show_database_stats():
         print(f"📄 Total articles: {result['count']}")
 
         # Articles with embeddings
-        result = execute_query_single("SELECT COUNT(*) as count FROM articles WHERE embedding IS NOT NULL")
+        result = execute_query_single(
+            "SELECT COUNT(*) as count FROM articles WHERE embedding IS NOT NULL"
+        )
         print(f"🧠 Articles with embeddings: {result['count']}")
 
         # Training examples count
@@ -68,19 +71,23 @@ def show_database_stats():
     except Exception as e:
         print(f"❌ Error getting statistics: {e}")
 
+
 def list_recent_articles(limit=5):
     """List recent articles"""
     print(f"\n📰 Recent Articles (last {limit}):")
     print("-" * 30)
 
     try:
-        articles = execute_query("""
+        articles = execute_query(
+            """
             SELECT id, LEFT(content, 100) as content_preview,
                    created_at, metadata->>'source' as source
             FROM articles
             ORDER BY created_at DESC
             LIMIT %s
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         if articles:
             for article in articles:
@@ -95,13 +102,15 @@ def list_recent_articles(limit=5):
     except Exception as e:
         print(f"❌ Error listing articles: {e}")
 
+
 def search_articles(query, limit=5):
     """Search articles by content"""
     print(f"\n🔍 Search Results for '{query}' (limit {limit}):")
     print("-" * 40)
 
     try:
-        articles = execute_query("""
+        articles = execute_query(
+            """
             SELECT id, LEFT(content, 150) as content_preview,
                    ts_rank_cd(to_tsvector('english', content), plainto_tsquery('english', %s)) as rank,
                    metadata->>'source' as source
@@ -109,7 +118,9 @@ def search_articles(query, limit=5):
             WHERE to_tsvector('english', content) @@ plainto_tsquery('english', %s)
             ORDER BY rank DESC
             LIMIT %s
-        """, (query, query, limit))
+        """,
+            (query, query, limit),
+        )
 
         if articles:
             for article in articles:
@@ -123,20 +134,24 @@ def search_articles(query, limit=5):
     except Exception as e:
         print(f"❌ Error searching articles: {e}")
 
+
 def show_training_examples(limit=5):
     """Show training examples"""
     print(f"\n🎓 Training Examples (last {limit}):")
     print("-" * 30)
 
     try:
-        examples = execute_query("""
+        examples = execute_query(
+            """
             SELECT id, task, created_at,
                    LEFT(input::text, 50) as input_preview,
                    LEFT(output::text, 50) as output_preview
             FROM training_examples
             ORDER BY created_at DESC
             LIMIT %s
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         if examples:
             for example in examples:
@@ -151,41 +166,50 @@ def show_training_examples(limit=5):
     except Exception as e:
         print(f"❌ Error showing training examples: {e}")
 
+
 def show_database_schema():
     """Show database schema"""
     print("\n📋 Database Schema:")
     print("-" * 20)
 
     try:
-        tables = execute_query("""
+        tables = execute_query(
+            """
             SELECT tablename
             FROM pg_tables
             WHERE schemaname = 'public'
             ORDER BY tablename
-        """)
+        """
+        )
 
         if tables:
             for table in tables:
-                table_name = table['tablename']
+                table_name = table["tablename"]
                 print(f"\n📊 {table_name}")
 
                 # Get column information
-                columns = execute_query("""
+                columns = execute_query(
+                    """
                     SELECT column_name, data_type, is_nullable
                     FROM information_schema.columns
                     WHERE table_name = %s AND table_schema = 'public'
                     ORDER BY ordinal_position
-                """, (table_name,))
+                """,
+                    (table_name,),
+                )
 
                 if columns:
                     for col in columns:
-                        nullable = "NULL" if col['is_nullable'] == 'YES' else "NOT NULL"
-                        print(f"   {col['column_name']} ({col['data_type']}) {nullable}")
+                        nullable = "NULL" if col["is_nullable"] == "YES" else "NOT NULL"
+                        print(
+                            f"   {col['column_name']} ({col['data_type']}) {nullable}"
+                        )
         else:
             print("No tables found")
 
     except Exception as e:
         print(f"❌ Error showing schema: {e}")
+
 
 def run_vector_search_test():
     """Test vector search functionality"""
@@ -194,24 +218,29 @@ def run_vector_search_test():
 
     try:
         # Get a sample article with embedding
-        result = execute_query_single("""
+        result = execute_query_single(
+            """
             SELECT id, LEFT(content, 50) as content_preview
             FROM articles
             WHERE embedding IS NOT NULL
             LIMIT 1
-        """)
+        """
+        )
 
         if result:
             print(f"Sample article ID: {result['id']}")
             print(f"Content preview: {result['content_preview']}...")
 
             # Get similar articles using basic similarity (would use pgvector in production)
-            similar = execute_query("""
+            similar = execute_query(
+                """
                 SELECT id, LEFT(content, 50) as content_preview
                 FROM articles
                 WHERE embedding IS NOT NULL AND id != %s
                 LIMIT 3
-            """, (result['id'],))
+            """,
+                (result["id"],),
+            )
 
             if similar:
                 print("\n📄 Similar articles:")
@@ -225,6 +254,7 @@ def run_vector_search_test():
     except Exception as e:
         print(f"❌ Error testing vector search: {e}")
 
+
 def show_connection_pool_status():
     """Show connection pool status"""
     print("\n🔌 Connection Pool Status:")
@@ -236,6 +266,7 @@ def show_connection_pool_status():
             print(f"{key}: {value}")
     except Exception as e:
         print(f"❌ Error getting pool status: {e}")
+
 
 def main():
     """Main interactive loop"""
@@ -292,6 +323,7 @@ def main():
             print(f"❌ Error: {e}")
 
         input("\nPress Enter to continue...")
+
 
 if __name__ == "__main__":
     main()

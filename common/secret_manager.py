@@ -34,6 +34,7 @@ from common.observability import get_logger
 
 logger = get_logger(__name__)
 
+
 class SecretManager:
     """Enterprise-grade secret management system"""
 
@@ -45,7 +46,7 @@ class SecretManager:
 
     def _get_default_vault_path(self) -> str:
         """Get default encrypted vault path"""
-        return str(Path.home() / '.justnews' / 'secrets.vault')
+        return str(Path.home() / ".justnews" / "secrets.vault")
 
     def _derive_key(self, password: str, salt: bytes) -> bytes:
         """Derive encryption key from password using PBKDF2"""
@@ -64,7 +65,7 @@ class SecretManager:
                 logger.warning("Vault file does not exist")
                 return False
 
-            with open(self.vault_path, 'rb') as f:
+            with open(self.vault_path, "rb") as f:
                 encrypted_data = f.read()
 
             # Extract salt from encrypted data (first 16 bytes)
@@ -100,7 +101,7 @@ class SecretManager:
     def get(self, key: str, default: Any = None) -> Any:
         """Get a secret value with fallback to environment variables"""
         # First try environment variable
-        env_key = key.upper().replace('.', '_')
+        env_key = key.upper().replace(".", "_")
         env_value = os.environ.get(env_key)
         if env_value is not None:
             return env_value
@@ -146,7 +147,7 @@ class SecretManager:
             final_data = salt + encrypted_data
 
             # Save to file
-            with open(self.vault_path, 'wb') as f:
+            with open(self.vault_path, "wb") as f:
                 f.write(final_data)
 
             logger.info("✅ Encrypted vault saved")
@@ -159,7 +160,7 @@ class SecretManager:
         """Save vault in plaintext format (development only)"""
         try:
             os.makedirs(os.path.dirname(self.vault_path), exist_ok=True)
-            with open(self.vault_path, 'w') as f:
+            with open(self.vault_path, "w") as f:
                 json.dump(self._vault, f, indent=2)
             logger.warning("⚠️ Vault saved in plaintext - NOT SECURE for production")
         except Exception as e:
@@ -172,7 +173,10 @@ class SecretManager:
 
         # Environment variables
         for key, value in os.environ.items():
-            if any(secret in key.lower() for secret in ['password', 'secret', 'key', 'token']):
+            if any(
+                secret in key.lower()
+                for secret in ["password", "secret", "key", "token"]
+            ):
                 result[f"env:{key}"] = self._mask_secret(value)
 
         # Vault secrets
@@ -184,8 +188,8 @@ class SecretManager:
     def _mask_secret(self, value: str) -> str:
         """Mask a secret value for display"""
         if len(value) <= 4:
-            return '*' * len(value)
-        return value[:2] + '*' * (len(value) - 4) + value[-2:]
+            return "*" * len(value)
+        return value[:2] + "*" * (len(value) - 4) + value[-2:]
 
     def validate_security(self) -> dict[str, Any]:
         """Validate security configuration"""
@@ -194,9 +198,9 @@ class SecretManager:
 
         # Check for plaintext secrets in config files
         config_files = [
-            'config/system_config.json',
-            'config/gpu/gpu_config.json',
-            'config/gpu/environment_config.json'
+            "config/system_config.json",
+            "config/gpu/gpu_config.json",
+            "config/gpu/environment_config.json",
         ]
 
         for config_file in config_files:
@@ -204,7 +208,10 @@ class SecretManager:
                 try:
                     with open(config_file) as f:
                         content = f.read().lower()
-                        if any(word in content for word in ['password', 'secret', 'key', 'token']):
+                        if any(
+                            word in content
+                            for word in ["password", "secret", "key", "token"]
+                        ):
                             issues.append(f"Potential secrets found in {config_file}")
                 except Exception as e:
                     warnings.append(f"Could not check {config_file}: {e}")
@@ -216,22 +223,26 @@ class SecretManager:
         # Check environment variables
         sensitive_env_vars = []
         for key, value in os.environ.items():
-            if any(secret in key.lower() for secret in ['password', 'secret', 'key', 'token']):
+            if any(
+                secret in key.lower()
+                for secret in ["password", "secret", "key", "token"]
+            ):
                 if len(value) < 8:
                     warnings.append(f"Weak secret in {key}")
                 sensitive_env_vars.append(key)
 
         return {
-            'issues': issues,
-            'warnings': warnings,
-            'sensitive_env_vars': sensitive_env_vars,
-            'vault_encrypted': self._key is not None,
-            'vault_exists': os.path.exists(self.vault_path)
+            "issues": issues,
+            "warnings": warnings,
+            "sensitive_env_vars": sensitive_env_vars,
+            "vault_encrypted": self._key is not None,
+            "vault_exists": os.path.exists(self.vault_path),
         }
 
 
 # Global instance
 _secret_manager = None
+
 
 def get_secret_manager() -> SecretManager:
     """Get the global secret manager instance"""
@@ -240,18 +251,22 @@ def get_secret_manager() -> SecretManager:
         _secret_manager = SecretManager()
     return _secret_manager
 
+
 # Convenience functions
 def get_secret(key: str, default: Any = None) -> Any:
     """Get a secret value"""
     return get_secret_manager().get(key, default)
 
+
 def set_secret(key: str, value: Any, encrypt: bool = True):
     """Set a secret value"""
     return get_secret_manager().set(key, value, encrypt)
 
+
 def list_secrets() -> dict[str, str]:
     """List all available secrets (masked)"""
     return get_secret_manager().list_secrets()
+
 
 def validate_secrets() -> dict[str, Any]:
     """Validate security configuration"""
@@ -278,14 +293,14 @@ if __name__ == "__main__":
 
     # Validate security
     security_check = secrets.validate_security()
-    if security_check['issues']:
+    if security_check["issues"]:
         print("\n🚨 Security Issues:")
-        for issue in security_check['issues']:
+        for issue in security_check["issues"]:
             print(f"  • {issue}")
 
-    if security_check['warnings']:
+    if security_check["warnings"]:
         print("\n⚠️ Security Warnings:")
-        for warning in security_check['warnings']:
+        for warning in security_check["warnings"]:
             print(f"  • {warning}")
 
     print("\n✅ Secret management system initialized")

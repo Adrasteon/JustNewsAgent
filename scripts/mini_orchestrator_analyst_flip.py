@@ -9,15 +9,17 @@ Updated version runs the orchestrator fully in-memory using FastAPI's TestClient
 
 Outputs JSON list to an --output path (default: orchestrator_demo_results/analyst_decision_flip.json).
 """
+
 from __future__ import annotations
-import os
-import sys
-import json
-import time
-import subprocess
+
 import argparse
+import json
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Ensure project root on sys.path when invoked directly so 'agents' can import
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -35,14 +37,23 @@ OUTPUT_ENV_KEY = "ANALYST_FLIP_OUTPUT_PATH"
 
 def child_entry():  # pragma: no cover
     from fastapi.testclient import TestClient  # type: ignore
+
     from agents.gpu_orchestrator.main import app  # type: ignore
 
     safe_mode_env = os.environ.get("SAFE_MODE", "false").lower() == "true"
     with TestClient(app) as client:
         gpu_resp = client.get("/gpu/info")
         policy_resp = client.get("/policy")
-        gpu_info = gpu_resp.json() if gpu_resp.status_code == 200 else {"available": False, "gpus": []}
-        policy = policy_resp.json() if policy_resp.status_code == 200 else {"safe_mode_read_only": True}
+        gpu_info = (
+            gpu_resp.json()
+            if gpu_resp.status_code == 200
+            else {"available": False, "gpus": []}
+        )
+        policy = (
+            policy_resp.json()
+            if policy_resp.status_code == 200
+            else {"safe_mode_read_only": True}
+        )
 
     gpu_available = bool(gpu_info.get("available"))
     decision: Dict[str, Any] = {
@@ -76,12 +87,23 @@ def run_cycle(safe_mode: bool) -> Dict[str, Any]:
             break
         if capture:
             decision_lines.append(line)
-    return json.loads("\n".join(decision_lines)) if decision_lines else {"error": "no_decision"}
+    return (
+        json.loads("\n".join(decision_lines))
+        if decision_lines
+        else {"error": "no_decision"}
+    )
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="GPU Orchestrator analyst decision flip harness")
-    parser.add_argument("--output", type=str, default=str(RESULTS_DIR / "analyst_decision_flip.json"), help="Output JSON file path")
+    parser = argparse.ArgumentParser(
+        description="GPU Orchestrator analyst decision flip harness"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default=str(RESULTS_DIR / "analyst_decision_flip.json"),
+        help="Output JSON file path",
+    )
     return parser.parse_args()
 
 
@@ -99,6 +121,7 @@ def main():  # pragma: no cover
     with out_path.open("w", encoding="utf-8") as f:
         json.dump(records, f, indent=2)
     print(f"Wrote {out_path}")
+
 
 if __name__ == "__main__":
     if IS_CHILD:

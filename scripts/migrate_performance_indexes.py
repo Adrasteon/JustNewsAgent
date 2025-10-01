@@ -16,6 +16,7 @@ from agents.common.database import execute_query
 
 logger = get_logger(__name__)
 
+
 def apply_migration(migration_file: str):
     """Apply a database migration from SQL file"""
     try:
@@ -23,7 +24,7 @@ def apply_migration(migration_file: str):
             sql_content = f.read()
 
         # Split into individual statements
-        statements = [stmt.strip() for stmt in sql_content.split(';') if stmt.strip()]
+        statements = [stmt.strip() for stmt in sql_content.split(";") if stmt.strip()]
 
         for statement in statements:
             if statement:
@@ -37,12 +38,19 @@ def apply_migration(migration_file: str):
         logger.error(f"❌ Failed to apply migration {migration_file}: {e}")
         return False
 
+
 def main():
     """Main migration function"""
     logger.info("🚀 Starting database performance migration")
 
     # Path to the migration file
-    migration_file = Path(__file__).parent.parent / "agents" / "memory" / "db_migrations" / "004_add_performance_indexes.sql"
+    migration_file = (
+        Path(__file__).parent.parent
+        / "agents"
+        / "memory"
+        / "db_migrations"
+        / "004_add_performance_indexes.sql"
+    )
 
     if not migration_file.exists():
         logger.error(f"Migration file not found: {migration_file}")
@@ -64,6 +72,7 @@ def main():
         return False
 
     return True
+
 
 if __name__ == "__main__":
     success = main()

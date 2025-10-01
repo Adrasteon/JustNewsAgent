@@ -16,7 +16,6 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -52,7 +51,9 @@ def scan_docs_for_legacy_links() -> List[Tuple[Path, int, str]]:
                 with md.open("r", encoding="utf-8", errors="ignore") as f:
                     for i, line in enumerate(f, start=1):
                         if link_re.search(line):
-                            offenders.append((md.relative_to(REPO_ROOT), i, line.rstrip()))
+                            offenders.append(
+                                (md.relative_to(REPO_ROOT), i, line.rstrip())
+                            )
             except Exception:  # pragma: no cover - robust in CI
                 continue
     return offenders
@@ -60,7 +61,9 @@ def scan_docs_for_legacy_links() -> List[Tuple[Path, int, str]]:
 
 def main() -> int:
     violations = {
-        "legacy_markdown_files": [str(p.relative_to(REPO_ROOT)) for p in find_legacy_md_files()],
+        "legacy_markdown_files": [
+            str(p.relative_to(REPO_ROOT)) for p in find_legacy_md_files()
+        ],
         "legacy_links": [
             {
                 "file": str(p),
@@ -71,7 +74,9 @@ def main() -> int:
         ],
     }
 
-    has_violations = bool(violations["legacy_markdown_files"] or violations["legacy_links"])
+    has_violations = bool(
+        violations["legacy_markdown_files"] or violations["legacy_links"]
+    )
     if has_violations:
         print("::error::Documentation policy violations detected")
         print(json.dumps(violations, indent=2))

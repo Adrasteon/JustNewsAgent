@@ -1,4 +1,5 @@
 from common.observability import get_logger
+
 #!/usr/bin/env python3
 """
 Download selected HF models into agent-specific model folders under agents/*/models.
@@ -8,19 +9,24 @@ Usage:
 
 By default this downloads a conservative set of small/medium models. Use --only ALL to download everything (may be large).
 """
-from pathlib import Path
 import argparse
+import logging
 import sys
+from pathlib import Path
 
-
-s %(levelname)s %(message)s")
+# Configure basic logging for script usage
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = get_logger(__name__)
 
 # Mapping of agents -> list of model ids to download. The value is a list of tuples (type, hf_id, prefer_sentence_transformers_bool)
 # type: 'transformers' or 'sentence-transformers'
 AGENT_MODEL_MAP = {
     "scout": [
-        ("transformers", "google/bert_uncased_L-2_H-128_A-2", False),  # small bert variant used for fast tests
+        (
+            "transformers",
+            "google/bert_uncased_L-2_H-128_A-2",
+            False,
+        ),  # small bert variant used for fast tests
         ("transformers", "cardiffnlp/twitter-roberta-base-sentiment-latest", False),
         ("transformers", "martin-ha/toxic-comment-model", False),
     ],
@@ -33,7 +39,7 @@ AGENT_MODEL_MAP = {
         ("sentence-transformers", "all-MiniLM-L6-v2", True),
     ],
     "synthesizer": [
-    ("transformers", "distilgpt2", False),
+        ("transformers", "distilgpt2", False),
         ("transformers", "google/flan-t5-small", False),
     ],
     "critic": [
@@ -54,6 +60,7 @@ AGENT_MODEL_MAP = {
     ],
 }
 
+
 # Normalizer for folder names
 def normalize_name(name: str) -> str:
     return name.replace("/", "_").replace(" ", "_")
@@ -65,7 +72,7 @@ def download_sentence_transformer(model_id: str, target_dir: Path):
     except Exception as e:
         logger.error("sentence_transformers not installed: %s", e)
         raise
-    logger.info("Downloading sentence-transformer %s -> %s", model_id, target_dir)
+    logger.debug("Starting sentence-transformer download")
     # The SentenceTransformer class accepts cache_folder
     model = SentenceTransformer(model_id, cache_folder=str(target_dir))
     try:
@@ -81,17 +88,21 @@ def download_transformers_model(model_id: str, target_dir: Path):
     except Exception as e:
         logger.error("transformers not installed: %s", e)
         raise
-    logger.info("Downloading transformers model+tokenizer %s -> %s", model_id, target_dir)
+    logger.debug("Starting transformers model+tokenizer download")
     target_dir.mkdir(parents=True, exist_ok=True)
     # Use cache_dir to force files into target_dir
     try:
         AutoModel.from_pretrained(model_id, cache_dir=str(target_dir))
-    except Exception as e:
-        logger.warning("Model download failed for %s: %s", model_id, e)
+    except Exception:
+        logger.warning("Model download failed for %s", model_id)
+        logger.debug("Model download exception", exc_info=True)
     try:
         AutoTokenizer.from_pretrained(model_id, cache_dir=str(target_dir))
-    except Exception as e:
-        logger.warning("Tokenizer download failed for %s: %s", model_id, e)
+    except Exception:
+        logger.warning("Tokenizer download failed")
+        logger.debug(
+            "Tokenizer download exception for model (details hidden)", exc_info=True
+        )
 
 
 def ensure_and_download(agent: str, model_tuple, dry_run: bool, base: Path):
@@ -100,7 +111,9 @@ def ensure_and_download(agent: str, model_tuple, dry_run: bool, base: Path):
     if folder.exists() and any(folder.iterdir()):
         logger.info("Skipping existing: %s (exists)", folder)
         return folder
-    logger.info("Preparing to download %s for agent %s into %s", model_id, agent, folder)
+    logger.info(
+        "Preparing to download %s for agent %s into %s", model_id, agent, folder
+    )
     if dry_run:
         return folder
     folder.mkdir(parents=True, exist_ok=True)
@@ -133,7 +146,12 @@ def main():
             to_download.append((agent, m))
 
     if not args.yes:
-        logger.info("About to download %d model(s) into agents/*/models (dry-run=%s, only=%s)", len(to_download), args.dry_run, args.only)
+        logger.info(
+            "About to download %d model(s) into agents/*/models (dry-run=%s, only=%s)",
+            len(to_download),
+            args.dry_run,
+            args.only,
+        )
         for agent, m in to_download:
             logger.info("  %s -> %s", agent, m[1])
         resp = input("Proceed? [y/N]: ")
@@ -147,5 +165,6 @@ def main():
 
     logger.info("All done")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

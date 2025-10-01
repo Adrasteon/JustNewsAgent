@@ -5,18 +5,19 @@ It is conservative: if an import cannot be resolved to a local file, it's ignore
 
 Output: /tmp/required_files.txt (one path per line, repository-relative)
 """
+
 from __future__ import annotations
 
 import ast
 from pathlib import Path
 
 REPO_ROOT = Path.cwd()
-OUT = Path('/tmp/required_files.txt')
+OUT = Path("/tmp/required_files.txt")
 
 seed_patterns = [
-    'agents/*/main.py',
-    'mcp_bus/**',
-    'tests/**',
+    "agents/*/main.py",
+    "mcp_bus/**",
+    "tests/**",
 ]
 
 
@@ -30,7 +31,7 @@ def find_seed_files() -> list[Path]:
 
 
 def parse_imports(path: Path) -> set[str]:
-    code = path.read_text(errors='ignore')
+    code = path.read_text(errors="ignore")
     tree = ast.parse(code, filename=str(path))
     imports = set()
     for node in ast.walk(tree):
@@ -45,14 +46,14 @@ def parse_imports(path: Path) -> set[str]:
 
 def module_name_to_paths(modname: str) -> list[Path]:
     # map module names like agents.balancer.tools to possible file paths
-    parts = modname.split('.')
+    parts = modname.split(".")
     candidates = []
     # try package module path
-    file1 = REPO_ROOT.joinpath(*parts).with_suffix('.py')
+    file1 = REPO_ROOT.joinpath(*parts).with_suffix(".py")
     if file1.exists():
         candidates.append(file1.relative_to(REPO_ROOT))
     # try package __init__.py
-    file2 = REPO_ROOT.joinpath(*parts, '__init__.py')
+    file2 = REPO_ROOT.joinpath(*parts, "__init__.py")
     if file2.exists():
         candidates.append(file2.relative_to(REPO_ROOT))
     return candidates
@@ -60,7 +61,7 @@ def module_name_to_paths(modname: str) -> list[Path]:
 
 def trace():
     seeds = find_seed_files()
-    print('Seeds:', len(seeds))
+    print("Seeds:", len(seeds))
     required: set[Path] = set(Path(s) for s in seeds)
     queue = list(required)
     seen_modules = set()
@@ -70,7 +71,7 @@ def trace():
         try:
             imports = parse_imports(p)
         except Exception as e:
-            print('Parse error', p, e)
+            print("Parse error", p, e)
             continue
         for mod in imports:
             if mod in seen_modules:
@@ -83,11 +84,11 @@ def trace():
                     queue.append(candp)
     # write output
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    with OUT.open('w') as fo:
+    with OUT.open("w") as fo:
         for p in sorted(required):
-            fo.write(str(p) + '\n')
-    print('Wrote', OUT, 'entries:', len(required))
+            fo.write(str(p) + "\n")
+    print("Wrote", OUT, "entries:", len(required))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     trace()

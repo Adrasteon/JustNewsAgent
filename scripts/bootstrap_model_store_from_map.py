@@ -16,6 +16,7 @@ Optional environment variables:
   MODEL_STORE_VERSION - version directory name (default: v1)
   MAP_FILE - path to the AGENT_MODEL_MAP.json (default: markdown_docs/agent_documentation/AGENT_MODEL_MAP.json)
 """
+
 from __future__ import annotations
 
 import json
@@ -26,9 +27,16 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MAP_FILE = Path(os.environ.get('MAP_FILE', str(ROOT / 'markdown_docs' / 'agent_documentation' / 'AGENT_MODEL_MAP.json')))
-MODEL_STORE_ROOT = Path(os.environ.get('MODEL_STORE_ROOT', '/media/adra/Data/justnews/model_store'))
-VERSION_NAME = os.environ.get('MODEL_STORE_VERSION', 'v1')
+MAP_FILE = Path(
+    os.environ.get(
+        "MAP_FILE",
+        str(ROOT / "markdown_docs" / "agent_documentation" / "AGENT_MODEL_MAP.json"),
+    )
+)
+MODEL_STORE_ROOT = Path(
+    os.environ.get("MODEL_STORE_ROOT", "/media/adra/Data/justnews/model_store")
+)
+VERSION_NAME = os.environ.get("MODEL_STORE_VERSION", "v1")
 
 
 def load_map(path: Path) -> dict[str, list[str]]:
@@ -46,8 +54,11 @@ def snapshot_download(repo_id: str, target: Path) -> bool:
     # Try huggingface_hub.snapshot_download first
     try:
         from huggingface_hub import snapshot_download
+
         print(f"snapshot_download: {repo_id} -> {target}")
-        snapshot_download(repo_id=repo_id, cache_dir=str(target), local_dir_use_symlinks=False)
+        snapshot_download(
+            repo_id=repo_id, cache_dir=str(target), local_dir_use_symlinks=False
+        )
         return True
     except Exception as e:
         print(f"snapshot_download not available or failed for {repo_id}: {e}")
@@ -55,6 +66,7 @@ def snapshot_download(repo_id: str, target: Path) -> bool:
     # Fallback: try to use transformers to populate cache
     try:
         from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer
+
         print(f"Attempting transformers.from_pretrained for {repo_id}")
         AutoTokenizer.from_pretrained(repo_id, cache_dir=str(target))
         try:
@@ -79,9 +91,11 @@ def populate_one_agent(agent: str, models: list[str]):
 
     # If the version directory already contains files, assume it's populated and skip downloads
     if any(version_dir.iterdir()):
-        print(f"Version directory {version_dir} already populated; skipping downloads for {agent}")
+        print(
+            f"Version directory {version_dir} already populated; skipping downloads for {agent}"
+        )
         # Ensure current symlink points to this version
-        current = agent_dir / 'current'
+        current = agent_dir / "current"
         try:
             if current.exists() or current.is_symlink():
                 current.unlink()
@@ -112,7 +126,7 @@ def populate_one_agent(agent: str, models: list[str]):
             print(f"Failed to move staging to version dir for {agent}: {e}")
 
         # Create/ensure current symlink
-        current = agent_dir / 'current'
+        current = agent_dir / "current"
         try:
             if current.exists() or current.is_symlink():
                 current.unlink()
@@ -135,5 +149,5 @@ def populate_all():
         populate_one_agent(agent, models)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     populate_all()

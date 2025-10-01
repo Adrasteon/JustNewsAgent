@@ -7,11 +7,10 @@ not need to duplicate boilerplate request logic.
 
 from __future__ import annotations
 
+import asyncio
 import os
 import time
 from typing import Any, Iterable, Mapping, MutableMapping
-
-import asyncio
 
 import httpx
 import requests
