@@ -188,6 +188,7 @@ archive_obsolete_files/backup_*/
 
 # Development Scripts and Tools
 *.sh
+!scripts/cleanup_generated_artifacts.sh
 nucleoid_service.py
 *_command_ref.md
 crawl4ai_best_practice.py
