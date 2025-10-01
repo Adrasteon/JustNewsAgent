@@ -1,0 +1,27 @@
+rules:
+  - id: js-raw-html-format
+    patterns:
+      - pattern: |
+          content.replace("<body>", f'<body data-search-query="$Q">')
+    message: "Server-side embedding of raw user input in HTML detected. Avoid server-side injection; use safe templating or escape data."
+    severity: WARNING
+    languages: [python]
+    metadata:
+      category: security
+  - id: python-hardcoded-credentials
+    pattern: |
+      api_key = "$SECRET"
+    message: "Hardcoded API key detected. Use environment variables or secret manager."
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: secrets
+  - id: python-aws-cred-pattern
+    pattern-either:
+      - pattern: "aws_access_key_id"
+      - pattern: "aws_secret_access_key"
+    message: "Possible AWS credential string detected in source. Verify secrets are not committed."
+    severity: ERROR
+    languages: [python]
+    metadata:
+      category: secrets

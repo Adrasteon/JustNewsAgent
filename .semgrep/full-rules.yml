@@ -1,0 +1,22 @@
+rules:
+  - id: python.security.injection.xss
+    pattern: |
+      content.replace("<body>", f'<body data-search-query="$Q">')
+    message: "Potential XSS via server-side HTML construction. Prefer templating frameworks and escaping."
+    severity: ERROR
+    languages: [python]
+  - id: python.secrets.aws-keys
+    pattern-either:
+      - pattern: "aws_access_key_id = $VAL"
+      - pattern: "aws_secret_access_key = $VAL"
+    message: "AWS credential literal detected. Use secrets manager."
+    severity: ERROR
+    languages: [python]
+  - id: python.sca.supply-chain
+    pattern: "pip install $PKG"
+    message: "Potential supply-chain risk: dynamic pip install detected. Review usage."
+    severity: WARNING
+    languages: [python]
+
+# Add references to community rule packs here as needed (example):
+# include: https://semgrep.dev/p/ci
