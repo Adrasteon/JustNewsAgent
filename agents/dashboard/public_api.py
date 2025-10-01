@@ -290,7 +290,8 @@ def _check_rate_limit(request: Request, endpoint_type: str = "public") -> bool:
     # Get client identifier (IP address or API key)
     client_id = request.client.host
     if hasattr(request.state, 'api_key') and request.state.api_key:
-        client_id = hashlib.md5(request.state.api_key.encode()).hexdigest()[:8]
+        # Use SHA-256 instead of MD5 for stronger hashing when deriving client IDs
+        client_id = hashlib.sha256(request.state.api_key.encode()).hexdigest()[:8]
 
     # Clean old requests (older than 1 hour)
     current_time = time.time()
@@ -804,7 +805,7 @@ async def export_articles(
                         "topic": topic,
                         "min_credibility": min_credibility
                     },
-                    "api_key_hash": hashlib.md5(api_key.encode()).hexdigest()[:8]
+                    "api_key_hash": hashlib.sha256(api_key.encode()).hexdigest()[:8]
                 },
                 "articles": filtered_articles
             }
@@ -882,7 +883,7 @@ async def get_research_metrics(
                 "institutional_users": 120,
                 "most_requested_topics": ["AI", "Climate Change", "Politics"]
             },
-            "api_key_hash": hashlib.md5(api_key.encode()).hexdigest()[:8]
+            "api_key_hash": hashlib.sha256(api_key.encode()).hexdigest()[:8]
         }
 
     except Exception as e:

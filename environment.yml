@@ -32,26 +32,12 @@ dependencies:
   - pytest-asyncio>=0.21.1
 
   - pip:
-    # Core ML packages (stable versions)
-    - torch==2.8.1
-    - torchvision==0.19.1
-    - torchaudio==2.4.1
-    - transformers==4.56.0
-    - tokenizers==0.22.0
-    - accelerate==1.10.1
-    - sentence-transformers==2.2.2
-    - safetensors==0.4.3
-    - bitsandbytes==0.47.0
-
-    # NVIDIA packages (specific versions)
-    - nvidia-ml-py3==7.352.0
-
-    # Additional pip packages from requirements file
+    # Use requirements.txt as the single source of truth for pip packages to avoid
+    # duplicate declarations that can confuse pip's resolver. Keep any agent-
+    # specific additions in `requirements.txt` so they can be edited independently.
     - -r requirements.txt
 
 # Notes:
-# - Used specific package versions to avoid dependency conflicts
-# - RAPIDS packages pinned to 25.4.0 for compatibility
-# - PyTorch pinned to 2.4.1 (stable version compatible with Python 3.12)
-# - NVIDIA packages use available versions
-# - Compatible with NVIDIA RTX 3090/4090 GPUs
+# - The pip-only requirements are defined in `requirements.txt`.
+# - RAPIDS packages (if needed) should be added here with explicit pins separately.
+# - Ensure compatibility between host CUDA/drivers and the PyTorch wheels chosen in requirements.txt.

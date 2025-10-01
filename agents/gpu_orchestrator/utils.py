@@ -1,5 +1,4 @@
 # Utility functions for GPU Orchestrator
-from typing import Optional, Tuple
 import logging
 import os
 from pathlib import Path
@@ -7,7 +6,9 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-def _load_spacy_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+def _load_spacy_model(
+    agent: str, model_id: str, strict: bool
+) -> tuple[bool, str | None]:
     """Load a spaCy model with ModelStore awareness."""
     try:
         import spacy
@@ -16,7 +17,7 @@ def _load_spacy_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Op
         return False, str(exc)
 
     root = os.environ.get("MODEL_STORE_ROOT")
-    candidate_error: Optional[str] = None
+    candidate_error: str | None = None
     if root:
         try:
             from agents.common.model_store import ModelStore
@@ -54,7 +55,9 @@ def _load_spacy_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Op
         return False, str(exc)
 
 
-def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+def _load_agent_model(
+    agent: str, model_id: str, strict: bool
+) -> tuple[bool, str | None]:
     """Attempt to load the model for an agent, returning success status."""
     logger.debug(
         "_load_agent_model called with agent=%s, model_id=%s, strict=%s",
@@ -65,7 +68,9 @@ def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Op
     if model_id == "en_core_web_sm":
         return _load_spacy_model(agent, model_id, strict)
     try:
-        from agents.common import model_loader  # noqa: WPS433 (local import for test patching)
+        from agents.common import (
+            model_loader,
+        )  # noqa: WPS433 (local import for test patching)
 
         model_loader.load_sentence_transformer(model_id, agent=agent)
     except Exception as exc:  # pragma: no cover - exercised via tests

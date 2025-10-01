@@ -1,0 +1,374 @@
+{
+  "root": "/home/adra/JustNewsAgent",
+  "applied": false,
+  "files_scanned": 1155,
+  "changes": [
+    {
+      "file": "docs_catalogue_v2.backup_20250908_132001.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs_catalogue_v2.backup_20250908_131633.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs_catalogue_v2.backup_20250908_131919.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs_catalogue_v2.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs_catalogue_v2.backup_20250908_132001.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs_catalogue_v2.backup_20250908_131633.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs_catalogue_v2.backup_20250908_131919.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs_catalogue_v2.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131923.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_132324.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_132010.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131613.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131951.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_132244.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131659.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_130621.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131744.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/quality_backups/docs_catalogue_backup_20250908_131906.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/JustNews_Plan_V4.md",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": ".backup/docs/docs_catalogue_v2.backup_20250907_122213.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/docs_catalogue_v2.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/quality_backups/docs_catalogue_backup_20250907_130030.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/quality_backups/docs_catalogue_backup_20250907_124630.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/quality_backups/docs_catalogue_backup_20250907_124955.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/quality_backups/docs_catalogue_backup_20250907_125059.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/quality_backups/docs_catalogue_backup_20250907_125659.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/doc_versions/snapshot_20250907_124640.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/doc_versions/snapshot_20250907_125041.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/doc_versions/snapshot_20250907_124614.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/docs/doc_versions/snapshot_20250907_125006.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".backup/agents/dashboard/public_api.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": ".backup/agents/archive/archive_api.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": ".backup/agents/archive/archive_graphql.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": ".backup/agents/archive/entity_linker.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": ".backup/agents/memory/memory_v2_engine.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131923.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_132324.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_132010.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131613.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131951.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_132244.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131659.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_130621.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131744.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "quality_backups/docs_catalogue_backup_20250908_131906.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": ".codacy/tools-configs/semgrep.yaml",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": "docs/JustNews_Plan_V4.md",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256("
+      ]
+    },
+    {
+      "file": "docs/docs_catalogue_v2.backup_20250907_122213.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/docs_catalogue_v2.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/quality_backups/docs_catalogue_backup_20250907_130030.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/quality_backups/docs_catalogue_backup_20250907_124630.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/quality_backups/docs_catalogue_backup_20250907_124955.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/quality_backups/docs_catalogue_backup_20250907_125059.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/quality_backups/docs_catalogue_backup_20250907_125659.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/doc_versions/snapshot_20250907_124640.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/doc_versions/snapshot_20250907_125041.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/doc_versions/snapshot_20250907_124614.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "docs/doc_versions/snapshot_20250907_125006.json",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md",
+      "replacements": [
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    },
+    {
+      "file": "scripts/replace_md5_with_sha256.py",
+      "replacements": [
+        "hashlib.md5( -> hashlib.sha256(",
+        "md5('..') -> encode(digest('..','sha256'),'hex')"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Scout Agent Production Crawler Orchestrator
@@ -22,6 +20,8 @@ Capabilities:
 - Canonical metadata emission with evidence capture
 - Ethical crawling compliance (robots.txt, rate limiting)
 """
+
+from common.observability import get_logger
 
 import asyncio
 import sys

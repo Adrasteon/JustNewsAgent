@@ -130,6 +130,12 @@ NEWSREADER_AGENT_PORT = int(os.environ.get("NEWSREADER_AGENT_PORT", 8009))
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 RELOAD_ENABLED = os.environ.get("RELOAD", "false").lower() == "true"
 
+def _get_allowed_origins() -> list:
+    env = os.environ.get("ALLOWED_ORIGINS", "")
+    if not env:
+        return []
+    return [o.strip() for o in env.split(",") if o.strip()]
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager"""
@@ -195,7 +201,7 @@ metrics = JustNewsMetrics("newsreader")
 # Middleware setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

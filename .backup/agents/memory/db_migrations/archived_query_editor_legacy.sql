@@ -1,0 +1,2 @@
+-- @pgsql Chat Query Editor (localhost)
+

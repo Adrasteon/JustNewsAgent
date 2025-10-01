@@ -4,15 +4,16 @@ import json
 import logging
 import os
 import time
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 from agents.gpu_orchestrator.utils import _validate_and_load_model
 
 logger = logging.getLogger(__name__)
 
 
-_MODEL_PRELOAD_STATE: Dict[str, Any] = {
+_MODEL_PRELOAD_STATE: dict[str, Any] = {
     "started_at": None,
     "completed_at": None,
     "in_progress": False,
@@ -34,7 +35,7 @@ def _resolve_project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def load_agent_model_map() -> Dict[str, List[str]]:
+def load_agent_model_map() -> dict[str, list[str]]:
     """Load the agent->model map from the documentation directory."""
     project_root = _resolve_project_root()
     candidates = [
@@ -53,12 +54,10 @@ def load_agent_model_map() -> Dict[str, List[str]]:
             return {}
 
         if not isinstance(raw_map, dict):
-            logger.warning(
-                "Agent model map at %s is not a dictionary; ignoring", path
-            )
+            logger.warning("Agent model map at %s is not a dictionary; ignoring", path)
             return {}
 
-        cleaned: Dict[str, List[str]] = {}
+        cleaned: dict[str, list[str]] = {}
         for agent, models in raw_map.items():
             if not isinstance(models, list):
                 logger.warning(
@@ -75,10 +74,10 @@ def load_agent_model_map() -> Dict[str, List[str]]:
     return {}
 
 
-def _deduplicate_agents(values: Iterable[str]) -> List[str]:
+def _deduplicate_agents(values: Iterable[str]) -> list[str]:
     """Return a list with duplicate agent identifiers removed."""
     seen: set[str] = set()
-    ordered: List[str] = []
+    ordered: list[str] = []
     for value in values:
         if value in seen:
             continue
@@ -88,9 +87,9 @@ def _deduplicate_agents(values: Iterable[str]) -> List[str]:
 
 
 def start_preload_job(
-    agents: Optional[Iterable[str]] = None,
-    strict: Optional[bool] = None,
-) -> Dict[str, Any]:
+    agents: Iterable[str] | None = None,
+    strict: bool | None = None,
+) -> dict[str, Any]:
     """Start a preload job and synchronously warm models for the requested agents."""
     model_map = load_agent_model_map()
     selected_agents = (
@@ -128,7 +127,7 @@ def start_preload_job(
 
     for agent in selected_agents:
         agent_models = model_map.get(agent, [])
-        agent_state: Dict[str, Dict[str, Any]] = {}
+        agent_state: dict[str, dict[str, Any]] = {}
         _MODEL_PRELOAD_STATE["per_agent"][agent] = agent_state
 
         for model_id in agent_models:
@@ -169,6 +168,6 @@ def start_preload_job(
     return _MODEL_PRELOAD_STATE
 
 
-def get_preload_status() -> Dict[str, Any]:
+def get_preload_status() -> dict[str, Any]:
     """Return the recorded status of the most recent preload job."""
     return _MODEL_PRELOAD_STATE

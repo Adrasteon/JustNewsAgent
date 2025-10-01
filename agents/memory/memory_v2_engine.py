@@ -148,7 +148,8 @@ class MemoryItem:
 
     def _generate_id(self) -> str:
         """Generate unique ID based on content hash"""
-        content_hash = hashlib.md5(self.content.encode()).hexdigest()
+        # Use SHA-256 instead of MD5 for stronger, non-cryptographic unique IDs
+        content_hash = hashlib.sha256(self.content.encode()).hexdigest()
         return f"{self.content_type.value}_{content_hash[:12]}"
 
 @dataclass
@@ -573,7 +574,7 @@ class MemoryV2Engine:
                 return self._fallback_embedding(content)
 
             # Check cache first
-            content_hash = hashlib.md5(content.encode()).hexdigest()
+            content_hash = hashlib.sha256(content.encode()).hexdigest()
             if content_hash in self.embedding_cache:
                 return self.embedding_cache[content_hash]
 
@@ -658,7 +659,7 @@ class MemoryV2Engine:
             # Store in database
             if self.sqlite_conn is not None:
                 cursor = self.sqlite_conn.cursor()
-                embedding_hash = hashlib.md5(embedding.tobytes()).hexdigest()
+                embedding_hash = hashlib.sha256(embedding.tobytes()).hexdigest()
 
                 # Store embedding separately
                 cursor.execute(

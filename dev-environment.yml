@@ -1,0 +1,24 @@
+# Development environment for JustNewsAgent
+# Use this to install developer tooling (formatters, linters, pre-commit hooks)
+# Use `mamba` when possible for faster installs.
+name: justnews-v2-py312-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - ruff
+  - isort
+  - black
+  - pre-commit
+  - mamba  # optional: speeds up conda installs for developers who use it
+  - pip:
+      # Add any pip-only developer packages here
+      - types-requests
+
+# Notes:
+# - This is a dedicated "dev" environment so the project runtime env (justnews-v2-py312)
+#   is not modified. If you prefer installing tools into the existing runtime env,
+#   see scripts/setup_dev_environment.sh for an "install into existing env" option.
+# - After adding or changing any dependencies, run the Codacy CLI analysis with
+#   trivy (security scanner) per repository policy.

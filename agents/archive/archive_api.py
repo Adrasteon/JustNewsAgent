@@ -210,9 +210,16 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # CORS middleware
+def _get_allowed_origins() -> list:
+    """Read ALLOWED_ORIGINS env var as a comma-separated list. Returns empty list by default for safety."""
+    env = os.environ.get("ALLOWED_ORIGINS", "")
+    if not env:
+        return []
+    return [o.strip() for o in env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
+    allow_origins=_get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -913,7 +920,7 @@ async def export_articles(
             )
 
         # Generate export job ID
-        job_id = f"export_articles_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(export_request).encode()).hexdigest()[:8]}"
+        job_id = f"export_articles_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(export_request).encode()).hexdigest()[:8]}"
 
         # Start export as background task
         background_tasks.add_task(
@@ -972,7 +979,7 @@ async def export_entities(
             )
 
         # Generate export job ID
-        job_id = f"export_entities_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(export_request).encode()).hexdigest()[:8]}"
+        job_id = f"export_entities_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(export_request).encode()).hexdigest()[:8]}"
 
         # Start export as background task
         background_tasks.add_task(
@@ -1029,7 +1036,7 @@ async def export_relationships(
             )
 
         # Generate export job ID
-        job_id = f"export_relationships_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(export_request).encode()).hexdigest()[:8]}"
+        job_id = f"export_relationships_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(export_request).encode()).hexdigest()[:8]}"
 
         # Start export as background task
         background_tasks.add_task(

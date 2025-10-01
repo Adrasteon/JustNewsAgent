@@ -20,6 +20,7 @@ GraphQL Schema:
 import contextlib
 import hashlib
 from datetime import datetime
+import os
 
 import graphene
 import uvicorn
@@ -241,7 +242,7 @@ class ExportArticles(graphene.Mutation):
             limit = min(limit, 10000)
 
             # Generate export job ID
-            job_id = f"export_articles_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+            job_id = f"export_articles_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(filters or {}).encode()).hexdigest()[:8]}"
 
             # Start export as background task (would need to be implemented)
             # For now, return job queued status
@@ -288,7 +289,7 @@ class ExportEntities(graphene.Mutation):
             limit = min(limit, 50000)
 
             # Generate export job ID
-            job_id = f"export_entities_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+            job_id = f"export_entities_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(filters or {}).encode()).hexdigest()[:8]}"
 
             # Start export as background task (would need to be implemented)
             return ExportEntities(
@@ -331,7 +332,7 @@ class ExportRelationships(graphene.Mutation):
             limit = min(limit, 100000)
 
             # Generate export job ID
-            job_id = f"export_relationships_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.md5(str(filters or {}).encode()).hexdigest()[:8]}"
+            job_id = f"export_relationships_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hashlib.sha256(str(filters or {}).encode()).hexdigest()[:8]}"
 
             # Start export as background task (would need to be implemented)
             return ExportRelationships(
@@ -849,9 +850,15 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # CORS middleware
+def _get_allowed_origins() -> list:
+    env = os.environ.get("ALLOWED_ORIGINS", "")
+    if not env:
+        return []
+    return [o.strip() for o in env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
+    allow_origins=_get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

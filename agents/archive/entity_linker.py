@@ -84,7 +84,8 @@ class ExternalKnowledgeBaseLinker:
     def _get_cache_key(self, entity_name: str, kb_name: str) -> str:
         """Generate cache key for entity lookup"""
         content = f"{entity_name}:{kb_name}"
-        return hashlib.md5(content.encode()).hexdigest()
+        # Switch to SHA-256 for cache keys to avoid using MD5
+        return hashlib.sha256(content.encode()).hexdigest()
 
     def _load_cache(self, cache_key: str) -> dict[str, Any] | None:
         """Load cached entity data"""

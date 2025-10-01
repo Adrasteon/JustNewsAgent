@@ -7,3 +7,14 @@ docs/quality_backups/
 **/*backup*.json
 **/docs_catalogue_v2.backup_*
 **/.backup/**
+docs_index_complete.json
+docs_index_clean.json
+docs_index.json
+docs_catalogue_v2.json
+config/gpu/orchestrator_policy.json
++.backup/config/gpu/orchestrator_policy.json
++.backup/docs_index_complete.json
++.backup/docs_index_clean.json
++.backup/docs_index.json
+entity_cache/
+production_bbc_crawler.py
