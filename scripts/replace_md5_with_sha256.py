@@ -21,6 +21,7 @@ import argparse
 import json
 import os
 import re
+import tempfile
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -144,7 +145,15 @@ def main(argv: list[str] | None = None) -> int:
                     f.write(new_text)
 
     # write report
-    report_path = os.path.join(args.root, ".md5_rewrite_report.json")
+    # Write report into the .backup folder to avoid creating large artifacts in repo root
+    backup_dir = os.path.join(args.root, ".backup")
+    try:
+        os.makedirs(backup_dir, exist_ok=True)
+    except Exception:
+        # If creating .backup fails for any reason, fallback to a temp file
+        backup_dir = tempfile.gettempdir()
+
+    report_path = os.path.join(backup_dir, ".md5_rewrite_report.json")
     with open(report_path, "w", encoding="utf-8") as rf:
         json.dump(report, rf, indent=2)
 
