@@ -360,138 +360,141 @@ nvml_supported_gauge = Gauge(
 
 # Optional shared endpoints if available
 try:
-	from agents.common.shutdown import register_shutdown_endpoint
+    from agents.common.shutdown import register_shutdown_endpoint
 
-	register_shutdown_endpoint(app)
+    register_shutdown_endpoint(app)
 except Exception:
-	logger.debug("shutdown endpoint not registered for gpu_orchestrator")
+    logger.debug("shutdown endpoint not registered for gpu_orchestrator")
 
 try:
-	from agents.common.reload import register_reload_endpoint
+    from agents.common.reload import register_reload_endpoint
 
-	register_reload_endpoint(app)
+    register_reload_endpoint(app)
 except Exception:
-	logger.debug("reload endpoint not registered for gpu_orchestrator")
+    logger.debug("reload endpoint not registered for gpu_orchestrator")
 
 
 # Add metrics middleware
 app.middleware("http")(metrics.request_middleware)
 
+
 @app.get("/health")
 @app.post("/health")
 async def health(request: Request):
-	_inc("policy_get_requests_total")  # reuse counter group for simplicity
-	return {"status": "ok", "safe_mode": SAFE_MODE}
+    _inc("policy_get_requests_total")  # reuse counter group for simplicity
+    return {"status": "ok", "safe_mode": SAFE_MODE}
 
 
 @app.get("/ready")
 def ready():
-	_inc("policy_get_requests_total")
-	return {"ready": READINESS}
+    _inc("policy_get_requests_total")
+    return {"ready": READINESS}
 
 
 @app.get("/gpu/info")
 def gpu_info():
-	"""Return current GPU telemetry (read-only)."""
-	try:
-		_inc("gpu_info_requests_total")
-		logger.info("Fetching GPU snapshot...")
-		data = get_gpu_snapshot()
-		logger.info(f"GPU snapshot data: {data}")
+    """Return current GPU telemetry (read-only)."""
+    try:
+        _inc("gpu_info_requests_total")
+        logger.info("Fetching GPU snapshot...")
+        data = get_gpu_snapshot()
+        logger.info(f"GPU snapshot data: {data}")
 
-		if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
-			data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
-			logger.warning(f"NVML not supported: {data['nvml_init_error']}")
+        if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
+            data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
+            logger.warning(
+                f"NVML not supported: {data['nvml_init_error']}"
+            )
 
-		logger.info("Detecting MPS status...")
-		mps = _detect_mps()
-		logger.info(f"MPS detection result: {mps}")
+        logger.info("Detecting MPS status...")
+        mps = _detect_mps()
+        logger.info(f"MPS detection result: {mps}")
 
-		data["mps_enabled"] = bool(mps.get("enabled", False))
-		data["mps"] = mps
+        data["mps_enabled"] = bool(mps.get("enabled", False))
+        data["mps"] = mps
 
-		# Update MPS metrics
-		mps_enabled_gauge.labels(
-			agent=metrics.agent_name,
-			agent_display_name=metrics.display_name
-		).set(1 if data["mps_enabled"] else 0)
+        # Update MPS metrics
+        mps_enabled_gauge.labels(
+            agent=metrics.agent_name,
+            agent_display_name=metrics.display_name,
+        ).set(1 if data["mps_enabled"] else 0)
 
-		logger.info("Returning GPU telemetry data.")
-		return data
-	except Exception as e:
-		logger.error(f"Failed to get GPU snapshot: {e}")
-		raise HTTPException(status_code=500, detail=str(e))
+        logger.info("Returning GPU telemetry data.")
+        return data
+    except Exception as e:
+        logger.error(f"Failed to get GPU snapshot: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/policy")
 def get_policy():
-	_inc("policy_get_requests_total")
-	return POLICY
+    _inc("policy_get_requests_total")
+    return POLICY
 
 
 @app.post("/policy")
 def set_policy(update: PolicyUpdate):
-	if SAFE_MODE:
-		# In SAFE_MODE, accept but do not enact changes (read-only posture)
-		_inc("policy_post_requests_total")
-		return {
-			**POLICY,
-			"note": "SAFE_MODE enabled: policy updates accepted but not enacted",
-		}
+    if SAFE_MODE:
+        # In SAFE_MODE, accept but do not enact changes (read-only posture)
+        _inc("policy_post_requests_total")
+        return {
+            **POLICY,
+            "note": "SAFE_MODE enabled: policy updates accepted but not enacted",
+        }
 
-	changed = False
-	if update.max_memory_per_agent_mb is not None:
-		POLICY["max_memory_per_agent_mb"] = int(update.max_memory_per_agent_mb)
-		changed = True
-	if update.allow_fractional_shares is not None:
-		POLICY["allow_fractional_shares"] = bool(update.allow_fractional_shares)
-		changed = True
-	if update.kill_on_oom is not None:
-		POLICY["kill_on_oom"] = bool(update.kill_on_oom)
-		changed = True
+    changed = False
+    if update.max_memory_per_agent_mb is not None:
+        POLICY["max_memory_per_agent_mb"] = int(update.max_memory_per_agent_mb)
+        changed = True
+    if update.allow_fractional_shares is not None:
+        POLICY["allow_fractional_shares"] = bool(update.allow_fractional_shares)
+        changed = True
+    if update.kill_on_oom is not None:
+        POLICY["kill_on_oom"] = bool(update.kill_on_oom)
+        changed = True
 
-	if changed:
-		logger.info(f"Updated GPU policy: {POLICY}")
-	_inc("policy_post_requests_total")
-	return POLICY
+    if changed:
+        logger.info(f"Updated GPU policy: {POLICY}")
+    _inc("policy_post_requests_total")
+    return POLICY
 
 
 @app.get("/allocations")
 def get_allocations():
-	"""Return current agent→GPU allocation view (placeholder)."""
-	_inc("policy_get_requests_total")
-	_purge_expired_leases()
-	return {"allocations": ALLOCATIONS}
+    """Return current agent→GPU allocation view (placeholder)."""
+    _inc("policy_get_requests_total")
+    _purge_expired_leases()
+    return {"allocations": ALLOCATIONS}
 
 
 def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
-	"""Validate the lease request parameters.
+    """Validate the lease request parameters.
 
-	Returns an error message if validation fails, or None if valid.
-	"""
-	if req.min_memory_mb is not None and req.min_memory_mb < 0:
-		return "min_memory_mb must be >= 0"
-	return None
+    Returns an error message if validation fails, or None if valid.
+    """
+    if req.min_memory_mb is not None and req.min_memory_mb < 0:
+        return "min_memory_mb must be >= 0"
+    return None
 
 
 def _allocate_gpu(req: LeaseRequest) -> Tuple[bool, Optional[int]]:
-	"""Allocate a GPU based on the lease request.
+    """Allocate a GPU based on the lease request.
 
-	Returns a tuple of (success, gpu_index) where success is a boolean
-	indicating if the allocation was successful, and gpu_index is the
-	index of the allocated GPU or None if no GPU could be allocated.
-	"""
-	snapshot = get_gpu_snapshot()
-	if snapshot.get("available") and snapshot.get("gpus"):
-		# naive: choose lowest used memory GPU meeting minimum
-		candidates = []
-		for g in snapshot["gpus"]:
-			if req.min_memory_mb and (g["memory_total_mb"] - g["memory_used_mb"]) < req.min_memory_mb:
-				continue
-			candidates.append(g)
-		if candidates:
-			return True, sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
-	return False, None
+    Returns a tuple of (success, gpu_index) where success is a boolean
+    indicating if the allocation was successful, and gpu_index is the
+    index of the allocated GPU or None if no GPU could be allocated.
+    """
+    snapshot = get_gpu_snapshot()
+    if snapshot.get("available") and snapshot.get("gpus"):
+        # naive: choose lowest used memory GPU meeting minimum
+        candidates = []
+        for g in snapshot["gpus"]:
+            if req.min_memory_mb and (g["memory_total_mb"] - g["memory_used_mb"]) < req.min_memory_mb:
+                continue
+            candidates.append(g)
+        if candidates:
+            return True, sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
+    return False, None
 
 
 @app.post("/lease")
@@ -528,12 +531,12 @@ def lease(req: LeaseRequest):
 
 @app.post("/release")
 def release(req: ReleaseRequest):
-	_inc("release_requests_total")
-	_purge_expired_leases()
-	alloc = ALLOCATIONS.pop(req.token, None)
-	if not alloc:
-		raise HTTPException(status_code=404, detail="unknown_token")
-	return {"released": True, "token": req.token}
+    _inc("release_requests_total")
+    _purge_expired_leases()
+    alloc = ALLOCATIONS.pop(req.token, None)
+    if not alloc:
+        raise HTTPException(status_code=404, detail="unknown_token")
+    return {"released": True, "token": req.token}
 
 
 @app.get("/metrics")
@@ -548,19 +551,19 @@ def get_metrics():
 # ---------------------------
 
 def _project_root() -> str:
-	try:
-		import pathlib
-		return str(pathlib.Path(__file__).resolve().parents[2])
-	except Exception:
-		return os.getcwd()
+    try:
+        import pathlib
+        return str(pathlib.Path(__file__).resolve().parents[2])
+    except Exception:
+        return os.getcwd()
 
 
 def _read_agent_model_map() -> Dict[str, Any]:
-	"""Read the agent model map from AGENT_MODEL_MAP.json."""
-	model_map = load_agent_model_map()
-	if not model_map:
-		logger.warning("Agent model map is empty; model preload will be a no-op")
-	return model_map
+    """Read the agent model map from AGENT_MODEL_MAP.json."""
+    model_map = load_agent_model_map()
+    if not model_map:
+        logger.warning("Agent model map is empty; model preload will be a no-op")
+    return model_map
 
 
 def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
@@ -587,160 +590,160 @@ def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[b
 # Refactor _worker
 # Example: Delegate preload job tasks to the preload module
 def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
-	logger.info("Starting model preload worker")
-	try:
-		model_map = _read_agent_model_map()
-		agents = selected_agents or list(model_map.keys())
-		# Prepare status entries
-		for a in agents:
-			models = model_map.get(a, [])
-			_MODEL_PRELOAD_STATE["per_agent"][a] = {}
-			for mid in models:
-				_MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
-		total = sum(len(model_map.get(a, [])) for a in agents)
-		_MODEL_PRELOAD_STATE["summary"]["total"] = total
+    logger.info("Starting model preload worker")
+    try:
+        model_map = _read_agent_model_map()
+        agents = selected_agents or list(model_map.keys())
+        # Prepare status entries
+        for a in agents:
+            models = model_map.get(a, [])
+            _MODEL_PRELOAD_STATE["per_agent"][a] = {}
+            for mid in models:
+                _MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
+        total = sum(len(model_map.get(a, [])) for a in agents)
+        _MODEL_PRELOAD_STATE["summary"]["total"] = total
 
-		strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
-		strict = strict_override if strict_override is not None else strict_env
+        strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
+        strict = strict_override if strict_override is not None else strict_env
 
-		logger.debug(f"Initial _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
+        logger.debug(f"Initial _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
 
-		# Iterate and preload each model on CPU
-		for a in agents:
-			for mid in model_map.get(a, []):
-				st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
-				logger.debug(f"Processing model {mid} for agent {a}")
-				logger.debug(f"Before invoking _validate_and_load_model: {st}")
-				logger.debug(f"_MODEL_PRELOAD_STATE summary before: {_MODEL_PRELOAD_STATE['summary']}")
-				st["status"] = "loading"
-				t0 = time.time()
-				ok, err = _validate_and_load_model(a, mid, strict)
-				logger.debug(f"_validate_and_load_model result: ok={ok}, err={err}")
-				if ok:
-					st["status"] = "ok"
-					st["duration_s"] = time.time() - t0
-					_MODEL_PRELOAD_STATE["summary"]["done"] += 1
-				else:
-					st["status"] = "error"
-					st["error"] = err
-					st["duration_s"] = time.time() - t0
-					_MODEL_PRELOAD_STATE["summary"]["failed"] += 1
-				logger.debug(f"Updated _MODEL_PRELOAD_STATE for agent {a}, model {mid}: {st}")
-				logger.debug(f"_MODEL_PRELOAD_STATE summary after: {_MODEL_PRELOAD_STATE['summary']}")
-			logger.debug(f"_MODEL_PRELOAD_STATE after processing agent {a}: {_MODEL_PRELOAD_STATE}")
-	except Exception as e:  # noqa: BLE001
-		logger.error(f"Model preload worker crashed: {e}")
-	finally:
-		_MODEL_PRELOAD_STATE["in_progress"] = False
-		_MODEL_PRELOAD_STATE["completed_at"] = time.time()
-		logger.debug(f"Final _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
+        # Iterate and preload each model on CPU
+        for a in agents:
+            for mid in model_map.get(a, []):
+                st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
+                logger.debug(f"Processing model {mid} for agent {a}")
+                logger.debug(f"Before invoking _validate_and_load_model: {st}")
+                logger.debug(f"_MODEL_PRELOAD_STATE summary before: {_MODEL_PRELOAD_STATE['summary']}")
+                st["status"] = "loading"
+                t0 = time.time()
+                ok, err = _validate_and_load_model(a, mid, strict)
+                logger.debug(f"_validate_and_load_model result: ok={ok}, err={err}")
+                if ok:
+                    st["status"] = "ok"
+                    st["duration_s"] = time.time() - t0
+                    _MODEL_PRELOAD_STATE["summary"]["done"] += 1
+                else:
+                    st["status"] = "error"
+                    st["error"] = err
+                    st["duration_s"] = time.time() - t0
+                    _MODEL_PRELOAD_STATE["summary"]["failed"] += 1
+                logger.debug(f"Updated _MODEL_PRELOAD_STATE for agent {a}, model {mid}: {st}")
+                logger.debug(f"_MODEL_PRELOAD_STATE summary after: {_MODEL_PRELOAD_STATE['summary']}")
+            logger.debug(f"_MODEL_PRELOAD_STATE after processing agent {a}: {_MODEL_PRELOAD_STATE}")
+    except Exception as e:  # noqa: BLE001
+        logger.error(f"Model preload worker crashed: {e}")
+    finally:
+        _MODEL_PRELOAD_STATE["in_progress"] = False
+        _MODEL_PRELOAD_STATE["completed_at"] = time.time()
+        logger.debug(f"Final _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
 
 
 @app.post("/models/preload")
 def models_preload(req: PreloadRequest):
-	"""Start a background model preload job (CPU warming) using AGENT_MODEL_MAP.json.
+    """Start a background model preload job (CPU warming) using AGENT_MODEL_MAP.json.
 
-	Returns current job state. If a job is already completed and refresh=false, returns that state.
-	"""
-	# If job completed and not refreshing, return existing state.
-	# If there were failures, return 503 to enforce a hard failure with clear reasons.
-	if _MODEL_PRELOAD_STATE.get("started_at") and not _MODEL_PRELOAD_STATE.get("in_progress") and not req.refresh:
-		failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
-		all_ready = (failed == 0 and _MODEL_PRELOAD_STATE["summary"].get("done", 0) == _MODEL_PRELOAD_STATE["summary"].get("total", 0))
-		state = {**_MODEL_PRELOAD_STATE, "all_ready": all_ready}
-		# Build a concise error list for clarity
-		errors: List[Dict[str, Any]] = []
-		for a, models in _MODEL_PRELOAD_STATE.get("per_agent", {}).items():
-			for mid, st in models.items():
-				if st.get("status") == "error":
-					errors.append({"agent": a, "model": mid, "error": st.get("error")})
-		state["errors"] = errors
-		if failed > 0:
-			raise HTTPException(status_code=503, detail=state)
-		return state
+    Returns current job state. If a job is already completed and refresh=false, returns that state.
+    """
+    # If job completed and not refreshing, return existing state.
+    # If there were failures, return 503 to enforce a hard failure with clear reasons.
+    if _MODEL_PRELOAD_STATE.get("started_at") and not _MODEL_PRELOAD_STATE.get("in_progress") and not req.refresh:
+        failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
+        all_ready = (failed == 0 and _MODEL_PRELOAD_STATE["summary"].get("done", 0) == _MODEL_PRELOAD_STATE["summary"].get("total", 0))
+        state = {**_MODEL_PRELOAD_STATE, "all_ready": all_ready}
+        # Build a concise error list for clarity
+        errors: List[Dict[str, Any]] = []
+        for a, models in _MODEL_PRELOAD_STATE.get("per_agent", {}).items():
+            for mid, st in models.items():
+                if st.get("status") == "error":
+                    errors.append({"agent": a, "model": mid, "error": st.get("error")})
+        state["errors"] = errors
+        if failed > 0:
+            raise HTTPException(status_code=503, detail=state)
+        return state
 
-	state = start_preload_job(req.agents, req.strict)
-	logger.debug(f"_MODEL_PRELOAD_STATE during /models/preload: {_MODEL_PRELOAD_STATE}")
-	logger.debug(f"_MODEL_PRELOAD_STATE before response: {_MODEL_PRELOAD_STATE}")
-	return {
-		**state,
-		"all_ready": False,
-	}
+    state = start_preload_job(req.agents, req.strict)
+    logger.debug(f"_MODEL_PRELOAD_STATE during /models/preload: {_MODEL_PRELOAD_STATE}")
+    logger.debug(f"_MODEL_PRELOAD_STATE before response: {_MODEL_PRELOAD_STATE}")
+    return {
+        **state,
+        "all_ready": False,
+    }
 
 
 @app.get("/mps/allocation")
 def get_mps_allocation():
-	"""Return MPS resource allocation configuration for all agents."""
-	try:
-		import json
-		from pathlib import Path
+    """Return MPS resource allocation configuration for all agents."""
+    try:
+        import json
+        from pathlib import Path
 
-		project_root = Path(__file__).resolve().parents[2]
-		config_path = project_root / "config" / "gpu" / "mps_allocation_config.json"
+        project_root = Path(__file__).resolve().parents[2]
+        config_path = project_root / "config" / "gpu" / "mps_allocation_config.json"
 
-		if not config_path.exists():
-			return {
-				"error": "MPS allocation configuration not found",
-				"path": str(config_path),
-			}
+        if not config_path.exists():
+            return {
+                "error": "MPS allocation configuration not found",
+                "path": str(config_path),
+            }
 
-		with open(config_path, "r", encoding="utf-8") as config_file:
-			config = json.load(config_file)
+        with open(config_path, "r", encoding="utf-8") as config_file:
+            config = json.load(config_file)
 
-		return config
-	except Exception as exc:  # noqa: BLE001
-		logger.error("Failed to load MPS allocation config: %s", exc)
-		return {"error": str(exc)}
+        return config
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to load MPS allocation config: %s", exc)
+        return {"error": str(exc)}
 
 
 @app.get("/models/status")
 def models_status():
-	"""Return current model preload status."""
-	status_snapshot = get_preload_status()
-	per_agent = status_snapshot.get("per_agent", {}) or {}
+    """Return current model preload status."""
+    status_snapshot = get_preload_status()
+    per_agent = status_snapshot.get("per_agent", {}) or {}
 
-	computed_total = 0
-	computed_done = 0
-	computed_failed = 0
-	errors: List[Dict[str, Any]] = []
+    computed_total = 0
+    computed_done = 0
+    computed_failed = 0
+    errors: List[Dict[str, Any]] = []
 
-	for agent, models in per_agent.items():
-		for model_id, model_status in models.items():
-			computed_total += 1
-			if model_status.get("status") == "ok":
-				computed_done += 1
-			elif model_status.get("status") == "error":
-				computed_failed += 1
-				errors.append({
-					"agent": agent,
-					"model": model_id,
-					"error": model_status.get("error"),
-				})
+    for agent, models in per_agent.items():
+        for model_id, model_status in models.items():
+            computed_total += 1
+            if model_status.get("status") == "ok":
+                computed_done += 1
+            elif model_status.get("status") == "error":
+                computed_failed += 1
+                errors.append({
+                    "agent": agent,
+                    "model": model_id,
+                    "error": model_status.get("error"),
+                })
 
-	if computed_total == 0 and status_snapshot.get("summary"):
-		fallback = status_snapshot["summary"]
-		computed_total = int(fallback.get("total", 0) or 0)
-		computed_done = int(fallback.get("done", 0) or 0)
-		computed_failed = int(fallback.get("failed", 0) or 0)
+    if computed_total == 0 and status_snapshot.get("summary"):
+        fallback = status_snapshot["summary"]
+        computed_total = int(fallback.get("total", 0) or 0)
+        computed_done = int(fallback.get("done", 0) or 0)
+        computed_failed = int(fallback.get("failed", 0) or 0)
 
-	all_ready = (
-		computed_failed == 0
-		and computed_done == computed_total
-		and not status_snapshot.get("in_progress", False)
-	)
+    all_ready = (
+        computed_failed == 0
+        and computed_done == computed_total
+        and not status_snapshot.get("in_progress", False)
+    )
 
-	return {
-		"all_ready": all_ready,
-		"in_progress": status_snapshot.get("in_progress", False),
-		"summary": {
-			"total": computed_total,
-			"done": computed_done,
-			"failed": computed_failed,
-		},
-		"errors": errors,
-		"started_at": status_snapshot.get("started_at"),
-		"completed_at": status_snapshot.get("completed_at"),
-	}
+    return {
+        "all_ready": all_ready,
+        "in_progress": status_snapshot.get("in_progress", False),
+        "summary": {
+            "total": computed_total,
+            "done": computed_done,
+            "failed": computed_failed,
+        },
+        "errors": errors,
+        "started_at": status_snapshot.get("started_at"),
+        "completed_at": status_snapshot.get("completed_at"),
+    }
 
 
 @app.get("/tools")
@@ -830,8 +833,8 @@ def initialize_nvml():
 
 
 if __name__ == "__main__":
-	import uvicorn
+    import uvicorn
 
-	# Place the runner at the very end so all endpoints above are registered
-	uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
+    # Place the runner at the very end so all endpoints above are registered
+    uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
 
