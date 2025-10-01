@@ -248,3 +248,14 @@ agents/reasoning/nucleoid_repo/
 
 # Session bundles produced by visual-first experiments (dev only)
 /data/session_bundles/
+
+# Ignore generated analysis and auxiliary report files
+/.md5_rewrite_report.json
+/codacy_semgrep.json
+/codacy_*.json
+*.sarif
+/.md5_*.json
+
+# Ignore local Codacy CLI artifacts and temporary outputs
+/.codacy/
+.codacy/*.json
