@@ -19,7 +19,8 @@ import logging
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field, ConfigDict
 from prometheus_client import (
-    Counter, Gauge
+    Counter,
+    Gauge,
 )
 
 from common.observability import get_logger
@@ -44,6 +45,21 @@ MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 SAFE_MODE = os.environ.get("SAFE_MODE", "false").lower() == "true"
 ENABLE_NVML = os.environ.get("ENABLE_NVML", "false").lower() == "true"
 LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))  # 1 hour default; 0 disables TTL
+
+# Shared tools list used when registering with the MCP Bus. Kept on one variable
+# to avoid very long inline lists across the file and to make wrapping easier.
+TOOL_LIST = [
+    "health",
+    "gpu_info",
+    "get_policy",
+    "set_policy",
+    "get_allocations",
+    "lease",
+    "release",
+    "models_preload",
+    "models_status",
+    "mps_allocation",
+]
 
 
 # In-memory state (intentionally simple/minimal for safety)
@@ -108,8 +124,16 @@ class MCPBusClient:
         self.base_url = base_url
 
     def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
-        import requests
+        """Register this agent with the MCP Bus if requests is available.
 
+        If the 'requests' package is not available the function logs and
+        returns without raising so the orchestrator remains importable.
+        """
+        if requests is None:
+            logger.warning(
+                "requests package not available; skipping MCP Bus registration",
+            )
+            return
 
         registration_data = {
             "name": agent_name,
@@ -180,23 +204,24 @@ def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
     """
     if not ENABLE_NVML or SAFE_MODE or not _NVML_SUPPORTED:
         return
-    try:
-        import pynvml  # type: ignore
-        for g in gpus:
-            idx = g.get("index")
-            if idx is not None:
-                try:
-                    handle = get_nvml_handle(idx)
-                    util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                    mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                    g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
-                    g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
-                    g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
-                    g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
-                except Exception as e:  # noqa: BLE001
-                    g["nvml_error"] = str(e)
-    except Exception as e:
-        logger.warning(f"NVML enrichment error: {e}")
+    # Use guarded top-level pynvml import to avoid import-outside-toplevel and
+    # to allow running in environments without pynvml present.
+    if pynvml is None:
+        # If NVML isn't installed, we skip enrichment gracefully.
+        return
+    for g in gpus:
+        idx = g.get("index")
+        if idx is not None:
+            try:
+                handle = get_nvml_handle(idx)
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
+                g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
+                g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
+                g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
+            except Exception as e:  # noqa: BLE001
+                g["nvml_error"] = str(e)
 
 
 def get_gpu_snapshot() -> Dict[str, Any]:
@@ -206,7 +231,13 @@ def get_gpu_snapshot() -> Dict[str, Any]:
         return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
     gpus = _parse_nvidia_smi_csv(smi)
     _get_nvml_enrichment(gpus)
-    return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
+    # Break the return dict across multiple lines to satisfy line-length checks
+    return {
+        "gpus": gpus,
+        "available": True,
+        "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED),
+        "nvml_supported": _NVML_SUPPORTED,
+    }
 
 
 def _detect_mps() -> Dict[str, Any]:
@@ -289,18 +320,7 @@ async def lifespan(app: FastAPI):
     register_agent_background(
         agent_name="gpu_orchestrator",
         agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
-        tools=[
-            "health",
-            "gpu_info",
-            "get_policy",
-            "set_policy",
-            "get_allocations",
-            "lease",
-            "release",
-            "models_preload",
-            "models_status",
-            "mps_allocation",
-        ],
+        tools=TOOL_LIST,
     )
 
     # Wait for registration to complete before signaling readiness
@@ -542,7 +562,10 @@ def release(req: ReleaseRequest):
 @app.get("/metrics")
 def get_metrics():
     """Prometheus metrics endpoint."""
-    from fastapi.responses import Response
+    if Response is None:
+        logger.error("fastapi.responses not available; metrics endpoint unavailable")
+        raise HTTPException(status_code=500, detail="fastapi not available")
+
     return Response(metrics.get_metrics(), media_type="text/plain")
 
 
@@ -573,18 +596,30 @@ def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[b
     indicating if the validation and loading was successful, and error_message
     is an optional string containing the error reason if it failed.
     """
+    if load_sentence_transformer is None:
+        msg = "model_loader not available in this environment"
+        logger.error(msg)
+        return False, msg
+
     try:
-        # Attempt to load the model using the mocked function
-        from agents.common.model_loader import load_sentence_transformer
-        logger.info(f"Validating and loading model {model_id} for agent {agent} (strict={strict})")
+        logger.info(
+            "Validating and loading model %s for agent %s (strict=%s)",
+            model_id,
+            agent,
+            strict,
+        )
         success, error = load_sentence_transformer(model_id, agent=agent)
-        logger.debug(f"load_sentence_transformer returned: success={success}, error={error}")
+        logger.debug(
+            "load_sentence_transformer returned: success=%s, error=%s",
+            success,
+            error,
+        )
         if not success:
             raise RuntimeError(error)
         return True, None
-    except Exception as e:
-        logger.error(f"Error validating/loading model {model_id} for agent {agent}: {e}")
-        return False, str(e)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.exception("Error validating/loading model %s for agent %s", model_id, agent)
+        return False, str(exc)
 
 
 # Refactor _worker
@@ -632,7 +667,7 @@ def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool
                 logger.debug(f"_MODEL_PRELOAD_STATE summary after: {_MODEL_PRELOAD_STATE['summary']}")
             logger.debug(f"_MODEL_PRELOAD_STATE after processing agent {a}: {_MODEL_PRELOAD_STATE}")
     except Exception as e:  # noqa: BLE001
-        logger.error(f"Model preload worker crashed: {e}")
+        logger.exception("Model preload worker crashed: %s", e)
     finally:
         _MODEL_PRELOAD_STATE["in_progress"] = False
         _MODEL_PRELOAD_STATE["completed_at"] = time.time()
@@ -673,7 +708,10 @@ def models_preload(req: PreloadRequest):
 
 @app.get("/mps/allocation")
 def get_mps_allocation():
-    """Return MPS resource allocation configuration for all agents."""
+    """Return MPS resource allocation configuration for all agents.
+
+    Reads from `config/gpu/mps_allocation_config.json` under the project root.
+    """
     try:
         import json
         from pathlib import Path
@@ -691,14 +729,18 @@ def get_mps_allocation():
             config = json.load(config_file)
 
         return config
-    except Exception as exc:  # noqa: BLE001
-        logger.error("Failed to load MPS allocation config: %s", exc)
+    except Exception as exc:  # noqa: BLE001 pylint: disable=broad-exception-caught
+        logger.exception("Failed to load MPS allocation config: %s", exc)
         return {"error": str(exc)}
 
 
 @app.get("/models/status")
 def models_status():
-    """Return current model preload status."""
+    """Return current model preload status.
+
+    Computes derived counters from the `get_preload_status()` snapshot and
+    returns a conservative summary suitable for health checks and dashboards.
+    """
     status_snapshot = get_preload_status()
     per_agent = status_snapshot.get("per_agent", {}) or {}
 
@@ -749,18 +791,7 @@ def models_status():
 @app.get("/tools")
 def list_tools():
     """List all tools exposed by the GPU Orchestrator."""
-    return {"tools": [
-        "health",
-        "gpu_info",
-        "get_policy",
-        "set_policy",
-        "get_allocations",
-        "lease",
-        "release",
-        "models_preload",
-        "models_status",
-        "mps_allocation"
-    ]}
+    return {"tools": TOOL_LIST}
 
 
 @app.post("/notify_ready")
@@ -771,33 +802,22 @@ def notify_ready():
         client.register_agent(
             agent_name="gpu_orchestrator",
             agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
-            tools=[
-                "health",
-                "gpu_info",
-                "get_policy",
-                "set_policy",
-                "get_allocations",
-                "lease",
-                "release",
-                "models_preload",
-                "models_status",
-                "mps_allocation",
-            ],
+            tools=TOOL_LIST,
         )
         logger.info("Successfully registered GPU Orchestrator with MCP Bus after notification.")
-    except Exception as e:
-        logger.error(f"Failed to register GPU Orchestrator with MCP Bus: {e}")
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        logger.exception("Failed to register GPU Orchestrator with MCP Bus: %s", exc)
         raise HTTPException(status_code=500, detail="Registration failed")
 
 
 @app.on_event("startup")
 async def orchestrator_startup():
+    """Async startup handler for orchestrator (initialization tasks)."""
     logger.info("Starting GPU Orchestrator...")
     initialize_nvml()  # Explicitly call the NVML initialization function
     logger.info("GPU Orchestrator startup sequence complete.")
 
 
-@app.on_event("startup")
 def initialize_nvml():
     global _NVML_SUPPORTED, _NVML_INIT_ERROR
     logger.debug("Checking ENABLE_NVML environment variable...")
@@ -809,32 +829,84 @@ def initialize_nvml():
         return
 
     logger.debug("Attempting to initialize NVML during startup...")
+    if pynvml is None:
+        logger.info("pynvml not installed; skipping NVML initialization")
+        _NVML_SUPPORTED = False
+        _NVML_INIT_ERROR = "pynvml unavailable"
+        return
+
     try:
-        import pynvml  # type: ignore
         pynvml.nvmlInit()
         _NVML_SUPPORTED = True
         logger.debug("NVML initialized successfully during startup.")
 
         # Log detailed GPU information
         device_count = pynvml.nvmlDeviceGetCount()
-        logger.debug(f"Number of devices detected: {device_count}")
+        logger.debug("Number of devices detected: %s", device_count)
         for i in range(device_count):
             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
             name = pynvml.nvmlDeviceGetName(handle)
             memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            logger.debug(f"Device {i}: {name.decode('utf-8')}")
-            logger.debug(f"  Total memory: {memory_info.total / 1024**2} MB")
-            logger.debug(f"  Used memory: {memory_info.used / 1024**2} MB")
-            logger.debug(f"  Free memory: {memory_info.free / 1024**2} MB")
-    except Exception as e:
+            try:
+                decoded_name = name.decode("utf-8") if isinstance(name, (bytes, bytearray)) else str(name)
+            except Exception:
+                decoded_name = str(name)
+            logger.debug("Device %s: %s", i, decoded_name)
+            logger.debug("  Total memory: %s MB", memory_info.total / 1024**2)
+            logger.debug("  Used memory: %s MB", memory_info.used / 1024**2)
+            logger.debug("  Free memory: %s MB", memory_info.free / 1024**2)
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         _NVML_SUPPORTED = False
-        _NVML_INIT_ERROR = str(e)
-        logger.error(f"NVML initialization failed during startup: {e}")
+        _NVML_INIT_ERROR = str(exc)
+        logger.exception("NVML initialization failed during startup: %s", exc)
+
+
+# Optional external dependencies: import at module level but guard failures so
+# the module remains importable in minimal/test environments.
+requests = None
+uvicorn = None
+pynvml = None
+Response = None
+load_sentence_transformer = None
+
+try:
+    import requests as _requests  # type: ignore
+    requests = _requests
+except Exception:
+    requests = None
+
+try:
+    import uvicorn as _uvicorn  # type: ignore
+    uvicorn = _uvicorn
+except Exception:
+    uvicorn = None
+
+try:
+    import pynvml as _pynvml  # type: ignore
+    pynvml = _pynvml
+except Exception:
+    pynvml = None
+
+try:
+    from fastapi.responses import Response as _Response  # type: ignore
+    Response = _Response
+except Exception:
+    Response = None
+
+try:
+    from agents.common.model_loader import load_sentence_transformer as _load_sentence_transformer
+    load_sentence_transformer = _load_sentence_transformer
+except Exception:
+    load_sentence_transformer = None
 
 
 if __name__ == "__main__":
-    import uvicorn
-
-    # Place the runner at the very end so all endpoints above are registered
-    uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
+    # Import uvicorn lazily so the module can be imported in environments without it.
+    try:
+        import uvicorn
+    except Exception:
+        logger.error("uvicorn not available; cannot start server from __main__")
+    else:
+        # Place the runner at the very end so all endpoints above are registered
+        uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
 
