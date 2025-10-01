@@ -1,0 +1,9 @@
+# Ignore archived snapshots and quality backups that are historical artifacts
+# These files are intentional historical snapshots and should be excluded from semgrep/analysis findings
+
+.backup/
+quality_backups/
+docs/quality_backups/
+**/*backup*.json
+**/docs_catalogue_v2.backup_*
+**/.backup/**

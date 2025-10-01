@@ -1,0 +1,9 @@
+# Codacy ignore file (informational). Some Codacy engines respect this pattern file.
+# Exclude archives, quality backups and large historical snapshots from analysis.
+
+.backup/
+quality_backups/
+docs/quality_backups/
+**/*backup*.json
+**/docs_catalogue_v2.backup_*
+**/.backup/**
