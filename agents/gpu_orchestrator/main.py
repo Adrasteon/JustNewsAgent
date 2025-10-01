@@ -7,32 +7,28 @@ to be expanded in later phases. Designed to run under systemd via the
 standard justnews-start-agent.sh launcher.
 """
 
+import logging
 import os
 import subprocess
-from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional, Tuple
-import uuid
 import threading
 import time
-import logging
+import uuid
+from contextlib import asynccontextmanager
+from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field, ConfigDict
-from prometheus_client import (
-    Counter,
-    Gauge,
-)
+from fastapi import FastAPI, HTTPException, Request  # pylint: disable=import-error
+from prometheus_client import Counter, Gauge  # pylint: disable=import-error
+from pydantic import BaseModel, ConfigDict, Field  # pylint: disable=import-error
 
-from common.observability import get_logger
+from agents.gpu_orchestrator.nvml import get_nvml_handle
+from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Import preload module
-from .preload import start_preload_job, get_preload_status, load_agent_model_map
-from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
-from agents.gpu_orchestrator.nvml import get_nvml_handle
-
+from .preload import get_preload_status, load_agent_model_map, start_preload_job
 
 # Ensure the log level is set to DEBUG to capture all debug messages
 logging.basicConfig(level=logging.DEBUG)
@@ -44,7 +40,8 @@ GPU_ORCHESTRATOR_PORT = int(os.environ.get("GPU_ORCHESTRATOR_PORT", 8014))
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 SAFE_MODE = os.environ.get("SAFE_MODE", "false").lower() == "true"
 ENABLE_NVML = os.environ.get("ENABLE_NVML", "false").lower() == "true"
-LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))  # 1 hour default; 0 disables TTL
+# 1 hour default; 0 disables TTL
+LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))
 
 # Shared tools list used when registering with the MCP Bus. Kept on one variable
 # to avoid very long inline lists across the file and to make wrapping easier.
@@ -64,16 +61,16 @@ TOOL_LIST = [
 
 # In-memory state (intentionally simple/minimal for safety)
 READINESS: bool = False
-POLICY: Dict[str, Any] = {
+POLICY: dict[str, Any] = {
     "max_memory_per_agent_mb": 2048,
     "allow_fractional_shares": True,
     "kill_on_oom": False,
     "safe_mode_read_only": SAFE_MODE,
 }
-ALLOCATIONS: Dict[str, Dict[str, Any]] = {}
+ALLOCATIONS: dict[str, dict[str, Any]] = {}
 
 # Simple in-process metrics (avoid external deps). Prometheus exposition via /metrics.
-_METRICS_COUNTERS: Dict[str, int] = {
+_METRICS_COUNTERS: dict[str, int] = {
     "requests_total": 0,
     "gpu_info_requests_total": 0,
     "policy_get_requests_total": 0,
@@ -84,7 +81,7 @@ _METRICS_COUNTERS: Dict[str, int] = {
 }
 _START_TIME = time.time()
 _NVML_SUPPORTED = False
-_NVML_INIT_ERROR: Optional[str] = None
+_NVML_INIT_ERROR: str | None = None
 _NVML_HANDLE_CACHE = {}
 
 
@@ -101,7 +98,7 @@ def _purge_expired_leases() -> None:
     if LEASE_TTL_SECONDS <= 0 or not ALLOCATIONS:
         return
     now = time.time()
-    expired: List[str] = []
+    expired: list[str] = []
     for token, alloc in list(ALLOCATIONS.items()):
         try:
             started = float(alloc.get("timestamp", now))
@@ -112,7 +109,9 @@ def _purge_expired_leases() -> None:
     for token in expired:
         ALLOCATIONS.pop(token, None)
     if expired:
-        _METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get("lease_expired_total", 0) + len(expired)
+        _METRICS_COUNTERS["lease_expired_total"] = _METRICS_COUNTERS.get(
+            "lease_expired_total", 0
+        ) + len(expired)
         lease_expired_counter.labels(
             agent=metrics.agent_name,
             agent_display_name=metrics.display_name,
@@ -123,7 +122,7 @@ class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
 
-    def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
+    def register_agent(self, agent_name: str, agent_address: str, tools: list[str]):
         """Register this agent with the MCP Bus if requests is available.
 
         If the 'requests' package is not available the function logs and
@@ -141,37 +140,63 @@ class MCPBusClient:
             "tools": tools,
         }
 
-        for attempt in range(5): # Retry up to 5 times
+        for attempt in range(5):  # Retry up to 5 times
             try:
-                response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
+                response = requests.post(
+                    f"{self.base_url}/register",
+                    json=registration_data,
+                    timeout=(2, 5),
+                )
                 response.raise_for_status()
-                logger.info(f"Successfully registered {agent_name} with MCP Bus on attempt {attempt + 1}")
+                logger.info(
+                    "Successfully registered %s with MCP Bus on attempt %s",
+                    agent_name,
+                    attempt + 1,
+                )
                 return
             except requests.exceptions.RequestException as e:
-                logger.warning(f"MCP Bus unavailable for registration (attempt {attempt + 1}/5): {e}")
-                time.sleep(2 ** attempt) # Exponential backoff
+                logger.warning(
+                    "MCP Bus unavailable for registration (attempt %s/5): %s",
+                    attempt + 1,
+                    e,
+                )
+                time.sleep(2**attempt)  # Exponential backoff
 
-        logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
+        logger.error(
+            f"Failed to register {agent_name} with MCP Bus after multiple attempts."
+        )
 
 
-def _run_nvidia_smi() -> Optional[str]:
+def _run_nvidia_smi() -> str | None:
     """Run nvidia-smi and return raw XML or CSV output, or None if unavailable."""
     # Prefer CSV for simpler parsing at this stage
+    # Build the nvidia-smi query in smaller parts to avoid overly long source
+    # lines and to make the query easier to modify in future.
+    query_fields = (
+        "index,name,memory.total,memory.used,"
+        "utilization.gpu,temperature.gpu,power.draw"
+    )
     cmd = [
         "nvidia-smi",
-        "--query-gpu=index,name,memory.total,memory.used,utilization.gpu,temperature.gpu,power.draw",
+        f"--query-gpu={query_fields}",
         "--format=csv,noheader,nounits",
     ]
     try:
-        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True, timeout=3)
+        output = subprocess.check_output(
+            cmd, stderr=subprocess.STDOUT, text=True, timeout=3
+        )
         return output
-    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+    except (
+        subprocess.CalledProcessError,
+        FileNotFoundError,
+        subprocess.TimeoutExpired,
+    ) as e:
         logger.debug(f"nvidia-smi unavailable or failed: {e}")
         return None
 
 
-def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
-    gpus: List[Dict[str, Any]] = []
+def _parse_nvidia_smi_csv(csv_text: str) -> list[dict[str, Any]]:
+    gpus: list[dict[str, Any]] = []
     for line in csv_text.strip().splitlines():
         parts = [p.strip() for p in line.split(",")]
         if len(parts) < 7:
@@ -187,7 +212,9 @@ def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
                     "temperature_c": float(parts[5]),
                     "power_draw_w": float(parts[6]),
                     "memory_utilization_pct": (
-                        (float(parts[3]) / float(parts[2]) * 100.0) if float(parts[2]) > 0 else 0.0
+                        (float(parts[3]) / float(parts[2]) * 100.0)
+                        if float(parts[2]) > 0
+                        else 0.0
                     ),
                 }
             )
@@ -197,7 +224,7 @@ def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
     return gpus
 
 
-def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
+def _get_nvml_enrichment(gpus: list[dict[str, Any]]) -> None:
     """Enrich GPU info with NVML data if available and enabled.
 
     Mutates the input list of GPU dictionaries to add NVML-related fields.
@@ -207,7 +234,7 @@ def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
     # Use guarded top-level pynvml import to avoid import-outside-toplevel and
     # to allow running in environments without pynvml present.
     if pynvml is None:
-        # If NVML isn't installed, we skip enrichment gracefully.
+        # If NVML isn't installed, skip enrichment gracefully.
         return
     for g in gpus:
         idx = g.get("index")
@@ -219,28 +246,29 @@ def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
                 g["nvml_gpu_util_pct"] = getattr(util, "gpu", None)
                 g["nvml_mem_used_mb"] = round(mem.used / 1024**2, 2)
                 g["nvml_mem_total_mb"] = round(mem.total / 1024**2, 2)
-                g["nvml_mem_util_pct"] = round((mem.used / mem.total * 100.0) if mem.total else 0.0, 2)
+                g["nvml_mem_util_pct"] = round(
+                    (mem.used / mem.total * 100.0) if mem.total else 0.0, 2
+                )
             except Exception as e:  # noqa: BLE001
                 g["nvml_error"] = str(e)
 
 
-def get_gpu_snapshot() -> Dict[str, Any]:
+def get_gpu_snapshot() -> dict[str, Any]:
     """Return a conservative, read-only snapshot of GPU state."""
     smi = _run_nvidia_smi()
     if smi is None:
         return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
     gpus = _parse_nvidia_smi_csv(smi)
     _get_nvml_enrichment(gpus)
-    # Break the return dict across multiple lines to satisfy line-length checks
     return {
         "gpus": gpus,
         "available": True,
-        "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED),
+        "nvml_enriched": (bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED)),
         "nvml_supported": _NVML_SUPPORTED,
     }
 
 
-def _detect_mps() -> Dict[str, Any]:
+def _detect_mps() -> dict[str, Any]:
     """Best-effort NVIDIA MPS detection.
 
     Returns a dict with:
@@ -252,10 +280,13 @@ def _detect_mps() -> Dict[str, Any]:
     control_process = False
     enabled = False
     try:
-        out = subprocess.run([
-            "pgrep", "-x", "nvidia-cuda-mps-control"
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=1)
-        control_process = (out.returncode == 0)
+        out = subprocess.run(
+            ["pgrep", "-x", "nvidia-cuda-mps-control"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=1,
+        )
+        control_process = out.returncode == 0
     except Exception:
         control_process = False
     try:
@@ -264,13 +295,19 @@ def _detect_mps() -> Dict[str, Any]:
     except Exception:
         enabled = False
     enabled = enabled or control_process
-    return {"enabled": bool(enabled), "pipe_dir": pipe_dir, "control_process": bool(control_process)}
+    return {
+        "enabled": bool(enabled),
+        "pipe_dir": pipe_dir,
+        "control_process": bool(control_process),
+    }
 
 
 class PolicyUpdate(BaseModel):
-    max_memory_per_agent_mb: Optional[int] = Field(None, ge=256, description="Per-agent memory cap in MB")
-    allow_fractional_shares: Optional[bool] = None
-    kill_on_oom: Optional[bool] = None
+    max_memory_per_agent_mb: int | None = Field(
+        None, ge=256, description="Per-agent memory cap in MB"
+    )
+    allow_fractional_shares: bool | None = None
+    kill_on_oom: bool | None = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -278,7 +315,7 @@ class PolicyUpdate(BaseModel):
 
 class LeaseRequest(BaseModel):
     agent: str
-    min_memory_mb: Optional[int] = Field(0, ge=0)
+    min_memory_mb: int | None = Field(0, ge=0)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -290,9 +327,16 @@ class ReleaseRequest(BaseModel):
 
 
 class PreloadRequest(BaseModel):
-    agents: Optional[List[str]] = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
-    refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
-    strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
+    agents: list[str] | None = Field(
+        default=None,
+        description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json",
+    )
+    refresh: bool = Field(
+        default=False, description="Restart preloading even if a job already completed"
+    )
+    strict: bool | None = Field(
+        default=None, description="Override STRICT_MODEL_STORE env for this preload run"
+    )
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -306,8 +350,11 @@ async def lifespan(app: FastAPI):
     # Registration status tracker
     registration_complete = threading.Event()
 
-    def register_agent_background(agent_name: str, agent_address: str, tools: List[str]):
+    def register_agent_background(
+        agent_name: str, agent_address: str, tools: list[str]
+    ):
         """Register the agent with the MCP Bus in a background thread."""
+
         def background_task():
             client = MCPBusClient()
             client.register_agent(agent_name, agent_address, tools)
@@ -344,37 +391,36 @@ metrics = JustNewsMetrics("gpu_orchestrator")
 
 # Set initial uptime
 uptime_gauge = Gauge(
-    'gpu_orchestrator_uptime_seconds',
-    'GPU orchestrator uptime in seconds',
-    ['agent', 'agent_display_name'],
-    registry=metrics.registry
+    "gpu_orchestrator_uptime_seconds",
+    "GPU orchestrator uptime in seconds",
+    ["agent", "agent_display_name"],
+    registry=metrics.registry,
 )
 uptime_gauge.labels(
-    agent=metrics.agent_name,
-    agent_display_name=metrics.display_name
+    agent=metrics.agent_name, agent_display_name=metrics.display_name
 ).set(time.time() - _START_TIME)
 
 # Add MPS-specific metrics
 mps_enabled_gauge = Gauge(
-    'gpu_orchestrator_mps_enabled',
-    'Whether NVIDIA MPS is enabled (1) or disabled (0)',
-    ['agent', 'agent_display_name'],
-    registry=metrics.registry
+    "gpu_orchestrator_mps_enabled",
+    "Whether NVIDIA MPS is enabled (1) or disabled (0)",
+    ["agent", "agent_display_name"],
+    registry=metrics.registry,
 )
 
 # Add additional GPU orchestrator specific metrics
 lease_expired_counter = Counter(
-    'gpu_orchestrator_lease_expired_total',
-    'Total number of GPU leases that have expired',
-    ['agent', 'agent_display_name'],
-    registry=metrics.registry
+    "gpu_orchestrator_lease_expired_total",
+    "Total number of GPU leases that have expired",
+    ["agent", "agent_display_name"],
+    registry=metrics.registry,
 )
 
 nvml_supported_gauge = Gauge(
-    'gpu_orchestrator_nvml_supported',
-    'Whether NVML is supported and enabled (1) or not (0)',
-    ['agent', 'agent_display_name'],
-    registry=metrics.registry
+    "gpu_orchestrator_nvml_supported",
+    "Whether NVML is supported and enabled (1) or not (0)",
+    ["agent", "agent_display_name"],
+    registry=metrics.registry,
 )
 
 
@@ -383,15 +429,15 @@ try:
     from agents.common.shutdown import register_shutdown_endpoint
 
     register_shutdown_endpoint(app)
-except Exception:
-    logger.debug("shutdown endpoint not registered for gpu_orchestrator")
+except Exception as exc:
+    logger.debug("shutdown endpoint not registered for gpu_orchestrator: %s", exc)
 
 try:
     from agents.common.reload import register_reload_endpoint
 
     register_reload_endpoint(app)
-except Exception:
-    logger.debug("reload endpoint not registered for gpu_orchestrator")
+except Exception as exc:
+    logger.debug("reload endpoint not registered for gpu_orchestrator: %s", exc)
 
 
 # Add metrics middleware
@@ -400,19 +446,27 @@ app.middleware("http")(metrics.request_middleware)
 
 @app.get("/health")
 @app.post("/health")
-async def health(request: Request):
+async def health(request: Request) -> dict[str, Any]:
+    """Liveness/health endpoint used by orchestrator watchers and tests.
+
+    Returns a small JSON payload containing service status and SAFE_MODE.
+    """
     _inc("policy_get_requests_total")  # reuse counter group for simplicity
     return {"status": "ok", "safe_mode": SAFE_MODE}
 
 
 @app.get("/ready")
-def ready():
+def ready() -> dict[str, bool]:
+    """Readiness probe for orchestration systems.
+
+    Returns a simple dict indicating whether the service is ready to accept traffic.
+    """
     _inc("policy_get_requests_total")
     return {"ready": READINESS}
 
 
 @app.get("/gpu/info")
-def gpu_info():
+def gpu_info() -> dict[str, Any]:
     """Return current GPU telemetry (read-only)."""
     try:
         _inc("gpu_info_requests_total")
@@ -423,12 +477,13 @@ def gpu_info():
         if ENABLE_NVML and not SAFE_MODE and not _NVML_SUPPORTED:
             data["nvml_init_error"] = _NVML_INIT_ERROR or "unsupported"
             logger.warning(
-                f"NVML not supported: {data['nvml_init_error']}"
+                "NVML not supported: %s",
+                data["nvml_init_error"],
             )
 
         logger.info("Detecting MPS status...")
         mps = _detect_mps()
-        logger.info(f"MPS detection result: {mps}")
+        logger.info("MPS detection result: %s", mps)
 
         data["mps_enabled"] = bool(mps.get("enabled", False))
         data["mps"] = mps
@@ -441,19 +496,19 @@ def gpu_info():
 
         logger.info("Returning GPU telemetry data.")
         return data
-    except Exception as e:
-        logger.error(f"Failed to get GPU snapshot: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        logger.exception("Failed to get GPU snapshot: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @app.get("/policy")
-def get_policy():
+def get_policy() -> dict[str, Any]:
     _inc("policy_get_requests_total")
     return POLICY
 
 
 @app.post("/policy")
-def set_policy(update: PolicyUpdate):
+def set_policy(update: PolicyUpdate) -> dict[str, Any]:
     if SAFE_MODE:
         # In SAFE_MODE, accept but do not enact changes (read-only posture)
         _inc("policy_post_requests_total")
@@ -474,20 +529,20 @@ def set_policy(update: PolicyUpdate):
         changed = True
 
     if changed:
-        logger.info(f"Updated GPU policy: {POLICY}")
+        logger.info("Updated GPU policy: %s", POLICY)
     _inc("policy_post_requests_total")
     return POLICY
 
 
 @app.get("/allocations")
-def get_allocations():
+def get_allocations() -> dict[str, Any]:
     """Return current agent→GPU allocation view (placeholder)."""
     _inc("policy_get_requests_total")
     _purge_expired_leases()
     return {"allocations": ALLOCATIONS}
 
 
-def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
+def _validate_lease_request(req: LeaseRequest) -> str | None:
     """Validate the lease request parameters.
 
     Returns an error message if validation fails, or None if valid.
@@ -497,7 +552,7 @@ def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
     return None
 
 
-def _allocate_gpu(req: LeaseRequest) -> Tuple[bool, Optional[int]]:
+def _allocate_gpu(req: LeaseRequest) -> tuple[bool, int | None]:
     """Allocate a GPU based on the lease request.
 
     Returns a tuple of (success, gpu_index) where success is a boolean
@@ -509,16 +564,22 @@ def _allocate_gpu(req: LeaseRequest) -> Tuple[bool, Optional[int]]:
         # naive: choose lowest used memory GPU meeting minimum
         candidates = []
         for g in snapshot["gpus"]:
-            if req.min_memory_mb and (g["memory_total_mb"] - g["memory_used_mb"]) < req.min_memory_mb:
+            if (
+                req.min_memory_mb
+                and (g["memory_total_mb"] - g["memory_used_mb"]) < req.min_memory_mb
+            ):
                 continue
             candidates.append(g)
         if candidates:
-            return True, sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"]
+            return (
+                True,
+                sorted(candidates, key=lambda x: x["memory_used_mb"])[0]["index"],
+            )
     return False, None
 
 
 @app.post("/lease")
-def lease(req: LeaseRequest):
+def lease(req: LeaseRequest) -> dict[str, Any]:
     """Obtain a simple ephemeral GPU lease. SAFE_MODE returns note only.
 
     Strategy: first-fit; if no GPU info or none available, return cpu fallback.
@@ -550,7 +611,7 @@ def lease(req: LeaseRequest):
 
 
 @app.post("/release")
-def release(req: ReleaseRequest):
+def release(req: ReleaseRequest) -> dict[str, Any]:
     _inc("release_requests_total")
     _purge_expired_leases()
     alloc = ALLOCATIONS.pop(req.token, None)
@@ -560,7 +621,7 @@ def release(req: ReleaseRequest):
 
 
 @app.get("/metrics")
-def get_metrics():
+def get_metrics() -> Any:
     """Prometheus metrics endpoint."""
     if Response is None:
         logger.error("fastapi.responses not available; metrics endpoint unavailable")
@@ -573,15 +634,18 @@ def get_metrics():
 # Model preload functionality
 # ---------------------------
 
+
 def _project_root() -> str:
     try:
         import pathlib
+
         return str(pathlib.Path(__file__).resolve().parents[2])
-    except Exception:
+    except Exception as exc:
+        logger.debug("_project_root fallback to cwd due to: %s", exc)
         return os.getcwd()
 
 
-def _read_agent_model_map() -> Dict[str, Any]:
+def _read_agent_model_map() -> dict[str, Any]:
     """Read the agent model map from AGENT_MODEL_MAP.json."""
     model_map = load_agent_model_map()
     if not model_map:
@@ -589,7 +653,9 @@ def _read_agent_model_map() -> Dict[str, Any]:
     return model_map
 
 
-def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+def _validate_and_load_model(
+    agent: str, model_id: str, strict: bool
+) -> tuple[bool, str | None]:
     """Validate and load a model for an agent.
 
     Returns a tuple of (success, error_message) where success is a boolean
@@ -618,13 +684,17 @@ def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[b
             raise RuntimeError(error)
         return True, None
     except Exception as exc:  # pylint: disable=broad-exception-caught
-        logger.exception("Error validating/loading model %s for agent %s", model_id, agent)
+        logger.exception(
+            "Error validating/loading model %s for agent %s: %s", model_id, agent, exc
+        )
         return False, str(exc)
 
 
 # Refactor _worker
 # Example: Delegate preload job tasks to the preload module
-def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
+def _worker(
+    selected_agents: list[str] | None, strict_override: bool | None
+) -> dict[str, Any]:
     logger.info("Starting model preload worker")
     try:
         model_map = _read_agent_model_map()
@@ -634,26 +704,37 @@ def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool
             models = model_map.get(a, [])
             _MODEL_PRELOAD_STATE["per_agent"][a] = {}
             for mid in models:
-                _MODEL_PRELOAD_STATE["per_agent"][a][mid] = {"status": "pending", "error": None, "duration_s": None}
+                _MODEL_PRELOAD_STATE["per_agent"][a][mid] = {
+                    "status": "pending",
+                    "error": None,
+                    "duration_s": None,
+                }
         total = sum(len(model_map.get(a, [])) for a in agents)
         _MODEL_PRELOAD_STATE["summary"]["total"] = total
 
-        strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in ("1", "true", "yes")
+        strict_env = os.environ.get("STRICT_MODEL_STORE", "0").lower() in (
+            "1",
+            "true",
+            "yes",
+        )
         strict = strict_override if strict_override is not None else strict_env
 
-        logger.debug(f"Initial _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
+        logger.debug("Initial _MODEL_PRELOAD_STATE: %s", _MODEL_PRELOAD_STATE)
 
         # Iterate and preload each model on CPU
         for a in agents:
             for mid in model_map.get(a, []):
                 st = _MODEL_PRELOAD_STATE["per_agent"][a][mid]
-                logger.debug(f"Processing model {mid} for agent {a}")
-                logger.debug(f"Before invoking _validate_and_load_model: {st}")
-                logger.debug(f"_MODEL_PRELOAD_STATE summary before: {_MODEL_PRELOAD_STATE['summary']}")
+                logger.debug("Processing model %s for agent %s", mid, a)
+                logger.debug("Before invoking _validate_and_load_model: %s", st)
+                logger.debug(
+                    "_MODEL_PRELOAD_STATE summary before: %s",
+                    _MODEL_PRELOAD_STATE["summary"],
+                )
                 st["status"] = "loading"
                 t0 = time.time()
                 ok, err = _validate_and_load_model(a, mid, strict)
-                logger.debug(f"_validate_and_load_model result: ok={ok}, err={err}")
+                logger.debug("_validate_and_load_model result: ok=%s, err=%s", ok, err)
                 if ok:
                     st["status"] = "ok"
                     st["duration_s"] = time.time() - t0
@@ -663,31 +744,49 @@ def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool
                     st["error"] = err
                     st["duration_s"] = time.time() - t0
                     _MODEL_PRELOAD_STATE["summary"]["failed"] += 1
-                logger.debug(f"Updated _MODEL_PRELOAD_STATE for agent {a}, model {mid}: {st}")
-                logger.debug(f"_MODEL_PRELOAD_STATE summary after: {_MODEL_PRELOAD_STATE['summary']}")
-            logger.debug(f"_MODEL_PRELOAD_STATE after processing agent {a}: {_MODEL_PRELOAD_STATE}")
-    except Exception as e:  # noqa: BLE001
-        logger.exception("Model preload worker crashed: %s", e)
+                logger.debug(
+                    "Updated _MODEL_PRELOAD_STATE for agent %s, model %s: %s",
+                    a,
+                    mid,
+                    st,
+                )
+                logger.debug(
+                    "_MODEL_PRELOAD_STATE summary after: %s",
+                    _MODEL_PRELOAD_STATE["summary"],
+                )
+            logger.debug(
+                "_MODEL_PRELOAD_STATE after processing agent %s: %s",
+                a,
+                _MODEL_PRELOAD_STATE,
+            )
+    except Exception as exc:  # noqa: BLE001 pylint: disable=broad-exception-caught
+        logger.exception("Model preload worker crashed: %s", exc)
     finally:
         _MODEL_PRELOAD_STATE["in_progress"] = False
         _MODEL_PRELOAD_STATE["completed_at"] = time.time()
-        logger.debug(f"Final _MODEL_PRELOAD_STATE: {_MODEL_PRELOAD_STATE}")
+        logger.debug("Final _MODEL_PRELOAD_STATE: %s", _MODEL_PRELOAD_STATE)
 
 
 @app.post("/models/preload")
-def models_preload(req: PreloadRequest):
+def models_preload(req: PreloadRequest) -> dict[str, Any]:
     """Start a background model preload job (CPU warming) using AGENT_MODEL_MAP.json.
 
     Returns current job state. If a job is already completed and refresh=false, returns that state.
     """
     # If job completed and not refreshing, return existing state.
     # If there were failures, return 503 to enforce a hard failure with clear reasons.
-    if _MODEL_PRELOAD_STATE.get("started_at") and not _MODEL_PRELOAD_STATE.get("in_progress") and not req.refresh:
+    if (
+        _MODEL_PRELOAD_STATE.get("started_at")
+        and not _MODEL_PRELOAD_STATE.get("in_progress")
+        and not req.refresh
+    ):
         failed = int(_MODEL_PRELOAD_STATE.get("summary", {}).get("failed", 0) or 0)
-        all_ready = (failed == 0 and _MODEL_PRELOAD_STATE["summary"].get("done", 0) == _MODEL_PRELOAD_STATE["summary"].get("total", 0))
+        all_ready = failed == 0 and _MODEL_PRELOAD_STATE["summary"].get(
+            "done", 0
+        ) == _MODEL_PRELOAD_STATE["summary"].get("total", 0)
         state = {**_MODEL_PRELOAD_STATE, "all_ready": all_ready}
         # Build a concise error list for clarity
-        errors: List[Dict[str, Any]] = []
+        errors: list[dict[str, Any]] = []
         for a, models in _MODEL_PRELOAD_STATE.get("per_agent", {}).items():
             for mid, st in models.items():
                 if st.get("status") == "error":
@@ -698,8 +797,10 @@ def models_preload(req: PreloadRequest):
         return state
 
     state = start_preload_job(req.agents, req.strict)
-    logger.debug(f"_MODEL_PRELOAD_STATE during /models/preload: {_MODEL_PRELOAD_STATE}")
-    logger.debug(f"_MODEL_PRELOAD_STATE before response: {_MODEL_PRELOAD_STATE}")
+    logger.debug(
+        "_MODEL_PRELOAD_STATE during /models/preload: %s", _MODEL_PRELOAD_STATE
+    )
+    logger.debug("_MODEL_PRELOAD_STATE before response: %s", _MODEL_PRELOAD_STATE)
     return {
         **state,
         "all_ready": False,
@@ -707,7 +808,7 @@ def models_preload(req: PreloadRequest):
 
 
 @app.get("/mps/allocation")
-def get_mps_allocation():
+def get_mps_allocation() -> dict[str, Any]:
     """Return MPS resource allocation configuration for all agents.
 
     Reads from `config/gpu/mps_allocation_config.json` under the project root.
@@ -725,7 +826,7 @@ def get_mps_allocation():
                 "path": str(config_path),
             }
 
-        with open(config_path, "r", encoding="utf-8") as config_file:
+        with open(config_path, encoding="utf-8") as config_file:
             config = json.load(config_file)
 
         return config
@@ -735,7 +836,7 @@ def get_mps_allocation():
 
 
 @app.get("/models/status")
-def models_status():
+def models_status() -> dict[str, Any]:
     """Return current model preload status.
 
     Computes derived counters from the `get_preload_status()` snapshot and
@@ -747,7 +848,7 @@ def models_status():
     computed_total = 0
     computed_done = 0
     computed_failed = 0
-    errors: List[Dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
 
     for agent, models in per_agent.items():
         for model_id, model_status in models.items():
@@ -756,11 +857,13 @@ def models_status():
                 computed_done += 1
             elif model_status.get("status") == "error":
                 computed_failed += 1
-                errors.append({
-                    "agent": agent,
-                    "model": model_id,
-                    "error": model_status.get("error"),
-                })
+                errors.append(
+                    {
+                        "agent": agent,
+                        "model": model_id,
+                        "error": model_status.get("error"),
+                    }
+                )
 
     if computed_total == 0 and status_snapshot.get("summary"):
         fallback = status_snapshot["summary"]
@@ -789,13 +892,13 @@ def models_status():
 
 
 @app.get("/tools")
-def list_tools():
+def list_tools() -> dict[str, list[str]]:
     """List all tools exposed by the GPU Orchestrator."""
     return {"tools": TOOL_LIST}
 
 
 @app.post("/notify_ready")
-def notify_ready():
+def notify_ready() -> dict[str, Any]:
     """Handle notification from MCP Bus that it is ready."""
     try:
         client = MCPBusClient()
@@ -804,25 +907,27 @@ def notify_ready():
             agent_address=f"http://localhost:{GPU_ORCHESTRATOR_PORT}",
             tools=TOOL_LIST,
         )
-        logger.info("Successfully registered GPU Orchestrator with MCP Bus after notification.")
+        logger.info(
+            "Successfully registered GPU Orchestrator with MCP Bus after notification."
+        )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         logger.exception("Failed to register GPU Orchestrator with MCP Bus: %s", exc)
-        raise HTTPException(status_code=500, detail="Registration failed")
+        raise HTTPException(status_code=500, detail="Registration failed") from exc
 
 
 @app.on_event("startup")
-async def orchestrator_startup():
+async def orchestrator_startup() -> None:
     """Async startup handler for orchestrator (initialization tasks)."""
     logger.info("Starting GPU Orchestrator...")
     initialize_nvml()  # Explicitly call the NVML initialization function
     logger.info("GPU Orchestrator startup sequence complete.")
 
 
-def initialize_nvml():
+def initialize_nvml() -> None:
     global _NVML_SUPPORTED, _NVML_INIT_ERROR
     logger.debug("Checking ENABLE_NVML environment variable...")
     enable_nvml = os.environ.get("ENABLE_NVML", "false").lower() == "true"
-    logger.debug(f"ENABLE_NVML is set to: {enable_nvml}")
+    logger.debug("ENABLE_NVML is set to: %s", enable_nvml)
 
     if not enable_nvml:
         logger.info("NVML is disabled via environment variable.")
@@ -848,8 +953,13 @@ def initialize_nvml():
             name = pynvml.nvmlDeviceGetName(handle)
             memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
             try:
-                decoded_name = name.decode("utf-8") if isinstance(name, (bytes, bytearray)) else str(name)
-            except Exception:
+                decoded_name = (
+                    name.decode("utf-8")
+                    if isinstance(name, (bytes, bytearray))
+                    else str(name)
+                )
+            except Exception as exc:
+                logger.debug("Failed to decode NVML device name: %s", exc)
                 decoded_name = str(name)
             logger.debug("Device %s: %s", i, decoded_name)
             logger.debug("  Total memory: %s MB", memory_info.total / 1024**2)
@@ -870,43 +980,40 @@ Response = None
 load_sentence_transformer = None
 
 try:
-    import requests as _requests  # type: ignore
-    requests = _requests
+    import requests  # Optional: used for MCP Bus registration
 except Exception:
     requests = None
-
+try:
+    import pynvml  # Optional NVML bindings
+except Exception:
+    pynvml = None
 try:
     import uvicorn as _uvicorn  # type: ignore
+
     uvicorn = _uvicorn
 except Exception:
     uvicorn = None
-
-try:
-    import pynvml as _pynvml  # type: ignore
-    pynvml = _pynvml
-except Exception:
-    pynvml = None
-
 try:
     from fastapi.responses import Response as _Response  # type: ignore
+
     Response = _Response
 except Exception:
     Response = None
-
 try:
-    from agents.common.model_loader import load_sentence_transformer as _load_sentence_transformer
+    from agents.common.model_loader import (
+        load_sentence_transformer as _load_sentence_transformer,
+    )
+
     load_sentence_transformer = _load_sentence_transformer
 except Exception:
     load_sentence_transformer = None
 
 
 if __name__ == "__main__":
-    # Import uvicorn lazily so the module can be imported in environments without it.
-    try:
-        import uvicorn
-    except Exception:
+    # Use the module-level guarded `uvicorn` variable so the module can be
+    # imported in environments without uvicorn installed and to avoid
+    # static-analysis unresolved-import warnings in analysis-only environments.
+    if uvicorn is None:
         logger.error("uvicorn not available; cannot start server from __main__")
     else:
-        # Place the runner at the very end so all endpoints above are registered
         uvicorn.run(app, host="0.0.0.0", port=GPU_ORCHESTRATOR_PORT)
-
