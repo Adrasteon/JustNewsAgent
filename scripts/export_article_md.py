@@ -8,9 +8,12 @@ import sys
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-DB = dict(
-    dbname="justnews", user="justnews_user", password="password123", host="localhost"
-)
+DB = {
+    "dbname": "justnews",
+    "user": "justnews_user",
+    "password": "password123",
+    "host": "localhost",
+}
 
 
 def fetch_article(article_id: int):

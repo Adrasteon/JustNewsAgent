@@ -132,7 +132,7 @@ def main():
         samp.write(
             "# top 50 clusters (cluster_id\tsize\trepresentative_id\trepresentative_title\tmembers...)\n"
         )
-        for idx, (root, members) in enumerate(clusters[:50], start=1):
+        for idx, (_root, members) in enumerate(clusters[:50], start=1):
             members_sorted = sorted(members)
             rep = members_sorted[0]
             rep_title = titles.get(rep, "")

@@ -5,6 +5,7 @@ Verify downloaded agent models: check folders, sizes, and attempt lightweight lo
 import logging
 import sys
 from pathlib import Path
+
 from common.observability import get_logger
 
 # Configure basic logging for the script (timestamp + level + message)
@@ -52,7 +53,7 @@ except Exception:
     AutoTokenizer = None
 
 checks = []
-for agent, name, size, path in results:
+for agent, name, _size, path in results:
     path_obj = Path(path)
     # quick existence check
     if not path_obj.exists():

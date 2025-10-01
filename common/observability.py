@@ -60,9 +60,7 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
-def setup_logging(
-    level: int = logging.INFO, format_string: str | None = None
-) -> None:
+def setup_logging(level: int = logging.INFO, format_string: str | None = None) -> None:
     """
     Setup basic logging configuration for the application.
     This function is now a compatibility wrapper and the main configuration
