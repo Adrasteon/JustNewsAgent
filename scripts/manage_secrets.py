@@ -176,7 +176,7 @@ class SecretManagerCLI:
         sensitive_vars = []
         all_vars = []
 
-        for key, value in os.environ.items():
+        for key, _value in os.environ.items():
             all_vars.append(key)
             if any(
                 secret in key.lower()

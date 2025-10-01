@@ -100,7 +100,7 @@ def main():
 
     with open(OUT_CLUSTERS, "w", encoding="utf-8") as out:
         out.write("cluster_id\tids\tsize\trepresentative_id\trepresentative_title\n")
-        for idx, (root, members) in enumerate(clusters, start=1):
+        for idx, (_root, members) in enumerate(clusters, start=1):
             members_sorted = sorted(members)
             size = len(members_sorted)
             rep = members_sorted[0]

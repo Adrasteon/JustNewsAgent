@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Verify downloaded agent models: check folders, sizes, and attempt lightweight load for transformers/sentence-transformers.
@@ -7,6 +5,7 @@ Verify downloaded agent models: check folders, sizes, and attempt lightweight lo
 import logging
 import sys
 from pathlib import Path
+from common.observability import get_logger
 
 # Configure basic logging for the script (timestamp + level + message)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")

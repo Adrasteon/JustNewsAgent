@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Database migration script for JustNewsAgent
@@ -13,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agents.common.database import execute_query
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 
