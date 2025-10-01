@@ -5,7 +5,10 @@ import time
 import traceback
 from datetime import UTC, datetime
 
-import requests
+try:
+    import requests
+except Exception:
+    requests = None
 
 # Import security utilities
 from agents.scout.security_utils import (
@@ -1653,3 +1656,34 @@ def _record_scout_performance(data: dict) -> None:
     """
     # TODO: integrate with JustNewsMetrics
     pass
+
+
+# Helper to analyze a single source using the scout engine. Extracted from
+# intelligent_source_discovery to reduce function complexity and improve testability.
+def _analyze_source_with_engine(source: dict, scout_engine, quality_threshold: float) -> dict | None:
+    """Fetch preview for a source and analyze with Scout engine.
+
+    Returns enriched source dict on success or None if it does not meet threshold
+    or analysis failed.
+    """
+    if requests is None:
+        return None
+    try:
+        resp = requests.post(
+            "http://localhost:32768/crawl_url",
+            json={"args": [source.get("url", "")], "kwargs": {"extract_text": True}},
+            timeout=(3, 20),
+        )
+        resp.raise_for_status()
+        content_data = resp.json()
+        content_text = content_data.get("content", "")[:2000]
+        analysis = scout_engine.comprehensive_content_analysis(content_text, source.get("url", ""))
+        scout_score = analysis.get("scout_score", 0.0)
+        if scout_score >= quality_threshold:
+            source["scout_analysis"] = analysis
+            source["scout_score"] = scout_score
+            source["priority"] = "HIGH" if scout_score >= 0.8 else "MEDIUM"
+            return source
+    except Exception:
+        return None
+    return None
