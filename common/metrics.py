@@ -7,20 +7,16 @@ import logging
 import time
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Dict, Optional
 
 import GPUtil
 import psutil
 from prometheus_client import (
-    CONTENT_TYPE_LATEST,
     CollectorRegistry,
     Counter,
     Gauge,
     Histogram,
-    Summary,
     generate_latest,
 )
-from prometheus_client.multiprocess import MultiProcessCollector
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +87,7 @@ class JustNewsMetrics:
         "503": "service-unavailable",
     }
 
-    def __init__(self, agent_name: str, registry: Optional[CollectorRegistry] = None):
+    def __init__(self, agent_name: str, registry: CollectorRegistry | None = None):
         """
         Initialize metrics for an agent.
 

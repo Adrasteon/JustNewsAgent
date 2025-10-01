@@ -21,7 +21,6 @@ import argparse
 import json
 import os
 import re
-from typing import List, Tuple
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -55,9 +54,9 @@ def is_text_file(path: str) -> bool:
     return ext.lower() in TEXT_EXTS
 
 
-def replace_in_text(text: str) -> Tuple[str, List[Tuple[str, str]]]:
+def replace_in_text(text: str) -> tuple[str, list[tuple[str, str]]]:
     """Return (new_text, list_of_replacements) for a single file's text."""
-    replacements: List[Tuple[str, str]] = []
+    replacements: list[tuple[str, str]] = []
     new_text = text
 
     # 1) hashlib.md5(...) -> hashlib.sha256(...)
@@ -87,8 +86,8 @@ def replace_in_text(text: str) -> Tuple[str, List[Tuple[str, str]]]:
     return new_text, replacements
 
 
-def find_files(root: str) -> List[str]:
-    files: List[str] = []
+def find_files(root: str) -> list[str]:
+    files: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # filter out skip dirs in-place to prune traversal
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
@@ -99,7 +98,7 @@ def find_files(root: str) -> List[str]:
     return files
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Find & replace MD5 usage with SHA-256 variants."
     )
@@ -122,7 +121,7 @@ def main(argv: List[str] | None = None) -> int:
 
     for path in files:
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 text = f.read()
         except (UnicodeDecodeError, PermissionError):
             # skip binary or unreadable files

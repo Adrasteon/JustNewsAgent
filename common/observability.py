@@ -5,7 +5,6 @@ Common observability utilities for JustNewsAgent
 import logging
 import os
 from logging.handlers import RotatingFileHandler
-from typing import Optional
 
 # Ensure LOG_DIR is defined
 LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "logs")
@@ -62,7 +61,7 @@ def get_logger(name: str) -> logging.Logger:
 
 
 def setup_logging(
-    level: int = logging.INFO, format_string: Optional[str] = None
+    level: int = logging.INFO, format_string: str | None = None
 ) -> None:
     """
     Setup basic logging configuration for the application.

@@ -39,7 +39,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Dict, List, Optional
 
 # Constants
 _DISABLE_FLAG = "JUSTNEWS_DISABLE_TEST_DB_FALLBACK"
@@ -84,7 +83,7 @@ def _build_database_url(env: dict) -> str:
     return f"postgresql://{user}:{password}@{host}:{port}/{name}"
 
 
-def apply_test_db_env_fallback(logger: Optional[logging.Logger] = None) -> List[str]:
+def apply_test_db_env_fallback(logger: logging.Logger | None = None) -> list[str]:
     """Apply development DB environment defaults if not already configured.
 
     This function performs no destructive overwrites—only missing variables are
@@ -101,7 +100,7 @@ def apply_test_db_env_fallback(logger: Optional[logging.Logger] = None) -> List[
     if os.environ.get(_DISABLE_FLAG):  # Explicit opt-out
         return []
 
-    applied: List[str] = []
+    applied: list[str] = []
 
     # Step 1: Primary DB_* defaults
     for k, v in _DEV_DEFAULTS.items():

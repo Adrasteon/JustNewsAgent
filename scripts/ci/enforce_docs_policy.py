@@ -14,12 +14,11 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def find_legacy_md_files() -> List[Path]:
+def find_legacy_md_files() -> list[Path]:
     """Return list of .md files under legacy locations that must be empty.
 
     We enforce that no Markdown files exist under:
@@ -27,7 +26,7 @@ def find_legacy_md_files() -> List[Path]:
     - deploy/monitoring/**
     """
     legacy_dirs = [REPO_ROOT / "deploy/systemd", REPO_ROOT / "deploy/monitoring"]
-    bad: List[Path] = []
+    bad: list[Path] = []
     for base in legacy_dirs:
         if not base.exists():
             continue
@@ -36,13 +35,13 @@ def find_legacy_md_files() -> List[Path]:
     return bad
 
 
-def scan_docs_for_legacy_links() -> List[Tuple[Path, int, str]]:
+def scan_docs_for_legacy_links() -> list[tuple[Path, int, str]]:
     """Scan docs/ and markdown_docs/ Markdown files for legacy links.
 
     Returns tuples of (file, line_no, line_text) for offending lines.
     """
     link_re = re.compile(r"\]\((deploy/(systemd|monitoring)/[^)]+)\)")
-    offenders: List[Tuple[Path, int, str]] = []
+    offenders: list[tuple[Path, int, str]] = []
     for docs_root in (REPO_ROOT / "docs", REPO_ROOT / "markdown_docs"):
         if not docs_root.exists():
             continue

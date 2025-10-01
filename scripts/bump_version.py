@@ -14,12 +14,9 @@ Examples:
 """
 
 import argparse
-import os
 import re
-import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 
 class VersionBumper:
@@ -30,7 +27,7 @@ class VersionBumper:
         self.dry_run = dry_run
         self.verbose = verbose
         self.project_root = Path(__file__).parent.parent
-        self.files_modified: List[str] = []
+        self.files_modified: list[str] = []
 
         # Validate version format
         if not re.match(r"^\d+\.\d+\.\d+$", new_version):

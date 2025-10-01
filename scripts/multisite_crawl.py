@@ -16,7 +16,7 @@ if project_root not in sys.path:
 # Auto-load global.env if environment variables are missing
 env_file = os.path.join(project_root, "deploy", "systemd", "env", "global.env")
 if os.path.exists(env_file):
-    with open(env_file, "r") as f:
+    with open(env_file) as f:
         for line in f:
             if "=" in line and not line.strip().startswith("#"):
                 key, val = line.strip().split("=", 1)
@@ -28,9 +28,6 @@ import asyncio
 import psycopg2
 import requests
 
-from agents.scout.production_crawlers.unified_production_crawler import (  # still imported for fallback
-    UnifiedProductionCrawler,
-)
 from common.observability import log_error
 
 # CLI argument parsing

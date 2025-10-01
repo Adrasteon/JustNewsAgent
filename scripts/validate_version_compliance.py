@@ -14,13 +14,9 @@ Options:
 """
 
 import argparse
-import json
-import os
 import re
-import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to Python path
 project_root = Path(__file__).parent.parent
@@ -33,9 +29,9 @@ class VersionComplianceValidator:
     def __init__(self, verbose: bool = False):
         self.verbose = verbose
         self.project_root = project_root
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
-        self.fixed_files: Set[str] = set()
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
+        self.fixed_files: set[str] = set()
 
         # Load central version
         try:

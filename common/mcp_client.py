@@ -10,7 +10,8 @@ from __future__ import annotations
 import asyncio
 import os
 import time
-from typing import Any, Iterable, Mapping, MutableMapping
+from collections.abc import Iterable, Mapping, MutableMapping
+from typing import Any
 
 import httpx
 import requests

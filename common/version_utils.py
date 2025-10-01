@@ -5,7 +5,7 @@ Centralized version management for all agents and components
 
 import os
 import sys
-from typing import Any, Dict
+from typing import Any
 
 # Add project root to path for imports
 _project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,12 +30,12 @@ def get_version() -> str:
     return __version__
 
 
-def get_version_info() -> Dict[str, Any]:
+def get_version_info() -> dict[str, Any]:
     """Get detailed version information"""
     return VERSION_INFO.copy()
 
 
-def get_agent_version_info(agent_name: str = None) -> Dict[str, Any]:
+def get_agent_version_info(agent_name: str = None) -> dict[str, Any]:
     """Get version info formatted for agent API responses"""
     info = get_version_info()
     if agent_name:
