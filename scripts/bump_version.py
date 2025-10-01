@@ -43,7 +43,7 @@ class VersionBumper:
                 print(f"📋 Current version: {current_version}")
                 print(f"📋 New version: {new_version}")
         except ImportError as e:
-            raise RuntimeError(f"Cannot load current version: {e}")
+            raise RuntimeError("Cannot load current version") from e
 
         if current_version == new_version:
             raise ValueError(

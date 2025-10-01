@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Download selected HF models into agent-specific model folders under agents/*/models.
@@ -13,6 +11,8 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+
+from common.observability import get_logger
 
 # Configure basic logging for script usage
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")

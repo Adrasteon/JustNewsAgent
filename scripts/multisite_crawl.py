@@ -22,13 +22,13 @@ if os.path.exists(env_file):
                 key, val = line.strip().split("=", 1)
                 os.environ.setdefault(key, val)
 
-import argparse
-import asyncio
-
-import psycopg2
-import requests
-
-from common.observability import log_error
+import argparse  # noqa: E402
+import asyncio  # noqa: E402
+#
+import psycopg2  # noqa: E402
+import requests  # noqa: E402
+#
+from common.observability import log_error  # noqa: E402
 
 # CLI argument parsing
 parser = argparse.ArgumentParser(description="Run unified production crawl via MCP Bus")

@@ -15,9 +15,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from agents.common.auth_models import create_user_tables
-from agents.common.database import execute_query, initialize_connection_pool
-from common.observability import get_logger
+from agents.common.auth_models import create_user_tables  # noqa: E402
+from agents.common.database import execute_query, initialize_connection_pool  # noqa: E402
+from common.observability import get_logger  # noqa: E402
 
 # Set up logging
 logger = get_logger(__name__)
