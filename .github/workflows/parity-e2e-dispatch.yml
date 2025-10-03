@@ -1,0 +1,102 @@
+name: Parity E2E (manual run)
+
+on:
+  workflow_dispatch:
+    inputs:
+      parity_tolerance:
+        description: 'Time tolerance in seconds for time-like fields when comparing stores'
+        required: false
+        default: '5'
+
+jobs:
+  parity-e2e-dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose netcat
+
+      - name: Build CI test image
+        run: |
+          docker build -t justnews/kafka-ci:latest -f kafka/docker/ci/Dockerfile kafka/
+
+      - name: Prepare host artifact directory
+        run: mkdir -p ./tmp/parity
+
+      - name: Bring up Kafka dev stack with retries
+        run: |
+          docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml up -d --build
+          MAX_RETRIES=120
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "readiness: attempt $i/$MAX_RETRIES"
+            SR_OK=1
+            BROKER_OK=1
+            if curl -sSf http://localhost:8081/ >/dev/null 2>&1; then
+              SR_OK=0
+            fi
+            if (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+              BROKER_OK=0
+            fi
+            if [ "$SR_OK" -eq 0 ] && [ "$BROKER_OK" -eq 0 ]; then
+              echo "All services appear ready"
+              break
+            fi
+            sleep $((i < 30 ? i : 30))
+          done
+          if ! curl -sSf http://localhost:8081/ >/dev/null 2>&1 || ! (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+            echo "Service readiness checks failed; dumping docker-compose ps" >&2
+            docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml ps
+            exit 4
+          fi
+
+      - name: Kafka admin readiness probe
+        run: |
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.kafka_admin_probe"
+
+      - name: Bootstrap topics and schemas
+        run: |
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.bootstrap_pilot --bootstrap broker:9092 --registry http://schema-registry:8081 --topics-file kafka/config/topics/pilot_topics.yaml"
+
+      - name: Run parity generator and harness inside CI image
+        env:
+          PARITY_TOLERANCE: ${{ github.event.inputs.parity_tolerance }}
+        run: |
+          set -euo pipefail
+          docker run --rm --network kafka_ci_default -v $(pwd)/tmp/parity:/tmp/parity \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            -e PARITY_TOLERANCE="$PARITY_TOLERANCE" \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.tests.parity.generate_parity_report --sample kafka/tests/parity/sample_dataset.jsonl --out /tmp/parity --tolerance \"$PARITY_TOLERANCE\" || true"
+
+      - name: Run parity pytest harness inside CI image (produce junit)
+        env:
+          PARITY_TOLERANCE: ${{ github.event.inputs.parity_tolerance }}
+        run: |
+          docker run --rm --network kafka_ci_default -v $(pwd)/tmp/parity:/tmp/parity \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            -e PARITY_TOLERANCE="$PARITY_TOLERANCE" \
+            justnews/kafka-ci:latest \
+            bash -lc "pytest -q kafka/tests/parity/test_parity_harness.py --junitxml=/tmp/parity/parity-junit.xml || true"
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-artifacts
+          path: ./tmp/parity
+
+      - name: Tear down Kafka stack
+        if: always()
+        run: docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml down -v
