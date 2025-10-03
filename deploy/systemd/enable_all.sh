@@ -5,5 +5,5 @@
 
 set -euo pipefail
 
-echo "(placeholder) enable_all.sh - no-op in CI"
+echo "(placeholder) enable_all.sh - no-op in CI --fresh"
 exit 0
