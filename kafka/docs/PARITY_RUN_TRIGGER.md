@@ -7,4 +7,4 @@ that exercises the CI parity-e2e job and produces artifacts for inspection.
 
 Remove this file after the run if desired.
 
-\n\n
+Rerun marker: 2025-10-03T13:58:00Z
