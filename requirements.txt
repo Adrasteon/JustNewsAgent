@@ -1,3 +1,8 @@
 # Minimal requirements placeholder required by CI docs-verify step
 # The docs verification script uses only Python stdlib, so this file is intentionally
 # empty. Keep this file present so `pip install -r requirements.txt` succeeds.
+
+# Add minimal runtime/test dependencies required by CI to avoid import errors
+prometheus-client>=0.15.0
+requests>=2.32.4
+psycopg2-binary>=2.9.6
