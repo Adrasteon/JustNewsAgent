@@ -1,25 +1,10 @@
----
-title: PostgreSQL integration
-description: Configure and verify DB connectivity for JustNews Memory
----
+<!-- MOVED_TO: markdown_docs/agent_documentation/systemd/postgresql_integration.md -->
 
-# PostgreSQL integration
+# THIS DOCUMENT HAS MOVED
 
-Set the database URL in `/etc/justnews/global.env` (adjust credentials/host):
+The PostgreSQL integration guide is now maintained at:
 
-```
-JUSTNEWS_DB_URL=postgresql://user:pass@localhost:5432/justnews
-```
+- markdown_docs/agent_documentation/systemd/postgresql_integration.md
 
-## Verification (on-host)
-
-Use the helper to verify connectivity quickly:
-
-```
-sudo ./deploy/systemd/helpers/db-check.sh
-```
-
-If `psql` is available, the script runs `SELECT 1`. Otherwise, it checks the Memory service health endpoint as a proxy.
-
-See also: `deploy/systemd/QUICK_REFERENCE.md` for the minimal env examples.
+Refer there for DB configuration and verification steps.
 

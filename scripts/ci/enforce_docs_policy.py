@@ -20,12 +20,35 @@ from typing import List, Tuple
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
+def has_moved_marker(p: Path) -> bool:
+    """Return True if file contains a migration marker that indicates it was moved.
+
+    Recognised markers (transitional):
+    - HTML comment on first lines: <!-- MOVED_TO: markdown_docs/... -->
+    - simple frontmatter key (moved_to: markdown_docs/...)
+    """
+    try:
+        txt = p.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        return False
+    if "<!-- MOVED_TO:" in txt:
+        return True
+    if re.search(r"^moved_to:\s*/?markdown_docs/", txt, re.I | re.M):
+        return True
+    return False
+
+
 def find_legacy_md_files() -> List[Path]:
     """Return list of .md files under legacy locations that must be empty.
 
     We enforce that no Markdown files exist under:
     - deploy/systemd/**
     - deploy/monitoring/**
+
+    However, during staged migrations we allow files which contain an explicit
+    migration marker (see has_moved_marker). This makes the migration safe to
+    land in multiple commits without failing CI while keeping an audit trail in
+    the legacy location.
     """
     legacy_dirs = [REPO_ROOT / "deploy/systemd", REPO_ROOT / "deploy/monitoring"]
     bad: List[Path] = []
@@ -33,6 +56,9 @@ def find_legacy_md_files() -> List[Path]:
         if not base.exists():
             continue
         for p in base.rglob("*.md"):
+            # allow explicit migration markers in the file
+            if has_moved_marker(p):
+                continue
             bad.append(p)
     return bad
 
@@ -79,6 +105,7 @@ def main() -> int:
             "\nResolution:\n"
             "- Move any Markdown under deploy/systemd or deploy/monitoring into markdown_docs/ per policy.\n"
             "- Update links in docs/ and markdown_docs/ to the new markdown_docs/ paths.\n"
+            "- If this is part of a staged migration, add a MARKER to the legacy file: `<!-- MOVED_TO: markdown_docs/path.md -->`\n"
         )
         return 1
 

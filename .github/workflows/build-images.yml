@@ -1,0 +1,44 @@
+name: 'Build Kafka Images (CI smoke)'
+
+on:
+  pull_request:
+    paths:
+      - 'kafka/**'
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl podman buildah git golang-go jq
+          sudo systemctl enable --now podman.socket || true
+          podman --version
+
+      - name: Install yq
+        run: |
+          pip3 install yq
+
+      - name: Run image build script
+        env:
+          CI: true
+        run: |
+          chmod +x kafka/scripts/build_images.sh
+          ./kafka/scripts/build_images.sh
+
+      - name: Save built images list and upload
+        run: |
+          podman images --format '{{.Repository}}:{{.Tag}} {{.ID}}' > images-built.txt
+          echo "Built images:"
+          cat images-built.txt
+        env: {}
+      - name: Upload artifact: built images list
+        uses: actions/upload-artifact@v4
+        with:
+          name: images-built
+          path: images-built.txt

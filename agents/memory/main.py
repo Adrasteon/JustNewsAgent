@@ -59,8 +59,7 @@ class Article(BaseModel):
     content: str
     metadata: dict
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class TrainingExample(BaseModel):
     task: str

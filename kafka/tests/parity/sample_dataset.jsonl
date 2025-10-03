@@ -1,0 +1,12 @@
+{"id": "p1", "title": "Pilot Article One", "url": "http://example.com/1", "published_at": "2025-10-01T12:00:00Z", "source": "example"}
+{"id": "p2", "title": "Pilot Article Two", "url": "http://example.com/2", "published_at": "2025-10-02T08:30:00Z", "source": "example"}
+{"id": "p3", "title": "Pilot Article Three", "url": "http://example.com/3", "published_at": "2025-10-02T09:00:00Z", "source": "example"}
+{"id": "p4", "title": "Pilot Article Four", "url": "http://example.com/4/", "published_at": "2025-10-03T01:00:00Z", "source": "Example", "summary": null}
+{"id": "p5", "title": "Pilot Article Five", "url": "http://example.com/5", "published_at": "2025-10-03T02:00:00Z", "source": "EXAMPLE", "extra": {"a": 1, "b": 2}}
+{"id": "p6", "title": "Pilot Article Six", "url": "http://example.com/6", "source": "example", "nested": {"z": [3,2,1], "a": {"k": "v"}}, "published_at": "2025-10-03T03:00:00Z"}
+{"id": "p7", "title": "Pilot Article Seven", "url": "http://example.com/7", "published_at": "2025-10-03T04:00:00Z", "source": "example", "summary": ""}
+{"id": "p8", "title": "Pilot Article Eight", "url": "http://example.com/8", "published_at": "2025-10-03T05:00:00Z", "source": "example", "summary": "这是一个包含unicode字符的文章摘要。"}
+{"id": "p9", "title": "Pilot Article Nine", "url": "http://example.com/9/", "published_at": "2025-10-03T06:00:00Z", "source": "Example", "summary": "Long summary aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"id": "p10", "title": "Pilot Article Ten", "url": "http://example.com/10", "published_at": "2025-10-03T07:00:00Z", "source": "example", "extra_v2": "new-field-evolution"}
+{"id": "p11", "title": "Pilot Article Eleven", "url": "http://example.com/11", "published_at": "2025-10-03T08:00:00Z", "source": "example", "nested": {"alpha": [1, 2, 3], "beta": {"z": 9}}}
+{"id": "p12", "title": "Pilot Article Twelve", "url": "http://example.com/12", "published_at": "2025-10-03T09:00:00Z", "source": "example", "summary": "重复ID测试"}

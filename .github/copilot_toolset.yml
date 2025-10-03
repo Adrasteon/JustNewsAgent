@@ -1,0 +1,44 @@
+# Copilot toolset allowlist for this repository
+# This file documents and enforces the reduced set of tools that the assistant
+# (GitHub Copilot agent) should use by default during development tasks.
+#
+# NOTE: This file is advisory and read by the assistant. It does not change the
+# platform's global tool availability. To fully restrict tools on the MCP
+# server, an admin must update MCP server configuration separately.
+
+# Allowed core tools (default, safe for day-to-day dev work)
+allowed_core_tools:
+  - read_file
+  - file_search
+  - grep_search
+  - insert_edit_into_file
+  - run_in_terminal
+  - runTests
+  - get_changed_files
+  - get_errors
+  - list_dir
+  - manage_todo_list
+
+# On-demand tools (only run when explicitly requested by a human):
+allowed_on_demand_tools:
+  - mcp_codacy_codacy_codacy_cli_analyze
+  - trivy
+  - semgrep
+  - lizard
+  - mcp_context7_get-library-docs
+  - mcp_upstash_conte_get-library-docs
+
+# Disallowed by default (assistant will not call these unless the user asks):
+# - Any broad Codacy management activations
+# - Any GitHub admin / repository management activations
+# - Notebook environment config tools
+# - Any other heavy/remote-scoped tool not listed above
+
+# Emergency override:
+# If you want the assistant to run a disallowed tool for a specific task,
+# add an explicit "allow_tool: <tool-name>" entry to the request or update this
+# file and commit the change.
+
+# Maintainers: updating this file is the canonical way to change the assistant's
+# allowed toolset for this repository. The assistant will run Codacy per-file
+# analysis automatically after edits when policy requires it.

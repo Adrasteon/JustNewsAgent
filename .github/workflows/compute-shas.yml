@@ -1,0 +1,33 @@
+name: 'Compute Upstream Source Checksums'
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  compute-shas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq python3-pip
+          pip3 install yq
+
+      - name: Run fetch_and_update_shas (no-commit)
+        run: |
+          chmod +x kafka/scripts/fetch_and_update_shas.sh
+          ./kafka/scripts/fetch_and_update_shas.sh --update
+
+      - name: Upload updated sources.yaml
+        uses: actions/upload-artifact@v4
+        with:
+          name: updated-sources
+          path: kafka/docker/sources/sources.yaml
+
+      - name: Show updated checksums
+        run: |
+          echo "Updated sources.yaml:" 
+          yq -r '. | to_entries[] | "\(.key): \(.value.sha256)"' kafka/docker/sources/sources.yaml || true

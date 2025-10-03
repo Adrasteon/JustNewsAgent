@@ -1,0 +1,27 @@
+# Pinned upstream sources for reproducible image builds
+# Each entry: name, version, url, sha256
+
+kafka:
+  version: "3.5.1"
+  scala: "2.13"
+  filename: "kafka_2.13-3.5.1.tgz"
+  url: "https://downloads.apache.org/kafka/3.5.1/kafka_2.13-3.5.1.tgz"
+  sha256: "REPLACE_WITH_ACTUAL_SHA256"
+
+zookeeper:
+  version: "3.8.1"
+  filename: "zookeeper-3.8.1.tar.gz"
+  url: "https://downloads.apache.org/zookeeper/stable/zookeeper-3.8.1.tar.gz"
+  sha256: "REPLACE_WITH_ACTUAL_SHA256"
+
+apicurio:
+  version: "2.1.0.Final"
+  filename: "apicurio-registry-2.1.0.Final-deployment.zip"
+  url: "https://repo1.maven.org/maven2/io/apicurio/apicurio-registry/2.1.0.Final/apicurio-registry-2.1.0.Final-deployment.zip"
+  sha256: "REPLACE_WITH_ACTUAL_SHA256"
+
+seaweedfs:
+  version: "2.90"
+  source: "git"
+  repo: "https://github.com/chrislusf/seaweedfs.git"
+  sha: "REPLACE_WITH_COMMIT_SHA"

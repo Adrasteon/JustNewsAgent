@@ -1,0 +1,203 @@
+name: Kafka PoC CI
+
+on:
+  pull_request:
+    paths:
+      - 'kafka/**'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('kafka/requirements.txt') }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r kafka/requirements.txt
+
+      - name: Run unit tests
+        run: |
+          pytest -q kafka/tests/test_schemas.py kafka/tests/test_adapter_pilot.py kafka/tests/test_inprocess_integration.py
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Build CI test image
+        run: |
+          docker build -t justnews/kafka-ci:latest -f kafka/docker/ci/Dockerfile kafka/
+
+      - name: Run integration tests inside CI image
+        run: |
+          # Use the docker-compose project 'kafka_ci' so the default network is predictable
+          docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml up -d --build
+          # Allow services to come up (increased attempts for slow CI runners)
+          MAX_RETRIES=120
+          for i in $(seq 1 $MAX_RETRIES); do
+            if curl -sSf http://localhost:8081/ >/dev/null 2>&1; then
+              echo "Schema Registry is up"
+              break
+            fi
+            sleep $((i < 10 ? i : 10))
+          done
+          # Run tests inside the CI image joined to the docker-compose network
+          docker run --rm --network kafka_ci_default \
+            -e RUN_PILOT_INTEGRATION=1 \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            justnews/kafka-ci:latest \
+            bash -lc "pytest -q kafka/tests/test_integration_pilot.py"
+
+  parity-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('kafka/requirements.txt') }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r kafka/requirements.txt
+
+      - name: Run parity tests
+        run: |
+          pytest -q kafka/tests/test_parity.py kafka/tests/parity/test_parity_harness.py
+
+  parity-e2e:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose netcat
+
+      - name: Build CI test image
+        run: |
+          docker build -t justnews/kafka-ci:latest -f kafka/docker/ci/Dockerfile kafka/
+
+      - name: Prepare host artifact directory
+        run: mkdir -p ./tmp/parity
+
+      - name: Bring up Kafka dev stack with retries
+        run: |
+          docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml up -d --build
+          # Wait for services with exponential backoff (increased retries/backoff)
+          # Wait for Schema Registry (HTTP) and Broker (TCP 9092)
+          MAX_RETRIES=120
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "readiness: attempt $i/$MAX_RETRIES"
+            SR_OK=1
+            BROKER_OK=1
+            if curl -sSf http://localhost:8081/ >/dev/null 2>&1; then
+              SR_OK=0
+            fi
+            # Check TCP for broker port using bash /dev/tcp
+            if (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+              BROKER_OK=0
+            fi
+            if [ "$SR_OK" -eq 0 ] && [ "$BROKER_OK" -eq 0 ]; then
+              echo "All services appear ready"
+              break
+            fi
+            sleep $((i < 30 ? i : 30))
+          done
+          # Final check
+          if ! curl -sSf http://localhost:8081/ >/dev/null 2>&1 || ! (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+            echo "Service readiness checks failed; dumping docker-compose ps" >&2
+            docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml ps
+            exit 4
+          fi
+
+      - name: Kafka admin readiness probe
+        run: |
+          # Use the CI image to run an admin-level Kafka probe module that performs
+          # protocol-level metadata checks (implemented in kafka/scripts/kafka_admin_probe.py).
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.kafka_admin_probe"
+
+      - name: Bootstrap topics and schemas
+        run: |
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.bootstrap_pilot --bootstrap broker:9092 --registry http://schema-registry:8081 --topics-file kafka/config/topics/pilot_topics.yaml"
+
+      - name: Run parity generator and harness inside CI image (capture exit codes)
+        run: |
+          set -euo pipefail
+          # Run a single container invocation that executes generator then pytest,
+          # writing artifacts into /tmp/parity (host-mounted). Capture the exit
+          # codes so we can publish artifacts and still fail the job appropriately.
+          docker run --rm --network kafka_ci_default -v $(pwd)/tmp/parity:/tmp/parity \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            -e PARITY_TOLERANCE=5 \
+            justnews/kafka-ci:latest \
+            bash -lc '
+              set -euo pipefail
+              python -m kafka.tests.parity.generate_parity_report --sample kafka/tests/parity/sample_dataset.jsonl --out /tmp/parity --tolerance "$PARITY_TOLERANCE" || echo "GEN_EXIT:$?" > /tmp/parity/gen_exit.txt
+              pytest -q kafka/tests/parity/test_parity_harness.py --junitxml=/tmp/parity/parity-junit.xml || echo "PY_EXIT:$?" > /tmp/parity/py_exit.txt
+            '
+          # Examine exit files and set overall exit code
+          GEN_EXIT=0
+          PY_EXIT=0
+          if [ -f ./tmp/parity/gen_exit.txt ]; then
+            GEN_EXIT=$(sed -E 's/[^0-9]*([0-9]+).*/\1/' ./tmp/parity/gen_exit.txt || echo 2)
+          fi
+          if [ -f ./tmp/parity/py_exit.txt ]; then
+            PY_EXIT=$(sed -E 's/[^0-9]*([0-9]+).*/\1/' ./tmp/parity/py_exit.txt || echo 1)
+          fi
+          echo "Parity generator exit code: $GEN_EXIT, pytest exit code: $PY_EXIT"
+          # If any non-zero code, fail the step with a meaningful message
+          if [ "$GEN_EXIT" -ne 0 ] || [ "$PY_EXIT" -ne 0 ]; then
+            echo "Parity checks failed: generator=$GEN_EXIT pytest=$PY_EXIT" >&2
+            exit $(( GEN_EXIT > PY_EXIT ? GEN_EXIT : PY_EXIT ))
+          fi
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-artifacts
+          path: ./tmp/parity
+
+      - name: Tear down Kafka stack
+        if: always()
+        run: docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml down -v

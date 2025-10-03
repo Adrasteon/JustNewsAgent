@@ -583,3 +583,268 @@ initialize_connection_pool()
 - Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md
 - Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md
 
+# Full Training Loop (Kafka-Integrated Continuous Learning)
+
+This section describes a complete, operational training loop that makes the
+JustNews system continuously learn from operational data, human feedback,
+and synthesized labels. The loop is Kafka-first: training signals flow as
+events across Kafka topics, training work is scheduled and executed by
+workers, and model updates are published to the model registry and rolled
+out via controlled deployment strategies.
+
+Goals
+- Continuously improve model accuracy, analysis depth and synthesis quality
+  across agents.
+- Support both online (incremental) and batched (mini-batch) updates.
+- Provide reproducible training, robust validation gates and automated
+  rollback capabilities.
+- Make model updates auditable and traceable via Kafka events and an
+  immutable model registry.
+
+Core training topics (new)
+- `justnews.training.example.created.v1` — a canonical training example
+  was generated (fields: example_id, agent_name, task_type, payload_ref,
+  label_ref(optional), uncertainty_score, importance_score, created_at)
+- `justnews.training.label.created.v1` — a human or programmatic label was
+  added to an example (fields: example_id, label, labeler_id, created_at)
+- `justnews.training.job.request.v1` — request to execute a training job
+  (fields: job_id, model_name, model_version_base, example_query, params)
+- `justnews.training.job.status.v1` — job progress / result events
+- `justnews.model.registry.update.v1` — model artifact published (fields:
+  model_name, model_version, artifact_bucket_key, metrics, signature)
+- `justnews.model.deploy.request.v1` and
+  `justnews.model.deploy.status.v1` — model rollout orchestration events
+
+Data collection & labeling
+1. Sources of training examples
+   - `article.persisted.v1`, `analysis.result.v1`, `media.segment.annotation.v1`.
+   - User corrections and UI feedback transformed into
+     `justnews.training.example.created.v1` or `justnews.training.label.created.v1`.
+   - Synthetic augmentation producers (e.g., paraphrasers) may produce
+     additional training examples annotated with provenance.
+2. Example enrichment
+   - Each example includes a `payload_ref` pointing to either raw JSON in
+     the training DB or an object store key (MinIO) for larger artifacts
+     (e.g., image crops, audio segments).
+3. Labeling
+   - Label tasks are created as events consumed by human-in-the-loop
+     labelers (web UI) or external annotator processes. Labeled results
+     are published back as `justnews.training.label.created.v1`.
+
+Buffering, sampling & prioritization
+- Examples are buffered in per-agent, per-task queues (in-memory and
+  persisted) managed by the OnTheFlyTrainingCoordinator.
+- Prioritization uses a composite score: (correction_priority, importance,
+  uncertainty, recency, diversity). Use reservoir sampling and stratified
+  sampling for balanced mini-batches.
+
+Training orchestration
+- The coordinator consumes training examples and scheduled label events,
+  groups examples into batches and produces `justnews.training.job.request.v1`.
+- Training job workers (batch or distributed) consume job requests, fetch
+  the examples via payload_ref, perform training (or fine-tuning) and
+  produce `justnews.training.job.status.v1` when finished with training
+  artifacts and evaluation metrics.
+- Workers register model artifacts to MinIO and publish
+  `justnews.model.registry.update.v1` with signed metadata.
+
+Model registry & metadata
+- Model registry stores: model_name, semantic version, base_version,
+  artifacts (object store keys), training configuration, training_seed,
+  evaluation metrics, provenance and cryptographic signature.
+- Every registry update is an append-only record; the registry emits
+  `justnews.model.registry.update.v1` for downstream deployment orchestration.
+
+Evaluation & gating (pre-deploy)
+- Before any model version is promoted the system runs a pre-deploy
+  evaluation suite:
+  - Holdout evaluation on a reserved validation set (including recent
+    examples and stress cases).
+  - Regression tests comparing key metrics (F1/AUC/precision/recall)
+    against the baseline. Define pass/fail thresholds per task.
+  - Adversarial tests for known failure modes and fairness checks.
+- A model must pass automated checks and human review when required.
+- The coordinator enforces gating: only publish `model.deploy.request` if
+  metrics exceed configured thresholds.
+
+Deployment strategies
+- Canary deployments: route a small % of inference traffic to the new
+  model and measure production metrics (latency, error rates, quality
+  metrics derived from user feedback).
+- Shadow deployments: run the new model in parallel on production data but
+  do not route traffic. Compare outputs offline for drift detection.
+- Progressive rollout: gradually increase traffic share if metrics hold.
+- Automatic rollback: if post-deploy metrics degrade beyond thresholds
+  (including human-specified quality signals), emit a `model.deploy.revert.v1`
+  and roll back to the previous stable version.
+
+Online vs Batch updates
+- Online (incremental) updates:
+  - Use when models support fine-grained online updates (e.g., EWC,
+    adapter tuning, parameter-efficient fine-tuning).
+  - Driven by immediate high-priority corrections (priority >= 2).
+  - Small, frequent updates with replay buffers to avoid catastrophic
+    forgetting. Always validate on a small holdout before publishing.
+- Batch (mini-batch) updates:
+  - Aggregate larger volumes of examples for scheduled retraining
+    (nightly/weekly). Use full training runs on dedicated infra.
+  - Better for backbone model changes or significant re-training.
+
+Active Learning & Query Strategies
+- Uncertainty sampling (model low-confidence predictions).
+- Disagreement sampling (ensemble disagreement or committee models).
+- Diversity sampling (cluster-based selection in embedding space).
+- Utility-weighted sampling (expected model improvement given a label).
+- Combine strategies for multi-objective selection (uncertainty + diversity).
+
+Human-in-the-loop workflows
+- Create labeling tasks when novel/uncertain examples are identified.
+- Provide a lightweight labeling UI that publishes `justnews.training.label.created.v1`.
+- Use labeler reputation and consensus voting to ensure label quality.
+
+Media-specific training flows
+- Segment-level model updates: ASR and vision models are trained/evaluated
+  on segment datasets. Keep per-segment evaluation metrics and per-model
+  test sets (e.g., ASR WER, OCR CER).
+- Cross-modal learning: align transcripts with visual frames to produce
+  multi-modal training examples (image + text pairs).
+- Ensure model checkpoints include the segment sampling seed and the
+  dataset manifest for reproducibility.
+
+Reproducibility & experiment tracking
+- Every training job record stores hyperparameters, random seeds,
+  dataset manifests, example_ids and the exact code/container hash used.
+- Integrate with an experiment tracking system (MLFlow, or an OSS
+  alternative) for lineage, metrics and artifact storage. Publish
+  experiment run summaries as Kafka events for auditing.
+
+Drift detection & automatic retraining triggers
+- Monitor: input feature drift, label distribution change, and prediction
+  quality decline.
+- When drift crosses configured thresholds, trigger a diagnostic job and
+  optionally schedule a retrain job using recent data.
+
+Quality & safety checks
+- Fairness and bias detection tests per agent/task.
+- Differential privacy or PII detection applied to training data before
+  model updates; automatically create redaction tasks when necessary.
+
+Security & provenance
+- Sign training artifacts and model binaries with agent/operator keys.
+- Audit logs: store the training event stream and job outcomes into
+  `audit_log` table and `justnews.audit.event.v1` topic for immutability.
+
+Example: Coordinator pseudocode (Kafka + asyncio)
+
+```python
+# Simplified: consume article.persisted, produce training.example and
+# schedule a training job when thresholds are reached.
+import asyncio
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+import uuid
+
+KAFKA_BOOTSTRAP = 'localhost:9092'
+
+async def coordinator_loop():
+    consumer = AIOKafkaConsumer('justnews.article.persisted.v1',
+                                bootstrap_servers=KAFKA_BOOTSTRAP,
+                                group_id='training-coordinator')
+    producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP)
+    await consumer.start()
+    await producer.start()
+    buffer = []
+    try:
+        async for msg in consumer:
+            event = parse_json(msg.value)
+            # Transform to training example
+            example = {
+                'example_id': str(uuid.uuid4()),
+                'agent_name': 'memory',
+                'task_type': 'extraction_quality',
+                'payload_ref': event['article_id'],
+                'uncertainty_score': event.get('extraction_confidence', 0.5),
+                'importance_score': 0.5,
+                'created_at': now_iso()
+            }
+            buffer.append(example)
+            # Publish canonical training.example event
+            await producer.send_and_wait(
+                'justnews.training.example.created.v1',
+                json_bytes(example)
+            )
+
+            # Schedule a training job when buffer is large or high priority
+            if len(buffer) >= 128 or any(e['uncertainty_score'] > 0.8 for e in buffer):
+                job = {'job_id': str(uuid.uuid4()), 'model_name': 'scout-v2',
+                       'example_query': {'since': '1h', 'task_type': 'extraction_quality'},
+                       'params': {'epochs': 1, 'lr': 5e-5}}
+                await producer.send_and_wait('justnews.training.job.request.v1', json_bytes(job))
+                buffer.clear()
+    finally:
+        await consumer.stop()
+        await producer.stop()
+
+# Run with: asyncio.run(coordinator_loop())
+```
+
+Example: Training worker (high-level)
+
+```python
+# Worker consumes train.job.request.v1, runs training and publishes status + registry update
+from kafka import KafkaProducer, KafkaConsumer
+import json
+
+# Example synchronous worker using kafka-python
+producer = KafkaProducer(bootstrap_servers='localhost:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+
+def on_job_request(job):
+    examples = fetch_examples(job['example_query'])
+    model_artifact_key, metrics = run_training_and_evaluate(examples, job['params'])
+    # Store artifact and publish registry update
+    registry_event = {
+        'model_name': job['model_name'],
+        'model_version': make_new_version(job['model_name']),
+        'artifact_key': model_artifact_key,
+        'metrics': metrics,
+        'signature': sign_artifact(model_artifact_key)
+    }
+    producer.send('justnews.model.registry.update.v1', registry_event)
+    producer.send('justnews.training.job.status.v1', {'job_id': job['job_id'], 'status': 'completed', 'metrics': metrics})
+    producer.flush()
+```
+
+Testing, CI & contract validation
+- Add end-to-end tests that boot an ephemeral Kafka and run small
+  training jobs (use Testcontainers). Validate the full training flow:
+  example creation → job request → worker training → registry update →
+  deploy gating.
+- Add schema contract tests for `justnews.training.*` and
+  `justnews.model.registry.*` topics.
+
+Operational runbooks
+- Pause training: produce a `justnews.training.pause.v1` to coordinator.
+- Drain jobs for maintenance: set a `maintenance` TTL and notify workers.
+- Investigate failed runs via `justnews.training.job.status.v1` and the
+  `audit_log` table.
+
+Privacy and data retention
+- Define retention and purging policies for training examples that
+  contain PII. Use policy-driven redaction workflows before inclusion
+  in training datasets.
+
+Governance & Human Oversight
+- Require human sign-off for major model-version upgrades (policy
+  enforced via `model.deploy.request` gating and explicit approvals).
+- Maintain a public changelog of model versions, metrics, and signed
+  attestations for transparency.
+
+Metrics & SLOs for training
+- Example metrics:
+  - examples_ingested_per_minute
+  - training_jobs_started/completed/failed
+  - model_registry_updates_per_day
+  - average_model_eval_metric_delta
+- SLOs:
+  - Model deploy latency ≤ 30 minutes (from job completion to canary)
+  - Training job failure rate < 1% on non-adversarial data
+

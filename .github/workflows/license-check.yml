@@ -1,0 +1,33 @@
+name: 'License Check'
+
+on:
+  pull_request:
+    paths:
+      - 'kafka/**'
+
+jobs:
+  license-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          # Install trivy from official release for deterministic audit
+          TRIVY_VERSION=0.66.0
+          curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" -o /tmp/trivy.tar.gz
+          tar -xzf /tmp/trivy.tar.gz -C /tmp
+          sudo mv /tmp/trivy /usr/local/bin/trivy
+          trivy --version
+
+      - name: Run trivy license scan
+        run: |
+          trivy fs --security-checks license --format json -o trivy_license.json kafka || true
+
+      - name: Fail on disallowed licenses (AGPL, Proprietary)
+        run: |
+          if jq -e '.Results[].Licenses[]?.Name | select(. == "AGPL-3.0" or . == "AGPL-3.0-only" or . == "AGPL-3.0-or-later" or . == "Proprietary")' trivy_license.json >/dev/null; then
+            echo "Disallowed license detected in kafka/ — see trivy_license.json" >&2
+            exit 1
+          fi

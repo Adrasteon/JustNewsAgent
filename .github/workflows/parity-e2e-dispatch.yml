@@ -16,8 +16,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose netcat
+      - name: Set up Docker Compose and netcat
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          # Install docker (for docker-compose-plugin) and the plugin; allow failures to avoid hard fail on unexpected apt issues
+          sudo apt-get install -y docker.io docker-compose-plugin || true
+          # Prefer netcat-openbsd, fall back to netcat-traditional
+          if ! sudo apt-get install -y netcat-openbsd; then
+            sudo apt-get install -y netcat-traditional || true
+          fi
+          # Ensure a docker-compose CLI binary is available for scripts that use `docker-compose`
+          if ! command -v docker-compose >/dev/null 2>&1; then
+            if [ -f /usr/libexec/docker/cli-plugins/docker-compose ]; then
+              sudo ln -sf /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose || true
+            elif [ -f /usr/lib/docker/cli-plugins/docker-compose ]; then
+              sudo ln -sf /usr/lib/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose || true
+            else
+              # Fallback: download a standalone docker-compose binary
+              DOCKER_COMPOSE_VERSION="2.21.0"
+              sudo curl -fsSL -o /usr/local/bin/docker-compose "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64"
+              sudo chmod +x /usr/local/bin/docker-compose || true
+            fi
+          fi
+          # Show version to verify install
+          if command -v docker-compose >/dev/null 2>&1; then
+            docker-compose --version || true
+          else
+            docker compose version || true
+          fi
 
       - name: Build CI test image
         run: |
@@ -96,6 +123,7 @@ jobs:
         with:
           name: parity-artifacts
           path: ./tmp/parity
+          if-no-files-found: error
 
       - name: Tear down Kafka stack
         if: always()

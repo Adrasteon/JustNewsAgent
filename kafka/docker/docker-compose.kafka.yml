@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  zookeeper:
+    build: ./build/zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  kafka:
+    build: ./build/kafka
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  schema-registry:
+    build: ./build/apicurio-registry
+    environment:
+      - QUARKUS_HTTP_PORT=8081
+    ports:
+      - "8081:8081"
+
+  minio:
+    build: ./build/seaweedfs
+    command: server
+    environment:
+      - SEAWEEDFS_MASTER_PORT=9333
+    ports:
+      - "9000:8333"
+    labels:
+      - "object-store.type=seaweedfs"
+
+  # Note: SeaweedFS is the canonical object store for the kafka scaffold.
+  # If SeaweedFS is unavailable, do not fall back to heavier systems by
+  # default; address operational constraints instead of adding a
+  # non-drop-in replacement.
+
+  postgres:
+    build: ./build/postgres
+    environment:
+      - POSTGRES_USER=justnews
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=justnews
+    ports:
+      - "5432:5432"

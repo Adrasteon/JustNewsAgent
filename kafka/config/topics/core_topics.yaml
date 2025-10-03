@@ -1,0 +1,70 @@
+# Core topic configurations for JustNews
+# These are sample configurations intended as canonical references for production
+
+topics:
+  - name: scout.article.created
+    partitions: 12
+    replication: 3
+    retention_ms: 1209600000 # 14 days
+    schema: article.created
+
+  - name: crawler.article.persisted
+    partitions: 12
+    replication: 3
+    retention_ms: 1209600000 # 14 days
+    schema: article.persisted
+
+  - name: memory.article.persisted
+    partitions: 12
+    replication: 3
+    retention_ms: 2592000000 # 30 days
+    schema: article.persisted
+
+  - name: analysis.request
+    partitions: 6
+    replication: 3
+    retention_ms: 604800000 # 7 days
+    schema: analysis.request
+
+  - name: analysis.result
+    partitions: 12
+    replication: 3
+    retention_ms: 1209600000 # 14 days
+    schema: analysis.result
+
+  - name: training.example
+    partitions: 6
+    replication: 3
+    retention_ms: 259200000 # 3 days
+    schema: training.example
+
+  - name: model.registry.update
+    partitions: 3
+    replication: 3
+    retention_ms: 1209600000 # 14 days
+    schema: model.registry.update
+
+  - name: justnews.deadletter
+    partitions: 1
+    replication: 3
+    retention_ms: 604800000 # 7 days
+    schema: deadletter
+
+  - name: gpu.lease.request
+    partitions: 3
+    replication: 3
+    retention_ms: 604800000
+    schema: gpu.lease
+
+  - name: gpu.lease.granted
+    partitions: 3
+    replication: 3
+    retention_ms: 604800000
+    schema: gpu.lease
+
+  - name: gpu.lease.released
+    partitions: 3
+    replication: 3
+    retention_ms: 604800000
+    schema: gpu.lease
+

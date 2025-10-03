@@ -1,0 +1,40 @@
+name: 'Kafka Integration: build images + run tests'
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - 'kafka/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl podman buildah git golang-go jq
+          sudo systemctl enable --now podman.socket || true
+
+      - name: Install python deps
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f kafka/requirements.txt ]; then pip install -r kafka/requirements.txt; fi
+          pip install pytest
+
+      - name: Build images from source (podman)
+        run: |
+          chmod +x kafka/scripts/build_images.sh
+          ./kafka/scripts/build_images.sh
+
+      - name: Run pytest
+        run: |
+          pytest -q kafka/tests

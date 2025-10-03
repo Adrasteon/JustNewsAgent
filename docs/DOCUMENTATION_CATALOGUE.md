@@ -74,9 +74,16 @@
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [AGENT_MODEL_MAP — Definitive Agent → Model mapping](markdown_docs/agent_documentation/AGENT_MODEL_MAP.md) | This document lists the authoritative mapping of agents to their external model dependencies as defi... | models, reasoning, multi-agent | current |
-| [API Documentation](markdown_docs/agent_documentation/api_documentation.md) | Comprehensive documentation covering api documentation with detailed technical information, implemen... | gpu, version-specific, synthesizer | current |
-| [ARC](agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/arc.md) | Documentation for ARC providing essential information and technical details for the JustNews system.... | agent, architecture, reasoning | current |
+| [AGENT_MODEL_MAP — Definitive Agent → Model mapping](markdown_docs/agent_documentation/AGENT_MODEL_MAP.md) | Authoritative mapping of agents to model dependencies | models, reasoning, multi-agent | current |
+| [API Documentation](markdown_docs/agent_documentation/api_documentation.md) | API reference and usage examples for agents | api, gpu, synthesizer | current |
+| [Crawler Agent](agents/crawler/README.md) | Overview and operational notes for the Crawler Agent | scout, gpu, memory | current |
+| [Deployment - Systemd Quick Reference](markdown_docs/agent_documentation/systemd/QUICK_REFERENCE.md) | Quick operational commands and common workflows for systemd deployment | deployment, systemd | current |
+| [Systemd Comprehensive Guide](markdown_docs/agent_documentation/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md) | Detailed systemd deployment and unit management guide | deployment, systemd | current |
+| [GPU Orchestrator Operations (Port 8014)](markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md) | Operations notes for GPU Orchestrator | gpu, operations | current |
+| [NewsReader Agent - Production-Validated Configuration](agents/newsreader/README.md) | Production configuration and known issues/resolutions | newsreader, production | current |
+| [Preflight Runbook: Model Gating and Preload Failures](markdown_docs/agent_documentation/preflight_runbook.md) | Runbook for preflight gating and handling preload failures | preflight, operations | current |
+| [Operator Guide — Systemd Deployment and Operations](markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md) | Operator-focused guide for systemd deployment | operator, systemd | current |
+| [Model store guidelines](markdown_docs/agent_documentation/MODEL_STORE_GUIDELINES.md) | Guidelines for model-store layout and safe updates | models, deployment | current |
 | [Agent Communication Protocols Documentation](markdown_docs/agent_documentation/agent_communication_protocols.md) | Comprehensive documentation covering agent communication protocols documentation with detailed techn... | optimization, deployment, mcp | current |
 | [Agent Documentation index](markdown_docs/agent_documentation/README.md) | This folder contains agent-specific documentation used by operators and
 developers. Key documents:..... | ai-agents, multi-agent, agents | current |
@@ -88,14 +95,13 @@ The Balancer Agent is a production-ready component of the JustNews V4 system, de
 | [Contributing](agents/reasoning/nucleoid_repo/CONTRIBUTING.md) | Thanks to declarative programming, we have a brand-new approach to data and logic. As we are still d... | development, guidelines, contribution | current |
 | [Contributor Covenant Code of Conduct](agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md) | Documentation for Contributor Covenant Code of Conduct providing essential information and technical... | security | current |
 | [Crawl4AI vs Playwright — feature-by-feature comparison](markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md) | Documentation for Crawl4AI vs Playwright — feature-by-feature comparison providing essential informa... | compliance, deployment, api | current |
-| [Crawler Agent](agents/crawler/README.md) | The **Crawler Agent** is a specialized JustNewsAgent service that provides unified production crawli... | scout, gpu, memory | current |
 | [Crawler Consolidation Plan — JustNewsAgent](markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md) | Date: 2025-08-27
 Author: Consolidation plan generated from interactive session...... | api, archive, models | current |
 | [Data Pipeline Documentation](markdown_docs/agent_documentation/data_pipeline_documentation.md) | Comprehensive documentation covering data pipeline documentation with detailed technical information... | gpu, version-specific, cuda | current |
 | [Database Schema & Operations Documentation](markdown_docs/agent_documentation/database_schema_operations.md) | Comprehensive documentation covering database schema & operations documentation with detailed techni... | optimization, security, training | current |
 | [Deployment Procedures Documentation](markdown_docs/agent_documentation/deployment_procedures_guide.md) | Comprehensive documentation covering deployment procedures documentation with detailed technical inf... | security, gpu, version-specific | current |
 | [Embedding Helper](markdown_docs/agent_documentation/EMBEDDING_HELPER.md) | Documentation for Embedding Helper providing essential information and technical details for the Jus... | models, gpu, multi-agent | current |
-| [Examples for systemd native deployment](markdown_docs/agent_documentation/systemd/examples/README.md) | Documentation for Examples for systemd native deployment... | deployment, architecture | current |
+| [Examples for systemd native deployment](markdown_docs/agent_documentation/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units. | mcp, ai-agents, scout | current |
 | [GPU Acceleration Documentation](markdown_docs/agent_documentation/gpu_acceleration_guide.md) | Comprehensive documentation covering gpu acceleration documentation with detailed technical informat... | gpu, version-specific, cuda | current |
 | [GPU Dashboard and Watcher Ingestion — Operations Guide](markdown_docs/agent_documentation/gpu_dashboard_and_watcher_ingestion.md) | Documentation for GPU Dashboard and Watcher Ingestion — Operations Guide... | performance, gpu, dashboard | current |
 | [GPU Orchestrator Operations (Port 8014)](markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md) | Documentation for GPU Orchestrator Operations (Port 8014)... | production, gpu, models | current |
@@ -111,7 +117,7 @@ Author: Consolidation plan generated from interactive session...... | api, archi
 | [JustNews V4 - Low-risk Action Plan (2025-09-12)](markdown_docs/agent_documentation/action_plan_2025-09-12.md) | Documentation for JustNews V4 - Low-risk Action Plan (2025-09-12)... | production, gpu, ai-agents | current |
 | [JustNews V4 Operator Guide — Systemd Deployment and Operations](markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md) | Documentation for JustNews V4 Operator Guide — Systemd Deployment and Operations... | production, performance, archive | current |
 | [JustNews V4 Systemd Implementation Guide](markdown_docs/agent_documentation/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md) | Documentation for JustNews V4 Systemd Implementation Guide... | production, performance, gpu | current |
-| [JustNews native deployment (systemd)](markdown_docs/agent_documentation/systemd/DEPLOYMENT.md) | Documentation for JustNews native deployment (systemd)... | scout, gpu, cuda | current |
+| [JustNews native deployment (systemd)](markdown_docs/agent_documentation/systemd/DEPLOYMENT.md) | Documentation for JustNews native deployment (systemd)... | mcp, models, logging | current |
 | [JustNewsAgent Canonical Port Mapping](markdown_docs/agent_documentation/canonical_port_mapping.md) | Complete documentation for JustNewsAgent Canonical Port Mapping including implementation details, co... | analytics, mcp, api | current |
 | [LLaVA NewsReader Agent Implementation Summary](agents/newsreader/documentation/IMPLEMENTATION_SUMMARY.md) | Detailed report documenting llava newsreader agent implementation summary with analysis, findings, a... | optimization, pytorch, mcp | current |
 | [Later: resume](markdown_docs/agent_documentation/Crawl4AI_API_SUMMARY.md) | This short reference summarises the Crawl4AI programmatic APIs, dispatcher classes, REST endpoints, ... | deployment, logging, api | current |
@@ -361,18 +367,17 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Action Systemd Prod](deploy/systemd/action_systemd_prod.md) | Documentation for Action Systemd Prod... |  | current |
-| [Comprehensive systemd guide](deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md) | Documentation for Comprehensive systemd guide... | scout, gpu, cuda | current |
-| [Deployment Status](deploy/systemd/deployment_status.md) | Documentation for Deployment Status... | deployment | current |
-| [Examples for systemd native deployment](deploy/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units, covering sys... | mcp, ai-agents, scout | current |
-| [JustNews native deployment (systemd)](deploy/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
-systemd units and sim... | mcp, models, logging | current |
-| [Phase5 Advanced Monitoring Plan](deploy/systemd/phase5_advanced_monitoring_plan.md) | Documentation for Phase5 Advanced Monitoring Plan... | monitoring | current |
-| [PostgreSQL integration](deploy/systemd/postgresql_integration.md) | Documentation for PostgreSQL integration... | memory | current |
-| [Quick Reference – systemd](deploy/systemd/QUICK_REFERENCE.md) | Documentation for Quick Reference – systemd... | reasoning, scout, archive | current |
-| [Readme](deploy/monitoring/README.md) | Documentation for Readme... |  | current |
-| [Shortfalls Analysis](deploy/systemd/shortfalls_analysis.md) | Documentation for Shortfalls Analysis... |  | current |
-| [Systemd scaffold for JustNews](deploy/systemd/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
+| [Action Systemd Prod](markdown_docs/development_reports/action_systemd_prod.md) | Documentation for Action Systemd Prod... |  | current |
+| [Comprehensive systemd guide](markdown_docs/agent_documentation/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md) | Documentation for Comprehensive systemd guide... | scout, gpu, cuda | current |
+| [Deployment Status](markdown_docs/development_reports/deployment_status.md) | Documentation for Deployment Status... | deployment | current |
+| [Examples for systemd native deployment](markdown_docs/agent_documentation/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units. | mcp, ai-agents, scout | current |
+| [JustNews native deployment (systemd)](markdown_docs/agent_documentation/systemd/DEPLOYMENT.md) | Documentation for JustNews native deployment (systemd)... | mcp, models, logging | current |
+| [Phase5 Advanced Monitoring Plan](markdown_docs/agent_documentation/systemd/phase5_advanced_monitoring_plan.md) | Documentation for Phase5 Advanced Monitoring Plan... | monitoring | current |
+| [PostgreSQL integration](markdown_docs/agent_documentation/systemd/postgresql_integration.md) | Documentation for PostgreSQL integration... | memory | current |
+| [Quick Reference – systemd](markdown_docs/agent_documentation/systemd/QUICK_REFERENCE.md) | Documentation for Quick Reference – systemd... | reasoning, scout, archive | current |
+| [Readme](markdown_docs/agent_documentation/monitoring/README.md) | Documentation for Readme... |  | current |
+| [Shortfalls Analysis](markdown_docs/development_reports/shortfalls_analysis.md) | Documentation for Shortfalls Analysis... |  | current |
+| [Systemd scaffold for JustNews](markdown_docs/agent_documentation/systemd/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
 
 ---
 

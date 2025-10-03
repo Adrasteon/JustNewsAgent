@@ -1,0 +1,15 @@
+# Minimal Kafka dev configuration for the kafka scaffold
+kafka:
+  bootstrap_servers: "localhost:9092"
+  schema_registry: "http://localhost:8081"
+  replication_factor: 1
+
+storage:
+  object_store_endpoint: "http://localhost:8333"  # SeaweedFS HTTP port for S3-like access
+  note: "Using SeaweedFS as the canonical object store (replaces MinIO) to avoid AGPL licensing concerns."
+  postgres_dsn: "postgresql://justnews:password@localhost:5432/justnews"
+
+services:
+  inference:
+    host: "localhost"
+    port: 8082

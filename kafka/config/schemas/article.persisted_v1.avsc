@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "namespace": "justnews.article",
+  "name": "ArticlePersisted",
+  "doc": "Article persisted event (v1).",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "url", "type": "string"},
+    {"name": "persisted_at", "type": "string"},
+    {"name": "source", "type": "string"}
+  ]
+}

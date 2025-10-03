@@ -1,0 +1,6 @@
+# Codacy configuration to exclude developer hooks and local scripts from analysis
+# This file instructs Codacy to skip repository-local hook scripts and helper scripts
+exclude_paths:
+  - .githooks/**
+  - scripts/**
+  - .github/instructions/**

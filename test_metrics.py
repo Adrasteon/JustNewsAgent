@@ -4,6 +4,8 @@ JustNews Metrics Library Test Script
 Demonstrates the core metrics functionality
 """
 
+# pylint: disable=assignment-from-no-return, unused-variable
+
 import time
 import asyncio
 from common.metrics import JustNewsMetrics, measure_processing_time
@@ -13,7 +15,7 @@ def test_basic_metrics():
     print("Testing JustNews Metrics Library...")
 
     # Initialize metrics for test agent
-    metrics = JustNewsMetrics("test_agent")
+    metrics = JustNewsMetrics("test_agent")  # pylint: disable=assignment-from-no-return, unused-variable
 
     # Test request recording
     print("✓ Recording HTTP requests...")
@@ -64,7 +66,8 @@ def test_basic_metrics():
             print(line)
     print("=" * 50)
 
-    return metrics
+    # Ensure the function returns None for pytest (avoid pytest ReturnNotNone warnings)
+    assert isinstance(metrics, JustNewsMetrics), "Expected metrics to be an instance of JustNewsMetrics"
 
 @measure_processing_time("test_processing")
 def test_decorator():

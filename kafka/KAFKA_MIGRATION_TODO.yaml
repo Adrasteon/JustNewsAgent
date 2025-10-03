@@ -1,0 +1,212 @@
+# Kafka migration actionable todo list for JustNews
+# Machine-readable YAML checklist for tracking progress and automation
+
+tasks:
+  - id: 1
+    title: "Project kickoff & design"
+    status: completed
+    owner: lead
+    estimate: 1w
+    description: "Finalize topic taxonomy, naming convention and schema strategy. Produce topic-schema-policy.md and sample topic configs."
+    completed_steps:
+      - "Drafted and finalized kafka/docs/topic-schema-policy.md with naming, schema and governance details"
+      - "Added canonical topic configs in kafka/config/topics/core_topics.yaml and pilot_topics.yaml"
+      - "Added validation script kafka/scripts/validate_topic_configs.py and unit tests kafka/tests/test_topic_configs.py"
+      - "Documented registry choice (Apicurio/Karapace) and compatibility rules"
+    acceptance_criteria:
+      - "topic-schema-policy.md created under kafka/docs"
+      - "sample topic config YAMLs for core topics exist"
+      - "validation script and tests ensure schemas referenced exist"
+    depends_on: []
+
+  - id: 2
+    title: "Dev scaffold & infra"
+    status: completed
+    owner: infra
+    estimate: 2d
+    description: "Finalize and test docker-compose dev stack and add bootstrap script to create topics and register schemas."
+    acceptance_criteria:
+      - "docker-compose up brings services to healthy state"
+      - "bootstrap script creates topics and registers example schemas"
+    depends_on: [1]
+
+  - id: 3
+    title: "Core developer ergonomics"
+    status: completed
+    owner: dev
+    estimate: 1d
+    description: "Provide TRANSPORT env toggle, adapter factory, and porting helper scripts."
+    acceptance_criteria:
+      - "adapter_template and port_agent.sh exist and are tested"
+    depends_on: [1]
+
+  - id: 4
+    title: "Topic & schema contract tests"
+    status: completed
+    owner: test
+    estimate: 3d
+    description: "Add schema files under kafka/config/schemas and unit tests that validate schema registry compatibility (mocked locally)."
+    completed_steps:
+      - "Added Avro schemas for article.created (v1/v2) and article.persisted (v1/v2)"
+      - "Added JSON schemas for training.example (v1/v2)"
+      - "Added kafka/tests/test_schemas.py that validates schema syntax and performs simple compatibility checks"
+      - "Resolved linting issues and ensured Codacy analysis passes for added files"
+    acceptance_criteria:
+      - "schema JSON/Avro files exist"
+      - "test_schemas.py validates schemas"
+    depends_on: [1,2]
+
+  - id: 5
+    title: "Pilot pipeline: Scout -> Crawler -> Memory"
+    status: completed
+    owner: dev
+    estimate: 2w
+    description: "Implement Scout producer, Crawler consumer+producer, and Memory consumer that persists and emits article.persisted using kafka-python as the runtime client."
+    completed_steps:
+      - "Added topic policy and pilot topic YAMLs under kafka/config/topics and kafka/docs"
+      - "Created Pydantic models for pilot events in kafka/src/agents/models.py"
+      - "Scaffolded scout, crawler (pilot) and memory adapters in kafka/src/agents"
+      - "Added unit tests simulating in-memory end-to-end flow under kafka/tests/test_adapter_pilot.py"
+      - "Implemented basic Schema Registry integration via kafka/src/agents/schema_registry.py and bootstrap_pilot.py"
+      - "Enhanced KafkaAdapter to use kafka-python and fastavro when available and include registry wire-format (magic byte + schema id) detection"
+      - "Added CI workflow ci/kafka-poc.yml that boots the dev stack, registers schemas, and runs unit + integration tests"
+    acceptance_criteria:
+      - "unit tests for adapters"
+      - "integration test validates article.created and article.persisted flow"
+    depends_on: [2,3,4]
+
+  - id: 6
+    title: "Contract parity & validation"
+    status: completed
+    owner: qa
+    estimate: 1w
+    description: "Add tests to assert parity between legacy MCP path and new Kafka path for pilot workflow."
+    completed_steps:
+      - "Added parity dataset sample kafka/tests/parity/sample_dataset.jsonl with edge cases"
+      - "Implemented replay runner kafka/tests/parity/replay_runner.py with normalization and tolerant comparison"
+      - "Added parity unit harness kafka/tests/parity/test_parity_harness.py and unit tests kafka/tests/parity/test_normalize.py"
+      - "Added generate_parity_report.py to produce artifacts and toleranced diffs"
+      - "Added CI parity jobs: parity-tests and parity-e2e with Kafka admin probe and bootstrap"
+      - "Added local run helper kafka/scripts/run_local_parity.sh for repeated E2E runs"
+      - "Documented acceptance criteria in kafka/docs/parity_acceptance.md"
+    acceptance_criteria:
+      - "parity unit tests pass locally"
+      - "parity-e2e job executes bootstrap and comparator; diffs are reported as artifacts"
+      - "tolerance for time-like fields default: 5 seconds (configurable)"
+    depends_on: [5]
+
+  - id: 7
+    title: "Training loop & model registry integration"
+    status: not-started
+    owner: ml
+    estimate: 3w
+    description: "Emit training examples, implement coordinator and worker skeletons, and register model artifacts to registry."
+    acceptance_criteria:
+      - "training.example events emitted"
+      - "training job lifecycle runs in CI (mocked training)"
+    depends_on: [5]
+
+  - id: 8
+    title: "Multimedia ingestion & processing pipeline"
+    status: not-started
+    owner: media
+    estimate: 4w
+    description: "Implement media ingest, transcoder, ASR and vision consumers; persist segment annotations in Memory."
+    acceptance_criteria:
+      - "media.segment events emitted"
+      - "segment-level transcripts and annotations persisted"
+    depends_on: [5]
+
+  - id: 9
+    title: "Port analytic agents (incremental)"
+    status: not-started
+    owner: dev
+    estimate: ongoing
+    description: "Port Analyst, FactChecker, Synthesizer, NewsReader, Critic, ChiefEditor one-by-one. Each port is a small PR."
+    acceptance_criteria:
+      - "adapter tests + contract tests for each agent"
+    depends_on: [5,7]
+
+  - id: 10
+    title: "GPU orchestration & inference cluster"
+    status: not-started
+    owner: infra
+    estimate: 3w
+    description: "Prototype GPU Orchestrator and implement inference endpoints for agents to call."
+    acceptance_criteria:
+      - "GPU lease lifecycle events work in integration tests"
+      - "inference mock responds to requests in CI"
+    depends_on: [5]
+
+  - id: 11
+    title: "Observability, monitoring & DLQ"
+    status: not-started
+    owner: ops
+    estimate: 1w
+    description: "Add metrics, DLQ consumers, dashboards and alerting rules."
+    acceptance_criteria:
+      - "prometheus metrics exposed and dashboards show test data"
+      - "DLQ alerts configured"
+    depends_on: [5,8]
+
+  - id: 12
+    title: "Security, signing & schema governance"
+    status: not-started
+    owner: sec
+    estimate: 2w
+    description: "Implement agent identities, event signing, schema registry RBAC and topic ACL docs."
+    acceptance_criteria:
+      - "events include signatures and signatures verify in tests"
+      - "policy docs exist"
+    depends_on: [1]
+
+  - id: 13
+    title: "CI, tests & release gates"
+    status: not-started
+    owner: ci
+    estimate: 2w
+    description: "Add GitHub Actions job that boots ephemeral kafka stack and runs contract tests for PRs."
+    acceptance_criteria:
+      - "ci/kafka-poc.yml runs and passes sample tests"
+    depends_on: [2,4]
+
+  - id: 14
+    title: "Documentation & runbooks"
+    status: not-started
+    owner: doc
+    estimate: 2w
+    description: "Add developer guide, runbooks for incidents, and cutover docs."
+    acceptance_criteria:
+      - "DEVELOPER_GUIDE.md and runbooks present and reviewed"
+    depends_on: []
+
+  - id: 15
+    title: "Migration & cutover plan"
+    status: not-started
+    owner: ops
+    estimate: 2w
+    description: "Execute pilot, incremental rollouts and final cutover to kafka-first operation."
+    acceptance_criteria:
+      - "cutover checklist completed and parity monitored"
+    depends_on: [6,9,11,13]
+
+  - id: 16
+    title: "Housekeeping & governance"
+    status: in-progress
+    owner: lead
+    estimate: ongoing
+    description: "CHANGELOG updates, Codacy/Trivy in CI for dependency changes, maintain audits."
+    completed_steps:
+      - "Added .codacy.yml to exclude local hook/scripts from broad analysis"
+      - "Implemented pre-commit enforcement: .githooks/pre-commit (wrapper), scripts/run_codacy_trivy_precommit.sh, scripts/install_precommit_hooks.sh"
+      - "Updated .github/instructions/codacy.instructions.md to document staged-file analysis and dependency-triggered Trivy runs"
+    acceptance_criteria:
+      - "CHANGELOG entries for major ports"
+      - "security scans run on dependency changes"
+      - "Pre-commit Codacy/Trivy enforcement implemented and documented"
+    depends_on: []
+
+metadata:
+  created_by: "GitHub Copilot"
+  created_at: "2025-10-02T00:00:00Z"
+  version: 1.0

@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "namespace": "justnews.article",
+  "name": "ArticleCreated",
+  "doc": "Article creation event (v1).",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "title", "type": "string"},
+    {"name": "url", "type": "string"},
+    {"name": "published_at", "type": ["null", "string"], "default": null},
+    {"name": "source", "type": "string"}
+  ]
+}

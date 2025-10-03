@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "namespace": "justnews.article",
+  "name": "ArticlePersisted",
+  "doc": "Article persisted event (v2) — incompatible change: removed 'source' field.",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "url", "type": "string"},
+    {"name": "persisted_at", "type": "string"}
+  ]
+}

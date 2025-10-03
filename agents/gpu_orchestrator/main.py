@@ -203,7 +203,14 @@ def get_gpu_snapshot() -> Dict[str, Any]:
 	"""Return a conservative, read-only snapshot of GPU state."""
 	smi = _run_nvidia_smi()
 	if smi is None:
-		return {"gpus": [], "available": False, "message": "nvidia-smi not available"}
+		# Always include nvml-related keys for deterministic responses in tests and clients
+		return {
+			"gpus": [],
+			"available": False,
+			"message": "nvidia-smi not available",
+			"nvml_supported": False,
+			"nvml_enriched": False,
+		}
 	gpus = _parse_nvidia_smi_csv(smi)
 	_get_nvml_enrichment(gpus)
 	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
@@ -241,8 +248,7 @@ class PolicyUpdate(BaseModel):
 	allow_fractional_shares: Optional[bool] = None
 	kill_on_oom: Optional[bool] = None
 
-	class Config:
-		arbitrary_types_allowed = True
+	model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class LeaseRequest(BaseModel):
@@ -271,6 +277,12 @@ class PreloadRequest(BaseModel):
 async def lifespan(app: FastAPI):
     global READINESS
     logger.info("GPU Orchestrator starting up")
+
+    # Ensure NVML initialization runs as part of startup (avoid using deprecated on_event)
+    try:
+        initialize_nvml()
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"NVML initialization during lifespan failed: {e}")
 
     # Registration status tracker
     registration_complete = threading.Event()
@@ -563,17 +575,17 @@ def _read_agent_model_map() -> Dict[str, Any]:
 	try:
 		import json
 		from pathlib import Path
-		
+
 		project_root = Path(__file__).resolve().parents[2]
 		model_map_path = project_root / "AGENT_MODEL_MAP.json"
-		
+
 		if not model_map_path.exists():
 			logger.warning(f"Model map file not found: {model_map_path}")
 			return {}
-		
+
 		with open(model_map_path, "r") as f:
 			model_map = json.load(f)
-		
+
 		logger.info(f"Loaded agent model map: {model_map}")
 		return model_map
 	except Exception as e:
@@ -783,46 +795,38 @@ def notify_ready():
         raise HTTPException(status_code=500, detail="Registration failed")
 
 
-@app.on_event("startup")
-async def orchestrator_startup():
-    logger.info("Starting GPU Orchestrator...")
-    initialize_nvml()  # Explicitly call the NVML initialization function
-    logger.info("GPU Orchestrator startup sequence complete.")
-
-
-@app.on_event("startup")
 def initialize_nvml():
-    global _NVML_SUPPORTED, _NVML_INIT_ERROR
-    logger.debug("Checking ENABLE_NVML environment variable...")
-    enable_nvml = os.environ.get("ENABLE_NVML", "false").lower() == "true"
-    logger.debug(f"ENABLE_NVML is set to: {enable_nvml}")
+     global _NVML_SUPPORTED, _NVML_INIT_ERROR
+     logger.debug("Checking ENABLE_NVML environment variable...")
+     enable_nvml = os.environ.get("ENABLE_NVML", "false").lower() == "true"
+     logger.debug(f"ENABLE_NVML is set to: {enable_nvml}")
 
-    if not enable_nvml:
-        logger.info("NVML is disabled via environment variable.")
-        return
+     if not enable_nvml:
+         logger.info("NVML is disabled via environment variable.")
+         return
 
-    logger.debug("Attempting to initialize NVML during startup...")
-    try:
-        import pynvml  # type: ignore
-        pynvml.nvmlInit()
-        _NVML_SUPPORTED = True
-        logger.debug("NVML initialized successfully during startup.")
+     logger.debug("Attempting to initialize NVML during startup...")
+     try:
+         import pynvml  # type: ignore
+         pynvml.nvmlInit()
+         _NVML_SUPPORTED = True
+         logger.debug("NVML initialized successfully during startup.")
 
-        # Log detailed GPU information
-        device_count = pynvml.nvmlDeviceGetCount()
-        logger.debug(f"Number of devices detected: {device_count}")
-        for i in range(device_count):
-            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-            name = pynvml.nvmlDeviceGetName(handle)
-            memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
-            logger.debug(f"Device {i}: {name.decode('utf-8')}")
-            logger.debug(f"  Total memory: {memory_info.total / 1024**2} MB")
-            logger.debug(f"  Used memory: {memory_info.used / 1024**2} MB")
-            logger.debug(f"  Free memory: {memory_info.free / 1024**2} MB")
-    except Exception as e:
-        _NVML_SUPPORTED = False
-        _NVML_INIT_ERROR = str(e)
-        logger.error(f"NVML initialization failed during startup: {e}")
+         # Log detailed GPU information
+         device_count = pynvml.nvmlDeviceGetCount()
+         logger.debug(f"Number of devices detected: {device_count}")
+         for i in range(device_count):
+             handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+             name = pynvml.nvmlDeviceGetName(handle)
+             memory_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+             logger.debug(f"Device {i}: {name.decode('utf-8')}")
+             logger.debug(f"  Total memory: {memory_info.total / 1024**2} MB")
+             logger.debug(f"  Used memory: {memory_info.used / 1024**2} MB")
+             logger.debug(f"  Free memory: {memory_info.free / 1024**2} MB")
+     except Exception as e:
+         _NVML_SUPPORTED = False
+         _NVML_INIT_ERROR = str(e)
+         logger.error(f"NVML initialization failed during startup: {e}")
 
 
 if __name__ == "__main__":

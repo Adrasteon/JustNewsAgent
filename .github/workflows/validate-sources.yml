@@ -1,0 +1,56 @@
+name: 'Validate Upstream Sources'
+
+on:
+  pull_request:
+    paths:
+      - 'kafka/docker/sources/**'
+      - 'kafka/docker/build/**'
+
+jobs:
+  validate-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update && sudo apt-get install -y curl jq coreutils
+          sudo apt-get install -y python3-pip
+          pip3 install yq
+
+      - name: Validate checksums
+        run: |
+          set -euo pipefail
+          SFILE=kafka/docker/sources/sources.yaml
+          echo "Validating sources in $SFILE"
+          keys=$(yq -r 'keys | .[]' "$SFILE")
+          failed=0
+          for k in $keys; do
+            url=$(yq -r ".${k}.url // \"\"" "$SFILE")
+            expected=$(yq -r ".${k}.sha256 // \"\"" "$SFILE")
+            fname=$(yq -r ".${k}.filename // \"\"" "$SFILE")
+            if [ -z "$url" ] || [ -z "$fname" ]; then
+              echo "Skipping $k: missing url or filename"
+              continue
+            fi
+            if [ -z "$expected" ] || [ "$expected" = "REPLACE_WITH_ACTUAL_SHA256" ]; then
+              echo "Missing checksum for $k ($fname) — please run the fetch_and_update_shas.sh script and commit hashes" >&2
+              failed=1
+              continue
+            fi
+            tmpfile="/tmp/$fname"
+            echo "Downloading $k -> $tmpfile"
+            curl -fsSL "$url" -o "$tmpfile"
+            actual=$(sha256sum "$tmpfile" | awk '{print $1}')
+            if [ "$actual" != "$expected" ]; then
+              echo "Checksum mismatch for $k: expected $expected got $actual" >&2
+              failed=1
+            else
+              echo "Checksum OK for $k"
+            fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more checksum validations failed" >&2
+            exit 1
+          fi

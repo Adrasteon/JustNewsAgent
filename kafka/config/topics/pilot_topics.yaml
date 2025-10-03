@@ -1,0 +1,19 @@
+# Sample topic configuration for pilot pipeline
+topics:
+  - name: scout.article.created
+    partitions: 3
+    replication: 1
+    retention_ms: 604800000 # 7 days
+    schema: article.created
+
+  - name: crawler.article.persisted
+    partitions: 3
+    replication: 1
+    retention_ms: 1209600000 # 14 days
+    schema: article.persisted
+
+  - name: training.example
+    partitions: 1
+    replication: 1
+    retention_ms: 259200000 # 3 days
+    schema: training.example

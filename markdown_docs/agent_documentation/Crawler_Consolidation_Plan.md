@@ -121,6 +121,44 @@ Article dict minimal shape:
    - `tests/test_db_dedupe.py`: small test for `register_url()` semantics (may need a test DB or mocking).
    - Update `agents/scout/README.md` describing canonical classes and how to run sequential vs concurrent modes.
 
+## Include NewsReader Agent in the consolidation
+
+Rationale:
+- The NewsReader Agent implements the most advanced page-level reader (visual + DOM extraction, OCR, LLaVA-based image+text analysis) and therefore should be treated as the canonical page-extraction and content-normalization component for the unified crawler system.
+- Reusing the NewsReader avoids duplication of extraction logic, preserves production-validated quantization and memory-safety configurations, and centralizes visual/text extraction for downstream agents (Scout, Synthesizer, Memory, Fact-Checker).
+
+Integration points and contracts:
+- Canonical `persist_article()` must accept the following additional keys when present from NewsReader extraction:
+  - `visual_assets`: list[Dict] — screenshots, image metadata, OCR text references
+  - `ocr_text`: Optional[str] — OCR-extracted text for images
+  - `extraction_source`: str — e.g., `newsreader_v2` or `enhanced_deepcrawl`
+  - `newsreader_analysis`: Optional[Dict] — structured analysis output (summary, entities, image_descriptions)
+- The unified crawler classes (UltraFastCrawler / ProductionAICrawler) will call the NewsReader extraction API for each processed URL when `analyze_content=True` or when images are present.
+- Provide a lightweight `newsreader_bridge` module under `agents/scout/` that wraps the NewsReader agent tools and normalizes outputs to the canonical Article dict shape.
+
+Step-by-step changes (minimal first PR)
+- Add `agents/scout/newsreader_bridge.py` implementing a thin wrapper around `agents.newsreader.tools` or the NewsReader FastAPI endpoints and normalizing outputs to the `Article` dict used by `persist_article()`.
+- Update `persist_article()` in canonical crawlers to accept and persist `visual_assets`, `ocr_text`, and `newsreader_analysis` fields (use `scripts/db_dedupe.register_url` unchanged for dedupe semantics).
+- Update `orchestrator.py` and canonical site modules to call `newsreader_bridge.process_url(url, ...)` as the canonical extraction path when `enable_ai` or `analyze_images` flags are set.
+- Add import-smoke and basic integration tests:
+  - `tests/test_newsreader_bridge_import.py` — import smoke for `newsreader_bridge` and a mocked NewsReader response
+  - `tests/test_newsreader_integration_sequential.py` — small sequential run mocked test for one URL returning OCR + image analysis
+
+Risk & mitigation
+- Risk: Image analysis increases GPU memory pressure. Mitigation: respect NewsReader production memory-safe configuration (BitsAndBytesConfig, conservative model selection) and expose a config flag to opt out of visual analysis when resources constrained.
+- Risk: Increased persistence size due to visual assets and OCR text. Mitigation: store visual assets as references (S3/path) and limit OCR text length; add a configurable retention/archival policy.
+
+Timeline (suggested)
+- Day 0–1: Add `newsreader_bridge`, small canonical `persist_article()` change, and import-smoke tests.
+- Day 2–3: Add sequential integration test with mocked NewsReader outputs, update orchestrator to call `newsreader_bridge` when requested.
+- Day 4: Run per-file static analysis, add small performance tests, and open PR for review.
+
+Testing & quality gates
+- Unit tests for `newsreader_bridge` normalization logic (no GPU required).
+- Integration tests mock NewsReader FastAPI endpoints to validate sequential flow without requiring actual image analysis.
+- Per-file Codacy analyze and ruff/ruff --fix on edited files prior to opening PR (run as part of CI gate).
+
+
 ## Patch-level (what will change in which files)
 
 - Modify (small edits) existing canonical site files to add `run_sequential()` and `persist_article()`.

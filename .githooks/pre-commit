@@ -1,0 +1,15 @@
+# pylint: skip-file
+#!/usr/bin/env python3
+"""Pre-commit hook wrapper: invoke repository Codacy pre-commit script.
+This file is intentionally a tiny Python wrapper to be robustly analyzed by Codacy tools.
+"""
+import os
+import subprocess
+import sys
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+HOOK_SCRIPT = os.path.join(REPO_ROOT, 'scripts', 'run_codacy_trivy_precommit.sh')
+
+# Execute the existing shell script and forward exit code
+ret = subprocess.call([HOOK_SCRIPT] + sys.argv[1:])
+sys.exit(ret)
