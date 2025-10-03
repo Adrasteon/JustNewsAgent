@@ -2,7 +2,12 @@ name: CI - JustNewsAgent Tests
 
 # Run on manual dispatch and pull requests to main/dev branches
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      run_parity:
+        description: 'Run parity-e2e job (true|false)'
+        required: false
+        default: 'false'
   pull_request:
     branches: [ main, dev ]
   push:
@@ -94,3 +99,106 @@ jobs:
       - name: Run version consistency check
         run: |
           python scripts/validate_versions.py
+
+  parity-e2e:
+    name: Parity E2E (Kafka parity generator)
+    runs-on: ubuntu-latest
+    needs: test
+    # Only run parity-e2e when explicitly requested via workflow_dispatch input
+    # or when working on branches/PRs that include parity in their name.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_parity == 'true') ||
+      (github.event_name == 'pull_request' && contains(github.head_ref, 'parity'))
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose netcat
+
+      - name: Build CI test image
+        run: |
+          docker build -t justnews/kafka-ci:latest -f kafka/docker/ci/Dockerfile kafka/
+
+      - name: Prepare host artifact directory
+        run: mkdir -p ./tmp/parity
+
+      - name: Bring up Kafka dev stack with retries
+        run: |
+          docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml up -d --build
+          MAX_RETRIES=120
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "readiness: attempt $i/$MAX_RETRIES"
+            SR_OK=1
+            BROKER_OK=1
+            if curl -sSf http://localhost:8081/ >/dev/null 2>&1; then
+              SR_OK=0
+            fi
+            if (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+              BROKER_OK=0
+            fi
+            if [ "$SR_OK" -eq 0 ] && [ "$BROKER_OK" -eq 0 ]; then
+              echo "All services appear ready"
+              break
+            fi
+            sleep $((i < 30 ? i : 30))
+          done
+          if ! curl -sSf http://localhost:8081/ >/dev/null 2>&1 || ! (echo > /dev/tcp/localhost/9092) >/dev/null 2>&1; then
+            echo "Service readiness checks failed; dumping docker-compose ps" >&2
+            docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml ps
+            exit 4
+          fi
+
+      - name: Kafka admin readiness probe
+        run: |
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.kafka_admin_probe"
+
+      - name: Bootstrap topics and schemas
+        run: |
+          docker run --rm --network kafka_ci_default \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            justnews/kafka-ci:latest \
+            bash -lc "python -m kafka.scripts.bootstrap_pilot --bootstrap broker:9092 --registry http://schema-registry:8081 --topics-file kafka/config/topics/pilot_topics.yaml"
+
+      - name: Run parity generator and harness inside CI image (capture exit codes)
+        run: |
+          set -euo pipefail
+          docker run --rm --network kafka_ci_default -v $(pwd)/tmp/parity:/tmp/parity \
+            -e KAFKA_BOOTSTRAP_SERVERS=broker:9092 \
+            -e SCHEMA_REGISTRY_URL=http://schema-registry:8081 \
+            -e PARITY_TOLERANCE=5 \
+            justnews/kafka-ci:latest \
+            bash -lc '
+              set -euo pipefail
+              python -m kafka.tests.parity.generate_parity_report --sample kafka/tests/parity/sample_dataset.jsonl --out /tmp/parity --tolerance "$PARITY_TOLERANCE" || echo "GEN_EXIT:$?" > /tmp/parity/gen_exit.txt
+              pytest -q kafka/tests/parity/test_parity_harness.py --junitxml=/tmp/parity/parity-junit.xml || echo "PY_EXIT:$?" > /tmp/parity/py_exit.txt
+            '
+          GEN_EXIT=0
+          PY_EXIT=0
+          if [ -f ./tmp/parity/gen_exit.txt ]; then
+            GEN_EXIT=$(sed -E 's/[^0-9]*([0-9]+).*/\1/' ./tmp/parity/gen_exit.txt || echo 2)
+          fi
+          if [ -f ./tmp/parity/py_exit.txt ]; then
+            PY_EXIT=$(sed -E 's/[^0-9]*([0-9]+).*/\1/' ./tmp/parity/py_exit.txt || echo 1)
+          fi
+          echo "Parity generator exit code: $GEN_EXIT, pytest exit code: $PY_EXIT"
+          if [ "$GEN_EXIT" -ne 0 ] || [ "$PY_EXIT" -ne 0 ]; then
+            echo "Parity checks failed: generator=$GEN_EXIT pytest=$PY_EXIT" >&2
+            exit $(( GEN_EXIT > PY_EXIT ? GEN_EXIT : PY_EXIT ))
+          fi
+
+      - name: Upload parity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-artifacts
+          path: ./tmp/parity
+
+      - name: Tear down Kafka stack
+        if: always()
+        run: docker-compose -p kafka_ci -f kafka/docker/docker-compose.kafka.yml down -v
