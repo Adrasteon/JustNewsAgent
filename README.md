@@ -1512,3 +1512,45 @@ README (Repository Archival & Evidence Data Management Annotation): this reposit
 
 **Note:** Codacy integration has been deprecated for this project (archived on 2025-10-04). All Codacy configuration and historical artifacts are stored under `archive_obsolete_files/20251004-120000/`. Use local CI/static analysis tools (e.g., `semgrep`, `ruff`, `pylint`, `trivy`) and the provided pre-commit scripts instead of Codacy.
 
+## square-one — single-command developer/operator entrypoint
+
+A new convenience wrapper script `square-one.sh` (committed at the repository root) provides a single, safe entrypoint to bring the entire JustNews system up or down for development and production workflows. The script:
+
+- Runs preflight checks (Conda env, Postgres connectivity, model-store layout, required ports).
+- Detects and *cleanly shuts down* any running JustNews services prior to start (calls systemd stop where applicable, calls `/shutdown` endpoints, and falls back to terminating processes by port). It intentionally skips stopping PostgreSQL so local DBs remain available.
+- Starts the system either via the production `deploy/systemd/reset_and_start.sh` path (when appropriate) or the developer `start_services_daemon.sh` script.
+- Can install itself to `/usr/local/bin/square-one` (`square-one install`) so the command `square-one` becomes globally available.
+
+Quick usage examples
+
+```bash
+# Run preflight checks
+./square-one.sh preflight
+
+# Start the full system (interactive prompt)
+./square-one.sh start
+
+# Start non-interactively (assume yes to prompts) using systemd when available
+./square-one.sh start --yes --force-systemd
+
+# Test Postgres connectivity only
+./square-one.sh check-db
+
+# Show brief status of expected ports/services
+./square-one.sh status
+
+# Install the wrapper globally (requires sudo)
+sudo ./square-one.sh install
+# afterwards you can run
+square-one start
+```
+
+Notes and operational guidance
+
+- The script is intended to be idempotent and safe: it attempts graceful shutdowns first and only force-kills processes when a clean shutdown path fails.
+- When installing globally (`install`), the script will copy itself to `/usr/local/bin/square-one` so it can be invoked from anywhere without a path.
+- By default `square-one start` preserves PostgreSQL if running locally (port 5432) — this avoids accidentally taking down the database during iterative development.
+- The wrapper is committed in branch `feat/new-scout-design`; you may wish to merge it into `main` when you are ready.
+
+If you want, I can add a short CI check that runs `square-one preflight` on PRs to validate environment readiness for integration/e2e jobs
+
