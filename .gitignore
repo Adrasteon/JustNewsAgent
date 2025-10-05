@@ -206,6 +206,7 @@ deep_content_analysis.py
 
 # Allowlist unified startup script
 !square-one.sh
+!Canonical_Test_RUNME.sh
 
 # Database Files and Vector Stores
 *.db
