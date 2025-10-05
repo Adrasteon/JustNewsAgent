@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # square-one.sh — Safe, idempotent project bootstrap and system starter
 # Purpose: single developer/operator entrypoint that verifies environment
 #          prerequisites, offers to start the system (dev or production), and
@@ -6,10 +6,20 @@
 #          becomes globally available.
 
 set -euo pipefail
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+
+# Determine script path using shell parameter expansion so we don't depend on external `dirname`/`basename`
+# This makes the script robust when PATH is restricted in tests (e.g., PATH=/nonexistent)
+SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+SCRIPT_NAME="${SCRIPT_SOURCE##*/}"
+SCRIPT_DIR="${SCRIPT_SOURCE%/*}"
+if [ -z "$SCRIPT_DIR" ] || [ "$SCRIPT_DIR" = "$SCRIPT_SOURCE" ]; then
+ SCRIPT_DIR="."
+fi
 LOG_DIR="$SCRIPT_DIR/logs"
-mkdir -p "$LOG_DIR"
+# Only attempt to create the logs directory if mkdir is available in PATH
+if has_cmd mkdir; then
+ mkdir -p "$LOG_DIR"
+fi
 
 # Default project conventions (can be overridden by env)
 CONDA_ENV="${CONDA_ENV:-justnews-v2-py312}"
@@ -483,7 +493,11 @@ case "$CMD" in
 
     # Dry-run: compute and report selected start mode without executing anything
     if [ "$DRY_RUN" -eq 1 ]; then
-      mode_arg="${FORCE_SYSTEMD:+systemd}"
+      if [ "${FORCE_SYSTEMD:-0}" -eq 1 ]; then
+        mode_arg="systemd"
+      else
+        mode_arg=""
+      fi
       selected_mode=$(compute_start_mode "$mode_arg")
       info "[dry-run] Would start in '$selected_mode' mode (no actions performed)"
       exit 0
