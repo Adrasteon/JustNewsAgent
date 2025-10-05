@@ -201,6 +201,9 @@ deep_content_analysis.py
 !deploy/systemd/scripts/*.sh
 !deploy/systemd/helpers/*.sh
 
+# Allowlist unified startup script
+!square-one.sh
+
 # Database Files and Vector Stores
 *.db
 *_vectordb/
