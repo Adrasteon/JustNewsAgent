@@ -171,6 +171,17 @@ setup_environment() {
     export PYTHONPATH="${PYTHONPATH:-$PROJECT_ROOT}"
     export PYTHONUNBUFFERED="${PYTHONUNBUFFERED:-1}"
 
+    # If PYTHON_BIN is set in envs, export it as PYTHON_BIN and validate existence
+    if [[ -n "${PYTHON_BIN:-}" ]]; then
+        if [[ -x "${PYTHON_BIN}" ]]; then
+            export PYTHON_BIN
+            log_info "PYTHON_BIN configured: ${PYTHON_BIN}"
+        else
+            log_warning "Configured PYTHON_BIN (${PYTHON_BIN}) not executable; falling back to default lookup"
+            unset PYTHON_BIN
+        fi
+    fi
+
     # Safety mode: force CPU and conservative settings to avoid GPU-related hard resets
     if [[ "${SAFE_MODE:-false}" == "true" ]]; then
         export USE_GPU="false"

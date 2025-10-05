@@ -55,6 +55,15 @@ WRAPPER_MAP=(
   "/usr/local/bin/cold_start.sh|$PROJECT_ROOT/deploy/systemd/scripts/cold_start.sh"
 )
 
+# New: allow operator to pass an explicit python path
+SET_PYTHON_BIN=""
+
+# New CLI-configurable defaults (can be overridden)
+JUSTNEWS_GROUP="justnews"
+DEFAULT_SERVICE_USER="justnews"
+ADMIN_GROUP="justnews-admins"
+ADMIN_USERS=()
+
 require_root() {
   if [[ $EUID -ne 0 ]]; then
     log_error "Must run as root (sudo)"
@@ -85,6 +94,10 @@ Options:
   --no-clean-ports       Do not kill residual port listeners
   --no-health-check      Skip final health check
   --dry-run              Show actions without executing system changes
+  --set-python-bin PATH  Force PYTHON_BIN to PATH when creating /etc/justnews/global.env
+  --justnews-group       Set the JustNews system group (default: justnews)
+  --service-user         Set the service user for JustNews (default: adra)
+  --admin-user USER      Add a system user as admin (repeatable for multiple users)
   -h, --help             Show this help
 
 Examples:
@@ -106,6 +119,27 @@ parse_args() {
         SAFE_MODE_STATE="${2:-}"; shift 2 || true
         if [[ "$SAFE_MODE_STATE" != "on" && "$SAFE_MODE_STATE" != "off" ]]; then
           log_error "--safe-mode requires 'on' or 'off'"; exit 1
+        fi
+        ;;
+      --set-python-bin)
+        SET_PYTHON_BIN="${2:-}"; shift 2 || true
+        if [[ -z "$SET_PYTHON_BIN" ]]; then
+          log_error "--set-python-bin requires an absolute path to a Python interpreter"; exit 1
+        fi
+        ;;
+      --justnews-group)
+        JUSTNEWS_GROUP="${2:-}"; shift 2 || true
+        if [[ -z "$JUSTNEWS_GROUP" ]]; then
+          log_error "--justnews-group requires a group name"; exit 1
+        fi
+        ;;
+      --admin-user)
+        ADMIN_USERS+=("${2:-}"); shift 2 || true
+        ;; 
+      --service-user)
+        DEFAULT_SERVICE_USER="${2:-}"; shift 2 || true
+        if [[ -z "$DEFAULT_SERVICE_USER" ]]; then
+          log_error "--service-user requires a username"; exit 1
         fi
         ;;
       --no-clean-ports) CLEAN_PORTS=false; shift ;;
@@ -167,7 +201,49 @@ kill_ports() {
   done
 }
 
+ensure_group_exists() {
+  local g="$JUSTNEWS_GROUP"
+  if getent group "$g" >/dev/null 2>&1; then
+    log_info "Group $g already exists"
+    return 0
+  fi
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: groupadd $g"; return 0
+  fi
+  groupadd "$g" || true
+  log_info "Created group: $g"
+}
+
+ensure_admin_group_exists() {
+  if getent group "$ADMIN_GROUP" >/dev/null 2>&1; then
+    log_info "Admin group $ADMIN_GROUP already exists"
+    return 0
+  fi
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: groupadd $ADMIN_GROUP"; return 0
+  fi
+  groupadd "$ADMIN_GROUP" || true
+  log_info "Created admin group: $ADMIN_GROUP"
+}
+
+create_system_user() {
+  local u="$DEFAULT_SERVICE_USER"
+  if id -u "$u" >/dev/null 2>&1; then
+    log_info "Service user $u already exists"
+    return 0
+  fi
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: useradd --system --no-create-home --shell /usr/sbin/nologin -g $JUSTNEWS_GROUP $u"
+    return 0
+  fi
+  useradd --system --no-create-home --shell /usr/sbin/nologin -g "$JUSTNEWS_GROUP" "$u" || true
+  log_info "Created system user: $u"
+}
+
 reinstall_units_scripts() {
+  # Ensure the target group exists before attempting to chown helper scripts
+  ensure_group_exists
+
   if [[ "$REINSTALL_UNITS" == true ]]; then
     log_info "Reinstalling systemd unit template..."
     if [[ "$DRY_RUN" == true ]]; then
@@ -176,6 +252,9 @@ reinstall_units_scripts() {
       mkdir -p "$(dirname "$UNIT_TEMPLATE_DST")"
       backup_file "$UNIT_TEMPLATE_DST"
       cp "$UNIT_TEMPLATE_SRC" "$UNIT_TEMPLATE_DST"
+      # Ensure unit template is world-readable but owned by root
+      chown root:root "$UNIT_TEMPLATE_DST" || true
+      chmod 0644 "$UNIT_TEMPLATE_DST" || true
       systemctl daemon-reload
       log_success "Unit template installed"
     fi
@@ -186,12 +265,22 @@ reinstall_units_scripts() {
     if [[ "$DRY_RUN" == true ]]; then
       echo "DRY-RUN: cp $START_SCRIPT_SRC $START_SCRIPT_DST; cp $WAIT_SCRIPT_SRC $WAIT_SCRIPT_DST"
     else
+      # Make source helper scripts executable so systemd ExecStartPre can call the repo copy if configured
+      if [[ -d "$PROJECT_ROOT/deploy/systemd/scripts" ]]; then
+        chmod +x "$PROJECT_ROOT/deploy/systemd/scripts/"*.sh 2>/dev/null || true
+        log_info "Ensured repo helper scripts are executable"
+      fi
       backup_file "$START_SCRIPT_DST" || true
       cp "$START_SCRIPT_SRC" "$START_SCRIPT_DST"
       chmod +x "$START_SCRIPT_DST"
+      # Secure helper script ownership and permissions
+      chown root:"$JUSTNEWS_GROUP" "$START_SCRIPT_DST" || true
+      chmod 0750 "$START_SCRIPT_DST" || true
       backup_file "$WAIT_SCRIPT_DST" || true
       cp "$WAIT_SCRIPT_SRC" "$WAIT_SCRIPT_DST"
       chmod +x "$WAIT_SCRIPT_DST"
+      chown root:"$JUSTNEWS_GROUP" "$WAIT_SCRIPT_DST" || true
+      chmod 0750 "$WAIT_SCRIPT_DST" || true
       log_success "Helper scripts installed"
     fi
   fi
@@ -204,6 +293,13 @@ ensure_path_wrappers() {
     if [[ -f "$src" ]] && [[ ! -x "$dst" ]]; then
       cp "$src" "$dst" && chmod +x "$dst"
       log_info "Installed PATH wrapper $(basename "$dst")"
+      if [[ "$DRY_RUN" == true ]]; then
+        echo "DRY-RUN: chown root:$JUSTNEWS_GROUP $dst; chmod 0750 $dst"
+      else
+        chown root:"$JUSTNEWS_GROUP" "$dst" || true
+        chmod 0750 "$dst" || true
+        log_info "Set owner root:$JUSTNEWS_GROUP and secure perms on $(basename "$dst")"
+      fi
     fi
   done
 }
@@ -216,6 +312,12 @@ sync_env_files() {
     return 0
   fi
   mkdir -p "$ENV_DST_DIR"
+  # Handle case where no env files exist in the source directory
+  files=("$ENV_SRC_DIR"/*.env)
+  if [[ ! -e "${files[0]}" ]]; then
+    log_warn "No env files found in $ENV_SRC_DIR; skipping env sync"
+    return 0
+  fi
   for f in "$ENV_SRC_DIR"/*.env; do
     local base
     base="$(basename "$f")"
@@ -279,6 +381,153 @@ health_check() {
   fi
 }
 
+# Detect a likely Python interpreter from common conda env locations or use explicit override
+detect_python_bin() {
+  # Priority: explicit CLI arg, /home/*/miniconda3 env named justnews-v2-py312, /opt/conda, CONDA_PREFIX
+  if [[ -n "$SET_PYTHON_BIN" ]]; then
+    DETECTED_PYTHON_BIN="$SET_PYTHON_BIN"
+    log_info "Using explicit Python provided via --set-python-bin: $DETECTED_PYTHON_BIN"
+    return 0
+  fi
+
+  # Check for CONDA_PREFIX in environment
+  if [[ -n "${CONDA_PREFIX:-}" ]] && [[ -x "${CONDA_PREFIX}/bin/python" ]]; then
+    DETECTED_PYTHON_BIN="${CONDA_PREFIX}/bin/python"
+    log_info "Detected Python via CONDA_PREFIX: $DETECTED_PYTHON_BIN"
+    return 0
+  fi
+
+  # Common user locations (search for named env used by CI/dev workflows)
+  local candidates=(/home/*/miniconda3/envs/justnews-v2-py312/bin/python /home/*/micromamba/envs/justnews-v2-py312/bin/python /opt/conda/envs/justnews-v2-py312/bin/python)
+  for c in "${candidates[@]}"; do
+    if [[ -x $c ]]; then
+      DETECTED_PYTHON_BIN="$c"
+      log_info "Auto-detected Python at: $DETECTED_PYTHON_BIN"
+      return 0
+    fi
+  done
+
+  # Fallback: try to locate any python in envs folder that looks like 'justnews'
+  for base in /home/*/miniconda3/envs /home/*/micromamba/envs /opt/conda/envs; do
+    if [[ -d $base ]]; then
+      for d in "$base"/*justnews*; do
+        if [[ -x "$d/bin/python" ]]; then
+          DETECTED_PYTHON_BIN="$d/bin/python"
+          log_info "Found candidate Python at: $DETECTED_PYTHON_BIN"
+          return 0
+        fi
+      done
+    fi
+  done
+
+  # Give up — leave empty to allow manual configuration
+  log_warn "No conda/python interpreter detected automatically. You can supply one with --set-python-bin or edit $GLOBAL_ENV"
+  DETECTED_PYTHON_BIN=""
+}
+
+# Inject or update PYTHON_BIN in the global env file so services run with the correct interpreter
+inject_python_bin_into_global_env() {
+  if [[ -z "$DETECTED_PYTHON_BIN" ]]; then
+    # If forcing overwrite but nothing detected, ensure an example placeholder exists
+    if [[ ! -f "$GLOBAL_ENV" ]]; then
+      echo "# Auto-created by reset_and_start.sh" > "$GLOBAL_ENV"
+    fi
+    if ! grep -q '^PYTHON_BIN=' "$GLOBAL_ENV" 2>/dev/null; then
+      echo "#PYTHON_BIN=/path/to/python (set with --set-python-bin)" >> "$GLOBAL_ENV"
+      log_info "Wrote PYTHON_BIN placeholder to $GLOBAL_ENV"
+    else
+      log_info "PYTHON_BIN already present in $GLOBAL_ENV; no changes made"
+    fi
+    return 0
+  fi
+
+  # Ensure file exists
+  if [[ ! -f "$GLOBAL_ENV" ]]; then
+    echo "# Auto-created by reset_and_start.sh" > "$GLOBAL_ENV"
+  fi
+
+  backup_file "$GLOBAL_ENV"
+  if grep -q '^PYTHON_BIN=' "$GLOBAL_ENV" 2>/dev/null; then
+    sed -i "s|^PYTHON_BIN=.*|PYTHON_BIN=$DETECTED_PYTHON_BIN|" "$GLOBAL_ENV"
+    log_info "Updated PYTHON_BIN in $GLOBAL_ENV -> $DETECTED_PYTHON_BIN"
+  else
+    echo "PYTHON_BIN=$DETECTED_PYTHON_BIN" >> "$GLOBAL_ENV"
+    log_info "Inserted PYTHON_BIN into $GLOBAL_ENV -> $DETECTED_PYTHON_BIN"
+  fi
+}
+
+# Create a dedicated group for service files and ensure proper permissions
+ensure_justnews_group_and_perms() {
+  local g="$JUSTNEWS_GROUP"
+  local svc_user=""
+  # Ensure group exists
+  if ! getent group "$g" >/dev/null; then
+    if [[ "$DRY_RUN" == true ]]; then
+      echo "DRY-RUN: groupadd $g"
+    else
+      groupadd "$g" || true
+      log_info "Created group: $g"
+    fi
+  else
+    log_info "Group $g already exists"
+  fi
+
+  # Discover service user from installed unit template (if available)
+  if [[ -f "$UNIT_TEMPLATE_DST" ]]; then
+    svc_user=$(grep -E '^User=' "$UNIT_TEMPLATE_DST" | head -n1 | cut -d= -f2 || true)
+  fi
+  svc_user=${svc_user:-"$DEFAULT_SERVICE_USER"}
+
+  # Ensure the system user exists and is a member of the group
+  create_system_user
+  if id -u "$svc_user" >/dev/null 2>&1; then
+    if [[ "$DRY_RUN" == true ]]; then
+      echo "DRY-RUN: usermod -aG $g $svc_user"
+    else
+      usermod -aG "$g" "$svc_user" || true
+      log_info "Added user $svc_user to group $g"
+    fi
+  else
+    log_warn "Service user '$svc_user' not found even after creation attempt; skipping group membership step"
+  fi
+
+  # Create and handle admin group + users
+  ensure_admin_group_exists
+  for au in "${ADMIN_USERS[@]}"; do
+    if id -u "$au" >/dev/null 2>&1; then
+      if [[ "$DRY_RUN" == true ]]; then
+        echo "DRY-RUN: usermod -aG $ADMIN_GROUP $au"
+        echo "DRY-RUN: usermod -aG $g $au"
+      else
+        usermod -aG "$ADMIN_GROUP" "$au" || true
+        usermod -aG "$g" "$au" || true
+        log_info "Added admin user $au to groups: $ADMIN_GROUP, $g"
+      fi
+    else
+      log_warn "Admin user '$au' not found on system; skipping addition"
+    fi
+  done
+
+  # Apply secure permissions to env dir and files
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: chown -R root:$g $ENV_DST_DIR; chmod 0750 $ENV_DST_DIR; chmod 0640 $ENV_DST_DIR/*.env"
+  else
+    chown -R root:"$g" "$ENV_DST_DIR" || true
+    chmod 0750 "$ENV_DST_DIR" || true
+    for f in "$ENV_DST_DIR"/*.env; do
+      if [[ -f "$f" ]]; then
+        chmod 0640 "$f" || true
+      fi
+    done
+    log_success "Set ownership root:$g and restrictive permissions for $ENV_DST_DIR"
+  fi
+}
+
+# Defaults and constants for new functions
+JUSTNEWS_GROUP="justnews"
+DEFAULT_SERVICE_USER="adra"
+DETECTED_PYTHON_BIN=""
+
 main() {
   parse_args "$@"
   require_root
@@ -293,6 +542,11 @@ main() {
   reinstall_units_scripts
   ensure_path_wrappers
   sync_env_files
+  # Ensure dedicated system user and admin groups exist and are configured
+  create_system_user
+  ensure_admin_group_exists
+  inject_python_bin_into_global_env
+  ensure_justnews_group_and_perms
   toggle_safe_mode
   daemon_reload
   fresh_start
