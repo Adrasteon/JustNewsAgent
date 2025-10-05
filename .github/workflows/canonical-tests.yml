@@ -1,0 +1,83 @@
+name: Canonical Test Suite
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  setup-env:
+    name: Setup Conda Environment
+    runs-on: ubuntu-latest
+    outputs:
+      env-created: ${{ steps.create-env.outcome }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: 3.12
+          auto-activate-base: false
+      - name: Install mamba
+        shell: bash -l {0}
+        run: |
+          conda install -n base -c conda-forge mamba -y || true
+      - name: Create dev env (mamba preferred)
+        run: |
+          if command -v mamba >/dev/null 2>&1; then
+            mamba env create -n justnews-v2-py312 -f environment.yml || mamba create -n justnews-v2-py312 python=3.12 -y
+          else
+            conda env create -f environment.yml || conda create -n justnews-v2-py312 python=3.12 -y
+          fi
+      - name: Install test utilities
+        run: |
+          if command -v mamba >/dev/null 2>&1; then
+            mamba install -n justnews-v2-py312 -c conda-forge prometheus_client gputil pytest -y || true
+          else
+            conda install -n justnews-v2-py312 -c conda-forge prometheus_client gputil pytest -y || true
+          fi
+
+  env-report:
+    name: Environment Report
+    needs: setup-env
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run env-report
+        run: |
+          conda run -n justnews-v2-py312 make env-report
+
+  smoke-and-unit:
+    name: Smoke + Unit Tests
+    needs: env-report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests (fast)
+        run: |
+          PY='conda run -n justnews-v2-py312 python' ./Canonical_Test_RUNME.sh --unit
+      - name: Run smoke E2E stub
+        run: |
+          PY='conda run -n justnews-v2-py312 python' ./Canonical_Test_RUNME.sh --smoke
+
+  tensorrt-stub:
+    name: TensorRT Stub (self-hosted GPU only)
+    needs: smoke-and-unit
+    runs-on: [self-hosted, gpu, linux]
+    if: ${{ always() }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run TensorRT stub
+        run: |
+          PY='conda run -n justnews-v2-py312 python' ./Canonical_Test_RUNME.sh --tensorrt
+
+  integration-manual:
+    name: Integration Tests (manual trigger)
+    needs: smoke-and-unit
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run integration tests
+        run: |
+          PY='conda run -n justnews-v2-py312 python' ./Canonical_Test_RUNME.sh --integration
