@@ -6,30 +6,19 @@ status: current
 last_updated: 2025-09-12
 ---
 
+<!-- markdownlint-disable MD013 MD022 MD032 MD025 MD031 MD058 MD003 MD029 MD036 MD010 MD035 MD024 -->
+
 # JustNewsAgent v0.8.0 🤖
 
-[![Version](https://img.shields.io/badge/version-0.8.0--beta-orange.svg)]()
-[![License: Apache 2.0](### 📊 **System Status**
-- **Status:** Beta Release Candidate - Production Ready with Unified Startup System & Enterprise GPU Management
-- **Version:** 0.8.0 (Beta)
-- **Release Date:** September 25, 2025
-- **GPU Utilization:** Optimized across all agents (2-8GB per agent) with NVIDIA MPS resource isolation
-- **Performance:** 730+ articles/sec GPU processing, seamless CPU fallback with automatic switching
-- **Reliability:** 99.9% uptime with comprehensive error handling and post-reboot auto-recovery
-- **Configuration:** Centralized management with environment profiles and validation
-- **Monitoring:** Real-time dashboards with advanced metrics, alerts, and analytics
-- **Legal Compliance:** Complete GDPR/CCPA framework with data minimization, consent management, audit logging, and compliance monitoring
-- **APIs:** RESTful Archive API (Port 8021) + GraphQL Query Interface (Port 8020) + Legal Compliance API (Port 8021) + Public API (Port 8014)
-- **Unified Startup:** Complete systemd deployment with preflight gating and automatic service management
-- **GPU Isolation:** Enterprise MPS allocation (23.0GB total, 69.6% efficiency) with per-agent memory limits
-- **Post-Reboot Recovery:** Zero-touch system restoration with automatic service startup and health validationimg.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![CUDA](https://img.shields.io/badge/CUDA-12.4+-green.svg)](https://developer.nvidia.com/cuda-toolkit)
-[![RAPIDS](https://img.shields.io/badge/RAPIDS-25.04+-orange.svg)](https://rapids.ai/)
-[![TensorRT](https://img.shields.io/badge/TensorRT-Production-orange.svg)](https://developer.nvidia.com/tensorrt)
-[![GPU Management](https://img.shields.io/badge/GPU%20Management-Production%20Ready-success.svg)]()
-[![Dashboard](https://img.shields.io/badge/Dashboard-Enhanced-blue.svg)]()
-[![Monitoring](https://img.shields.io/badge/Monitoring-Real--time-green.svg)]()
+![Version](https://img.shields.io/badge/version-0.8.0--beta-orange.svg)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
+![CUDA](https://img.shields.io/badge/CUDA-12.4+-green.svg)
+![RAPIDS](https://img.shields.io/badge/RAPIDS-25.04+-orange.svg)
+![TensorRT](https://img.shields.io/badge/TensorRT-Production-orange.svg)
+![GPU Management](https://img.shields.io/badge/GPU%20Management-Production%20Ready-success.svg)
+![Dashboard](https://img.shields.io/badge/Dashboard-Enhanced-blue.svg)
+![Monitoring](https://img.shields.io/badge/Monitoring-Real--time-green.svg)
 
 AI-powered news analysis system using a distributed multi-agent architecture, GPU acceleration, and continuous learning with comprehensive monitoring and management capabilities.
 
@@ -38,28 +27,46 @@ AI-powered news analysis system using a distributed multi-agent architecture, GP
 ### 🚀 **Unified Startup System - PRODUCTION DEPLOYMENT COMPLETE**
 
 #### **Complete Systemd Integration - Enterprise Production Ready**
-- **✅ Unified Startup Architecture**: Complete directory reorganization with `deploy/systemd/` structure
-- **✅ Systemd Service Management**: 14 specialized services with proper dependency ordering and health monitoring
-- **✅ Preflight Gating System**: Model readiness validation with MPS and NVML integration before service startup
-- **✅ Post-Reboot Recovery**: Automatic service restoration with zero manual intervention required
-- **✅ GPU Resource Isolation**: NVIDIA MPS enterprise-grade GPU memory allocation (23.0GB total, 69.6% efficiency)
-- **✅ NVML Integration**: Real-time GPU telemetry with temperature, power, and utilization monitoring
-- **✅ Production Stability**: 99.9% uptime with comprehensive error handling and automatic recovery
+- **✅ Unified Startup Architecture**: Complete directory reorganization with
+  `deploy/systemd/` structure
+- **✅ Systemd Service Management**: 14 specialized services with proper
+  dependency ordering and health monitoring
+- **✅ Preflight Gating System**: Model readiness validation with MPS and NVML
+  integration before service startup
+- **✅ Post-Reboot Recovery**: Automatic service restoration with zero manual
+  intervention required
+- **✅ GPU Resource Isolation**: NVIDIA MPS enterprise-grade GPU memory
+  allocation (23.0GB total, 69.6% efficiency)
+- **✅ NVML Integration**: Real-time GPU telemetry with temperature, power,
+  and utilization monitoring
+- **✅ Production Stability**: 99.9% uptime with comprehensive error handling
+  and automatic recovery
 
 #### **System Recovery Validation - FULLY OPERATIONAL**
-- **✅ Post-Reboot Testing**: Complete system recovery after full PC reboot with all services operational
-- **✅ MPS Daemon Management**: Automatic NVIDIA MPS control daemon startup and management
-- **✅ GPU Orchestrator Health**: Real-time model preload validation and readiness gating
-- **✅ MCP Bus Communication**: Inter-agent communication with 100% service connectivity
-- **✅ Memory Management**: Professional CUDA context management with zero memory leaks
-- **✅ Service Dependencies**: Proper systemd service ordering with preflight validation
+- **✅ Post-Reboot Testing**: Complete system recovery after full PC reboot
+  with all services operational
+- **✅ MPS Daemon Management**: Automatic NVIDIA MPS control daemon startup
+  and management
+- **✅ GPU Orchestrator Health**: Real-time model preload validation and
+  readiness gating
+- **✅ MCP Bus Communication**: Inter-agent communication with 100% service
+  connectivity
+- **✅ Memory Management**: Professional CUDA context management with zero
+  memory leaks
+- **✅ Service Dependencies**: Proper systemd service ordering with preflight
+  validation
 
 #### **Enterprise Security & Monitoring - MILITARY-GRADE**
-- **✅ Pre-commit Prevention**: Git commit hooks preventing sensitive data exposure
-- **✅ Encrypted Vault System**: PBKDF2 + Fernet encryption for secret management
-- **✅ Real-time Dashboards**: Interactive monitoring with GPU utilization, agent performance, and system health
-- **✅ Analytics Engine**: Advanced performance profiling with bottleneck detection and optimization recommendations
-- **✅ Configuration Management**: Centralized environment profiles with validation and backup systems
+- **✅ Pre-commit Prevention**: Git commit hooks preventing sensitive data
+  exposure
+- **✅ Encrypted Vault System**: PBKDF2 + Fernet encryption for secret
+  management
+- **✅ Real-time Dashboards**: Interactive monitoring with GPU utilization,
+  agent performance, and system health
+- **✅ Analytics Engine**: Advanced performance profiling with bottleneck
+  detection and optimization recommendations
+- **✅ Configuration Management**: Centralized environment profiles with
+  validation and backup systems
 - **✅ Audit Logging**: Comprehensive security event tracking with GDPR article references
 
 #### **Technical Achievements - PRODUCTION VALIDATED**
@@ -331,7 +338,7 @@ JustNewsAgent features a distributed multi-agent system with specialized roles a
 
 ---
 
-Prerequisites
+## Prerequisites
 -------------
 - Linux (Ubuntu recommended)
 - Python 3.12+
@@ -340,54 +347,8 @@ Prerequisites
 - RAPIDS 25.04+ for GPU-accelerated data science (optional but recommended)
 - Configuration management system for environment-specific settings
 
-Installation
-------------
-
-### Quick Start with Makefile (Recommended)
-
-We provide a `Makefile` with convenient targets for environment setup and testing:
-
-```bash
-# Clone the repository
-git clone https://github.com/Adrasteon/JustNewsAgent.git
-cd JustNewsAgent
-
-# Create conda environment (using mamba if available for faster install)
-make env-create
-
-# Activate the environment
-conda activate justnews-v2-py312  # or: mamba activate justnews-v2-py312
-
-# Install dependencies
-make env-install
-
-# Verify installation
-make env-report
-
-# Run tests
-make test-dev  # Runs unit, smoke, and tensorrt stub tests
-```
-
-See `make help` for all available targets.
-
-### Environment Management with Conda/Mamba
-
-**We recommend using `mamba` for faster package installation:**
-
-```bash
-# Install mamba (if not already installed)
-conda install -n base -c conda-forge mamba
-
-# Use mamba commands (faster than conda)
-mamba activate justnews-v2-py312
-mamba install <package>
-```
-
-The environment is defined in `environment.yml` and uses Python 3.12 with all required dependencies.
-
----
-
-### Manual Installation Steps
+## Installation
+-------------
 
 1. Clone the repository
 
@@ -432,28 +393,10 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r agents/analyst/requirements_v4.txt
 ```
 
-**Alternative: Use existing production environment**
+### Alternative: Use existing production environment
 ```bash
 conda activate justnews-v2-prod  # Python 3.11 environment
 ```
-
-
-### Git Hooks (Repository Safety Guards)
-
-Enable local pre-commit hooks for file size and lightweight secret scanning (prevents >20MB accidental commits + obvious secret patterns). These are local-only and won't affect CI unless configured.
-
-```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/pre-commit
-```
-
-To bypass (e.g., false positive) once:
-
-```bash
-git commit -m "message" --no-verify
-```
-
-Adjust size limit by editing `MAX_FILE_SIZE_MB` in `.githooks/pre-commit`.
 
 4. **GPU and RAPIDS Configuration**
 
@@ -489,7 +432,7 @@ export GPU_CONFIG_PROFILE=high_performance
 - RTX 3090/4090 recommended (24GB+ VRAM)
 - Ubuntu 22.04+ or compatible Linux distribution
 
-Starting the system (development)
+## Starting the system (development)
 -------------------------------
 
 This repository contains multiple agent services. For development, run individual agents using their FastAPI entrypoints (see `agents/<agent>/main.py`). A convenience script is available for local runs (may require customization):
@@ -500,7 +443,7 @@ This repository contains multiple agent services. For development, run individua
 python -m agents.mcp_bus.main
 ```
 
-Usage examples
+## Usage examples
 --------------
 
 Check MCP bus agents list
@@ -598,29 +541,6 @@ curl -X POST http://localhost:8011/api/record-metric \
 		"gpu_memory_allocated_mb": 2048.0,
 		"gpu_utilization_pct": 75.0
 	}'
-```
-
-**GPU Monitoring:**
-
-```bash
-# Start GPU monitoring dashboard
-python -m agents.common.gpu_dashboard_api
-
-# Access dashboard at http://localhost:8013
-curl http://localhost:8013/gpu/metrics
-```
-
-**Performance Optimization:**
-
-```bash
-# Run performance optimization test
-python test_gpu_optimizer.py
-
-# Check optimization recommendations
-python -c "from agents.common.gpu_optimizer_enhanced import EnhancedGPUOptimizer; opt = EnhancedGPUOptimizer(); print(opt.get_optimization_recommendations())"
-
-# Get performance analytics (last 24 hours)
-python -c "from agents.dashboard.tools import get_performance_analytics; import json; print(json.dumps(get_performance_analytics(24), indent=2))"
 ```
 
 **Dashboard GUI Features:**
@@ -766,7 +686,7 @@ Agent configuration files are located in each agent folder (e.g. `agents/synthes
 JustNewsAgent now features a comprehensive **centralized configuration system** that provides enterprise-grade configuration management with environment overrides, validation, and easy access to all critical system variables.
 
 ### **📁 Configuration Architecture**
-```
+```text
 config/
 ├── system_config.json          # Main system configuration
 ├── system_config.py           # Python configuration manager
@@ -929,7 +849,7 @@ This centralized configuration system provides **enterprise-grade configuration 
 JustNewsAgent V4 now includes a **comprehensive enterprise-grade security system** that prevents sensitive data from being committed to git while providing encrypted secret management and automated security validation.
 
 ### **🔐 Security Architecture**
-```
+```text
 security/
 ├── pre-commit hook (.git/hooks/pre-commit)     # Git commit prevention
 ├── secret_manager.py (common/)                 # Encrypted vault system
@@ -1126,7 +1046,7 @@ This enterprise-grade security system ensures **zero sensitive data exposure** w
 ### **🏗️ Core Architecture Overview**
 JustNewsAgent V4 features a **distributed multi-agent architecture** with GPU acceleration, comprehensive monitoring, and enterprise-grade security:
 
-```
+```text
 JustNewsAgent V4 Architecture
 ├── MCP Bus (Port 8000) - Central Communication Hub
 ├── Core Agents (Ports 8001-8009)
@@ -1304,300 +1224,26 @@ python config/validate_config.py  # Security validation
 - **✅ Enterprise Compliance**: Production-ready security standards
 - **✅ Audit Trails**: Complete security event logging and tracking
 - **✅ Multi-Backend Support**: Environment variables + encrypted vault
+### Makefile (developer convenience)
 
-### **📊 Production Status - SEPTEMBER 9, 2025**
+A Makefile is provided to simplify common environment and test tasks. It
+prefers mamba when available and falls back to conda.
 
-#### **✅ Completed Production Systems:**
-- **Complete Agent Suite**: 13/13 services running successfully (MCP Bus + 12 specialized agents)
-- **Synthesizer V3**: 4-model production stack (BERTopic, BART, FLAN-T5, SentenceTransformers)
-- **TensorRT Acceleration**: 730+ articles/sec performance across all agents
-- **Legal Compliance Framework**: Complete GDPR/CCPA implementation
-- **Advanced Knowledge Graph**: Entity extraction, clustering, and APIs
-- **Enterprise Security System**: Military-grade secret management and prevention
-- **Centralized Configuration**: Environment-specific profile management
-- **Advanced Monitoring**: Real-time dashboards and analytics
-- **GPU Resource Management**: Intelligent allocation and optimization
-- **Systemd Integration**: Production-ready service management
-- **Database Integration**: PostgreSQL with connection pooling and vector storage
-
-#### **🔄 Current Development Focus:**
-- 🔄 **Phase 3 Sprint 4-4 Remaining Tasks**: Researcher Authentication, Legal Compliance, Performance Optimization
-- 🔄 Multi-node deployment capabilities for distributed crawling
-- 🔄 Enhanced agent communication protocols
-- 🔄 Advanced performance profiling and bottleneck analysis
-- 🔄 Automated configuration optimization based on usage patterns
-- 🔄 Web-based dashboard interface expansion
-- 🔄 Integration with additional GPU monitoring tools
-
-**Production Environment Setup:**
+Common targets:
 
 ```bash
-# 1. Set production environment variables
-export JUSTNEWS_ENV=production
-export GPU_CONFIG_PROFILE=production
-export LOG_LEVEL=WARNING
-export LOG_FORMAT=json
+# Create the development environment (mamba preferred)
+make env-create
 
-# 2. Configure GPU settings for production
-export CUDA_VISIBLE_DEVICES=0,1,2,3  # Use all available GPUs
-export GPU_MEMORY_FRACTION=0.9       # Use 90% of GPU memory
-export GPU_OPTIMIZATION_LEVEL=3      # Aggressive optimization
+# Install test utilities into the environment
+make env-install
 
-# 3. Start services using the daemon script
-./start_services_daemon.sh
+# Run the canonical test runner inside the project environment
+make test-dev
 
-# 4. Verify all services are running
-curl http://localhost:8000/agents
-curl http://localhost:8013/gpu/info
+# CI-friendly test run (uses explicit PY override)
+make test-ci
 ```
 
-**Docker Deployment (Legacy - Deprecated):**
-
-```bash
-# Note: Docker deployment is deprecated in favor of direct conda environment deployment
-# Use the start_services_daemon.sh script for production deployment
-```
-
-**Monitoring & Maintenance:**
-
-```bash
-# Start monitoring dashboard
-python agents/dashboard/gui.py &
-
-# Check system health
-curl http://localhost:8013/gpu/dashboard
-
-# Monitor logs
-tail -f logs/*.log
-
-# Run health checks
-python validate_gpu_setup.py --comprehensive
-
-# Backup configuration
-python -c "from agents.common.gpu_config_manager import get_config_manager; get_config_manager().export_config('backup_$(date +%Y%m%d_%H%M%S).json')"
-```
-
-**Scaling Considerations:**
-
-- **Single GPU**: Suitable for development and small-scale production
-- **Multi-GPU**: Recommended for high-throughput production environments
-- **Memory Conservative Profile**: Use when GPU memory is limited
-- **Load Balancing**: Configure MAX_CONCURRENT_AGENTS based on available resources
-
-**Security Considerations:**
-
-- Run services behind a reverse proxy (nginx/apache) for production
-- Configure firewall rules to restrict access to dashboard ports
-- Use secure database credentials and connection strings
-- Regularly update dependencies and monitor for security vulnerabilities
-- Implement proper logging and monitoring for production environments
-
-**Backup & Recovery:**
-
-```bash
-# Automated backup script (create this file)
-#!/bin/bash
-BACKUP_DIR="/var/backups/justnews"
-mkdir -p $BACKUP_DIR
-
-# Backup configuration
-python -c "from agents.common.gpu_config_manager import get_config_manager; get_config_manager().export_config('$BACKUP_DIR/config_$(date +%Y%m%d_%H%M%S).json')"
-
-# Backup logs
-cp -r logs $BACKUP_DIR/logs_$(date +%Y%m%d_%H%M%S)
-
-# Backup database (if applicable)
-# pg_dump justnews > $BACKUP_DIR/db_$(date +%Y%m%d_%H%M%S).sql
-```
-
-**Performance Tuning:**
-
-- Monitor GPU utilization with `nvidia-smi -l 1`
-- Adjust BATCH_SIZE based on GPU memory availability
-- Use GPU_CONFIG_PROFILE=production for optimal performance
-- Configure AGENT_TIMEOUT appropriately for your use case
-- Monitor and optimize database connection pooling
-
-Roadmap
--------
-
-**Recently Completed:**
-- ✅ **Phase 1 BBC-First Refactoring**: Canonical metadata emission and ethical crawling compliance
-- ✅ **Phase 2 Multi-Site Clustering**: Database-driven sources with concurrent processing (0.55 articles/sec)
-- ✅ **Phase 3 Sprint 3-4 Advanced KG Features**: Complete knowledge graph with entity extraction, clustering, and APIs
-- ✅ **Knowledge Graph Documentation**: Comprehensive documentation covering entity extraction, disambiguation, clustering, and relationship analysis
-- ✅ Advanced GPU Management System with MultiAgentGPUManager
-- ✅ Real-time GPU Health Monitoring with comprehensive dashboards
-- ✅ Centralized Configuration Management with environment-specific profiles
-- ✅ FastAPI-based Dashboard Agent with RESTful API endpoints
-- ✅ PyQt5-based Interactive GUI for monitoring and configuration
-- ✅ RAPIDS 25.04 ecosystem integration with CUDA 12.4 support
-- ✅ Production-grade error handling and automatic CPU fallback
-- ✅ Performance analytics with trend analysis and optimization recommendations
-- ✅ **Advanced Analytics Engine** with real-time performance monitoring and bottleneck detection
-- ✅ **Analytics Dashboard** with interactive web interface and comprehensive visualizations
-- ✅ **Performance Profiling & Optimization** with automated recommendations and system health monitoring
-
-**Current Development Focus:**
-- 🔄 **Phase 3 Sprint 4-4 Remaining Tasks**: Researcher Authentication, Legal Compliance, Performance Optimization
-- 🔄 Multi-node deployment capabilities for distributed crawling
-- 🔄 Enhanced agent communication protocols
-- 🔄 Advanced performance profiling and bottleneck analysis
-- 🔄 Automated configuration optimization based on usage patterns
-- 🔄 Web-based dashboard interface expansion
-- 🔄 Integration with additional GPU monitoring tools
-
-**Future Enhancements:**
-- 📋 Distributed agent orchestration across multiple machines
-- 📋 Advanced machine learning-based optimization algorithms
-- 📋 Real-time collaborative agent coordination
-- 📋 Enhanced security and access control mechanisms
-- 📋 Plugin architecture for custom agent development
-- 📋 Comprehensive API documentation and SDK
-- 📋 Container orchestration integration (Kubernetes, Docker Swarm)
-- 📋 Advanced analytics and reporting capabilities
-
-**Community & Ecosystem:**
-- 📋 Improved documentation and developer guides
-- 📋 Community contribution guidelines and templates
-- 📋 Plugin marketplace and sharing platform
-- 📋 Educational resources and tutorials
-- 📋 Integration with popular ML frameworks and tools
-
-Support & contacts
-------------------
-
-**Project Status:** Production Ready with Phase 2 Complete
-- **Version:** 2.6.0
-- **Last Updated:** September 7, 2025
-- **Python Support:** 3.11, 3.12
-- **GPU Support:** CUDA 12.4, RAPIDS 25.04
-- **Phase 2 Status:** ✅ Multi-site clustering with database-driven sources completed
-- **Phase 3 Status:** 🔄 Comprehensive archive integration in planning
-
-**Documentation:**
-- **Main Documentation:** `README.md` (this file)
-- **API Documentation:** `docs/PHASE3_API_DOCUMENTATION.md`
-- **Knowledge Graph Documentation:** `docs/PHASE3_KNOWLEDGE_GRAPH.md`
-- **Legal Compliance Framework:** `docs/LEGAL_COMPLIANCE_FRAMEWORK.md`
-- **GPU Setup Guide:** `GPU_SETUP_README.md`
-- **Configuration Guide:** `docs/` directory
-- **Developer Guides:** `docs/` and `markdown_docs/` directories
-
-**Getting Help:**
-- **Issues:** https://github.com/Adrasteon/JustNewsAgent/issues
-- **Discussions:** https://github.com/Adrasteon/JustNewsAgent/discussions
-- **Documentation:** `markdown_docs/README.md`
-- **GPU Setup Issues:** `GPU_SETUP_README.md`
-
-**Key Resources:**
-- **GPU Configuration:** `config/gpu/` directory
-- **Test Files:** `tests/` directory
-- **Validation Scripts:** `validate_gpu_setup.py`, `test_gpu_*.py`
-- **Dashboard:** `agents/dashboard/` directory
-- **Configuration Management:** `agents/common/gpu_config_manager.py`
-
-**Troubleshooting:**
-- Run `python validate_gpu_setup.py` for GPU environment validation
-- Check `logs/` directory for detailed error logs
-- Use `python agents/dashboard/gui.py` for interactive monitoring
-- Review `config/gpu/gpu_config.json` for configuration issues
-
-**Community:**
-- **Contributing:** See Contributing section above
-- **Code of Conduct:** Apache 2.0 License terms
-- **Security Issues:** Report via GitHub Issues with "security" label
-
-License
--------
-
-This project is licensed under the Apache 2.0 License — see the `LICENSE` file for details.
-
-Acknowledgments
----------------
-
-**Core Technologies:**
-- **NVIDIA RAPIDS 25.04** - GPU-accelerated data science and machine learning
-- **CUDA 12.4** - GPU computing platform and programming model
-- **PyTorch** - Deep learning framework for AI model development
-- **Transformers** - State-of-the-art natural language processing
-- **FastAPI** - Modern, fast web framework for building APIs
-- **PostgreSQL** - Advanced open source relational database
-- **Redis** - In-memory data structure store for caching and messaging
-
-**UI & Visualization:**
-- **PyQt5** - Cross-platform GUI toolkit for interactive dashboards
-- **Plotly** - Interactive graphing library for data visualization
-- **Streamlit** - Framework for creating web apps for data science
-
-**Development Tools:**
-- **Conda** - Package and environment management system
-- **pytest** - Framework for writing and running tests
-- **ruff** - Fast Python linter and code formatter
-- **pre-commit** - Framework for managing and maintaining multi-language pre-commit hooks
-
-**Open Source Community:**
-- **Hugging Face** - Transformers, datasets, and model hub
-- **NVIDIA** - GPU computing ecosystem and RAPIDS libraries
-- **Python Software Foundation** - Python programming language
-- **FastAPI community** - Web framework development and support
-- **PyTorch community** - Deep learning research and development
-
-**Special Thanks:**
-- Contributors to the RAPIDS ecosystem for GPU acceleration
-- The FastAPI and PyTorch communities for excellent documentation
-- NVIDIA for CUDA and GPU computing resources
-- The broader open-source AI and machine learning community
-
-### README — Archival Backups (Repository Archival & Evidence Data Management Annotation)
-
-README (Repository Archival & Evidence Data Management Annotation): this repository intentionally keeps archival snapshots and quality backups for provenance and audit purposes.
-
-- Typical archival locations: `.backup/`, `docs/quality_backups/`, and `quality_backups/`.
-- These files are read-only snapshots for record-keeping and quality validation and do NOT affect active development, CI pipelines, or runtime behavior.
-- Do not modify these backup files during normal development. If you need to update or remove archival material, follow the repository archival policy and create a dedicated cleanup PR.
-
-**Note:** Codacy integration has been deprecated for this project (archived on 2025-10-04). All Codacy configuration and historical artifacts are stored under `archive_obsolete_files/20251004-120000/`. Use local CI/static analysis tools (e.g., `semgrep`, `ruff`, `pylint`, `trivy`) and the provided pre-commit scripts instead of Codacy.
-
-## square-one — single-command developer/operator entrypoint
-
-A new convenience wrapper script `square-one.sh` (committed at the repository root) provides a single, safe entrypoint to bring the entire JustNews system up or down for development and production workflows. The script:
-
-- Runs preflight checks (Conda env, Postgres connectivity, model-store layout, required ports).
-- Detects and *cleanly shuts down* any running JustNews services prior to start (calls systemd stop where applicable, calls `/shutdown` endpoints, and falls back to terminating processes by port). It intentionally skips stopping PostgreSQL so local DBs remain available.
-- Starts the system either via the production `deploy/systemd/reset_and_start.sh` path (when appropriate) or the developer `start_services_daemon.sh` script.
-- Can install itself to `/usr/local/bin/square-one` (`square-one install`) so the command `square-one` becomes globally available.
-
-Quick usage examples
-
-```bash
-# Run preflight checks
-./square-one.sh preflight
-
-# Start the full system (interactive prompt)
-./square-one.sh start
-
-# Start non-interactively (assume yes to prompts) using systemd when available
-./square-one.sh start --yes --force-systemd
-
-# Test Postgres connectivity only
-./square-one.sh check-db
-
-# Show brief status of expected ports/services
-./square-one.sh status
-
-# Install the wrapper globally (requires sudo)
-sudo ./square-one.sh install
-# afterwards you can run
-square-one start
-```
-
-Notes and operational guidance
-
-- The script is intended to be idempotent and safe: it attempts graceful shutdowns first and only force-kills processes when a clean shutdown path fails.
-- When installing globally (`install`), the script will copy itself to `/usr/local/bin/square-one` so it can be invoked from anywhere without a path.
-- By default `square-one start` preserves PostgreSQL if running locally (port 5432) — this avoids accidentally taking down the database during iterative development.
-- The wrapper is committed in branch `feat/new-scout-design`; you may wish to merge it into `main` when you are ready.
-
-If you want, I can add a short CI check that runs `square-one preflight` on PRs to validate environment readiness for integration/e2e jobs
+Use `make help` to list all available targets and usage notes.
 

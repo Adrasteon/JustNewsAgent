@@ -1,98 +1,119 @@
-.PHONY: help env-create env-install env-report test-dev test-unit test-smoke test-tensorrt test-ci check-env
+# Makefile - developer convenience targets for JustNewsAgent
+# Prefers mamba when available, falls back to conda.
 
-# Default target
+# Environment configuration
+ENV_NAME ?= justnews-v2-py312
+CONDA ?= conda
+
+# Detect mamba binary if installed
+MAMBA := $(shell command -v mamba 2>/dev/null || true)
+PKG_MGR := $(if $(MAMBA),mamba,conda)
+
+.DEFAULT_GOAL := help
+
+.PHONY: help env-create env-install env-rapids env-report test-dev test-unit \
+  test-smoke test-tensorrt test-ci test-py-override check-env
+
 help:
-	@echo "JustNewsAgent Makefile - Developer Convenience Targets"
-	@echo ""
-	@echo "Environment Management:"
-	@echo "  make env-create     - Create conda environment from environment.yml"
-	@echo "  make env-install    - Install dependencies in active environment"
-	@echo "  make env-report     - Report Python and package versions"
-	@echo "  make check-env      - Verify environment is activated"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test-dev       - Run all safe tests (unit + smoke + tensorrt stub)"
-	@echo "  make test-unit      - Run unit tests only"
-	@echo "  make test-smoke     - Run smoke E2E stub test"
-	@echo "  make test-tensorrt  - Run TensorRT stub build test"
-	@echo "  make test-ci        - Run the canonical CI test sequence"
-	@echo ""
-	@echo "Note: Most targets require an activated conda environment."
-	@echo "      Use: conda activate justnews-v2-py312 (or mamba)"
+	@echo "JustNewsAgent Makefile - common developer tasks"
+	@echo
+	@echo "Targets:"
+	@echo "  env-create        Create the development conda env (mamba preferred)"
+	@echo "  env-install       Install utility/test deps into the env (mamba preferred)"
+	@echo "  env-rapids        Install RAPIDS / GPU packages (verify CUDA compatibility)"
+	@echo "  env-report        Print environment and package versions for debugging/reproducibility"
+	@echo "  test-dev          Run canonical tests inside the conda env (all steps)"
+	@echo "  test-unit         Run unit tests only (runner --unit)"
+	@echo "  test-smoke        Run smoke tests (runner --smoke)"
+	@echo "  test-tensorrt     Run TensorRT gated tests (runner --tensorrt)"
+	@echo "  test-py-override  Run canonical runner with explicit PY override (useful for CI)"
+	@echo "  test-ci           CI-friendly wrapper (uses PY override and runs all tests)"
+	@echo "  check-env         Print detected package manager and env status"
 
-# Environment Management
 env-create:
-	@echo "Creating conda environment justnews-v2-py312 from environment.yml..."
+	@echo "Using package manager: $(PKG_MGR)"
 	@if command -v mamba >/dev/null 2>&1; then \
-		echo "Using mamba (faster)..."; \
-		mamba env create -f environment.yml; \
+		mamba create -n $(ENV_NAME) python=3.12 -c conda-forge -y; \
 	else \
-		echo "Using conda..."; \
-		conda env create -f environment.yml; \
+		conda create -n $(ENV_NAME) python=3.12 -c conda-forge -y; \
 	fi
-	@echo ""
-	@echo "Environment created. Activate with: conda activate justnews-v2-py312"
+	@echo "Created environment '$(ENV_NAME)'. Activate with: conda activate $(ENV_NAME)"
 
 env-install:
-	@echo "Installing/updating dependencies in active environment..."
-	pip install -U pip setuptools wheel
-	@echo "Dependencies installed."
+	@echo "Installing test/util dependencies into $(ENV_NAME)"
+	@if command -v mamba >/dev/null 2>&1; then \
+		mamba install -n $(ENV_NAME) -c conda-forge prometheus_client gputil pytest -y; \
+	else \
+		conda install -n $(ENV_NAME) -c conda-forge prometheus_client gputil pytest -y; \
+	fi
+
+env-rapids:
+	@echo "Installing RAPIDS example - verify GPU & CUDA compatibility first!"
+	@echo "Using channels: rapidsai, conda-forge, nvidia"
+	@if command -v mamba >/dev/null 2>&1; then \
+		mamba install -n $(ENV_NAME) -c rapidsai -c conda-forge -c nvidia rapids=25.04 python=3.12 cuda-version=12.4 -y; \
+	else \
+		conda install -n $(ENV_NAME) -c rapidsai -c conda-forge -c nvidia rapids=25.04 python=3.12 cuda-version=12.4 -y; \
+	fi
 
 env-report:
-	@echo "=== Environment Report ==="
-	@echo "Python version:"
-	@python --version
-	@echo ""
-	@echo "Key package versions:"
-	@python -c "import sys; print(f'Python: {sys.version}')" 2>/dev/null || true
-	@python -c "import torch; print(f'PyTorch: {torch.__version__}')" 2>/dev/null || echo "PyTorch: not installed"
-	@python -c "import transformers; print(f'Transformers: {transformers.__version__}')" 2>/dev/null || echo "Transformers: not installed"
-	@python -c "import fastapi; print(f'FastAPI: {fastapi.__version__}')" 2>/dev/null || echo "FastAPI: not installed"
-	@python -c "import pytest; print(f'Pytest: {pytest.__version__}')" 2>/dev/null || echo "Pytest: not installed"
-	@echo ""
-	@echo "CUDA availability:"
-	@python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')" 2>/dev/null || echo "PyTorch not available to check CUDA"
-	@if command -v nvidia-smi >/dev/null 2>&1; then \
-		echo ""; \
-		echo "GPU info:"; \
-		nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null || echo "nvidia-smi failed"; \
-	else \
-		echo "nvidia-smi not found (no GPU or drivers not installed)"; \
+	@echo "Detected package manager: $(PKG_MGR)"
+	@echo "Conda version: $(shell $(CONDA) --version 2>/dev/null || echo 'conda: not found')"
+	@if command -v mamba >/dev/null 2>&1; then \
+		echo "Mamba version:" $(shell mamba --version 2>/dev/null || echo 'mamba: not found'); \
 	fi
+	@echo "Conda environments:" \
+		; $(CONDA) info --envs || true
+	@if $(CONDA) env list | grep -q "$(ENV_NAME)"; then \
+		echo "Environment '$(ENV_NAME)' found - conda list:"; \
+		$(CONDA) list -n $(ENV_NAME) --no-builds || true; \
+		echo "Probing Python and common GPU packages inside $(ENV_NAME):"; \
+		conda run -n $(ENV_NAME) python - <<'PY' || true
+import sys, importlib
+print('python:', sys.version.replace('\n',' '))
+for pkg in ('torch','cudf','cuml','cugraph','cupy'):
+    try:
+        m = importlib.import_module(pkg)
+        ver = getattr(m, '__version__', None)
+        print(f"{pkg}: {ver}")
+    except Exception as e:
+        print(f"{pkg}: not available ({e.__class__.__name__})")
+PY
+	else \
+		echo "Environment '$(ENV_NAME)' not found; run 'make env-create' first"; \
+	fi
+
+test-dev:
+	@echo "Running canonical tests in env $(ENV_NAME)"
+	conda run -n $(ENV_NAME) ./Canonical_Test_RUNME.sh --all
+
+test-unit:
+	@echo "Running unit tests in env $(ENV_NAME)"
+	conda run -n $(ENV_NAME) ./Canonical_Test_RUNME.sh --unit
+
+test-smoke:
+	@echo "Running smoke tests in env $(ENV_NAME)"
+	conda run -n $(ENV_NAME) ./Canonical_Test_RUNME.sh --smoke
+
+test-tensorrt:
+	@echo "Running TensorRT gated tests in env $(ENV_NAME)"
+	conda run -n $(ENV_NAME) ./Canonical_Test_RUNME.sh --tensorrt
+
+test-py-override:
+	@echo "Running canonical runner with explicit PY override using env $(ENV_NAME)"
+	PY='conda run -n $(ENV_NAME) python' ./Canonical_Test_RUNME.sh --all
+
+# CI-friendly non-interactive test target. Useful for CI pipelines.
+test-ci:
+	@echo "CI test run (non-interactive) using env $(ENV_NAME)"
+	PY='conda run -n $(ENV_NAME) python' ./Canonical_Test_RUNME.sh --all
 
 check-env:
-	@if [ -z "$$CONDA_DEFAULT_ENV" ]; then \
-		echo "ERROR: No conda environment is active."; \
-		echo "Please activate: conda activate justnews-v2-py312"; \
-		exit 1; \
+	@echo "Detected package manager: $(PKG_MGR)"
+	@echo "Conda environments (showing only names):"
+	@conda env list | awk '{print $$1}' | sed -n '1,200p' || true
+	@if conda env list | grep -q "$(ENV_NAME)"; then \
+		echo "Environment $(ENV_NAME) exists"; \
 	else \
-		echo "Active conda environment: $$CONDA_DEFAULT_ENV"; \
+		echo "Environment $(ENV_NAME) not found"; \
 	fi
-
-# Testing Targets
-test-unit: check-env
-	@echo "Running unit tests (excludes integration tests)..."
-	pytest -v -k "not integration" --tb=short --maxfail=5
-
-test-smoke: check-env
-	@echo "Running smoke E2E stub test..."
-	python tests/smoke_e2e_stub.py
-
-test-tensorrt: check-env
-	@echo "Running TensorRT stub build test..."
-	pytest -v tests/test_tensorrt_stub.py
-
-test-dev: check-env test-unit test-smoke test-tensorrt
-	@echo ""
-	@echo "=== All safe tests completed ==="
-
-test-ci: check-env
-	@echo "Running canonical CI test sequence..."
-	@echo ""
-	$(MAKE) env-report
-	@echo ""
-	$(MAKE) test-unit
-	@echo ""
-	$(MAKE) test-smoke
-	@echo ""
-	@echo "=== Canonical CI test sequence completed ==="

@@ -6,11 +6,11 @@ status: current
 last_updated: 2025-09-12
 ---
 
-# 📚 JustNews V4 Documentation Contributor Guidelines
-
 ## 🎯 Overview
 
-Welcome to the JustNews V4 documentation team! These guidelines ensure our documentation maintains the highest quality standards and exceeds industry benchmarks. Our target is **>90% quality score** across all documentation.
+Welcome to the JustNews V4 documentation team! These guidelines ensure our
+documentation maintains the highest quality standards and exceeds industry
+benchmarks. Our target is **>90% quality score** across all documentation.
 
 **Current Status:** ✅ **100.0/100 Quality Score Achieved**
 
@@ -82,13 +82,13 @@ make test-ci
 
 ## 📋 Table of Contents
 
-1. [Quality Standards](#quality-standards)
-2. [Documentation Structure](#documentation-structure)
-3. [Writing Guidelines](#writing-guidelines)
-4. [Technical Requirements](#technical-requirements)
-5. [Review Process](#review-process)
-6. [Tools and Automation](#tools-and-automation)
-7. [Version Control](#version-control)
+- Quality Standards
+- Documentation Structure
+- Writing Guidelines
+- Technical Requirements
+- Review Process
+- Tools and Automation
+- Version Control
 
 ---
 
@@ -127,7 +127,7 @@ make test-ci
 
 ### Required Directory Structure
 
-```
+```text
 JustNewsAgent/
 ├── docs/
 │   ├── docs_catalogue_v2.json    # 📋 Master catalogue
@@ -169,28 +169,35 @@ JustNewsAgent/
 ### Content Standards
 
 #### 1. Descriptions
+
 - **Minimum Length**: 150 characters
 - **Target Length**: 200+ characters
 - **Structure**: Problem → Solution → Benefits
 - **Keywords**: Include relevant technical terms
 
 **Example:**
-```
+
+```text
 ❌ Poor: "Installation guide"
-✅ Excellent: "Complete installation guide for JustNews V4 with RTX3090 GPU support, including dependency management, environment setup, and troubleshooting common issues."
+✅ Excellent: "Complete installation guide for JustNews V4 with
+RTX3090 GPU support, including dependency management, environment
+setup, and troubleshooting common issues."
 ```
 
 #### 2. Titles
+
 - **Clear and Descriptive**: Explain document purpose
 - **Consistent Format**: Use title case
 - **Include Key Terms**: GPU, AI, agents, etc.
 
 #### 3. Tags
+
 - **Required**: Every document must have tags
 - **Relevant**: Use specific, searchable terms
 - **Consistent**: Follow established tag conventions
 
 **Tag Categories:**
+
 - **Technical**: `gpu`, `tensorrt`, `api`, `database`
 - **Functional**: `installation`, `deployment`, `monitoring`
 - **Content**: `guide`, `report`, `documentation`, `tutorial`
@@ -198,12 +205,14 @@ JustNewsAgent/
 ### Style Guidelines
 
 #### Language and Tone
+
 - **Professional**: Use formal, technical language
 - **Clear**: Avoid jargon without explanation
 - **Concise**: Be comprehensive but not verbose
 - **Active Voice**: Prefer active voice over passive
 
 #### Formatting Standards
+
 - **Markdown**: Use consistent Markdown formatting
 - **Headers**: Use proper hierarchy (H1 → H2 → H3)
 - **Code Blocks**: Use syntax highlighting
@@ -234,20 +243,78 @@ Every document entry must include:
 ### File Standards
 
 #### Naming Conventions
+
 - **Lowercase**: Use lowercase with underscores
 - **Descriptive**: Include key terms in filename
 - **Extensions**: Use `.md` for Markdown files
 
 **Examples:**
+
 - ✅ `gpu_acceleration_guide.md`
 - ✅ `agent_communication_protocol.md`
 - ❌ `GPU_GUIDE.md`
 - ❌ `doc1.md`
 
-#### Version Control
+#### File Version Control
+
 - **Commits**: Use descriptive commit messages
 - **Branches**: Create feature branches for changes
 - **Pull Requests**: Required for all changes
+
+### Environment & Dependency Management (preferred)
+
+For reproducible development and CI parity we require contributors to use
+conda-compatible environments. We explicitly recommend mamba (a conda-
+compatible, faster solver) or conda for environment creation and package
+installation.
+
+- Use mamba where possible to create and manage the project environment.
+  Example:
+
+  ```bash
+  conda install -n base -c conda-forge mamba -y
+  mamba create -n justnews-v2-py312 python=3.12 -c conda-forge -y
+  mamba activate justnews-v2-py312
+  ```
+
+- Install project utilities and test dependencies from conda-forge to avoid
+  mixing package managers. Example:
+
+  ```bash
+  mamba install -c conda-forge prometheus_client gputil pytest -y
+  ```
+
+- Running tests: always execute tests inside the environment. Prefer
+  `conda run -n <env> ...` for automation and CI. Example:
+
+  ```bash
+  conda run -n justnews-v2-py312 ./Canonical_Test_RUNME.sh --all
+  ```
+
+- Policy on pip: avoid using pip to install into the conda environment
+  unless a package is unavailable via conda. If pip is required, run it
+  inside the environment or via `conda run -n <env> pip install ...`.
+
+#### Makefile targets (developer)
+
+We provide a Makefile that wraps common environment and test tasks. The
+Makefile prefers mamba when available and provides CI-friendly targets.
+
+```bash
+# Create environment (mamba preferred):
+make env-create
+
+# Install test and utility deps into the env:
+make env-install
+
+# Run the canonical test runner in the env (all steps):
+make test-dev
+
+# CI-friendly wrapper (uses explicit PY override):
+make test-ci
+```
+
+Use `make help` to see all targets and descriptions.
 
 ---
 
@@ -308,6 +375,7 @@ python docs/version_control.py history --document "doc_id"
 ### Automated Scripts
 
 #### Quality Enhancement
+
 ```python
 from docs.quality_enhancement import QualityEnhancer
 
@@ -317,6 +385,7 @@ enhancer.enhance_short_descriptions()
 ```
 
 #### Catalogue Management
+
 ```python
 from docs.automation_tools import DocumentationAutomation
 
@@ -331,7 +400,7 @@ automation.validate_cross_references()
 
 ### Commit Message Standards
 
-```
+```text
 type(scope): description
 
 [optional body]
@@ -340,6 +409,7 @@ type(scope): description
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -349,7 +419,8 @@ type(scope): description
 - `chore`: Maintenance changes
 
 **Examples:**
-```
+
+```text
 docs(catalogue): enhance GPU documentation descriptions
 
 - Added detailed GPU acceleration guides
@@ -361,7 +432,7 @@ Closes #123
 
 ### Branch Naming
 
-```
+```text
 feature/description-of-feature
 bugfix/issue-description
 docs/documentation-update
@@ -391,6 +462,7 @@ hotfix/critical-fix
 ### Response Procedures
 
 #### Critical Alert Response
+
 1. **Immediate Action**: Stop all documentation work
 2. **Root Cause Analysis**: Identify quality issues
 3. **Fix Issues**: Address all critical problems
@@ -398,6 +470,7 @@ hotfix/critical-fix
 5. **Resume Normal Operations**
 
 #### Warning Alert Response
+
 1. **Monitor Closely**: Track quality trends
 2. **Address Issues**: Fix identified problems
 3. **Prevent Degradation**: Implement preventive measures
@@ -479,6 +552,7 @@ hotfix/critical-fix
 ### Quality Goals
 
 **2025 Q4 Goals:**
+
 - Maintain 95%+ quality score consistently
 - Achieve 100% documentation coverage
 - Implement advanced automation features
@@ -496,34 +570,39 @@ hotfix/critical-fix
 ## ✅ Checklist for Contributors
 
 ### Before Starting Work
+
 - [ ] Review current quality score
-- [ ] Understand documentation structure
-- [ ] Check existing similar documents
-- [ ] Plan changes with quality impact in mind
+- [ ] Confirm target audience and scope
+- [ ] Check for related docs that require updates
 
 ### During Development
+
 - [ ] Follow writing guidelines
-- [ ] Include all required metadata
-- [ ] Test changes with quality monitor
-- [ ] Validate JSON structure
+- [ ] Run automated quality checks locally
 
 ### Before Committing
+
 - [ ] Run quality check
-- [ ] Verify all fields complete
-- [ ] Check formatting consistency
-- [ ] Review change impact
+- [ ] Verify all fields are complete
+- [ ] Ensure code examples run where applicable
 
 ### After Committing
+
 - [ ] Monitor quality score
 - [ ] Address any alerts promptly
-- [ ] Update related documentation
-- [ ] Share improvements with team
+- [ ] Share improvements with the team
 
 ---
 
-**Remember**: High-quality documentation is a critical component of JustNews V4's success. Your contributions help maintain our industry-leading standards and ensure the system remains accessible and maintainable.
+### Remember
 
-**Thank you for contributing to JustNews V4 documentation! 🚀**
+High-quality documentation is a critical component of JustNews V4's
+success. Your contributions help maintain our industry-leading standards and
+ensure the system remains accessible and maintainable.
+
+### Thank you
+
+Thank you for contributing to JustNews V4 documentation! 🚀
 
 ## See also
 
