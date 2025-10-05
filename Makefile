@@ -12,7 +12,7 @@ PKG_MGR := $(if $(MAMBA),mamba,conda)
 .DEFAULT_GOAL := help
 
 .PHONY: help env-create env-install env-rapids env-report test-dev test-unit \
-  test-smoke test-tensorrt test-ci test-py-override check-env
+  test-smoke test-tensorrt test-ci test-py-override check-env check-install
 
 help:
 	@echo "JustNewsAgent Makefile - common developer tasks"
@@ -29,6 +29,7 @@ help:
 	@echo "  test-py-override  Run canonical runner with explicit PY override (useful for CI)"
 	@echo "  test-ci           CI-friendly wrapper (uses PY override and runs all tests)"
 	@echo "  check-env         Print detected package manager and env status"
+	@echo "  check-install     Run local installation checks (unit template & env examples)"
 
 env-create:
 	@echo "Using package manager: $(PKG_MGR)"
@@ -117,3 +118,7 @@ check-env:
 	else \
 		echo "Environment $(ENV_NAME) not found"; \
 	fi
+
+check-install:
+	@echo "Running local installation checks (unit template & env examples)"
+	@bash scripts/ci/check_unit_and_env.sh

@@ -251,7 +251,23 @@ reinstall_units_scripts() {
     else
       mkdir -p "$(dirname "$UNIT_TEMPLATE_DST")"
       backup_file "$UNIT_TEMPLATE_DST"
-      cp "$UNIT_TEMPLATE_SRC" "$UNIT_TEMPLATE_DST"
+      # Prepare a temporary unit file so we can inject configured User/Group
+      tmp_unit=$(mktemp)
+      cp "$UNIT_TEMPLATE_SRC" "$tmp_unit"
+      # Replace User= and Group= lines with configured values (if present)
+      if grep -q '^User=' "$tmp_unit" 2>/dev/null; then
+        sed -i "s/^User=.*/User=$DEFAULT_SERVICE_USER/" "$tmp_unit" || true
+      else
+        # Append User if not present
+        echo "User=$DEFAULT_SERVICE_USER" >> "$tmp_unit"
+      fi
+      if grep -q '^Group=' "$tmp_unit" 2>/dev/null; then
+        sed -i "s/^Group=.*/Group=$JUSTNEWS_GROUP/" "$tmp_unit" || true
+      else
+        echo "Group=$JUSTNEWS_GROUP" >> "$tmp_unit"
+      fi
+      cp "$tmp_unit" "$UNIT_TEMPLATE_DST"
+      rm -f "$tmp_unit"
       # Ensure unit template is world-readable but owned by root
       chown root:root "$UNIT_TEMPLATE_DST" || true
       chmod 0644 "$UNIT_TEMPLATE_DST" || true
