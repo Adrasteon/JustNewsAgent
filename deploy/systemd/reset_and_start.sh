@@ -48,6 +48,8 @@ WAIT_SCRIPT_DST="/usr/local/bin/wait_for_mcp.sh"
 ENV_SRC_DIR="$PROJECT_ROOT/deploy/systemd/env"
 ENV_DST_DIR="/etc/justnews"
 GLOBAL_ENV="$ENV_DST_DIR/global.env"
+TMPFILES_SRC="$PROJECT_ROOT/deploy/systemd/tmpfiles/justnews.conf"
+TMPFILES_DST="/etc/tmpfiles.d/justnews.conf"
 WRAPPER_MAP=(
   "/usr/local/bin/enable_all.sh|$PROJECT_ROOT/deploy/systemd/scripts/enable_all.sh"
   "/usr/local/bin/health_check.sh|$PROJECT_ROOT/deploy/systemd/scripts/health_check.sh"
@@ -251,20 +253,21 @@ reinstall_units_scripts() {
     else
       mkdir -p "$(dirname "$UNIT_TEMPLATE_DST")"
       backup_file "$UNIT_TEMPLATE_DST"
-      # Prepare a temporary unit file so we can inject configured User/Group
       tmp_unit=$(mktemp)
       cp "$UNIT_TEMPLATE_SRC" "$tmp_unit"
-      # Replace User= and Group= lines with configured values (if present)
       if grep -q '^User=' "$tmp_unit" 2>/dev/null; then
         sed -i "s/^User=.*/User=$DEFAULT_SERVICE_USER/" "$tmp_unit" || true
       else
-        # Append User if not present
         echo "User=$DEFAULT_SERVICE_USER" >> "$tmp_unit"
       fi
       if grep -q '^Group=' "$tmp_unit" 2>/dev/null; then
         sed -i "s/^Group=.*/Group=$JUSTNEWS_GROUP/" "$tmp_unit" || true
       else
         echo "Group=$JUSTNEWS_GROUP" >> "$tmp_unit"
+      fi
+      # Also ensure runtime/state directories are defined in the final unit (redundant but explicit)
+      if ! grep -q '^RuntimeDirectory=' "$tmp_unit" 2>/dev/null; then
+        sed -i "/^WorkingDirectory=/a RuntimeDirectory=$JUSTNEWS_GROUP\nRuntimeDirectoryMode=0750\nStateDirectory=$JUSTNEWS_GROUP" "$tmp_unit" || true
       fi
       cp "$tmp_unit" "$UNIT_TEMPLATE_DST"
       rm -f "$tmp_unit"
@@ -274,6 +277,22 @@ reinstall_units_scripts() {
       systemctl daemon-reload
       log_success "Unit template installed"
     fi
+  fi
+  # Install systemd-tmpfiles spec so systemd creates runtime/state directories
+  if [[ -f "$TMPFILES_SRC" ]]; then
+    log_info "Installing tmpfiles spec for JustNews..."
+    if [[ "$DRY_RUN" == true ]]; then
+      echo "DRY-RUN: cp $TMPFILES_SRC $TMPFILES_DST; systemd-tmpfiles --create $TMPFILES_DST"
+    else
+      backup_file "$TMPFILES_DST" || true
+      cp "$TMPFILES_SRC" "$TMPFILES_DST"
+      chmod 0644 "$TMPFILES_DST" || true
+      # Create runtime/state directories immediately
+      systemd-tmpfiles --create "$TMPFILES_DST" || true
+      log_success "Tmpfiles spec installed and directories created"
+    fi
+  else
+    log_warn "Tmpfiles spec not found at $TMPFILES_SRC; skipping tmpfiles install"
   fi
 
   if [[ "$REINSTALL_SCRIPTS" == true ]]; then

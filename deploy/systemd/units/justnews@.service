@@ -12,6 +12,16 @@ EnvironmentFile=-/etc/justnews/%i.env
 # Recommended in production: create system user 'justnews' and group 'justnews'.
 User=justnews
 Group=justnews
+# Create an ephemeral runtime directory under /run and persistent state under /var/lib
+RuntimeDirectory=justnews
+RuntimeDirectoryMode=0750
+StateDirectory=justnews
+#
+# Security hardening defaults - adjust if an agent needs extra privileges
+ProtectSystem=full
+ProtectHome=read-only
+PrivateTmp=yes
+NoNewPrivileges=yes
 # Use an absolute working directory (systemd requires absolute paths)
 WorkingDirectory=/home/adra/JustNewsAgent
 # Start from a shell to allow cd into repo and use env var expansion safely

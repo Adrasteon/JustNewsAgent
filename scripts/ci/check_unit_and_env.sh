@@ -35,6 +35,22 @@ if [[ "$unit_group" != "$RECOMMENDED_GROUP" ]]; then
 fi
 info "Unit template user/group validated: $unit_user/$unit_group"
 
+# Ensure runtime and state directories are declared
+if ! grep -q '^RuntimeDirectory=justnews' "$UNIT" 2>/dev/null; then
+  fail "Unit template missing RuntimeDirectory=justnews"
+fi
+if ! grep -q '^StateDirectory=justnews' "$UNIT" 2>/dev/null; then
+  fail "Unit template missing StateDirectory=justnews"
+fi
+# Check basic hardening
+if ! grep -q '^ProtectSystem=full' "$UNIT" 2>/dev/null; then
+  warn "Unit template missing ProtectSystem=full; consider adding for extra safety"
+fi
+if ! grep -q '^PrivateTmp=yes' "$UNIT" 2>/dev/null; then
+  warn "Unit template missing PrivateTmp=yes; consider adding for extra isolation"
+fi
+info "Runtime/state directives validated"
+
 # Validate env example does not contain concrete secrets
 if [[ ! -f "$ENV_EXAMPLE" ]]; then
   warn "Env example not found: $ENV_EXAMPLE"; exit 0
