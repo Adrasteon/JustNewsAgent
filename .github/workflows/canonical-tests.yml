@@ -1,0 +1,100 @@
+name: Canonical Tests
+
+# Canonical test workflow using Makefile targets for reproducible test execution.
+# This workflow focuses on the core test sequence (env setup, unit, smoke tests) with
+# optional TensorRT stub tests on GPU runners and integration tests via workflow_dispatch.
+#
+# For comprehensive CI with linting, pre-commit hooks, and coverage:
+#   see .github/workflows/ci.yml
+#
+# Run on PRs to main/dev and support manual workflow_dispatch with optional integration tests
+on:
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      run_integration:
+        description: 'Run integration tests'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  test:
+    name: Canonical Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: 3.12
+          auto-update-conda: true
+          activate-environment: justnews-v2-py312
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Environment setup
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make env-install
+
+      - name: Environment report
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make env-report
+
+      - name: Unit tests
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make test-unit
+
+      - name: Smoke tests
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make test-smoke
+
+      - name: Integration tests
+        if: github.event.inputs.run_integration == 'true'
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          pytest -v -k "integration" --tb=short --maxfail=3
+        continue-on-error: true
+
+  tensorrt-stub:
+    name: TensorRT Stub Build (GPU Runner)
+    # Only run on self-hosted GPU runners if the label exists
+    # Remove 'if: false' when self-hosted GPU runner is configured
+    if: false
+    runs-on: [self-hosted, gpu]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: 3.12
+          auto-update-conda: true
+          activate-environment: justnews-v2-py312
+          environment-file: environment.yml
+          use-mamba: true
+
+      - name: Environment setup
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make env-install
+
+      - name: TensorRT stub test
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          make test-tensorrt

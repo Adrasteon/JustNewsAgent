@@ -16,6 +16,70 @@ Welcome to the JustNews V4 documentation team! These guidelines ensure our docum
 
 ---
 
+## 🚀 Development Environment Setup
+
+### Quick Start with Makefile
+
+We provide a `Makefile` with convenient targets for environment setup and testing:
+
+```bash
+# Create conda environment (using mamba if available for faster install)
+make env-create
+
+# Activate the environment
+conda activate justnews-v2-py312  # or: mamba activate justnews-v2-py312
+
+# Install dependencies
+make env-install
+
+# Verify installation
+make env-report
+
+# Run tests
+make test-dev      # Run all safe tests (unit + smoke + tensorrt stub)
+make test-unit     # Run unit tests only
+make test-smoke    # Run smoke E2E stub test
+make test-tensorrt # Run TensorRT stub build test
+make test-ci       # Run canonical CI test sequence
+```
+
+See `make help` for all available targets.
+
+### Environment Management with Conda/Mamba
+
+**We recommend using `mamba` for faster package installation:**
+
+```bash
+# Install mamba (if not already installed)
+conda install -n base -c conda-forge mamba
+
+# Use mamba commands (faster than conda)
+mamba activate justnews-v2-py312
+mamba install <package>
+```
+
+The environment is defined in `environment.yml` and uses Python 3.12 with all required dependencies.
+
+### Running Tests Locally
+
+```bash
+# Activate environment
+conda activate justnews-v2-py312
+
+# Run specific test suites
+make test-unit      # Unit tests (excludes integration)
+make test-smoke     # Smoke E2E tests
+make test-tensorrt  # TensorRT stub tests
+
+# Run all safe tests
+make test-dev
+
+# Run CI test sequence (includes env report)
+make test-ci
+```
+
+---
+
 ## 📋 Table of Contents
 
 1. [Quality Standards](#quality-standards)

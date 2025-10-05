@@ -1,0 +1,10 @@
+{
+  "environment": "test",
+  "python_version": "3.12",
+  "test_suite": "canonical",
+  "gpu_required": false,
+  "metadata": {
+    "created": "2025-10-05",
+    "description": "Test environment metadata for canonical test suite"
+  }
+}
