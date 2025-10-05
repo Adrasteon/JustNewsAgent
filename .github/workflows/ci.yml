@@ -16,6 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Run pre-commit hooks (includes shellcheck & yamllint)
+        shell: bash -l {0}
+        run: |
+          python -m pip install --user pre-commit
+          export PATH="$HOME/.local/bin:$PATH"
+          pre-commit run --all-files
+
       - name: ShellCheck shell scripts
         run: |
           echo "Installing shellcheck and running it against shell scripts"

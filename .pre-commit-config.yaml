@@ -1,0 +1,14 @@
+repos:
+- repo: https://github.com/pre-commit/mirrors-shellcheck
+  rev: v0.9.0
+  hooks:
+    - id: shellcheck
+      args: [ -x ]
+      files: \.(sh|bash)$
+
+- repo: https://github.com/pre-commit/mirrors-yamllint
+  rev: v1.30.0
+  hooks:
+    - id: yamllint
+      args: [ -c, .yamllint ]
+      files: \.ya?ml$
