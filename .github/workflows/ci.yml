@@ -31,6 +31,23 @@ jobs:
         # Allow the team to iterate; make this an enforceable check in the future by removing continue-on-error
         continue-on-error: false
 
+      - name: Lint CI YAML (yamllint)
+        run: |
+          echo "Installing yamllint and checking CI workflow syntax"
+          python3 -m pip install --user yamllint
+          export PATH="$HOME/.local/bin:$PATH"
+          yamllint -f parsable .github/workflows/ci.yml || (echo "yamllint detected issues in .github/workflows/ci.yml" && yamllint .github/workflows/ci.yml && exit 1)
+
+      - name: Validate markdown frontmatter
+        run: |
+          echo "Checking for invalid markdown frontmatter across the repository"
+          python3 scripts/find_invalid_frontmatter.py > /tmp/frontmatter_issues || true
+          if [ -s /tmp/frontmatter_issues ]; then
+            echo "Invalid frontmatter detected:"; cat /tmp/frontmatter_issues; exit 1
+          else
+            echo "No invalid frontmatter found"
+          fi
+
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:

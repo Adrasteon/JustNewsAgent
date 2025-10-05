@@ -26,7 +26,6 @@ POSTGRES_USER="${POSTGRES_USER:-justnews_user}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password123}"
 
 # Helpers
-echod() { printf "%s\n" "$*"; }
 error() { printf "ERROR: %s\n" "$*" >&2; }
 info() { printf "[info] %s\n" "$*"; }
 warn() { printf "[warn] %s\n" "$*"; }
@@ -168,7 +167,7 @@ shutdown_justnews_services() {
         if [ "$code" = "200" ] || [ "$code" = "202" ] || [ "$code" = "204" ]; then
           info "Shutdown endpoint accepted POST on port $port (code $code). Waiting for port to close..."
           deadline=$(( $(date +%s) + 10 ))
-          while is_port_in_use "$port" && [ $(date +%s) -le $deadline ]; do
+          while is_port_in_use "$port" && [ "$(date +%s)" -le "$deadline" ]; do
             sleep 1
           done
           if ! is_port_in_use "$port"; then
