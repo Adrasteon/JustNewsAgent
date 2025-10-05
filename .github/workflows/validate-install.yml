@@ -1,0 +1,24 @@
+name: Validate installation config
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/systemd/**'
+      - 'scripts/ci/**'
+      - 'Makefile'
+      - '.github/workflows/**'
+
+jobs:
+  check-install:
+    name: Check unit & env examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run installation checks
+        run: |
+          set -euo pipefail
+          echo "Running unit + env validation"
+          chmod +x scripts/ci/check_unit_and_env.sh || true
+          ./scripts/ci/check_unit_and_env.sh
