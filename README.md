@@ -343,6 +343,52 @@ Prerequisites
 Installation
 ------------
 
+### Quick Start with Makefile (Recommended)
+
+We provide a `Makefile` with convenient targets for environment setup and testing:
+
+```bash
+# Clone the repository
+git clone https://github.com/Adrasteon/JustNewsAgent.git
+cd JustNewsAgent
+
+# Create conda environment (using mamba if available for faster install)
+make env-create
+
+# Activate the environment
+conda activate justnews-v2-py312  # or: mamba activate justnews-v2-py312
+
+# Install dependencies
+make env-install
+
+# Verify installation
+make env-report
+
+# Run tests
+make test-dev  # Runs unit, smoke, and tensorrt stub tests
+```
+
+See `make help` for all available targets.
+
+### Environment Management with Conda/Mamba
+
+**We recommend using `mamba` for faster package installation:**
+
+```bash
+# Install mamba (if not already installed)
+conda install -n base -c conda-forge mamba
+
+# Use mamba commands (faster than conda)
+mamba activate justnews-v2-py312
+mamba install <package>
+```
+
+The environment is defined in `environment.yml` and uses Python 3.12 with all required dependencies.
+
+---
+
+### Manual Installation Steps
+
 1. Clone the repository
 
 ```bash
@@ -390,6 +436,7 @@ pip install -r agents/analyst/requirements_v4.txt
 ```bash
 conda activate justnews-v2-prod  # Python 3.11 environment
 ```
+
 
 ### Git Hooks (Repository Safety Guards)
 
