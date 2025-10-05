@@ -111,7 +111,10 @@ ultra_safe_*.py
 # TODO: sanitize and remove these ignores
 agents/scout/production_crawlers/crawler_utils.py
 scripts/mini_e2e_runner.py
-start_services_daemon.sh
+# start_services_daemon.sh
+# Allowlist the primary developer and convenience startup scripts so they can be committed.
+!/start_services_daemon.sh
+!/square-one.sh
 
 # CUDA debug and reset tools
 debug_cuda_resources.py
