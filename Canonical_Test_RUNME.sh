@@ -6,7 +6,8 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$SCRIPT_DIR"
-PY=python3
+# Allow caller to override the Python command (e.g. PY='conda run -n justnews-v2-py312 python')
+PY=${PY:-python3}
 PYTEST=pytest
 
 # Helpers
@@ -76,7 +77,7 @@ if [ "$DO_PRECOMMIT" -eq 1 ]; then
   if command -v pre-commit >/dev/null 2>&1; then
     pre-commit run --all-files || { warn "pre-commit reported issues"; FAIL_COUNT=$((FAIL_COUNT+1)); }
   else
-    warn "pre-commit not found in PATH; try: pipx install pre-commit or python3 -m pip install --user pre-commit"
+    warn "pre-commit not found in PATH; install in the project environment: conda install -n justnews-v2-py312 -c conda-forge pre-commit (or mamba install -n justnews-v2-py312 -c conda-forge pre-commit)"
     FAIL_COUNT=$((FAIL_COUNT+1))
   fi
 fi
