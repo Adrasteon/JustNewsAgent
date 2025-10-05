@@ -255,6 +255,17 @@ preflight() {
   info "Running preflight checks"
   local failed=0
 
+  # If dry-run requested, print planned checks and exit success (non-destructive)
+  if [ "${DRY_RUN:-0}" -eq 1 ]; then
+    info "[dry-run] Preflight would perform the following checks:"
+    info "  - Verify Conda availability and environment: $CONDA_ENV"
+    info "  - Check Postgres connectivity to ${POSTGRES_USER}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
+    info "  - Verify required agent ports: ${REQUIRED_PORTS[*]}"
+    info "  - Confirm model store directory: $MODEL_STORE_ROOT"
+    info "  - Ensure essential start scripts exist: start_services_daemon.sh and deploy/systemd/reset_and_start.sh"
+    return 0
+  fi
+
   # Conda
   if try_source_conda; then
     info "Conda runtime available"
@@ -337,7 +348,7 @@ install_global() {
 
 usage() {
   cat <<EOF
-Usage: $SCRIPT_NAME [command] [--yes] [--force-systemd]
+Usage: $SCRIPT_NAME [command] [--yes] [--force-systemd] [--dry-run]
 Commands:
   preflight       Run a preflight check for required envs/files/ports
   check-db        Test Postgres connection with current envs
@@ -348,6 +359,7 @@ Commands:
 Flags:
   --yes           Non-interactive affirmative answer for install/start
   --force-systemd  Force systemd path for start when auto-detecting
+  --dry-run       Print what would be done without executing actions
 EOF
 }
 
@@ -367,10 +379,31 @@ status() {
   done
 }
 
+# Compute the start mode without performing actions
+compute_start_mode() {
+  local explicit_mode="$1"
+  if [ -n "$explicit_mode" ]; then
+    echo "$explicit_mode"
+    return 0
+  fi
+  # Prefer systemd path when running as root and the reset script exists
+  if [ "$EUID" -eq 0 ] && [ -x "$SCRIPT_DIR/deploy/systemd/reset_and_start.sh" ]; then
+    echo "systemd"
+    return 0
+  fi
+  # If force-systemd requested and script exists, prefer systemd
+  if [ -x "$SCRIPT_DIR/deploy/systemd/reset_and_start.sh" ] && [ "$FORCE_SYSTEMD" = "1" ]; then
+    echo "systemd"
+    return 0
+  fi
+  echo "dev"
+}
+
 # Parse command args
 CMD=""
 ASSUME_YES=0
 FORCE_SYSTEMD=0
+DRY_RUN=0
 if [ $# -gt 0 ]; then
   case "$1" in
     preflight|start|install|status|check-db|help)
@@ -387,6 +420,8 @@ while [ $# -gt 0 ]; do
       ASSUME_YES=1; shift;;
     --force-systemd)
       FORCE_SYSTEMD=1; shift;;
+    --dry-run)
+      DRY_RUN=1; shift;;
     *)
       error "Unknown arg $1"; usage; exit 1;;
   esac
@@ -445,6 +480,14 @@ case "$CMD" in
         warn "Preflight detected issues. Re-run with --yes to force start despite warnings, or fix issues and retry."
         exit 1
       fi
+    fi
+
+    # Dry-run: compute and report selected start mode without executing anything
+    if [ "$DRY_RUN" -eq 1 ]; then
+      mode_arg="${FORCE_SYSTEMD:+systemd}"
+      selected_mode=$(compute_start_mode "$mode_arg")
+      info "[dry-run] Would start in '$selected_mode' mode (no actions performed)"
+      exit 0
     fi
 
     start_services "${FORCE_SYSTEMD:+systemd}"

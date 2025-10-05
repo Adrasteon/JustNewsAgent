@@ -16,6 +16,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: ShellCheck shell scripts
+        run: |
+          echo "Installing shellcheck and running it against shell scripts"
+          sudo apt-get update -y
+          sudo apt-get install -y shellcheck
+          files=$(git ls-files '*.sh' 'scripts/**/*.sh' 'deploy/systemd/**/*.sh' || true)
+          if [ -z "$files" ]; then
+            echo "No shell scripts found to lint"
+          else
+            echo "Running shellcheck on: $files"
+            shellcheck -x $files
+          fi
+        # Allow the team to iterate; make this an enforceable check in the future by removing continue-on-error
+        continue-on-error: false
+
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -43,6 +58,13 @@ jobs:
           conda activate justnews-v2-py312
           # Run unit tests only (exclude integration tests)
           pytest -v -k "not integration" --tb=short --maxfail=5
+
+      - name: Run startup dry-run check
+        shell: bash -l {0}
+        run: |
+          conda activate justnews-v2-py312
+          # Verify the startup wrapper computes a start mode without executing actions
+          ./square-one.sh start --dry-run --yes
 
       - name: Run integration tests (optional)
         shell: bash -l {0}
