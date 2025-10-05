@@ -201,7 +201,7 @@ for port in $(seq 8000 8021); do
     if attempt_shutdown_port "$port"; then
       # Wait up to 10s for port to close
       deadline=$(( $(date +%s) + 10 ))
-      while is_port_in_use "$port" && [ $(date +%s) -le $deadline ]; do
+      while is_port_in_use "$port" && [ "$(date +%s)" -le "$deadline" ]; do
         sleep 1
       done
       if is_port_in_use "$port"; then
@@ -283,7 +283,7 @@ wait_for_health() {
 
   echo "Waiting for $name to become healthy at $url (timeout ${HEALTH_TIMEOUT}s)"
   local attempts=0
-  while [ $(date +%s) -le $deadline ]; do
+  while [ "$(date +%s)" -le "$deadline" ]; do
     attempts=$((attempts + 1))
     if curl -s --max-time 2 "$url" >/dev/null 2>&1; then
       echo "✅ $name is healthy (after ${attempts}s)"
