@@ -35,14 +35,15 @@ Expected Performance on RTX 3090:
 """
 
 
-import os
-from common.observability import get_logger
 import json
+import os
+import re
 import subprocess
 import time
-from datetime import datetime, timezone
-import re
-from typing import Optional, Dict, List, Tuple, Any
+from datetime import UTC, datetime
+from typing import Any
+
+from common.observability import get_logger
 
 # Configure logging first
 
@@ -145,7 +146,7 @@ class DockerModelClient:
 
     def query_model(
         self, prompt: str, max_tokens: int = 50, temperature: float = 0.1
-    ) -> Optional[str]:
+    ) -> str | None:
         """Query the Docker Model Runner with a prompt."""
         if not self.is_available:
             logger.warning("Docker Model Runner not available for query")
@@ -205,7 +206,7 @@ class DockerModelClient:
     ):
         """Log performance metrics for analysis."""
         metrics = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "operation": operation,
             "model": self.model_name,
             "elapsed_time": elapsed_time,
@@ -264,7 +265,7 @@ class HybridModelManager:
 
     def query_with_fallback(
         self, prompt: str, max_tokens: int = 50, temperature: float = 0.1
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         """
         Query using hybrid approach: Docker Model Runner first, safe fallback second.
         Returns (response, source) where source is 'docker', 'fallback', or 'error'.
@@ -293,7 +294,7 @@ class HybridModelManager:
 
     def _query_fallback_model(
         self, prompt: str, max_tokens: int = 50, temperature: float = 0.1
-    ) -> Optional[str]:
+    ) -> str | None:
         """Query the V3 fallback model - DISABLED to prevent crashes."""
         logger.info("V3 fallback model query requested but DISABLED for stability")
         return None
@@ -311,17 +312,17 @@ def get_hybrid_manager() -> HybridModelManager:
     return _hybrid_manager
 
 
-def log_feedback(event: str, details: dict, include_source: Optional[str] = None):
+def log_feedback(event: str, details: dict, include_source: str | None = None):
     """Enhanced feedback logging for V4 training pipeline."""
     enhanced_details = {
         **details,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "model_source": include_source,
         "version": "v4_hybrid",
     }
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
         f.write(
-            f"{datetime.now(timezone.utc).isoformat()}\t{event}\t"
+            f"{datetime.now(UTC).isoformat()}\t{event}\t"
             f"{json.dumps(enhanced_details)}\n"
         )
 
@@ -493,7 +494,7 @@ def score_sentiment(text: str) -> float:
 # =====================================================================
 # BATCH PROCESSING FUNCTIONS - 10x-100x Performance Improvement
 # =====================================================================
-def score_sentiment_batch(texts: List[str]) -> List[float]:
+def score_sentiment_batch(texts: list[str]) -> list[float]:
     """
     BATCH GPU-First sentiment scoring - Up to 100x faster than sequential!
     This function processes multiple articles simultaneously on the GPU,
@@ -571,7 +572,7 @@ def score_sentiment_batch(texts: List[str]) -> List[float]:
     return individual_scores
 
 
-def score_bias_batch(texts: List[str]) -> List[float]:
+def score_bias_batch(texts: list[str]) -> list[float]:
     """
     BATCH GPU-First bias scoring - Up to 100x faster than sequential!
     This function processes multiple articles simultaneously on the GPU,
@@ -649,7 +650,7 @@ def score_bias_batch(texts: List[str]) -> List[float]:
     return individual_scores
 
 
-def identify_entities(text: str) -> List[str]:
+def identify_entities(text: str) -> list[str]:
     """
     V4 Hybrid entity identification using Docker Model Runner with V3 fallback.
     Enhanced with performance monitoring and feedback collection.
@@ -701,12 +702,12 @@ def identify_entities(text: str) -> List[str]:
         return []
 
 
-def get_system_status() -> Dict[str, Any]:
+def get_system_status() -> dict[str, Any]:
     """Get comprehensive V4 hybrid system status for monitoring."""
     manager = get_hybrid_manager()
     status = {
         "version": "v4_hybrid",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "docker_model_runner": {
             "available": manager.docker_client.is_available,
             "model": manager.docker_client.model_name,
@@ -727,7 +728,6 @@ def get_system_status() -> Dict[str, Any]:
         try:
             # Attempt to discover engine files without instantiating full loader
             import os
-from common.observability import get_logger
 
             engines_dir = os.path.join(os.path.dirname(__file__), "tensorrt_engines")
             engines = (
@@ -745,11 +745,11 @@ from common.observability import get_logger
 
 def benchmark_performance(
     text_sample: str = "This is a test news article about politics.",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run performance benchmarks for both Docker and fallback models."""
     logger.info("Running V4 hybrid performance benchmarks...")
     results = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "sample_text": text_sample,
         "benchmarks": {},
     }
@@ -815,7 +815,7 @@ except ImportError as e:
 # Enhanced V4 query function with RTX integration
 async def query_hybrid_model_v4(
     prompt: str, max_tokens: int = 50, temperature: float = 0.1
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     V4 Enhanced hybrid model query with RTX optimization.
     Priority order:
@@ -844,7 +844,7 @@ async def query_hybrid_model_v4(
 # Enhanced query function that handles both sync and async contexts
 def query_hybrid_model_enhanced(
     prompt: str, max_tokens: int = 50, temperature: float = 0.1
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Enhanced query function that automatically handles V4 RTX integration.
     Maintains backward compatibility while adding V4 capabilities.
@@ -869,6 +869,6 @@ def query_hybrid_model_enhanced(
 # Update the main query function to use enhanced version
 def query_hybrid_model(
     prompt: str, max_tokens: int = 50, temperature: float = 0.1
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """Query the hybrid model system with V4 RTX enhancement."""
     return query_hybrid_model_enhanced(prompt, max_tokens, temperature)

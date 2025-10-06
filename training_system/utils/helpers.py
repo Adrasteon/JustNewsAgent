@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Training System Utilities
 Helper functions and tools for the online training system
 """
@@ -10,6 +9,9 @@ from typing import Any
 
 import pandas as pd
 
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 logger = get_logger(__name__)
 
 def export_training_data_to_csv(training_data: list[dict], filename: str = None) -> str:

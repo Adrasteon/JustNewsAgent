@@ -1,11 +1,13 @@
 """
-from common.observability import get_logger
 Tools for the Dashboard Agent.
 """
 
 
 import time
 
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 logger = get_logger(__name__)
 
 def log_event(event: str, details: dict):

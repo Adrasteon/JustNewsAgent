@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Data Minimization Module for GDPR Compliance
 
 This module implements data minimization principles by:
@@ -16,6 +15,10 @@ from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
+
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 
 from agents.common.compliance_audit import (
     AuditEventSeverity,

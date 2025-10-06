@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 GPU Monitoring Dashboard API
 Provides REST API endpoints for GPU monitoring and dashboard data
 
@@ -13,6 +12,10 @@ Features:
 
 import contextlib
 from datetime import datetime
+
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 
 import uvicorn
 from fastapi import FastAPI, HTTPException

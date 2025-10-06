@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Native TensorRT Tools for the Analyst Agent - Production Ready
 
 This implements native TensorRT acceleration with validated performance:
@@ -14,8 +13,9 @@ This implements native TensorRT acceleration with validated performance:
 import atexit
 from datetime import UTC, datetime
 
-# Configure logging
+from common.observability import get_logger, setup_logging
 
+setup_logging()
 logger = get_logger(__name__)
 
 # Import native TensorRT engine

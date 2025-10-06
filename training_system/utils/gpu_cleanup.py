@@ -1,25 +1,10 @@
-"""
-from common.observability import get_logger
-GPU Cleanup Utilities for PyTorch Models
-        try:
-            logger.info("🧹 Starting GPU model cleanup...")
-            
-            # Clean up registered models
-            for name, model in list(self._models.items()):
-                try:
-                    if hasattr(model, 'cpu'):
-                        model.cpu()
-                    elif hasattr(model, 'model') and hasattr(model.model, 'cpu'):
-                        model.model.cpu()
-                    del model
-                except Exception as e:
-                    logger.debug(f"Error cleaning up model {name}: {e}")
-            
-            # Clear the models dictionary
-            self._models.clear() during shutdown by proper GPU memory management
-"""
+"""GPU Cleanup Utilities for PyTorch Models"""
 
 import atexit
+
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 import gc
 import signal
 import sys

@@ -43,19 +43,19 @@ Usage Examples:
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import shutil
 import signal
 import subprocess
 import sys
 import time
-import json
-import shutil
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 try:
     import requests  # type: ignore
-except ImportError as e:  # pragma: no cover - dependency should exist
+except ImportError:  # pragma: no cover - dependency should exist
     print("requests dependency missing. Install project requirements.", file=sys.stderr)
     raise
 
@@ -72,13 +72,13 @@ _applied = apply_test_db_env_fallback()  # returns list of applied vars (unused 
 
 
 
-def parse_env_file(path: Path) -> Dict[str, str]:
+def parse_env_file(path: Path) -> dict[str, str]:
     """Parse a simple KEY=VALUE env file ignoring comments and blanks.
 
     Performs shell-style $VAR expansion after initial collection to allow
     referencing earlier variables inside the same file (best-effort, not full bash).
     """
-    data: Dict[str, str] = {}
+    data: dict[str, str] = {}
     if not path.exists():  # silent skip
         return data
     try:
@@ -96,7 +96,7 @@ def parse_env_file(path: Path) -> Dict[str, str]:
                 val = val[1:-1]
             data[key] = val
         # Second pass expansion
-        expanded: Dict[str, str] = {}
+        expanded: dict[str, str] = {}
         temp_env = os.environ.copy()
         temp_env.update(data)
         for k, v in data.items():
@@ -107,7 +107,7 @@ def parse_env_file(path: Path) -> Dict[str, str]:
         return data
 
 
-def load_env_sources(env_dir: Path, extra_files: List[str], include_global: bool, overwrite: bool) -> Dict[str, str]:
+def load_env_sources(env_dir: Path, extra_files: list[str], include_global: bool, overwrite: bool) -> dict[str, str]:
     """Load environment variables from systemd-style env directory.
 
     Precedence (later overrides earlier if overwrite=True):
@@ -116,8 +116,8 @@ def load_env_sources(env_dir: Path, extra_files: List[str], include_global: bool
     If overwrite is False existing os.environ keys win.
     Returns dict of variables actually injected (post precedence resolution).
     """
-    collected: Dict[str, str] = {}
-    loaded_sequence: List[Path] = []
+    collected: dict[str, str] = {}
+    loaded_sequence: list[Path] = []
     if include_global:
         g = env_dir / 'global.env'
         if g.exists():
@@ -137,7 +137,7 @@ def load_env_sources(env_dir: Path, extra_files: List[str], include_global: bool
         else:
             print(f"[mini-e2e] Note: env file not found: {p}")
     # Final application respecting existing environment if overwrite disabled
-    applied: Dict[str, str] = {}
+    applied: dict[str, str] = {}
     for k, v in collected.items():
         if not overwrite and k in os.environ:
             continue
@@ -152,7 +152,7 @@ def load_env_sources(env_dir: Path, extra_files: List[str], include_global: bool
     return applied
 
 
-def build_phase_configs(enable_nvml: bool) -> List[Dict[str, Any]]:
+def build_phase_configs(enable_nvml: bool) -> list[dict[str, Any]]:
     """Return ordered phase configuration for SAFE_MODE flip.
 
     Exposed for smoke tests (no side effects).
@@ -206,7 +206,7 @@ def wait_ready(timeout: float = 25.0) -> bool:
     return False
 
 
-def fetch(endpoint: str, timeout: float = 4.0) -> Optional[Any]:
+def fetch(endpoint: str, timeout: float = 4.0) -> Any | None:
     url = f"{ORCH_BASE}{endpoint}" if not endpoint.startswith("http") else endpoint
     try:
         r = requests.get(url, timeout=timeout)
@@ -217,7 +217,7 @@ def fetch(endpoint: str, timeout: float = 4.0) -> Optional[Any]:
         return {"error": str(e)}
 
 
-def request_lease() -> Dict[str, Any]:
+def request_lease() -> dict[str, Any]:
     try:
         r = requests.post(f"{ORCH_BASE}/lease", json={"agent": "mini_e2e", "purpose": "test"}, timeout=5)
         return r.json()
@@ -225,7 +225,7 @@ def request_lease() -> Dict[str, Any]:
         return {"error": str(e)}
 
 
-def run_phase(phase: Dict[str, Any], args: argparse.Namespace) -> Dict[str, Any]:
+def run_phase(phase: dict[str, Any], args: argparse.Namespace) -> dict[str, Any]:
     """Execute a single orchestrator phase (launch → sample → terminate).
 
     Captures stdout/stderr into log files for post-mortem if readiness fails.
@@ -258,7 +258,7 @@ def run_phase(phase: Dict[str, Any], args: argparse.Namespace) -> Dict[str, Any]
     else:
         ready_ok = True
 
-    phase_result: Dict[str, Any] = {
+    phase_result: dict[str, Any] = {
         "phase": phase["name"],
         "safe_mode": phase["SAFE_MODE"],
         "enable_nvml": phase["ENABLE_NVML"],
@@ -299,8 +299,8 @@ def run_phase(phase: Dict[str, Any], args: argparse.Namespace) -> Dict[str, Any]
     return phase_result
 
 
-def derive_summary(phases: List[Dict[str, Any]]) -> Dict[str, Any]:
-    summary: Dict[str, Any] = {"phases": phases}
+def derive_summary(phases: list[dict[str, Any]]) -> dict[str, Any]:
+    summary: dict[str, Any] = {"phases": phases}
     # Basic assertions / interpretations
     p1 = phases[0]
     p2 = phases[1] if len(phases) > 1 else {}
@@ -311,7 +311,7 @@ def derive_summary(phases: List[Dict[str, Any]]) -> Dict[str, Any]:
     return summary
 
 
-def maybe_run_analyst_flip(args: argparse.Namespace) -> Optional[str]:
+def maybe_run_analyst_flip(args: argparse.Namespace) -> str | None:
     if not args.analyst_flip or args.dry_run:
         return None
     out_path = Path(args.analyst_output)
@@ -324,7 +324,7 @@ def maybe_run_analyst_flip(args: argparse.Namespace) -> Optional[str]:
         return None
 
 
-def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Mini E2E Orchestrator SAFE_MODE flip runner")
     p.add_argument("--enable-nvml", action="store_true", help="Enable NVML during phase2 (SAFE_MODE=false)")
     p.add_argument("--force-kill", action="store_true", help="Force kill existing orchestrator on port before start")
@@ -390,12 +390,12 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Load env files early so subsequent phases inherit
-    injected_env: Dict[str, str] = {}
+    injected_env: dict[str, str] = {}
     if args.env_dir:
         injected_env = load_env_sources(
             env_dir=Path(args.env_dir),
@@ -412,7 +412,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         os.environ.setdefault("POSTGRES_USER", os.environ["JUSTNEWS_DB_USER"])
     if os.environ.get("JUSTNEWS_DB_PASSWORD") and not os.environ.get("POSTGRES_PASSWORD"):
         os.environ.setdefault("POSTGRES_PASSWORD", os.environ["JUSTNEWS_DB_PASSWORD"])
-    missing_crit: List[str] = []
+    missing_crit: list[str] = []
     if args.report_missing:
         crit_keys = ["MCP_BUS_URL", "DATABASE_URL", "POSTGRES_HOST", "POSTGRES_DB", "POSTGRES_USER"]
         for ck in crit_keys:
@@ -436,10 +436,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 1
 
     phases_cfg = build_phase_configs(enable_nvml=args.enable_nvml)
-    phase_results: List[Dict[str, Any]] = []
+    phase_results: list[dict[str, Any]] = []
 
     # Optional DB preflight (runs before orchestrator phases)
-    db_preflight_result: Dict[str, Any] = {}
+    db_preflight_result: dict[str, Any] = {}
     if args.auto_seed_sources:
         args.preflight_db = True  # implicit
     if args.preflight_db:
@@ -490,7 +490,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 # --- Crawl Automation Helpers (defined before __main__ to avoid NameError) ---
-def run_crawl(args: argparse.Namespace) -> Dict[str, Any]:
+def run_crawl(args: argparse.Namespace) -> dict[str, Any]:
     """Run a small crawl after SAFE_MODE=false phase.
 
     Spawns a fresh orchestrator instance (SAFE_MODE=false) to ensure it is
@@ -515,7 +515,7 @@ def run_crawl(args: argparse.Namespace) -> Dict[str, Any]:
         env=env,
     )
     ready = wait_ready(timeout=args.readiness_timeout)
-    crawl_info: Dict[str, Any] = {
+    crawl_info: dict[str, Any] = {
         "requested": True,
         "ready": ready,
         "args": {
@@ -602,7 +602,7 @@ def run_crawl(args: argparse.Namespace) -> Dict[str, Any]:
 
 
 # --- DB Preflight & Source Seeding -------------------------------------------------
-def run_db_preflight(args: argparse.Namespace) -> Dict[str, Any]:
+def run_db_preflight(args: argparse.Namespace) -> dict[str, Any]:
     """Verify DB connectivity and optionally seed sources.
 
     Strategy:
@@ -611,7 +611,7 @@ def run_db_preflight(args: argparse.Namespace) -> Dict[str, Any]:
       3. If --auto-seed-sources: check sources table existence & row count; seed if missing or empty.
     Returns structured diagnostic dict (never raises).
     """
-    result: Dict[str, Any] = {"requested": True}
+    result: dict[str, Any] = {"requested": True}
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
         # Build from component vars

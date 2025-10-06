@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Multi-GPU Cluster Support for JustNewsAgent
 
 Provides comprehensive multi-GPU cluster management with:
@@ -23,6 +22,8 @@ from typing import Any
 
 import numpy as np
 
+from common.observability import get_logger, setup_logging
+
 # GPU and ML imports with graceful fallbacks
 try:
     import psutil
@@ -44,6 +45,7 @@ try:
 except ImportError:
     pass
 
+setup_logging()
 logger = get_logger(__name__)
 
 class ClusterStatus(Enum):

@@ -1,5 +1,4 @@
 """
-from common.observability import get_logger
 Consent Validation Middleware for GDPR Compliance
 
 This middleware validates user consents before allowing data processing operations.
@@ -16,6 +15,10 @@ Features:
 
 
 from fastapi import HTTPException, Request, status
+
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 from fastapi.responses import JSONResponse
 
 from agents.common.compliance_audit import (
