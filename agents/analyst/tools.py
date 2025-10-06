@@ -1055,10 +1055,10 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
         # Use local GPU-accelerated analyst
         from .gpu_analyst import get_gpu_analyst
         gpu_analyst = get_gpu_analyst()
-        
+
         # Get GPU sentiment score
         sentiment_score = gpu_analyst.score_sentiment_gpu(text)
-        
+
         if sentiment_score is not None:
             # Convert score to sentiment analysis format
             if sentiment_score > 0.6:
@@ -1070,7 +1070,7 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
             else:
                 dominant_sentiment = "neutral"
                 confidence = 0.7
-            
+
             # Determine intensity
             if confidence > 0.8:
                 intensity = "strong"
@@ -1078,7 +1078,7 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
                 intensity = "moderate"
             else:
                 intensity = "mild"
-            
+
             result = {
                 "dominant_sentiment": dominant_sentiment,
                 "confidence": float(confidence),
@@ -1086,7 +1086,7 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
                 "sentiment_scores": {
                     "positive": float(sentiment_score),
                     "negative": float(1.0 - sentiment_score),
-                    "neutral": float(0.5)
+                    "neutral": 0.5
                 },
                 "method": "gpu_accelerated",
                 "model_name": "cardiffnlp/twitter-roberta-base-sentiment-latest",
@@ -1130,10 +1130,10 @@ def detect_bias(text: str) -> dict[str, Any]:
         # Use local GPU-accelerated analyst
         from .gpu_analyst import get_gpu_analyst
         gpu_analyst = get_gpu_analyst()
-        
+
         # Get GPU bias score
         bias_score = gpu_analyst.score_bias_gpu(text)
-        
+
         if bias_score is not None:
             # Convert score to bias detection format
             if bias_score > 0.7:
@@ -1148,9 +1148,9 @@ def detect_bias(text: str) -> dict[str, Any]:
             else:
                 bias_level = "minimal"
                 has_bias = False
-            
+
             confidence = min(bias_score + 0.3, 0.9)
-            
+
             result = {
                 "has_bias": has_bias,
                 "bias_score": float(bias_score),

@@ -17,12 +17,10 @@ Date: September 7, 2025
 """
 
 import json
-import os
-import re
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import logging
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -44,7 +42,7 @@ class QualityEnhancer:
     def load_catalogue(self) -> bool:
         """Load the documentation catalogue"""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 self.catalogue = json.load(f)
             logger.info(f"Loaded catalogue with {len(self.catalogue['categories'])} categories")
             return True
@@ -58,7 +56,7 @@ class QualityEnhancer:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             self.backup_path = self.catalogue_path.with_suffix(f".backup_{timestamp}.json")
 
-            with open(self.catalogue_path, 'r', encoding='utf-8') as src:
+            with open(self.catalogue_path, encoding='utf-8') as src:
                 with open(self.backup_path, 'w', encoding='utf-8') as dst:
                     dst.write(src.read())
 
@@ -68,7 +66,7 @@ class QualityEnhancer:
             logger.error(f"Failed to create backup: {e}")
             return False
 
-    def analyze_quality_issues(self) -> Dict[str, Any]:
+    def analyze_quality_issues(self) -> dict[str, Any]:
         """Analyze and identify quality issues in the catalogue"""
         logger.info("Analyzing quality issues...")
 
@@ -131,7 +129,7 @@ class QualityEnhancer:
         logger.info(f"Quality analysis complete: {summary['issues_found']} issues found in {total_docs} documents")
         return summary
 
-    def generate_enhanced_description(self, doc: Dict[str, Any], category: Dict[str, Any]) -> str:
+    def generate_enhanced_description(self, doc: dict[str, Any], category: dict[str, Any]) -> str:
         """Generate an enhanced description for a document"""
         title = doc.get('title', '')
         current_desc = doc.get('description', '')
@@ -143,31 +141,31 @@ class QualityEnhancer:
             enhanced = f"Comprehensive {category_name.lower()} report documenting system performance, deployment achievements, and operational metrics for the JustNews V4 multi-agent architecture."
 
         elif 'agent' in category_name.lower() and 'documentation' in category_name.lower():
-            enhanced = f"Detailed documentation covering agent implementation, configuration, capabilities, and integration patterns for the JustNews V4 multi-agent system."
+            enhanced = "Detailed documentation covering agent implementation, configuration, capabilities, and integration patterns for the JustNews V4 multi-agent system."
 
         elif 'gpu' in category_name.lower():
-            enhanced = f"Complete guide for GPU environment setup, configuration, and optimization including RTX3090 support, PyTorch integration, and performance tuning for JustNews V4."
+            enhanced = "Complete guide for GPU environment setup, configuration, and optimization including RTX3090 support, PyTorch integration, and performance tuning for JustNews V4."
 
         elif 'training' in category_name.lower():
-            enhanced = f"Comprehensive documentation of the continuous learning system, including EWC-based training, active learning algorithms, and performance monitoring for JustNews V4 agents."
+            enhanced = "Comprehensive documentation of the continuous learning system, including EWC-based training, active learning algorithms, and performance monitoring for JustNews V4 agents."
 
         elif 'architecture' in category_name.lower():
-            enhanced = f"Technical architecture documentation covering system design, component interactions, performance characteristics, and implementation details for JustNews V4."
+            enhanced = "Technical architecture documentation covering system design, component interactions, performance characteristics, and implementation details for JustNews V4."
 
         elif 'api' in category_name.lower():
-            enhanced = f"API specification and integration documentation including RESTful endpoints, GraphQL schemas, and external service connections for JustNews V4."
+            enhanced = "API specification and integration documentation including RESTful endpoints, GraphQL schemas, and external service connections for JustNews V4."
 
         elif 'monitoring' in category_name.lower():
-            enhanced = f"System monitoring and analytics documentation covering performance tracking, health checks, alerting systems, and operational dashboards for JustNews V4."
+            enhanced = "System monitoring and analytics documentation covering performance tracking, health checks, alerting systems, and operational dashboards for JustNews V4."
 
         elif 'compliance' in category_name.lower():
-            enhanced = f"Legal and security compliance framework documentation including GDPR, CCPA requirements, data protection measures, and regulatory compliance for JustNews V4."
+            enhanced = "Legal and security compliance framework documentation including GDPR, CCPA requirements, data protection measures, and regulatory compliance for JustNews V4."
 
         elif 'scripts' in category_name.lower():
-            enhanced = f"Utility scripts and tools documentation covering automation, deployment helpers, model management, and operational utilities for JustNews V4."
+            enhanced = "Utility scripts and tools documentation covering automation, deployment helpers, model management, and operational utilities for JustNews V4."
 
         elif 'deployment' in category_name.lower():
-            enhanced = f"Production deployment and operational documentation including service management, configuration, scaling, and maintenance procedures for JustNews V4."
+            enhanced = "Production deployment and operational documentation including service management, configuration, scaling, and maintenance procedures for JustNews V4."
 
         else:
             # Generic enhancement based on title keywords
@@ -211,7 +209,7 @@ class QualityEnhancer:
 
         return enhanced
 
-    def enhance_short_descriptions(self) -> Dict[str, Any]:
+    def enhance_short_descriptions(self) -> dict[str, Any]:
         """Enhance documents with short descriptions"""
         logger.info("Enhancing short descriptions...")
 
@@ -257,7 +255,7 @@ class QualityEnhancer:
         logger.info(f"Enhanced {enhanced_count} documents with short descriptions")
         return summary
 
-    def add_missing_tags(self) -> Dict[str, Any]:
+    def add_missing_tags(self) -> dict[str, Any]:
         """Add missing tags to documents"""
         logger.info("Adding missing tags...")
 
@@ -320,7 +318,7 @@ class QualityEnhancer:
         logger.info(f"Added tags to {len(tags_added)} documents")
         return summary
 
-    def add_word_counts(self) -> Dict[str, Any]:
+    def add_word_counts(self) -> dict[str, Any]:
         """Add missing word counts to documents"""
         logger.info("Adding missing word counts...")
 
@@ -351,7 +349,7 @@ class QualityEnhancer:
         logger.info(f"Added word counts to {len(word_counts_added)} documents")
         return summary
 
-    def validate_enhancements(self) -> Dict[str, Any]:
+    def validate_enhancements(self) -> dict[str, Any]:
         """Validate the quality enhancements"""
         logger.info("Validating enhancements...")
 
@@ -405,7 +403,7 @@ class QualityEnhancer:
             logger.error(f"Failed to save catalogue: {e}")
             return False
 
-    def generate_report(self, results: Dict[str, Any]) -> str:
+    def generate_report(self, results: dict[str, Any]) -> str:
         """Generate a comprehensive enhancement report"""
         report = []
         report.append("=" * 80)
@@ -475,7 +473,7 @@ class QualityEnhancer:
 
         return "\n".join(report)
 
-    def run_quality_enhancement(self) -> Dict[str, Any]:
+    def run_quality_enhancement(self) -> dict[str, Any]:
         """Run the complete quality enhancement process"""
         logger.info("Starting Phase 3: Quality Enhancement")
 

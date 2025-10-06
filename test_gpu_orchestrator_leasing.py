@@ -3,10 +3,10 @@
 Focused, fast tests that mock GPU snapshot to ensure deterministic behavior.
 """
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 
-from agents.gpu_orchestrator.main import app, ALLOCATIONS
+from agents.gpu_orchestrator.main import ALLOCATIONS, app
 
 
 @pytest.fixture(autouse=True)

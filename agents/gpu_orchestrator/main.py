@@ -7,31 +7,28 @@ to be expanded in later phases. Designed to run under systemd via the
 standard justnews-start-agent.sh launcher.
 """
 
+import logging
 import os
 import subprocess
-from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional, Tuple
-import uuid
 import threading
 import time
-import logging
+import uuid
+from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field, ConfigDict
-from prometheus_client import (
-    Counter, Gauge
-)
+from prometheus_client import Counter, Gauge
+from pydantic import BaseModel, ConfigDict, Field
 
-from common.observability import get_logger
+from agents.gpu_orchestrator.nvml import get_nvml_handle
+from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Import preload module
-from .preload import start_preload_job, get_preload_status
-from agents.gpu_orchestrator.preload import _MODEL_PRELOAD_STATE
-from agents.gpu_orchestrator.nvml import get_nvml_handle
-
+from .preload import get_preload_status, start_preload_job
 
 # Ensure the log level is set to DEBUG to capture all debug messages
 logging.basicConfig(level=logging.DEBUG)
@@ -48,16 +45,16 @@ LEASE_TTL_SECONDS = int(os.environ.get("GPU_ORCHESTRATOR_LEASE_TTL", "3600"))  #
 
 # In-memory state (intentionally simple/minimal for safety)
 READINESS: bool = False
-POLICY: Dict[str, Any] = {
+POLICY: dict[str, Any] = {
 	"max_memory_per_agent_mb": 2048,
 	"allow_fractional_shares": True,
 	"kill_on_oom": False,
 	"safe_mode_read_only": SAFE_MODE,
 }
-ALLOCATIONS: Dict[str, Dict[str, Any]] = {}
+ALLOCATIONS: dict[str, dict[str, Any]] = {}
 
 # Simple in-process metrics (avoid external deps). Prometheus exposition via /metrics.
-_METRICS_COUNTERS: Dict[str, int] = {
+_METRICS_COUNTERS: dict[str, int] = {
 	"requests_total": 0,
 	"gpu_info_requests_total": 0,
 	"policy_get_requests_total": 0,
@@ -68,7 +65,7 @@ _METRICS_COUNTERS: Dict[str, int] = {
 }
 _START_TIME = time.time()
 _NVML_SUPPORTED = False
-_NVML_INIT_ERROR: Optional[str] = None
+_NVML_INIT_ERROR: str | None = None
 _NVML_HANDLE_CACHE = {}
 
 
@@ -85,7 +82,7 @@ def _purge_expired_leases() -> None:
 	if LEASE_TTL_SECONDS <= 0 or not ALLOCATIONS:
 		return
 	now = time.time()
-	expired: List[str] = []
+	expired: list[str] = []
 	for token, alloc in list(ALLOCATIONS.items()):
 		try:
 			started = float(alloc.get("timestamp", now))
@@ -107,7 +104,7 @@ class MCPBusClient:
 	def __init__(self, base_url: str = MCP_BUS_URL):
 		self.base_url = base_url
 
-	def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
+	def register_agent(self, agent_name: str, agent_address: str, tools: list[str]):
 		import requests
 
 
@@ -130,7 +127,7 @@ class MCPBusClient:
 		logger.error(f"Failed to register {agent_name} with MCP Bus after multiple attempts.")
 
 
-def _run_nvidia_smi() -> Optional[str]:
+def _run_nvidia_smi() -> str | None:
 	"""Run nvidia-smi and return raw XML or CSV output, or None if unavailable."""
 	# Prefer CSV for simpler parsing at this stage
 	cmd = [
@@ -146,8 +143,8 @@ def _run_nvidia_smi() -> Optional[str]:
 		return None
 
 
-def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
-	gpus: List[Dict[str, Any]] = []
+def _parse_nvidia_smi_csv(csv_text: str) -> list[dict[str, Any]]:
+	gpus: list[dict[str, Any]] = []
 	for line in csv_text.strip().splitlines():
 		parts = [p.strip() for p in line.split(",")]
 		if len(parts) < 7:
@@ -173,7 +170,7 @@ def _parse_nvidia_smi_csv(csv_text: str) -> List[Dict[str, Any]]:
 	return gpus
 
 
-def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
+def _get_nvml_enrichment(gpus: list[dict[str, Any]]) -> None:
 	"""Enrich GPU info with NVML data if available and enabled.
 
 	Mutates the input list of GPU dictionaries to add NVML-related fields.
@@ -199,7 +196,7 @@ def _get_nvml_enrichment(gpus: List[Dict[str, Any]]) -> None:
 		logger.warning(f"NVML enrichment error: {e}")
 
 
-def get_gpu_snapshot() -> Dict[str, Any]:
+def get_gpu_snapshot() -> dict[str, Any]:
 	"""Return a conservative, read-only snapshot of GPU state."""
 	smi = _run_nvidia_smi()
 	if smi is None:
@@ -209,7 +206,7 @@ def get_gpu_snapshot() -> Dict[str, Any]:
 	return {"gpus": gpus, "available": True, "nvml_enriched": bool(ENABLE_NVML and not SAFE_MODE and _NVML_SUPPORTED), "nvml_supported": _NVML_SUPPORTED}
 
 
-def _detect_mps() -> Dict[str, Any]:
+def _detect_mps() -> dict[str, Any]:
 	"""Best-effort NVIDIA MPS detection.
 
 	Returns a dict with:
@@ -237,9 +234,9 @@ def _detect_mps() -> Dict[str, Any]:
 
 
 class PolicyUpdate(BaseModel):
-	max_memory_per_agent_mb: Optional[int] = Field(None, ge=256, description="Per-agent memory cap in MB")
-	allow_fractional_shares: Optional[bool] = None
-	kill_on_oom: Optional[bool] = None
+	max_memory_per_agent_mb: int | None = Field(None, ge=256, description="Per-agent memory cap in MB")
+	allow_fractional_shares: bool | None = None
+	kill_on_oom: bool | None = None
 
 	class Config:
 		arbitrary_types_allowed = True
@@ -247,7 +244,7 @@ class PolicyUpdate(BaseModel):
 
 class LeaseRequest(BaseModel):
 	agent: str
-	min_memory_mb: Optional[int] = Field(0, ge=0)
+	min_memory_mb: int | None = Field(0, ge=0)
 
 	model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -259,9 +256,9 @@ class ReleaseRequest(BaseModel):
 
 
 class PreloadRequest(BaseModel):
-	agents: Optional[List[str]] = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
+	agents: list[str] | None = Field(default=None, description="Subset of agents to preload; default all from AGENT_MODEL_MAP.json")
 	refresh: bool = Field(default=False, description="Restart preloading even if a job already completed")
-	strict: Optional[bool] = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
+	strict: bool | None = Field(default=None, description="Override STRICT_MODEL_STORE env for this preload run")
 
 	model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -275,7 +272,7 @@ async def lifespan(app: FastAPI):
     # Registration status tracker
     registration_complete = threading.Event()
 
-    def register_agent_background(agent_name: str, agent_address: str, tools: List[str]):
+    def register_agent_background(agent_name: str, agent_address: str, tools: list[str]):
         """Register the agent with the MCP Bus in a background thread."""
         def background_task():
             client = MCPBusClient()
@@ -464,7 +461,7 @@ def get_allocations():
 	return {"allocations": ALLOCATIONS}
 
 
-def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
+def _validate_lease_request(req: LeaseRequest) -> str | None:
 	"""Validate the lease request parameters.
 
 	Returns an error message if validation fails, or None if valid.
@@ -474,7 +471,7 @@ def _validate_lease_request(req: LeaseRequest) -> Optional[str]:
 	return None
 
 
-def _allocate_gpu(req: LeaseRequest) -> Tuple[bool, Optional[int]]:
+def _allocate_gpu(req: LeaseRequest) -> tuple[bool, int | None]:
 	"""Allocate a GPU based on the lease request.
 
 	Returns a tuple of (success, gpu_index) where success is a boolean
@@ -555,7 +552,7 @@ def _project_root() -> str:
 		return os.getcwd()
 
 
-def _read_agent_model_map() -> Dict[str, Any]:
+def _read_agent_model_map() -> dict[str, Any]:
 	"""Read the agent model map from AGENT_MODEL_MAP.json.
 
 	Returns a dictionary mapping agent names to lists of model IDs.
@@ -563,17 +560,17 @@ def _read_agent_model_map() -> Dict[str, Any]:
 	try:
 		import json
 		from pathlib import Path
-		
+
 		project_root = Path(__file__).resolve().parents[2]
 		model_map_path = project_root / "AGENT_MODEL_MAP.json"
-		
+
 		if not model_map_path.exists():
 			logger.warning(f"Model map file not found: {model_map_path}")
 			return {}
-		
-		with open(model_map_path, "r") as f:
+
+		with open(model_map_path) as f:
 			model_map = json.load(f)
-		
+
 		logger.info(f"Loaded agent model map: {model_map}")
 		return model_map
 	except Exception as e:
@@ -581,7 +578,7 @@ def _read_agent_model_map() -> Dict[str, Any]:
 		return {}
 
 
-def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> tuple[bool, str | None]:
     """Validate and load a model for an agent.
 
     Returns a tuple of (success, error_message) where success is a boolean
@@ -604,7 +601,7 @@ def _validate_and_load_model(agent: str, model_id: str, strict: bool) -> Tuple[b
 
 # Refactor _worker
 # Example: Delegate preload job tasks to the preload module
-def _worker(selected_agents: Optional[List[str]], strict_override: Optional[bool]) -> Dict[str, Any]:
+def _worker(selected_agents: list[str] | None, strict_override: bool | None) -> dict[str, Any]:
 	logger.info("Starting model preload worker")
 	try:
 		model_map = _read_agent_model_map()
@@ -667,7 +664,7 @@ def models_preload(req: PreloadRequest):
 		all_ready = (failed == 0 and _MODEL_PRELOAD_STATE["summary"].get("done", 0) == _MODEL_PRELOAD_STATE["summary"].get("total", 0))
 		state = {**_MODEL_PRELOAD_STATE, "all_ready": all_ready}
 		# Build a concise error list for clarity
-		errors: List[Dict[str, Any]] = []
+		errors: list[dict[str, Any]] = []
 		for a, models in _MODEL_PRELOAD_STATE.get("per_agent", {}).items():
 			for mid, st in models.items():
 				if st.get("status") == "error":
@@ -692,16 +689,16 @@ def get_mps_allocation():
 	try:
 		import json
 		from pathlib import Path
-		
+
 		project_root = Path(__file__).resolve().parents[2]
 		config_path = project_root / "config" / "gpu" / "mps_allocation_config.json"
-		
+
 		if not config_path.exists():
 			return {"error": "MPS allocation configuration not found", "path": str(config_path)}
-		
-		with open(config_path, "r") as f:
+
+		with open(config_path) as f:
 			config = json.load(f)
-		
+
 		return config
 	except Exception as e:
 		logger.error(f"Failed to load MPS allocation config: {e}")
@@ -714,9 +711,9 @@ def models_status():
 	failed = int(get_preload_status().get("summary", {}).get("failed", 0) or 0)
 	done = int(get_preload_status().get("summary", {}).get("done", 0) or 0)
 	total = int(get_preload_status().get("summary", {}).get("total", 0) or 0)
-	
+
 	all_ready = (failed == 0 and done == total and not get_preload_status().get("in_progress", False))
-	
+
 	# Build error list for failed models
 	errors = []
 	if get_preload_status().get("per_agent"):
@@ -728,7 +725,7 @@ def models_status():
 						"model": model_id,
 						"error": status.get("error")
 					})
-	
+
 	return {
 		"all_ready": all_ready,
 		"in_progress": get_preload_status().get("in_progress", False),

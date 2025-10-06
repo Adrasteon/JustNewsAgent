@@ -11,10 +11,9 @@ import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from common.observability import get_logger
-
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 
@@ -198,8 +197,9 @@ def log_feedback(call: ToolCall):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    import uvicorn
     import os
+
+    import uvicorn
 
     host = os.environ.get("FACT_CHECKER_HOST", "0.0.0.0")
     port = int(os.environ.get("FACT_CHECKER_PORT", 8003))

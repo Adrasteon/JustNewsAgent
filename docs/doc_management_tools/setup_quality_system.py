@@ -8,11 +8,11 @@ Date: September 7, 2025
 """
 
 import os
-import sys
-import json
 import subprocess
-from pathlib import Path
+import sys
 from datetime import datetime
+from pathlib import Path
+
 
 def print_header(title: str):
     """Print formatted header"""

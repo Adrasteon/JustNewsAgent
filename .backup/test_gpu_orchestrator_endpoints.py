@@ -7,12 +7,11 @@ Single authoritative test set (previous duplicate sections removed).
 """
 
 import subprocess
-from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
 
-from agents.gpu_orchestrator.main import app, SAFE_MODE  # type: ignore
+from agents.gpu_orchestrator.main import SAFE_MODE, app  # type: ignore
 
 
 @pytest.fixture

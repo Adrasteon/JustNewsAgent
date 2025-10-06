@@ -38,21 +38,20 @@ Examples:
 import argparse
 import asyncio
 import json
+import os
 import sys
 import time
-import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
-from tqdm.asyncio import tqdm
-
-from common.observability import get_logger
-from common.dev_db_fallback import apply_test_db_env_fallback
 from agents.scout.production_crawlers.crawler_utils import get_active_sources
+from common.dev_db_fallback import apply_test_db_env_fallback
+
 from agents.common.gpu_orchestrator_client import GPUOrchestratorClient
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)
@@ -73,7 +72,7 @@ AGENT_READ_TIMEOUT = float(os.getenv("MCP_CLIENT_READ_TIMEOUT", "180"))
 @dataclass
 class CrawlConfig:
     """Configuration for large-scale crawling"""
-    sites: List[str] = field(default_factory=lambda: CrawlConfig._load_sites_from_database())
+    sites: list[str] = field(default_factory=lambda: CrawlConfig._load_sites_from_database())
     mode: str = "mixed"  # 'ultra_fast', 'ai_enhanced', or 'mixed'
     articles_per_site: int = DEFAULT_ARTICLES_PER_SITE
     concurrent_sites: int = DEFAULT_CONCURRENT_SITES
@@ -86,7 +85,7 @@ class CrawlConfig:
     archive_port: int = 8021  # Archive REST API port
 
     @staticmethod
-    def _load_sites_from_database() -> List[str]:
+    def _load_sites_from_database() -> list[str]:
         """Load active sites from database with fallback to bbc.com"""
         try:
             logger.info("🔍 Loading active sources from database...")
@@ -120,9 +119,9 @@ class SiteResult:
     avg_quality_score: float = 0.0
     processing_time: float = 0.0
     ai_analysis_count: int = 0
-    errors: List[str] = field(default_factory=list)
-    articles: List[Dict[str, Any]] = field(default_factory=list)
-    performance_metrics: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    articles: list[dict[str, Any]] = field(default_factory=list)
+    performance_metrics: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class LargeScaleResult:
@@ -133,15 +132,15 @@ class LargeScaleResult:
     total_processing_time: float = 0.0
     overall_success_rate: float = 0.0
     overall_quality_score: float = 0.0
-    site_results: List[SiteResult] = field(default_factory=list)
-    archive_summary: Optional[Dict[str, Any]] = None
-    knowledge_graph_stats: Optional[Dict[str, Any]] = None
+    site_results: list[SiteResult] = field(default_factory=list)
+    archive_summary: dict[str, Any] | None = None
+    knowledge_graph_stats: dict[str, Any] | None = None
     timestamp: str = ""
-    ai_models_used: List[str] = field(default_factory=list)
-    timing_breakdown: Dict[str, float] = field(default_factory=dict)
+    ai_models_used: list[str] = field(default_factory=list)
+    timing_breakdown: dict[str, float] = field(default_factory=dict)
 
 
-def _format_duration(seconds: Optional[float]) -> str:
+def _format_duration(seconds: float | None) -> str:
     """Formats a duration in seconds into a human-readable string."""
     if seconds is None:
         return "N/A"
@@ -174,7 +173,7 @@ class LargeScaleCrawler:
         Path(config.output_dir).mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def _get_quality_score(article: Dict[str, Any]) -> float:
+    def _get_quality_score(article: dict[str, Any]) -> float:
         """Derive a quality score from available fields.
 
         Preference order:
@@ -292,7 +291,7 @@ class LargeScaleCrawler:
                 await asyncio.sleep(1.0)
         logger.warning(f"⚠️ Proceeding without full MCP registration: seen={sorted(seen)}")
 
-    async def check_system_health(self) -> Dict[str, bool]:
+    async def check_system_health(self) -> dict[str, bool]:
         """Check health of all required agents"""
         agents = {
             "mcp_bus": "http://localhost:8000/agents",
@@ -326,7 +325,7 @@ class LargeScaleCrawler:
 
         return health_status
 
-    async def get_production_crawler_info(self) -> Dict[str, Any]:
+    async def get_production_crawler_info(self) -> dict[str, Any]:
         """Get information about available production crawlers"""
         logger.info("🔍 Getting production crawler information...")
         result = await self.call_agent("scout", "get_production_crawler_info")
@@ -478,7 +477,7 @@ class LargeScaleCrawler:
                 "ai_enhanced": mode == "ai_enhanced"
             }
 
-            logger.info("✅ {} crawl complete!".format(site))
+            logger.info(f"✅ {site} crawl complete!")
             # Console summary for visibility in CI/test-mode
             if self.config.test_mode:
                 print(f"[crawl_single_site] {site} {mode}: found={result.articles_found} time={result.processing_time:.1f}s")
@@ -496,7 +495,7 @@ class LargeScaleCrawler:
 
         return result
 
-    async def process_articles_batch(self, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    async def process_articles_batch(self, articles: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Process a batch of articles through NewsReader and Memory agents"""
         logger.info(f"🔄 Processing batch of {len(articles)} articles...")
 
@@ -505,7 +504,7 @@ class LargeScaleCrawler:
         # Create semaphore for concurrency control
         semaphore = asyncio.Semaphore(self.config.concurrent_sites)
 
-        async def process_single_article(article: Dict[str, Any]) -> Dict[str, Any]:
+        async def process_single_article(article: dict[str, Any]) -> dict[str, Any]:
             async with semaphore:
                 try:
                     url = article.get("url", "")
@@ -561,7 +560,7 @@ class LargeScaleCrawler:
                 except Exception as e:
                     article["processing_status"] = "exception"
                     article["error"] = str(e)
-                
+
                 return article
 
         # Process articles concurrently
@@ -573,7 +572,7 @@ class LargeScaleCrawler:
 
         return processed_articles
 
-    async def archive_and_analyze(self, all_articles: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def archive_and_analyze(self, all_articles: list[dict[str, Any]]) -> dict[str, Any]:
         """Archive articles and perform knowledge graph analysis"""
         archive_summary = {}
         kg_stats = {}
@@ -865,7 +864,7 @@ class LargeScaleCrawler:
 
         return self.results
 
-    def _determine_site_modes(self) -> Dict[str, str]:
+    def _determine_site_modes(self) -> dict[str, str]:
         """Determine crawl mode for each site"""
         site_modes = {}
 

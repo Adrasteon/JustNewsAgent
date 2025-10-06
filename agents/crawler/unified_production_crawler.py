@@ -26,35 +26,27 @@ import json
 import os
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
+from typing import Any
+
 import requests  # for MCP bus calls
 
 # Database imports
 from common.observability import get_logger
-from .sites.generic_site_crawler import GenericSiteCrawler, MultiSiteCrawler, SiteConfig
+
 from .crawler_utils import (
-    CanonicalMetadata,
-    ModalDismisser,
     RateLimiter,
     RobotsChecker,
-    get_active_sources,
-    get_sources_by_domain,
-    update_source_crawling_strategy,
-    record_crawling_performance,
-    get_source_performance_history,
-    get_optimal_sources_for_strategy,
     create_crawling_performance_table,
+    get_source_performance_history,
+    get_sources_by_domain,
     initialize_connection_pool,
 )
 from .performance_monitoring import (
-    PerformanceMetrics,
     PerformanceOptimizer,
     get_performance_monitor,
     start_performance_monitoring,
-    stop_performance_monitoring,
-    export_performance_metrics
 )
+from .sites.generic_site_crawler import GenericSiteCrawler, MultiSiteCrawler, SiteConfig
 
 MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 
@@ -120,7 +112,7 @@ class UnifiedProductionCrawler:
         # Strategy optimization cache
         self.strategy_cache = {}
         self.performance_history = {}
-        
+
         # Background cleanup management
         self.cleanup_task = None
         self._start_background_cleanup()
@@ -144,14 +136,14 @@ class UnifiedProductionCrawler:
     async def _cleanup_orphaned_processes(self):
         """Aggressively cleanup orphaned browser processes - only kill very old processes"""
         try:
-            import subprocess
-            import signal
             import os
-            
+            import signal
+            import subprocess
+
             # Kill Chrome processes older than 10 minutes (very conservative)
             try:
                 result = subprocess.run(
-                    ['pgrep', '-f', 'chrome'], 
+                    ['pgrep', '-f', 'chrome'],
                     capture_output=True, text=True, timeout=3
                 )
                 if result.returncode == 0:
@@ -181,11 +173,11 @@ class UnifiedProductionCrawler:
                 logger.debug("Chrome cleanup timed out")
             except Exception as e:
                 logger.debug(f"Chrome cleanup failed: {e}")
-                
+
             # Kill Playwright driver processes older than 15 minutes
             try:
                 result = subprocess.run(
-                    ['pgrep', '-f', 'playwright.*run-driver'], 
+                    ['pgrep', '-f', 'playwright.*run-driver'],
                     capture_output=True, text=True, timeout=3
                 )
                 if result.returncode == 0:
@@ -210,7 +202,7 @@ class UnifiedProductionCrawler:
                 logger.debug("Playwright cleanup timed out")
             except Exception as e:
                 logger.debug(f"Playwright cleanup failed: {e}")
-                
+
         except Exception as e:
             logger.warning(f"Orphaned process cleanup failed: {e}")
 
@@ -232,25 +224,25 @@ class UnifiedProductionCrawler:
                     await self.cleanup_task
                 except asyncio.CancelledError:
                     pass
-            
+
             # Final aggressive cleanup - kill all browser processes from this session
             await self._cleanup_orphaned_processes()
-            
+
             # Force kill any remaining processes - be more aggressive here
             import subprocess
             try:
                 # Kill all Chrome processes (they should all be from this crawler instance)
-                subprocess.run(['pkill', '-9', '-f', 'chrome'], 
+                subprocess.run(['pkill', '-9', '-f', 'chrome'],
                              timeout=10, capture_output=True)
                 # Kill Playwright drivers
-                subprocess.run(['pkill', '-9', '-f', 'playwright.*run-driver'], 
+                subprocess.run(['pkill', '-9', '-f', 'playwright.*run-driver'],
                              timeout=10, capture_output=True)
                 logger.info("Forced cleanup of all browser processes from crawler session")
             except subprocess.TimeoutExpired:
                 logger.warning("Force cleanup timed out")
             except Exception as e:
                 logger.debug(f"Force cleanup failed: {e}")
-                
+
         except Exception as e:
             logger.warning(f"Resource cleanup failed: {e}")
 
@@ -328,7 +320,7 @@ class UnifiedProductionCrawler:
         # Default to generic strategy
         return "generic"
 
-    async def _crawl_ultra_fast_mode(self, site_config: SiteConfig, max_articles: int = 50) -> List[Dict]:
+    async def _crawl_ultra_fast_mode(self, site_config: SiteConfig, max_articles: int = 50) -> list[dict]:
         """
         Ultra-fast crawling mode (8.14+ articles/sec)
         Optimized for high-volume sites with reliable structure
@@ -365,7 +357,7 @@ class UnifiedProductionCrawler:
             # Always cleanup after ultra-fast mode
             await self._cleanup_orphaned_processes()
 
-    async def _crawl_ai_enhanced_mode(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def _crawl_ai_enhanced_mode(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """AI-enhanced crawling stub: delegates to generic mode"""
         logger.info(f"🤖 AI-enhanced crawling stub: delegating to generic mode for {site_config.name}")
         try:
@@ -376,7 +368,7 @@ class UnifiedProductionCrawler:
             # Always cleanup after AI-enhanced crawling
             await self._cleanup_orphaned_processes()
 
-    async def _crawl_generic_mode(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def _crawl_generic_mode(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """
         Generic crawling mode with Crawl4AI-first strategy
         Supports any news source with graceful fallbacks
@@ -397,7 +389,7 @@ class UnifiedProductionCrawler:
             # Always cleanup after generic crawling
             await self._cleanup_orphaned_processes()
 
-    async def _apply_ai_analysis(self, article: Dict) -> Dict:
+    async def _apply_ai_analysis(self, article: dict) -> dict:
         """Delegate AI analysis to Analyst agent via MCP bus"""
         content = article.get('content', '')
         if not content or len(content) < 100:
@@ -412,7 +404,7 @@ class UnifiedProductionCrawler:
             logger.error(f"Remote AI analysis failed: {e}")
         return article
 
-    async def crawl_site(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def crawl_site(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """
         Crawl a single site using the optimal strategy
         """
@@ -425,7 +417,7 @@ class UnifiedProductionCrawler:
         else:  # generic
             return await self._crawl_generic_mode(site_config, max_articles)
 
-    async def run_unified_crawl(self, domains: List[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> Dict[str, Any]:
+    async def run_unified_crawl(self, domains: list[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> dict[str, Any]:
         """
         Main entry point for unified crawling - converts domains to SiteConfig objects and runs crawl
         """
@@ -463,9 +455,9 @@ class UnifiedProductionCrawler:
         # Execute the crawl
         return await self.crawl_multiple_sites(site_configs, max_articles_per_site, concurrent_sites)
 
-    async def crawl_multiple_sites(self, site_configs: List[SiteConfig],
+    async def crawl_multiple_sites(self, site_configs: list[SiteConfig],
                                  max_articles_per_site: int = 25,
-                                 concurrent_sites: int = 3) -> Dict[str, Any]:
+                                 concurrent_sites: int = 3) -> dict[str, Any]:
         """
         Crawl multiple sites concurrently using optimal strategies
         """
@@ -524,7 +516,7 @@ class UnifiedProductionCrawler:
         logger.info(f"✅ Unified crawl completed: {total_articles} articles in {total_time:.2f}s ({articles_per_second:.2f} articles/sec)")
         return summary
 
-    async def _ingest_articles(self, articles: List[Dict]) -> Dict[str, int]:
+    async def _ingest_articles(self, articles: list[dict]) -> dict[str, int]:
         """
         Ingest articles to database via memory agent MCP calls
         
@@ -620,15 +612,15 @@ class UnifiedProductionCrawler:
         """Cleanup all resources"""
         try:
             # Force cleanup of any remaining browser processes
-            import subprocess
-            import signal
             import os
-            
+            import signal
+            import subprocess
+
             # Kill any orphaned Chrome/Playwright processes
             try:
                 # Find and kill Chrome processes older than 5 minutes
                 result = subprocess.run(
-                    ['pgrep', '-f', 'chrome'], 
+                    ['pgrep', '-f', 'chrome'],
                     capture_output=True, text=True, timeout=5
                 )
                 if result.returncode == 0:
@@ -649,21 +641,21 @@ class UnifiedProductionCrawler:
                             pass
             except Exception as e:
                 logger.debug(f"Chrome cleanup failed: {e}")
-                
+
             # Kill Playwright driver processes
             try:
-                subprocess.run(['pkill', '-f', 'playwright.*run-driver'], 
+                subprocess.run(['pkill', '-f', 'playwright.*run-driver'],
                              timeout=5, capture_output=True)
                 logger.info("Cleaned up Playwright driver processes")
             except Exception as e:
                 logger.debug(f"Playwright cleanup failed: {e}")
-                
+
         except Exception as e:
             logger.warning(f"Resource cleanup failed: {e}")
 
 
 # Expose async wrapper for the FastAPI unified_production_crawl endpoint
-async def unified_production_crawl(domains: List[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> Dict[str, Any]:
+async def unified_production_crawl(domains: list[str], max_articles_per_site: int = 25, concurrent_sites: int = 3) -> dict[str, Any]:
     """
     Wrapper function to run the unified production crawler pipeline.
     """
@@ -678,19 +670,19 @@ async def unified_production_crawl(domains: List[str], max_articles_per_site: in
 __all__ = ['UnifiedProductionCrawler']
 
 
-def get_crawler_info(*args, **kwargs) -> Dict[str, Any]:
+def get_crawler_info(*args, **kwargs) -> dict[str, Any]:
     """
     Get information about the crawler configuration and capabilities.
     This is a standalone function for external access to crawler info.
     """
     crawler = UnifiedProductionCrawler()
-    
+
     return {
         "crawler_type": "UnifiedProductionCrawler",
         "version": "3.0",
         "capabilities": [
             "ultra_fast_crawling",
-            "ai_enhanced_crawling", 
+            "ai_enhanced_crawling",
             "generic_crawling",
             "multi_site_concurrent_crawling",
             "performance_monitoring",

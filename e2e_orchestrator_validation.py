@@ -20,14 +20,14 @@ import json
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import requests
 
 from agents.common.gpu_orchestrator_client import GPUOrchestratorClient
 
 
-def fetch_json(url: str, timeout=(2, 5)) -> Dict[str, Any]:  # noqa: D401
+def fetch_json(url: str, timeout=(2, 5)) -> dict[str, Any]:  # noqa: D401
     r = requests.get(url, timeout=timeout)
     r.raise_for_status()
     return r.json()
@@ -47,7 +47,7 @@ def main() -> int:
 
     client = GPUOrchestratorClient(base_url=orch_base)
 
-    result: Dict[str, Any] = {
+    result: dict[str, Any] = {
         "orchestrator": orch_base,
         "analyst": analyst_base,
         "samples": [],

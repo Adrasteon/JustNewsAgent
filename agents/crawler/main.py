@@ -4,28 +4,26 @@ Main file for the Crawler Agent.
 # main.py for Crawler Agent
 
 import os
+import uuid
 from contextlib import asynccontextmanager
+from typing import Any
 
 import requests
-from fastapi import FastAPI, HTTPException
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from typing import Dict, Any
-import uuid
-import asyncio
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 logger = get_logger(__name__)
 
 ready = False
 # In-memory storage of crawl job statuses
-crawl_jobs: Dict[str, Any] = {}
+crawl_jobs: dict[str, Any] = {}
 
 # Environment variables
 CRAWLER_AGENT_PORT = int(os.environ.get("CRAWLER_AGENT_PORT", 8015))  # Updated to 8015 per canonical port mapping
@@ -150,27 +148,27 @@ def clear_jobs():
     for job_id in list(crawl_jobs.keys()):
         del crawl_jobs[job_id]
         cleared_jobs.append(job_id)
-    
+
     return {"cleared_jobs": cleared_jobs, "message": f"Cleared {len(cleared_jobs)} jobs from memory"}
 
 @app.post("/reset_crawler")
 def reset_crawler():
     """Completely reset the crawler state - clear all jobs and reset performance metrics."""
     global crawl_jobs
-    
+
     # Clear all jobs
     cleared_jobs = list(crawl_jobs.keys())
     crawl_jobs.clear()
-    
+
     # Reset performance metrics if they exist
     try:
         from agents.crawler.performance_monitoring import reset_performance_metrics
         reset_performance_metrics()
     except ImportError:
         pass  # Performance monitoring might not be available
-    
+
     return {
-        "cleared_jobs": cleared_jobs, 
+        "cleared_jobs": cleared_jobs,
         "message": f"Completely reset crawler: cleared {len(cleared_jobs)} jobs and reset metrics"
     }
 

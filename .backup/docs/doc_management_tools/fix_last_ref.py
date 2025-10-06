@@ -6,9 +6,10 @@ Fix the final broken cross-reference with correct document ID
 import json
 from pathlib import Path
 
+
 def fix_last_broken_ref():
     catalogue_path = Path("../docs_catalogue_v2.json")
-    with open(catalogue_path, 'r') as f:
+    with open(catalogue_path) as f:
         catalogue = json.load(f)
 
     # The broken reference is pointing to the wrong ID

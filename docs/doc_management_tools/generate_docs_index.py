@@ -14,17 +14,16 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 import re
+from pathlib import Path
 
 FM_START = re.compile(r"^---\s*$")
 FM_END = re.compile(r"^---\s*$")
 
 
-def parse_frontmatter(text: str) -> Dict[str, str]:
+def parse_frontmatter(text: str) -> dict[str, str]:
     lines = text.splitlines()
-    fm: Dict[str, str] = {}
+    fm: dict[str, str] = {}
     if not lines or not FM_START.match(lines[0]):
         return fm
     for i in range(1, min(len(lines), 200)):
@@ -37,9 +36,9 @@ def parse_frontmatter(text: str) -> Dict[str, str]:
     return fm
 
 
-def scan_docs(root: Path) -> List[Dict]:
+def scan_docs(root: Path) -> list[dict]:
     md_root = root / "markdown_docs"
-    entries: Dict[str, List[Dict]] = {}
+    entries: dict[str, list[dict]] = {}
     for md in md_root.rglob("*.md"):
         rel = md.relative_to(root)
         parts = rel.parts

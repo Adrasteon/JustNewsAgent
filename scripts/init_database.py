@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 import os
 import sys
-
 from pathlib import Path
 
 # Add the project root to Python path FIRST
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from common.observability import get_logger
-from agents.common.database import execute_query, initialize_connection_pool
 from agents.common.auth_models import create_user_tables
+from agents.common.database import execute_query, initialize_connection_pool
+from common.observability import get_logger
 
 """
 Database initialization script for JustNewsAgent Authentication System
@@ -24,7 +23,7 @@ logger = get_logger(__name__)
 
 def create_initial_admin_user():
     """Create an initial admin user for testing"""
-    from agents.common.auth_models import create_user, UserCreate, UserRole
+    from agents.common.auth_models import UserCreate, UserRole, create_user
 
     try:
         admin_user = UserCreate(

@@ -5,22 +5,21 @@ Provides access to articles, analysis data, and statistics for public consumptio
 Includes researcher APIs for academic and journalistic use.
 """
 
+import hashlib
 import os
 import time
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
-from fastapi import APIRouter, HTTPException, Query, Depends, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-from pathlib import Path
-import requests
 from collections import defaultdict
-import hashlib
+from datetime import datetime, timedelta
+from typing import Any
+
+import requests
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 # Import common modules
 try:
-    from common.observability import get_logger
     from common.metrics import JustNewsMetrics
+    from common.observability import get_logger
 except ImportError:
     import logging
     get_logger = lambda name: logging.getLogger(name)
@@ -54,7 +53,7 @@ def _get_cache_key(endpoint: str, **kwargs) -> str:
     params = "_".join(f"{k}:{v}" for k, v in sorted(kwargs.items()))
     return f"{endpoint}_{params}"
 
-def _get_cached_data(key: str) -> Optional[Any]:
+def _get_cached_data(key: str) -> Any | None:
     """Get data from cache if not expired"""
     if key in _data_cache:
         data, timestamp = _data_cache[key]
@@ -68,7 +67,7 @@ def _set_cached_data(key: str, data: Any):
     """Store data in cache"""
     _data_cache[key] = (data, time.time())
 
-def _call_memory_agent(tool: str, **kwargs) -> Optional[Any]:
+def _call_memory_agent(tool: str, **kwargs) -> Any | None:
     """Call memory agent via MCP bus"""
     try:
         payload = {
@@ -85,7 +84,7 @@ def _call_memory_agent(tool: str, **kwargs) -> Optional[Any]:
         logger.warning(f"Failed to call memory agent {tool}: {e}")
         return None
 
-def _call_analyst_agent(tool: str, **kwargs) -> Optional[Any]:
+def _call_analyst_agent(tool: str, **kwargs) -> Any | None:
     """Call analyst agent via MCP bus"""
     try:
         payload = {
@@ -102,7 +101,7 @@ def _call_analyst_agent(tool: str, **kwargs) -> Optional[Any]:
         logger.warning(f"Failed to call analyst agent {tool}: {e}")
         return None
 
-def _get_real_articles(limit: int = 50) -> List[Dict]:
+def _get_real_articles(limit: int = 50) -> list[dict]:
     """Get real articles from memory agent"""
     cache_key = _get_cache_key("articles", limit=limit)
     cached = _get_cached_data(cache_key)
@@ -146,7 +145,7 @@ def _get_real_articles(limit: int = 50) -> List[Dict]:
     # Fallback to mock data if memory agent unavailable
     return _get_mock_articles(limit)
 
-def _get_mock_articles(limit: int = 50) -> List[Dict]:
+def _get_mock_articles(limit: int = 50) -> list[dict]:
     """Fallback mock articles when real data unavailable"""
     return [
         {
@@ -211,7 +210,7 @@ def _get_mock_articles(limit: int = 50) -> List[Dict]:
         }
     ][:limit]
 
-def _get_real_stats() -> Dict:
+def _get_real_stats() -> dict:
     """Get real statistics from various agents"""
     cache_key = _get_cache_key("stats")
     cached = _get_cached_data(cache_key)
@@ -251,7 +250,7 @@ def _get_real_stats() -> Dict:
     # Fallback to mock stats
     return _get_mock_stats()
 
-def _get_mock_stats() -> Dict:
+def _get_mock_stats() -> dict:
     """Fallback mock statistics"""
     return {
         "total_articles": 125000,
@@ -305,7 +304,7 @@ def _check_rate_limit(request: Request, endpoint_type: str = "public") -> bool:
     _rate_limits[client_id].append(current_time)
     return True
 
-def _verify_api_key(credentials: Optional[HTTPAuthorizationCredentials]) -> Optional[str]:
+def _verify_api_key(credentials: HTTPAuthorizationCredentials | None) -> str | None:
     """Verify API key for research endpoints"""
     if not credentials:
         return None
@@ -318,8 +317,8 @@ def _verify_api_key(credentials: Optional[HTTPAuthorizationCredentials]) -> Opti
 
 async def get_api_key_optional(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
-) -> Optional[str]:
+    credentials: HTTPAuthorizationCredentials | None = Depends(security)
+) -> str | None:
     """Optional API key dependency for research endpoints"""
     api_key = _verify_api_key(credentials)
     request.state.api_key = api_key
@@ -327,7 +326,7 @@ async def get_api_key_optional(
 
 async def require_api_key(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)
+    credentials: HTTPAuthorizationCredentials | None = Depends(security)
 ) -> str:
     """Required API key dependency for research endpoints"""
     api_key = _verify_api_key(credentials)
@@ -367,7 +366,7 @@ class ArticleFilter:
         self.limit = min(limit, 100)  # Max 100 articles per request
         self.offset = offset
 
-def filter_articles(articles: List[Dict], filter_obj: ArticleFilter) -> List[Dict]:
+def filter_articles(articles: list[dict], filter_obj: ArticleFilter) -> list[dict]:
     """Filter articles based on provided criteria"""
     filtered = articles.copy()
 
@@ -577,7 +576,7 @@ async def get_trending_topics(request: Request, limit: int = Query(10, ge=1, le=
         logger.error(f"Error in get_trending_topics: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve trending topics")
 
-def _get_mock_trending_topics() -> List[Dict]:
+def _get_mock_trending_topics() -> list[dict]:
     """Mock trending topics data"""
     return [
         {"name": "Artificial Intelligence", "count": 245, "change": "+12%"},
@@ -609,7 +608,7 @@ async def get_source_credibility(request: Request, limit: int = Query(20, ge=1, 
         logger.error(f"Error in get_source_credibility: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve source credibility data")
 
-def _get_mock_source_credibility() -> List[Dict]:
+def _get_mock_source_credibility() -> list[dict]:
     """Mock source credibility data"""
     return [
         {"name": "Reuters", "score": 95, "articles": 1250, "reliability": "high"},
@@ -635,7 +634,7 @@ async def get_fact_checks(request: Request, limit: int = Query(10, ge=1, le=50))
         logger.error(f"Error in get_fact-checks: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve fact checks")
 
-def _get_mock_fact_checks() -> List[Dict]:
+def _get_mock_fact_checks() -> list[dict]:
     """Mock fact check data"""
     return [
         {

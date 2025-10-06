@@ -13,13 +13,11 @@ Examples:
     python scripts/bump_version.py 1.0.0 --dry-run --verbose
 """
 
-import sys
-import os
-import re
 import argparse
+import re
+import sys
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
-import subprocess
+
 
 class VersionBumper:
     """Automates version updates across the JustNewsAgent codebase"""
@@ -29,7 +27,7 @@ class VersionBumper:
         self.dry_run = dry_run
         self.verbose = verbose
         self.project_root = Path(__file__).parent.parent
-        self.files_modified: List[str] = []
+        self.files_modified: list[str] = []
 
         # Validate version format
         if not re.match(r'^\d+\.\d+\.\d+$', new_version):

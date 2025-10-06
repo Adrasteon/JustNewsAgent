@@ -21,12 +21,14 @@ import random
 import re
 import time
 from datetime import datetime
-from typing import Any, List
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 try:  # pragma: no cover
-    from crawl4ai import AsyncWebCrawler  # type: ignore
-    from crawl4ai import LLMConfig  # type: ignore
+    from crawl4ai import (
+        AsyncWebCrawler,  # type: ignore
+        LLMConfig,  # type: ignore
+    )
     from crawl4ai.extraction_strategy import LLMExtractionStrategy  # type: ignore
     _CRAWL4AI_AVAILABLE = True
 except Exception:  # noqa: BLE001
@@ -226,7 +228,7 @@ class GenericSiteCrawler:
             # Robust browser cleanup for URL discovery
             logger.debug(f"🧹 Cleaning up browser for URL discovery from {self.site_config.name}")
             cleanup_errors = []
-            
+
             try:
                 if browser and not browser.is_connected():
                     logger.debug("Browser already closed")
@@ -241,7 +243,7 @@ class GenericSiteCrawler:
                                 logger.debug(f"Error closing page: {e}")
                     except Exception as e:
                         logger.debug(f"Error closing pages: {e}")
-                    
+
                     # Close all contexts
                     try:
                         for context in browser.contexts:
@@ -251,7 +253,7 @@ class GenericSiteCrawler:
                                 logger.debug(f"Error closing context: {e}")
                     except Exception as e:
                         logger.debug(f"Error closing contexts: {e}")
-                    
+
                     # Close browser
                     try:
                         await browser.close()
@@ -262,7 +264,7 @@ class GenericSiteCrawler:
             except Exception as e:
                 logger.warning(f"❌ Unexpected error during browser cleanup: {e}")
                 cleanup_errors.append(f"browser_unexpected: {e}")
-            
+
             # Stop playwright
             try:
                 await playwright.stop()
@@ -270,7 +272,7 @@ class GenericSiteCrawler:
             except Exception as e:
                 logger.warning(f"❌ Error stopping playwright: {e}")
                 cleanup_errors.append(f"playwright: {e}")
-            
+
             if cleanup_errors:
                 logger.warning(f"⚠️ URL discovery cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
             else:
@@ -507,13 +509,13 @@ class GenericSiteCrawler:
             # Robust browser cleanup - ensure all browsers are closed
             logger.info(f"🧹 Cleaning up {len(browsers)} browsers for {self.site_config.name}")
             cleanup_errors = []
-            
+
             for i, b in enumerate(browsers):
                 try:
                     if b and not b.is_connected():
                         logger.debug(f"Browser {i} already closed")
                         continue
-                    
+
                     # Close all pages first
                     try:
                         pages = b.contexts[0].pages if b.contexts else []
@@ -524,7 +526,7 @@ class GenericSiteCrawler:
                                 logger.debug(f"Error closing page: {e}")
                     except Exception as e:
                         logger.debug(f"Error closing pages: {e}")
-                    
+
                     # Close all contexts
                     try:
                         for context in b.contexts:
@@ -534,7 +536,7 @@ class GenericSiteCrawler:
                                 logger.debug(f"Error closing context: {e}")
                     except Exception as e:
                         logger.debug(f"Error closing contexts: {e}")
-                    
+
                     # Close browser
                     try:
                         await b.close()
@@ -542,11 +544,11 @@ class GenericSiteCrawler:
                     except Exception as e:
                         logger.warning(f"❌ Error closing browser {i}: {e}")
                         cleanup_errors.append(f"browser_{i}: {e}")
-                        
+
                 except Exception as e:
                     logger.warning(f"❌ Unexpected error during browser {i} cleanup: {e}")
                     cleanup_errors.append(f"browser_{i}_unexpected: {e}")
-            
+
             # Stop playwright
             try:
                 await playwright.stop()
@@ -554,7 +556,7 @@ class GenericSiteCrawler:
             except Exception as e:
                 logger.warning(f"❌ Error stopping playwright: {e}")
                 cleanup_errors.append(f"playwright: {e}")
-            
+
             if cleanup_errors:
                 logger.warning(f"⚠️ Browser cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
             else:

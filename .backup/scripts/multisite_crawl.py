@@ -4,6 +4,7 @@ Script to run a unified production crawl against all sources in the JustNews dat
 """
 import os
 import sys
+
 # Ensure project root is in sys.path for module imports
 project_root = os.environ.get("JUSTNEWS_ROOT") or os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if project_root not in sys.path:
@@ -12,19 +13,19 @@ if project_root not in sys.path:
 # Auto-load global.env if environment variables are missing
 env_file = os.path.join(project_root, 'deploy', 'systemd', 'env', 'global.env')
 if os.path.exists(env_file):
-    with open(env_file, 'r') as f:
+    with open(env_file) as f:
         for line in f:
             if '=' in line and not line.strip().startswith('#'):
                 key, val = line.strip().split('=', 1)
                 os.environ.setdefault(key, val)
 
-import asyncio
-import requests
-import psycopg2
-from common.observability import log_error
 import argparse
+import asyncio
 
-from agents.scout.production_crawlers.unified_production_crawler import UnifiedProductionCrawler  # still imported for fallback
+import psycopg2
+import requests
+
+from common.observability import log_error
 
 # CLI argument parsing
 parser = argparse.ArgumentParser(description="Run unified production crawl via MCP Bus")

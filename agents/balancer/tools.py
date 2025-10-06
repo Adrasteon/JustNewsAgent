@@ -1,6 +1,7 @@
-from typing import Any, Dict, List
-import time
 import random
+import time
+from typing import Any
+
 
 def echo(*args, **kwargs) -> dict[str, Any]:
     """Simple tool that echoes back its input for smoke tests."""
@@ -12,7 +13,7 @@ def sum_numbers(numbers: list[float]) -> float:
     return float(sum(numbers))
 
 
-def distribute_load(workload_items: List[Dict[str, Any]], agent_count: int = 8) -> Dict[str, Any]:
+def distribute_load(workload_items: list[dict[str, Any]], agent_count: int = 8) -> dict[str, Any]:
     """Distribute workload items across available agents for load balancing.
 
     Args:
@@ -44,7 +45,7 @@ def distribute_load(workload_items: List[Dict[str, Any]], agent_count: int = 8) 
     }
 
 
-def get_agent_status() -> Dict[str, Any]:
+def get_agent_status() -> dict[str, Any]:
     """Get status of all agents for load balancing decisions.
 
     Returns:
@@ -75,7 +76,7 @@ def get_agent_status() -> Dict[str, Any]:
     }
 
 
-def balance_workload(current_loads: Dict[str, float] = None) -> Dict[str, Any]:
+def balance_workload(current_loads: dict[str, float] = None) -> dict[str, Any]:
     """Balance workload based on current agent loads.
 
     Args:
@@ -127,7 +128,7 @@ def balance_workload(current_loads: Dict[str, float] = None) -> Dict[str, Any]:
     }
 
 
-def monitor_performance(monitoring_window_seconds: int = 300) -> Dict[str, Any]:
+def monitor_performance(monitoring_window_seconds: int = 300) -> dict[str, Any]:
     """Monitor agent performance metrics for load balancing.
 
     Args:

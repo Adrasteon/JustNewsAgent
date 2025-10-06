@@ -48,9 +48,9 @@ try:
         DomainFilter,
         FilterChain,
         KeywordRelevanceScorer,
+        LLMConfig,  # type: ignore
         PathDepthScorer,
     )
-    from crawl4ai import LLMConfig  # type: ignore
     from crawl4ai.extraction_strategy import LLMExtractionStrategy  # type: ignore
     CRAWL4AI_NATIVE_AVAILABLE = True
     logger.info("✅ Native Crawl4AI components loaded for advanced deep crawling")
@@ -67,10 +67,10 @@ intelligence_available = False
 def initialize_scout_intelligence():
     """Initialize Next-Generation GPU-accelerated Scout intelligence engine with AI-first approach"""
     global scout_engine, intelligence_available
-    
+
     if scout_engine is not None:
         return intelligence_available
-    
+
     try:
         from agents.scout.gpu_scout_engine_v2 import NextGenGPUScoutEngine
         scout_engine = NextGenGPUScoutEngine(enable_training=True)
@@ -216,7 +216,7 @@ def intelligent_source_discovery(*args, **kwargs):
         if not intelligence_available:
             # Try to initialize intelligence engine
             initialize_scout_intelligence()
-        
+
         if intelligence_available and scout_engine:
             filtered_sources = []
 
@@ -349,7 +349,7 @@ def intelligent_content_crawl(*args, **kwargs):
         if not intelligence_available:
             # Try to initialize intelligence engine
             initialize_scout_intelligence()
-        
+
         if intelligence_available and scout_engine and analyze_content and content_text:
             # Comprehensive analysis
             analysis = scout_engine.comprehensive_content_analysis(content_text, url)
@@ -995,17 +995,21 @@ PRODUCTION_CRAWLERS_AVAILABLE = False
 def initialize_production_crawlers():
     """Initialize production crawlers on demand"""
     global production_crawler, PRODUCTION_CRAWLERS_AVAILABLE
-    
+
     if production_crawler is not None:
         return PRODUCTION_CRAWLERS_AVAILABLE
-    
+
     try:
-        from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
+        from agents.scout.production_crawlers.orchestrator import (
+            ProductionCrawlerOrchestrator,
+        )
         production_crawler = ProductionCrawlerOrchestrator()
         supported_sites = []
         try:
             # Use synchronous database call instead of async
-            from agents.scout.production_crawlers.crawler_utils import get_active_sources
+            from agents.scout.production_crawlers.crawler_utils import (
+                get_active_sources,
+            )
             sources = get_active_sources()
             supported_sites = [{
                 'id': s['id'],
@@ -1039,7 +1043,7 @@ def initialize_production_crawlers():
         log_feedback("production_crawler_init_error", {"error": str(inst_e), "traceback": traceback.format_exc()})
         production_crawler = None
         PRODUCTION_CRAWLERS_AVAILABLE = False
-    
+
     return PRODUCTION_CRAWLERS_AVAILABLE
 
 async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
@@ -1088,13 +1092,13 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
                 "max_total_articles": target_articles
             }
         }
-        
+
         response = requests.post(
             "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=300  # 5 minutes timeout for crawling
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             log_feedback("production_crawl_ultra_fast", {
@@ -1109,7 +1113,7 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
             logger.error(f"Ultra-fast production crawl failed for {site}: {error_msg}")
             log_feedback("production_crawl_ultra_fast_error", {"site": site, "error": error_msg})
             return {"error": error_msg, "articles": []}
-            
+
     except Exception as e:
         logger.error(f"Ultra-fast production crawl failed for {site}: {e}")
         log_feedback("production_crawl_ultra_fast_error", {"site": site, "error": str(e)})
@@ -1161,13 +1165,13 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
                 "max_total_articles": target_articles
             }
         }
-        
+
         response = requests.post(
             "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=600  # 10 minutes timeout for AI-enhanced crawling
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             log_feedback("production_crawl_ai_enhanced", {
@@ -1182,7 +1186,7 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
             logger.error(f"AI-enhanced production crawl failed for {site}: {error_msg}")
             log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": error_msg})
             return {"error": error_msg, "articles": []}
-            
+
     except Exception as e:
         logger.error(f"AI-enhanced production crawl failed for {site}: {e}")
         log_feedback("production_crawl_ai_enhanced_error", {"site": site, "error": str(e)})
@@ -1212,13 +1216,13 @@ def get_production_crawler_info():
         # Call Crawler agent via MCP Bus
         import requests
         payload = {"args": [], "kwargs": {}}
-        
+
         response = requests.post(
             "http://localhost:8015/get_crawler_info",
             json=payload,
             timeout=30
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             # Add Scout agent context
@@ -1231,7 +1235,7 @@ def get_production_crawler_info():
             logger.error(f"Failed to get production crawler info: {error_msg}")
             log_feedback("get_production_crawler_info_error", {"error": error_msg})
             return {"available": False, "error": error_msg, "supported_sites": []}
-            
+
     except Exception as e:
         logger.error(f"Failed to get production crawler info: {e}")
         log_feedback("get_production_crawler_info_error", {"error": str(e)})
@@ -1276,13 +1280,13 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
                 "max_total_articles": max_total_articles
             }
         }
-        
+
         response = requests.post(
             "http://localhost:8015/unified_production_crawl",
             json=payload,
             timeout=900  # 15 minutes timeout for dynamic crawling
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             # Add Scout agent context
@@ -1307,7 +1311,7 @@ async def production_crawl_dynamic(domains: list[str] | None = None,
             logger.error(f"Dynamic multi-site crawl failed: {error_msg}")
             log_feedback("production_crawl_dynamic_error", {"error": error_msg})
             return {"error": error_msg}
-            
+
     except Exception as e:
         logger.error(f"Dynamic multi-site crawl failed: {e}")
         log_feedback("production_crawl_dynamic_error", {"error": str(e)})

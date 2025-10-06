@@ -22,8 +22,8 @@ Performance Targets:
 - Production-scale capacity: 100K+ articles/day
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path for version import
 _project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

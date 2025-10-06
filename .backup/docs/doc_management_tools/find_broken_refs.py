@@ -6,9 +6,10 @@ Quick script to identify remaining broken references
 import json
 from pathlib import Path
 
+
 def find_broken_refs():
     catalogue_path = Path("../docs_catalogue_v2.json")
-    with open(catalogue_path, 'r') as f:
+    with open(catalogue_path) as f:
         catalogue = json.load(f)
 
     all_doc_ids = set()

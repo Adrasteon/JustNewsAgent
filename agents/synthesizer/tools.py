@@ -354,16 +354,16 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
     """Cluster articles using optimized embedding configuration."""
     if not article_texts:
         return {"clusters": [], "cluster_labels": [], "n_clusters": 0, "articles_processed": 0}
-    
+
     result = {"clusters": [], "cluster_labels": [], "n_clusters": 0, "articles_processed": 0}  # Initialize result
-    
+
     try:
         model = get_embedding_model()
         embeddings = model.encode(article_texts)
         method = os.environ.get("SYNTHESIZER_CLUSTER_METHOD", "kmeans").lower()
         clusters = []
         cluster_labels = []
-        
+
         try:
             if method == "bertopic":
                 if BERTopic is None:
@@ -398,7 +398,7 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
                 cluster_labels = ["cluster_" + str(i) for i in range(n_clusters)]
                 for idx, label in enumerate(labels):
                     clusters[label].append(idx)
-            
+
             result = {
                 "clusters": clusters,
                 "cluster_labels": cluster_labels,
@@ -406,10 +406,10 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
                 "articles_processed": len(article_texts),
                 "method": method
             }
-            
+
             log_feedback("cluster_articles", {"method": method, "n_clusters": len(clusters), "clusters": clusters})
             return result
-            
+
         except Exception as e:
             logger.error(f"Error in cluster_articles: {e}")
             log_feedback("cluster_articles_error", {"error": str(e), "method": method})
@@ -422,7 +422,7 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
                 "error": str(e)
             }
             return result
-            
+
     finally:
         # Collect prediction for training
         try:
@@ -475,7 +475,7 @@ def neutralize_text(text: str) -> dict[str, Any]:
     neutralized_bias_score = sum(1 for word in result.lower().split() if word in bias_indicators) / max(len(result.split()), 1)
 
     log_feedback("neutralize_text", {"input": text, "output": result})
-    
+
     result_dict = {
         "neutralized_text": result,
         "original_text": text,
@@ -484,7 +484,7 @@ def neutralize_text(text: str) -> dict[str, Any]:
         "processing_time": 0.0,  # Would need timing implementation
         "method": "dialogpt_neutralization"
     }
-    
+
     # Collect prediction for training
     try:
         confidence = min(0.95, max(0.5, 1.0 - neutralized_bias_score))  # Higher confidence for better neutralization
@@ -502,7 +502,7 @@ def neutralize_text(text: str) -> dict[str, Any]:
         logger.debug("Training system not available - skipping data collection")
     except Exception as e:
         logger.warning(f"Failed to collect training data: {e}")
-    
+
     return result_dict
 
 def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
@@ -540,7 +540,7 @@ def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
     confidence = min(0.9, len(result.split()) / 100.0)  # Simple heuristic
 
     log_feedback("aggregate_cluster", {"input": article_texts, "output": result})
-    
+
     result_dict = {
         "summary": result,
         "key_points": key_points,
@@ -548,7 +548,7 @@ def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
         "articles_processed": len(article_texts),
         "method": "dialogpt_aggregation"
     }
-    
+
     # Collect prediction for training
     try:
         from training_system import collect_prediction
@@ -565,7 +565,7 @@ def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
         logger.debug("Training system not available - skipping data collection")
     except Exception as e:
         logger.warning(f"Failed to collect training data: {e}")
-    
+
     return result_dict
 
 # ==================== SYNTHESIZER V2 TRAINING-INTEGRATED METHODS ====================

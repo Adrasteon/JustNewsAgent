@@ -4,15 +4,16 @@ Web Interface for JustNews Crawler Dashboard
 """
 
 import os
-import requests
 import re
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 
 # Import database functions
 import sys
+
+import requests
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
+
 sys.path.append('/home/adra/justnewsagent/JustNewsAgent')
 from agents.common.database import execute_query, initialize_connection_pool
 from common.dev_db_fallback import apply_test_db_env_fallback
@@ -66,7 +67,7 @@ class CrawlRequest(BaseModel):
 async def root():
     """Serve the main dashboard HTML"""
     try:
-        with open("/home/adra/justnewsagent/JustNewsAgent/agents/dashboard/web_interface/index.html", "r") as f:
+        with open("/home/adra/justnewsagent/JustNewsAgent/agents/dashboard/web_interface/index.html") as f:
             return f.read()
     except Exception as e:
         print(f"Error reading HTML file: {e}")
@@ -87,7 +88,7 @@ async def start_crawl(request: CrawlRequest):
     try:
         # Parse domains input
         domains_input = request.domains.strip()
-        
+
         if domains_input.lower() == "all":
             # Get all active sources
             domains = get_sources_with_limit()
@@ -181,7 +182,7 @@ async def get_crawl_status():
         response = requests.get(f"{CRAWLER_AGENT_URL}/jobs")
         response.raise_for_status()
         jobs = response.json()
-        
+
         # Get details for each job
         job_details = {}
         for job_id, status in jobs.items():
@@ -191,7 +192,7 @@ async def get_crawl_status():
                 job_details[job_id] = detail_response.json()
             except:
                 job_details[job_id] = {"status": "unknown"}
-        
+
         return job_details
     except requests.RequestException as e:
         raise HTTPException(status_code=500, detail=f"Failed to get crawl status: {str(e)}")
@@ -251,14 +252,14 @@ async def get_system_health():
         ("memory", MEMORY_AGENT_URL),
         ("mcp_bus", MCP_BUS_URL)
     ]
-    
+
     for name, url in agents:
         try:
             response = requests.get(f"{url}/health", timeout=5)
             health[name] = response.status_code == 200
         except:
             health[name] = False
-    
+
     return health
 
 if __name__ == "__main__":

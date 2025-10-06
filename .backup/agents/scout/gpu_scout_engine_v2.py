@@ -235,7 +235,7 @@ class NextGenGPUScoutEngine:
 
                 # Use GPU orchestrator for model management
                 gpu_mgr = get_gpu_manager()
-                model_key = f"scout_news_classifier"
+                model_key = "scout_news_classifier"
 
                 # Check if model already exists in registry
                 existing_pipeline = gpu_mgr.get(model_key)
@@ -311,7 +311,7 @@ class NextGenGPUScoutEngine:
 
                 # Use GPU orchestrator for model management
                 gpu_mgr = get_gpu_manager()
-                model_key = f"scout_quality_assessor"
+                model_key = "scout_quality_assessor"
 
                 # Check if model already exists in registry
                 existing_pipeline = gpu_mgr.get(model_key)
@@ -387,7 +387,7 @@ class NextGenGPUScoutEngine:
 
                 # Use GPU orchestrator for model management
                 gpu_mgr = get_gpu_manager()
-                model_key = f"scout_sentiment_analyzer"
+                model_key = "scout_sentiment_analyzer"
 
                 # Check if model already exists in registry
                 existing_pipeline = gpu_mgr.get(model_key)
@@ -440,7 +440,7 @@ class NextGenGPUScoutEngine:
 
                 # Use GPU orchestrator for model management
                 gpu_mgr = get_gpu_manager()
-                model_key = f"scout_bias_detector"
+                model_key = "scout_bias_detector"
 
                 # Check if model already exists in registry
                 existing_pipeline = gpu_mgr.get(model_key)

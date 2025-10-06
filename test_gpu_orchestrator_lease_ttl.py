@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test lease TTL expiry logic (opportunistic purge)."""
 import time
+
 from fastapi.testclient import TestClient
 
-from agents.gpu_orchestrator.main import app, ALLOCATIONS  # type: ignore
+from agents.gpu_orchestrator.main import ALLOCATIONS, app  # type: ignore
 
 
 def test_lease_ttl_expiry(monkeypatch):

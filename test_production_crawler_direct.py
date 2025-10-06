@@ -3,9 +3,8 @@
 Direct test of Scout Agent production crawler functionality
 """
 
-import sys
-import os
 import asyncio
+import sys
 
 # Add the project root to the path
 sys.path.insert(0, '/home/adra/justnewsagent/JustNewsAgent')
@@ -16,7 +15,9 @@ def test_production_crawler():
 
     try:
         # Import the production crawler orchestrator
-        from agents.scout.production_crawlers.orchestrator import ProductionCrawlerOrchestrator
+        from agents.scout.production_crawlers.orchestrator import (
+            ProductionCrawlerOrchestrator,
+        )
         print("✅ ProductionCrawlerOrchestrator imported successfully")
 
         # Create the orchestrator
@@ -32,7 +33,10 @@ def test_production_crawler():
         print(f"✅ Supported modes: {supported_modes}")
 
         # Test the tools import
-        from agents.scout.tools import get_production_crawler_info, PRODUCTION_CRAWLERS_AVAILABLE
+        from agents.scout.tools import (
+            PRODUCTION_CRAWLERS_AVAILABLE,
+            get_production_crawler_info,
+        )
         print(f"✅ Production crawlers available: {PRODUCTION_CRAWLERS_AVAILABLE}")
 
         # Test the info function

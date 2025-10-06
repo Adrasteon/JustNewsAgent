@@ -17,13 +17,10 @@ Date: September 7, 2025
 """
 
 import json
-import os
-import re
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
 import logging
 from collections import defaultdict
+from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -43,7 +40,7 @@ class DocumentationAutomation:
     def load_catalogue(self) -> bool:
         """Load the documentation catalogue"""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 self.catalogue = json.load(f)
             logger.info(f"Loaded catalogue with {len(self.catalogue['categories'])} categories")
             return True
@@ -51,7 +48,7 @@ class DocumentationAutomation:
             logger.error(f"Failed to load catalogue: {e}")
             return False
 
-    def validate_cross_references(self) -> Dict[str, Any]:
+    def validate_cross_references(self) -> dict[str, Any]:
         """Validate and repair cross-references in the catalogue"""
         logger.info("Validating cross-references...")
 
@@ -111,7 +108,7 @@ class DocumentationAutomation:
         logger.info(f"Cross-reference validation complete: {results['valid_references']} valid, {results['broken_references']} broken")
         return results
 
-    def generate_quality_dashboard(self) -> Dict[str, Any]:
+    def generate_quality_dashboard(self) -> dict[str, Any]:
         """Generate a quality monitoring dashboard"""
         logger.info("Generating quality dashboard...")
 
@@ -191,7 +188,7 @@ class DocumentationAutomation:
         logger.info(f"Quality dashboard generated: Overall score {dashboard['overall_score']:.1f}")
         return dashboard
 
-    def _generate_recommendations(self, dashboard: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, dashboard: dict[str, Any]) -> list[str]:
         """Generate maintenance recommendations based on dashboard data"""
         recommendations = []
 
@@ -220,7 +217,7 @@ class DocumentationAutomation:
 
         return recommendations
 
-    def suggest_category_improvements(self) -> Dict[str, Any]:
+    def suggest_category_improvements(self) -> dict[str, Any]:
         """Suggest improvements for category organization"""
         logger.info("Analyzing category organization...")
 
@@ -260,7 +257,7 @@ class DocumentationAutomation:
         logger.info("Category analysis complete")
         return suggestions
 
-    def generate_maintenance_schedule(self) -> Dict[str, Any]:
+    def generate_maintenance_schedule(self) -> dict[str, Any]:
         """Generate automated maintenance schedule"""
         logger.info("Generating maintenance schedule...")
 
@@ -396,7 +393,7 @@ class DocumentationAutomation:
 
         return "\n".join(report)
 
-    def run_automation_suite(self) -> Dict[str, Any]:
+    def run_automation_suite(self) -> dict[str, Any]:
         """Run the complete automation suite"""
         logger.info("Starting Phase 4: Automation Tools Implementation")
 

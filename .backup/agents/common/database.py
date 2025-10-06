@@ -34,7 +34,7 @@ def get_db_config():
         'user': os.environ.get("POSTGRES_USER"),
         'password': os.environ.get("POSTGRES_PASSWORD")
     }
-    
+
     # If any are missing, try to parse DATABASE_URL
     if not all(config.values()):
         database_url = os.environ.get("DATABASE_URL")
@@ -51,7 +51,7 @@ def get_db_config():
                     config['port'] = parsed.port
             except Exception as e:
                 logger.warning(f"Failed to parse DATABASE_URL: {e}")
-    
+
     return config
 
 # Connection pool configuration

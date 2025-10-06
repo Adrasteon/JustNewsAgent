@@ -32,12 +32,14 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
 try:  # local import – optional
-    from agents.common.gpu_orchestrator_client import GPUOrchestratorClient  # type: ignore
+    from agents.common.gpu_orchestrator_client import (
+        GPUOrchestratorClient,  # type: ignore
+    )
 except Exception:  # pragma: no cover - hard failure only if completely missing
     GPUOrchestratorClient = None  # type: ignore
 
@@ -48,13 +50,13 @@ def timestamp() -> str:
     return datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
 
-def write_json(path: Path, data: Dict[str, Any]) -> None:
+def write_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, sort_keys=True)
 
 
-def analyst_http_batch(base: str, texts: List[str]) -> Dict[str, Any]:
+def analyst_http_batch(base: str, texts: list[str]) -> dict[str, Any]:
     # Minimal HTTP fallback hitting analyst endpoints if available
     # Expect an endpoint like /analyze/batch (adjust if project provides different one)
     # If 404 we degrade gracefully.
@@ -67,7 +69,7 @@ def analyst_http_batch(base: str, texts: List[str]) -> Dict[str, Any]:
         return {"status": "error", "detail": str(e)}
 
 
-def run_gpu_local(texts: List[str]) -> Dict[str, Any]:
+def run_gpu_local(texts: list[str]) -> dict[str, Any]:
     # Attempt to import fast GPU analyst helper functions if they exist.
     # We keep broad except to avoid crashing harness on missing dev code.
     try:  # pragma: no cover - import side effects
@@ -110,7 +112,7 @@ def main() -> int:
 
     texts = [f"Synthetic news text sample {i}" for i in range(args.items)]
 
-    metrics: Dict[str, Any] = {
+    metrics: dict[str, Any] = {
         "timestamp": timestamp(),
         "orchestrator_url": args.orchestrator,
         "analyst_url": args.analyst,

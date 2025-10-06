@@ -10,14 +10,15 @@ Updated version runs the orchestrator fully in-memory using FastAPI's TestClient
 Outputs JSON list to an --output path (default: orchestrator_demo_results/analyst_decision_flip.json).
 """
 from __future__ import annotations
-import os
-import sys
-import json
-import time
-import subprocess
+
 import argparse
+import json
+import os
+import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
 
 # Ensure project root on sys.path when invoked directly so 'agents' can import
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -35,6 +36,7 @@ OUTPUT_ENV_KEY = "ANALYST_FLIP_OUTPUT_PATH"
 
 def child_entry():  # pragma: no cover
     from fastapi.testclient import TestClient  # type: ignore
+
     from agents.gpu_orchestrator.main import app  # type: ignore
 
     safe_mode_env = os.environ.get("SAFE_MODE", "false").lower() == "true"
@@ -45,7 +47,7 @@ def child_entry():  # pragma: no cover
         policy = policy_resp.json() if policy_resp.status_code == 200 else {"safe_mode_read_only": True}
 
     gpu_available = bool(gpu_info.get("available"))
-    decision: Dict[str, Any] = {
+    decision: dict[str, Any] = {
         "use_gpu": bool(gpu_available and not safe_mode_env),
         "safe_mode": bool(policy.get("safe_mode_read_only", True)),
         "gpu_available": gpu_available,
@@ -60,13 +62,13 @@ def child_entry():  # pragma: no cover
     print("__ANALYST_DECISION_END__")
 
 
-def run_cycle(safe_mode: bool) -> Dict[str, Any]:
+def run_cycle(safe_mode: bool) -> dict[str, Any]:
     env = os.environ.copy()
     env["SAFE_MODE"] = "true" if safe_mode else "false"
     env["ANALYST_FLIP_CHILD"] = "1"
-    cmd: List[str] = [sys.executable, str(THIS_FILE)]
+    cmd: list[str] = [sys.executable, str(THIS_FILE)]
     proc = subprocess.run(cmd, env=env, capture_output=True, text=True, check=True)
-    decision_lines: List[str] = []
+    decision_lines: list[str] = []
     capture = False
     for line in proc.stdout.splitlines():
         if line.strip() == "__ANALYST_DECISION_START__":
@@ -89,7 +91,7 @@ def main():  # pragma: no cover
     args = parse_args()
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    records: List[Dict[str, Any]] = []
+    records: list[dict[str, Any]] = []
     for mode in (True, False):
         start = time.time()
         rec = run_cycle(mode)

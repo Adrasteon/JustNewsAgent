@@ -5,9 +5,9 @@ Reorganizes the large Development Reports category into logical subcategories.
 """
 
 import json
-from pathlib import Path
-from typing import Dict, List, Any
 import logging
+from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,7 +24,7 @@ class CatalogueReorganizer:
     def load_catalogue(self):
         """Load the catalogue from file"""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 self.catalogue = json.load(f)
             logger.info(f"Loaded catalogue with {self.catalogue['catalogue_metadata']['total_documents']} documents")
         except Exception as e:
@@ -41,7 +41,7 @@ class CatalogueReorganizer:
             logger.error(f"Failed to save catalogue: {e}")
             raise
 
-    def get_category_by_id(self, category_id: str) -> Dict[str, Any]:
+    def get_category_by_id(self, category_id: str) -> dict[str, Any]:
         """Get category by ID"""
         for category in self.catalogue['categories']:
             if category['id'] == category_id:
@@ -123,7 +123,7 @@ class CatalogueReorganizer:
         # Update total categories count
         self.catalogue['catalogue_metadata']['categories'] = len(self.catalogue['categories'])
 
-    def categorize_document(self, document: Dict[str, Any]) -> str:
+    def categorize_document(self, document: dict[str, Any]) -> str:
         """Determine the appropriate subcategory for a document based on its content"""
         title = document.get('title', '').lower()
         description = document.get('description', '').lower()

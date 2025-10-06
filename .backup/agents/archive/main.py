@@ -11,10 +11,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from agents.archive.archive_manager import ArchiveManager
-from common.observability import get_logger
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 logger = get_logger(__name__)
@@ -140,7 +140,6 @@ class CrawlerResults(BaseModel):
 async def archive_articles(call: ToolCall):
     """Archive articles from crawler results with Knowledge Graph integration"""
     try:
-        from datetime import datetime
 
         kwargs = call.kwargs or {}
 
@@ -212,7 +211,6 @@ async def search_archive(call: ToolCall):
 def get_archive_stats(call: ToolCall):
     """Get comprehensive archive statistics"""
     try:
-        import os
         from pathlib import Path
 
         # Get storage statistics

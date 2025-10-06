@@ -1,5 +1,6 @@
 #!/home/adra/miniconda3/condabin/conda run -n justnews-v2-py312 python3
 from common.observability import get_logger
+
 """
 Production BBC NewsReader Crawler - Robust Implementation
 
@@ -15,21 +16,21 @@ Features:
 
 import asyncio
 import json
-import logging
-
-from typing import List, Dict, Optional
-import time
-from datetime import datetime
 
 # Production NewsReader and web crawling
 import sys
+import time
+from datetime import datetime
+
 sys.path.append('/home/adra/JustNewsAgentic')
-from production_newsreader_fixed import ProductionNewsReader
-import psycopg2
-from scripts.db_dedupe import ensure_table, register_url
-from playwright.async_api import async_playwright
-from PIL import Image
 import io
+
+import psycopg2
+from PIL import Image
+from playwright.async_api import async_playwright
+
+from production_newsreader_fixed import ProductionNewsReader
+from scripts.db_dedupe import ensure_table, register_url
 
 # Configure logging
 logger = get_logger(__name__)
@@ -44,7 +45,7 @@ class ProductionBBCNewsReaderCrawler:
     - Screenshot-based content capture for JavaScript handling
     - Comprehensive error handling and resource management
     """
-    
+
     def __init__(self):
         self.newsreader = None
         self.browser = None
@@ -52,24 +53,24 @@ class ProductionBBCNewsReaderCrawler:
         self.results = []
         self.failed_urls = []
         self.processed_count = 0
-        
+
     async def initialize(self) -> bool:
         """Initialize production crawler with all components"""
         try:
             logger.info("🚀 Initializing Production BBC NewsReader Crawler...")
-            
+
             # Initialize production NewsReader
             self.newsreader = ProductionNewsReader()
             newsreader_success = await self.newsreader.initialize_with_fallback_strategy()
-            
+
             if not newsreader_success:
                 logger.error("❌ Failed to initialize NewsReader")
                 return False
-            
+
             # Check NewsReader health
             health = await self.newsreader.health_check()
             logger.info(f"📊 NewsReader Health: {health}")
-            
+
             # Initialize browser for screenshot capture
             playwright = await async_playwright().start()
             self.browser = await playwright.chromium.launch(headless=True)
@@ -77,15 +78,15 @@ class ProductionBBCNewsReaderCrawler:
                 viewport={'width': 1920, 'height': 1080},
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             )
-            
+
             logger.info("✅ Production crawler initialization complete")
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Crawler initialization failed: {e}")
             return False
-    
-    async def get_bbc_england_urls(self, max_urls: int = 15) -> List[str]:
+
+    async def get_bbc_england_urls(self, max_urls: int = 15) -> list[str]:
         """
         Get BBC England article URLs using depth-first strategy.
         
@@ -97,26 +98,26 @@ class ProductionBBCNewsReaderCrawler:
         """
         try:
             logger.info("🔍 Discovering BBC England article URLs...")
-            
+
             page = await self.context.new_page()
-            
+
             # Start from BBC England page
             await page.goto("https://www.bbc.co.uk/news/england", wait_until='networkidle')
             await asyncio.sleep(2)  # Allow dynamic content to load
-            
+
             urls = set()
-            
+
             # Look for article links using correct BBC selectors
             selectors = [
                 'a[href*="articles/"]',  # New BBC article format
                 'h3 a[href*="/news/"]',  # Headlines in h3 tags
                 'h2 a[href*="/news/"]',  # Headlines in h2 tags
             ]
-            
+
             for selector in selectors:
                 try:
                     links = await page.locator(selector).all()
-                    
+
                     for link in links:
                         try:
                             href = await link.get_attribute('href')
@@ -124,9 +125,9 @@ class ProductionBBCNewsReaderCrawler:
                                 # Convert relative URLs to absolute
                                 if href.startswith('/'):
                                     href = f"https://www.bbc.co.uk{href}"
-                                
+
                                 # Filter for England articles and proper news content
-                                if ('articles/' in href or 
+                                if ('articles/' in href or
                                     any(pattern in href for pattern in ['/news/uk-england-', '/news/england-'])):
                                     # Avoid duplicate and non-article URLs
                                     if not any(skip in href for skip in ['video', 'live', 'sport', 'topics', 'regions']):
@@ -137,20 +138,20 @@ class ProductionBBCNewsReaderCrawler:
                 except Exception as e:
                     logger.warning(f"⚠️ Selector {selector} failed: {e}")
                     continue
-            
+
             # Convert to list and limit
             england_urls = list(urls)[:max_urls]
-            
+
             await page.close()
-            
+
             logger.info(f"✅ Found {len(england_urls)} BBC England article URLs")
             return england_urls
-            
+
         except Exception as e:
             logger.error(f"❌ Error discovering BBC England URLs: {e}")
             return []
-    
-    async def capture_page_screenshot(self, url: str) -> Optional[Image.Image]:
+
+    async def capture_page_screenshot(self, url: str) -> Image.Image | None:
         """
         Capture page screenshot for NewsReader analysis.
         
@@ -162,11 +163,11 @@ class ProductionBBCNewsReaderCrawler:
         """
         try:
             page = await self.context.new_page()
-            
+
             # Navigate and wait for content
             await page.goto(url, wait_until='networkidle', timeout=30000)
             await asyncio.sleep(3)  # Additional wait for dynamic content
-            
+
             # Handle cookie banners if present
             try:
                 cookie_button = page.locator('button:has-text("Accept"), button:has-text("OK"), button:has-text("Agree")')
@@ -175,26 +176,26 @@ class ProductionBBCNewsReaderCrawler:
                     await asyncio.sleep(1)
             except Exception:
                 pass  # Cookie handling is optional
-            
+
             # Capture screenshot
             screenshot_bytes = await page.screenshot(
                 full_page=True,
                 type='png'
             )
-            
+
             await page.close()
-            
+
             # Convert to PIL Image
             image = Image.open(io.BytesIO(screenshot_bytes))
-            
+
             logger.info(f"✅ Screenshot captured: {url}")
             return image
-            
+
         except Exception as e:
             logger.error(f"❌ Screenshot capture failed for {url}: {e}")
             return None
-    
-    async def analyze_article_with_newsreader(self, url: str, image: Image.Image) -> Optional[Dict]:
+
+    async def analyze_article_with_newsreader(self, url: str, image: Image.Image) -> dict | None:
         """
         Analyze article content using production NewsReader.
         
@@ -208,10 +209,10 @@ class ProductionBBCNewsReaderCrawler:
         try:
             # Create analysis context
             context = f"Analyze this BBC England news article from {url}. Focus on the main news content, headline, and key information."
-            
+
             # Analyze with production NewsReader
             analysis = await self.newsreader.analyze_news_content(image, context)
-            
+
             if analysis:
                 result = {
                     "url": url,
@@ -220,18 +221,18 @@ class ProductionBBCNewsReaderCrawler:
                     "model_type": self.newsreader.model_type,
                     "status": "success"
                 }
-                
+
                 logger.info(f"✅ Analysis complete: {url}")
                 return result
             else:
                 logger.warning(f"⚠️ No analysis result for: {url}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"❌ Analysis failed for {url}: {e}")
             return None
-    
-    async def process_article(self, url: str) -> Optional[Dict]:
+
+    async def process_article(self, url: str) -> dict | None:
         """
         Process single article with production pipeline.
         
@@ -243,13 +244,13 @@ class ProductionBBCNewsReaderCrawler:
         """
         try:
             logger.info(f"🔄 Processing: {url}")
-            
+
             # Capture screenshot
             image = await self.capture_page_screenshot(url)
             if not image:
                 self.failed_urls.append({"url": url, "reason": "screenshot_failed"})
                 return None
-            
+
             # Analyze with NewsReader
             result = await self.analyze_article_with_newsreader(url, image)
             if result:
@@ -258,13 +259,13 @@ class ProductionBBCNewsReaderCrawler:
             else:
                 self.failed_urls.append({"url": url, "reason": "analysis_failed"})
                 return None
-                
+
         except Exception as e:
             logger.error(f"❌ Article processing failed for {url}: {e}")
             self.failed_urls.append({"url": url, "reason": str(e)})
             return None
-    
-    async def crawl_bbc_england_articles(self, max_articles: int = 15) -> Dict:
+
+    async def crawl_bbc_england_articles(self, max_articles: int = 15) -> dict:
         """
         Main crawling method with production pipeline.
         
@@ -276,14 +277,14 @@ class ProductionBBCNewsReaderCrawler:
         """
         try:
             start_time = time.time()
-            
+
             logger.info(f"🚀 Starting BBC England crawling (max {max_articles} articles)")
-            
+
             # Get England article URLs
             urls = await self.get_bbc_england_urls(max_articles)
             if not urls:
                 return {"error": "No URLs found", "results": []}
-            
+
             logger.info(f"📝 Processing {len(urls)} BBC England articles...")
 
             # Ensure dedupe table exists (DB-side gate)
@@ -313,18 +314,18 @@ class ProductionBBCNewsReaderCrawler:
 
                 # Brief pause between requests
                 await asyncio.sleep(1)
-            
+
             # Compile final results
             end_time = time.time()
             duration = round(end_time - start_time, 2)
-            
+
             # Close DB conn if used
             if conn:
                 conn.close()
 
             # Get final NewsReader metrics
             final_metrics = await self.newsreader.get_performance_metrics()
-            
+
             crawl_results = {
                 "success": True,
                 "total_urls_found": len(urls),
@@ -338,50 +339,50 @@ class ProductionBBCNewsReaderCrawler:
                 "failed_urls": self.failed_urls,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
             logger.info(f"✅ BBC England crawling complete: {len(self.results)}/{len(urls)} successful")
             return crawl_results
-            
+
         except Exception as e:
             logger.error(f"❌ BBC England crawling failed: {e}")
             return {"error": str(e), "results": self.results}
-    
+
     async def cleanup(self):
         """Production cleanup with proper resource management"""
         try:
             if self.context:
                 await self.context.close()
-            
+
             if self.browser:
                 await self.browser.close()
-            
+
             if self.newsreader:
                 self.newsreader.cleanup()
-            
+
             logger.info("✅ Production crawler cleanup completed")
-            
+
         except Exception as e:
             logger.error(f"❌ Cleanup error: {e}")
 
 async def main():
     """Production BBC NewsReader crawler execution"""
-    
+
     crawler = ProductionBBCNewsReaderCrawler()
-    
+
     try:
         # Initialize production crawler
         if not await crawler.initialize():
             logger.error("❌ Failed to initialize production crawler")
             return
-        
+
         # Run BBC England crawling
         results = await crawler.crawl_bbc_england_articles(max_articles=10)
-        
+
         # Save results
         output_file = "bbc_england_production_results.json"
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
-        
+
         # Display summary
         print("\n" + "="*80)
         print("🏆 PRODUCTION BBC ENGLAND CRAWLER RESULTS")
@@ -394,7 +395,7 @@ async def main():
         print(f"💾 Memory: {results.get('newsreader_metrics', {}).get('memory_allocated_gb', 0)}GB")
         print(f"📄 Results saved: {output_file}")
         print("="*80)
-        
+
     finally:
         # Always cleanup
         await crawler.cleanup()

@@ -10,13 +10,11 @@ Date: September 7, 2025
 import json
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
+
 import schedule
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
 # Configure logging
 logging.basicConfig(
@@ -45,10 +43,10 @@ class DocumentationQualityMonitor:
 
         logger.info("Documentation Quality Monitor initialized")
 
-    def calculate_quality_score(self) -> Dict[str, Any]:
+    def calculate_quality_score(self) -> dict[str, Any]:
         """Calculate comprehensive quality score"""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 catalogue = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load catalogue: {e}")
@@ -180,7 +178,7 @@ class DocumentationQualityMonitor:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             backup_path = self.backup_dir / f"docs_catalogue_backup_{timestamp}.json"
 
-            with open(self.catalogue_path, 'r', encoding='utf-8') as src:
+            with open(self.catalogue_path, encoding='utf-8') as src:
                 with open(backup_path, 'w', encoding='utf-8') as dst:
                     dst.write(src.read())
 

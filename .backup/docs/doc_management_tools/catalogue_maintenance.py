@@ -17,15 +17,14 @@ Usage:
     python docs/catalogue_maintenance.py --performance-report
 """
 
-import os
-import json
 import argparse
+import json
+import logging
+from collections import Counter, defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
-from collections import defaultdict, Counter
-import logging
-from dataclasses import dataclass
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -44,9 +43,9 @@ class CatalogueStats:
     avg_word_count: float
     largest_document: str
     smallest_document: str
-    most_common_tags: List[tuple]
-    documents_per_category: Dict[str, int]
-    status_distribution: Dict[str, int]
+    most_common_tags: list[tuple]
+    documents_per_category: dict[str, int]
+    status_distribution: dict[str, int]
 
 class CatalogueMaintenanceTools:
     """Comprehensive maintenance and analysis tools for the documentation catalogue"""
@@ -56,15 +55,15 @@ class CatalogueMaintenanceTools:
         self.catalogue_path = self.workspace_root / "docs" / "docs_catalogue_v2.json"
         self.catalogue = self._load_catalogue()
 
-    def _load_catalogue(self) -> Dict[str, Any]:
+    def _load_catalogue(self) -> dict[str, Any]:
         """Load the catalogue from file"""
         if not self.catalogue_path.exists():
             raise FileNotFoundError(f"Catalogue not found: {self.catalogue_path}")
 
-        with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+        with open(self.catalogue_path, encoding='utf-8') as f:
             return json.load(f)
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Comprehensive health check of the catalogue"""
         logger.info("Performing comprehensive catalogue health check...")
 
@@ -142,8 +141,8 @@ class CatalogueMaintenanceTools:
         logger.info(f"Health check complete: {total_issues} issues found")
         return result
 
-    def advanced_search(self, query: str, category: Optional[str] = None,
-                       tags: Optional[List[str]] = None, status: Optional[str] = None) -> List[Dict]:
+    def advanced_search(self, query: str, category: str | None = None,
+                       tags: list[str] | None = None, status: str | None = None) -> list[dict]:
         """Advanced search with multiple filters"""
         logger.info(f"Performing advanced search: query='{query}', category='{category}', tags={tags}, status='{status}'")
 
@@ -188,7 +187,7 @@ class CatalogueMaintenanceTools:
         logger.info(f"Search complete: {len(results)} results found")
         return results
 
-    def _calculate_relevance(self, query: str, doc: Dict) -> float:
+    def _calculate_relevance(self, query: str, doc: dict) -> float:
         """Calculate relevance score for search results"""
         score = 0.0
         query_lower = query.lower()
@@ -213,7 +212,7 @@ class CatalogueMaintenanceTools:
 
         return score
 
-    def analyze_cross_references(self) -> Dict[str, Any]:
+    def analyze_cross_references(self) -> dict[str, Any]:
         """Analyze cross-reference patterns in the catalogue"""
         logger.info("Analyzing cross-reference patterns...")
 
@@ -264,7 +263,7 @@ class CatalogueMaintenanceTools:
         logger.info(f"Cross-reference analysis complete: {len(broken_refs)} broken references found")
         return result
 
-    def generate_performance_report(self) -> Dict[str, Any]:
+    def generate_performance_report(self) -> dict[str, Any]:
         """Generate comprehensive performance and statistics report"""
         logger.info("Generating performance report...")
 
@@ -368,7 +367,7 @@ class CatalogueMaintenanceTools:
         logger.info("Performance report generated successfully")
         return result
 
-    def _generate_maintenance_recommendations(self, stats: CatalogueStats) -> List[str]:
+    def _generate_maintenance_recommendations(self, stats: CatalogueStats) -> list[str]:
         """Generate maintenance recommendations based on statistics"""
         recommendations = []
 

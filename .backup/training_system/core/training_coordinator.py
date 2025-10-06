@@ -17,7 +17,7 @@ import time
 from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any, List
+from typing import Any
 
 import torch
 
@@ -565,77 +565,77 @@ class OnTheFlyTrainingCoordinator:
         except Exception as e:
             logger.error(f"Critic model update error: {e}")
             return False
-    def _update_synthesizer_models(self, examples: List[TrainingExample]) -> bool:
+    def _update_synthesizer_models(self, examples: list[TrainingExample]) -> bool:
         """Update Synthesizer V3 models (BERTopic, BART, FLAN-T5, SentenceTransformers)"""
         try:
             # Synthesizer handles multiple tasks: clustering, neutralization, aggregation
             synthesis_examples = [ex for ex in examples if ex.task_type in [
                 'article_clustering', 'text_neutralization', 'cluster_aggregation'
             ]]
-            
+
             if synthesis_examples:
                 # Update synthesis models based on examples
                 # This would involve fine-tuning the BART and FLAN-T5 models
                 # and updating SentenceTransformers embeddings
                 logger.info(f"Updated Synthesizer models with {len(synthesis_examples)} examples")
-                
+
                 # For now, log the update - in production this would trigger actual model training
                 for example in synthesis_examples:
                     logger.debug(f"Synthesis training: {example.task_type} - {len(example.input_text)} chars")
-                
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Synthesizer model update error: {e}")
             return False
-    
-    def _update_chief_editor_models(self, examples: List[TrainingExample]) -> bool:
+
+    def _update_chief_editor_models(self, examples: list[TrainingExample]) -> bool:
         """Update Chief Editor models (task classification, workflow orchestration)"""
         try:
             # Chief Editor handles editorial tasks: brief generation, publishing, evidence review
             editorial_examples = [ex for ex in examples if ex.task_type in [
                 'story_brief_generation', 'story_publishing', 'evidence_review_queuing'
             ]]
-            
+
             if editorial_examples:
                 # Update editorial decision models based on examples
                 # This would involve fine-tuning classification models for editorial tasks
                 logger.info(f"Updated Chief Editor models with {len(editorial_examples)} examples")
-                
+
                 # For now, log the update - in production this would trigger actual model training
                 for example in editorial_examples:
                     logger.debug(f"Editorial training: {example.task_type} - {len(example.input_text)} chars")
-                
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Chief Editor model update error: {e}")
             return False
-    
-    def _update_memory_models(self, examples: List[TrainingExample]) -> bool:
+
+    def _update_memory_models(self, examples: list[TrainingExample]) -> bool:
         """Update Memory models (embedding models, vector search optimization)"""
         try:
             # Memory handles storage and retrieval tasks
             memory_examples = [ex for ex in examples if ex.task_type in [
                 'article_storage', 'vector_search', 'training_example_logging'
             ]]
-            
+
             if memory_examples:
                 # Update embedding models and search optimization based on examples
                 # This would involve fine-tuning SentenceTransformers models
                 logger.info(f"Updated Memory models with {len(memory_examples)} examples")
-                
+
                 # For now, log the update - in production this would trigger actual model training
                 for example in memory_examples:
                     logger.debug(f"Memory training: {example.task_type} - {len(example.input_text)} chars")
-                
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Memory model update error: {e}")
             return False
-    
-    def _incremental_update_classifier(self, model, examples: List[TrainingExample]) -> bool:
+
+    def _incremental_update_classifier(self, model, examples: list[TrainingExample]) -> bool:
         """
         Perform incremental update on a transformer classifier model
         Uses Elastic Weight Consolidation (EWC) to prevent catastrophic forgetting

@@ -24,8 +24,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 from agents.common.schemas import NeuralAssessment, ReasoningInput
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure centralized logging
 logger = get_logger(__name__)

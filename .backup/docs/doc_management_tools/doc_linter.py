@@ -25,13 +25,11 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 REQUIRED_KEYS = ["title", "description", "tags", "status", "last_updated"]
 ALLOWED_ROOT_MD = {"README.md", "CHANGELOG.md"}
@@ -68,7 +66,7 @@ class DocIssue:
 @dataclass
 class Frontmatter:
     raw: str
-    data: Dict[str, object]
+    data: dict[str, object]
 
 
 def load_text(p: Path) -> str:
@@ -79,7 +77,7 @@ def save_text(p: Path, text: str) -> None:
     p.write_text(text, encoding="utf-8")
 
 
-def parse_frontmatter(text: str) -> Tuple[Optional[Frontmatter], str]:
+def parse_frontmatter(text: str) -> tuple[Frontmatter | None, str]:
     lines = text.splitlines()
     if not lines or not FM_START.match(lines[0]):
         return None, text
@@ -90,7 +88,7 @@ def parse_frontmatter(text: str) -> Tuple[Optional[Frontmatter], str]:
             body = "\n".join(lines[i + 1 :])
             try:
                 # naive YAML: use json-like fallback if braces; else parse key: value lines
-                data: Dict[str, object] = {}
+                data: dict[str, object] = {}
                 for ln in fm_block.splitlines():
                     ln = ln.strip()
                     if not ln or ln.startswith("#"):
@@ -109,7 +107,7 @@ def parse_frontmatter(text: str) -> Tuple[Optional[Frontmatter], str]:
     return None, text
 
 
-def ensure_frontmatter(body: str, filename: str, existing_fm: Optional[Frontmatter]) -> Tuple[str, bool]:
+def ensure_frontmatter(body: str, filename: str, existing_fm: Frontmatter | None) -> tuple[str, bool]:
     changed = False
     fm_data = existing_fm.data.copy() if existing_fm else {}
     # Title
@@ -166,9 +164,9 @@ def ensure_frontmatter(body: str, filename: str, existing_fm: Optional[Frontmatt
         return "---\n" + existing_fm.raw + "\n---\n\n" + body, False
 
 
-def fix_quad_fences(text: str) -> Tuple[str, bool]:
+def fix_quad_fences(text: str) -> tuple[str, bool]:
     changed = False
-    new_lines: List[str] = []
+    new_lines: list[str] = []
     for ln in text.splitlines():
         if QUAD_FENCE_START.match(ln):
             new_lines.append("```")
@@ -199,10 +197,10 @@ def main() -> int:
     args = ap.parse_args()
 
     root = Path(args.root).resolve()
-    issues: List[DocIssue] = []
-    fixed: List[str] = []
+    issues: list[DocIssue] = []
+    fixed: list[str] = []
 
-    md_files: List[Path] = []
+    md_files: list[Path] = []
     for p in root.rglob("*.md"):
         # skip noisy/vendor dirs
         if any(part in IGNORED_DIR_PARTS for part in p.parts):

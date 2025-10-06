@@ -14,8 +14,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import List, Tuple
-
 
 REQUIRED_REL_PATHS = [
     "deploy/systemd/README.md",
@@ -133,8 +131,8 @@ def repo_root_from_this_file() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def check_files_exist(root: Path) -> Tuple[bool, List[str]]:
-    missing: List[str] = []
+def check_files_exist(root: Path) -> tuple[bool, list[str]]:
+    missing: list[str] = []
     for rel in REQUIRED_REL_PATHS:
         if not (root / rel).is_file():
             missing.append(rel)
@@ -146,7 +144,7 @@ def load_json(path: Path):
         return json.load(f)
 
 
-def check_catalogue(root: Path) -> Tuple[bool, str]:
+def check_catalogue(root: Path) -> tuple[bool, str]:
     cat_path = root / "docs_catalogue_v2.json"
     if not cat_path.is_file():
         return False, f"Missing catalogue file: {cat_path}"
@@ -174,7 +172,7 @@ def normalize_to_rel(raw_path: str, root: Path) -> str:
         return raw_path.lstrip("/")
 
 
-def check_index(root: Path) -> Tuple[bool, str]:
+def check_index(root: Path) -> tuple[bool, str]:
     idx_path = root / "docs_index.json"
     if not idx_path.is_file():
         return False, f"Missing index file: {idx_path}"
@@ -202,7 +200,7 @@ def main() -> int:
     ok_cat, msg_cat = check_catalogue(root)
     ok_idx, msg_idx = check_index(root)
 
-    errors: List[str] = []
+    errors: list[str] = []
     if not ok_files:
         errors.append(f"Missing required files: {missing}")
     if not ok_cat:
@@ -217,7 +215,7 @@ def main() -> int:
         return 1
 
     # Extended operator-simplicity checks
-    ext_errors: List[str] = []
+    ext_errors: list[str] = []
     # Validate a set of artifacts with shared logic
     def validate_artifact(key: str, needle: str):
         spec = REQUIRED_ARTIFACTS[key]

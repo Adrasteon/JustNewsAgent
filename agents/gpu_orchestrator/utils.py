@@ -1,10 +1,9 @@
 # Utility functions for GPU Orchestrator
-from typing import Tuple, Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
-def _load_agent_model(agent: str, model_id: str, strict: bool) -> Tuple[bool, Optional[str]]:
+def _load_agent_model(agent: str, model_id: str, strict: bool) -> tuple[bool, str | None]:
     """Simulate model loading for testing purposes."""
     logger.debug(f"_load_agent_model called with agent={agent}, model_id={model_id}, strict={strict}")
     if "fail" in model_id:

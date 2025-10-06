@@ -5,6 +5,7 @@ Ensures /metrics exposes NVML gauges when ENABLE_NVML=true, SAFE_MODE=false,
 and internal _NVML_SUPPORTED is True.
 """
 import sys
+
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, '/home/adra/justnewsagent/JustNewsAgent')

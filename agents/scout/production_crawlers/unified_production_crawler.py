@@ -22,12 +22,10 @@ Capabilities:
 """
 
 import asyncio
-import json
 import os
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
+from typing import Any
 
 # Database and AI imports
 import tomotopy as tp
@@ -36,29 +34,24 @@ from transformers import pipeline
 
 # Local imports
 from common.observability import get_logger
-from .sites.generic_site_crawler import GenericSiteCrawler, MultiSiteCrawler, SiteConfig
+
 from .crawler_utils import (
-    CanonicalMetadata,
-    ModalDismisser,
     RateLimiter,
     RobotsChecker,
-    get_active_sources,
-    get_sources_by_domain,
-    update_source_crawling_strategy,
-    record_crawling_performance,
-    get_source_performance_history,
-    get_optimal_sources_for_strategy,
     create_crawling_performance_table,
+    get_active_sources,
+    get_source_performance_history,
+    get_sources_by_domain,
     initialize_connection_pool,
+    record_crawling_performance,
+    update_source_crawling_strategy,
 )
 from .performance_monitoring import (
-    PerformanceMetrics,
     PerformanceOptimizer,
     get_performance_monitor,
     start_performance_monitoring,
-    stop_performance_monitoring,
-    export_performance_metrics
 )
+from .sites.generic_site_crawler import GenericSiteCrawler, MultiSiteCrawler, SiteConfig
 
 logger = get_logger(__name__)
 
@@ -218,7 +211,7 @@ class UnifiedProductionCrawler:
         self.strategy_cache[cache_key] = strategy
         return strategy
 
-    async def _crawl_ultra_fast_mode(self, site_config: SiteConfig, max_articles: int = 50) -> List[Dict]:
+    async def _crawl_ultra_fast_mode(self, site_config: SiteConfig, max_articles: int = 50) -> list[dict]:
         """
         Ultra-fast crawling mode (8.14+ articles/sec)
         Optimized for high-volume sites with reliable structure
@@ -248,7 +241,7 @@ class UnifiedProductionCrawler:
             logger.error(f"Ultra-fast crawling failed for {site_config.name}: {e}")
             return []
 
-    async def _crawl_ai_enhanced_mode(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def _crawl_ai_enhanced_mode(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """
         AI-enhanced crawling mode (0.86+ articles/sec)
         Includes full AI analysis pipeline with NewsReader integration
@@ -285,7 +278,7 @@ class UnifiedProductionCrawler:
             logger.error(f"AI-enhanced crawling failed for {site_config.name}: {e}")
             return []
 
-    async def _crawl_generic_mode(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def _crawl_generic_mode(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """
         Generic crawling mode with Crawl4AI-first strategy
         Supports any news source with graceful fallbacks
@@ -303,7 +296,7 @@ class UnifiedProductionCrawler:
             logger.error(f"Generic crawling failed for {site_config.name}: {e}")
             return []
 
-    async def _apply_ai_analysis(self, article: Dict) -> Dict:
+    async def _apply_ai_analysis(self, article: dict) -> dict:
         """
         Apply comprehensive AI analysis pipeline to article
 
@@ -403,7 +396,7 @@ class UnifiedProductionCrawler:
             logger.error(f"AI analysis failed for article: {e}")
             return article
 
-    async def crawl_site(self, site_config: SiteConfig, max_articles: int = 25) -> List[Dict]:
+    async def crawl_site(self, site_config: SiteConfig, max_articles: int = 25) -> list[dict]:
         """
         Crawl a single site using the optimal strategy
         """
@@ -455,9 +448,9 @@ class UnifiedProductionCrawler:
 
         return articles
 
-    async def crawl_multiple_sites(self, site_configs: List[SiteConfig],
+    async def crawl_multiple_sites(self, site_configs: list[SiteConfig],
                                  max_articles_per_site: int = 25,
-                                 concurrent_sites: int = 3) -> Dict[str, Any]:
+                                 concurrent_sites: int = 3) -> dict[str, Any]:
         """
         Crawl multiple sites concurrently using optimal strategies
         """
@@ -511,10 +504,10 @@ class UnifiedProductionCrawler:
 
         return summary
 
-    async def run_unified_crawl(self, domains: Optional[List[str]] = None,
+    async def run_unified_crawl(self, domains: list[str] | None = None,
                               max_articles_per_site: int = 25,
                               concurrent_sites: int = 3,
-                              max_total_articles: int = 100) -> Dict[str, Any]:
+                              max_total_articles: int = 100) -> dict[str, Any]:
         """
         Main entry point for unified production crawling
         """
@@ -545,7 +538,7 @@ class UnifiedProductionCrawler:
             concurrent_sites
         )
 
-    def get_performance_report(self) -> Dict[str, Any]:
+    def get_performance_report(self) -> dict[str, Any]:
         """Get comprehensive performance report"""
         total_time = time.time() - self.performance_metrics["start_time"]
 

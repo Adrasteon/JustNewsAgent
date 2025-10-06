@@ -5,15 +5,14 @@ Phase 1 Implementation: Fix broken cross-references in catalogue
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set, Tuple
 from datetime import datetime
+from pathlib import Path
+
 
 class CrossReferenceFixer:
     def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
-        with open(self.catalogue_path, 'r') as f:
+        with open(self.catalogue_path) as f:
             self.catalogue = json.load(f)
 
         # Manual mapping of broken references to correct ones
@@ -34,7 +33,7 @@ class CrossReferenceFixer:
             "training_system": "markdown_docs_development_reports_training_system_documentation"
         }
 
-    def fix_broken_references(self) -> Dict[str, int]:
+    def fix_broken_references(self) -> dict[str, int]:
         """Fix all broken cross-references in the catalogue"""
         fixes_applied = {}
 
@@ -59,7 +58,7 @@ class CrossReferenceFixer:
 
         return fixes_applied
 
-    def add_missing_cross_references(self) -> Dict[str, int]:
+    def add_missing_cross_references(self) -> dict[str, int]:
         """Add cross-references to orphaned documents"""
         # Find orphaned documents
         all_doc_ids = set()
@@ -101,7 +100,7 @@ class CrossReferenceFixer:
 
         return fixes_applied
 
-    def validate_fixes(self) -> Dict[str, int]:
+    def validate_fixes(self) -> dict[str, int]:
         """Validate that fixes resolved the issues"""
         # Check for remaining broken references
         all_doc_ids = set()

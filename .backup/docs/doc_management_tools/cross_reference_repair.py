@@ -5,15 +5,14 @@ Phase 1 Implementation: Fix broken cross-references and orphaned documents
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set, Tuple
 from datetime import datetime
+from pathlib import Path
+
 
 class CrossReferenceRepair:
     def __init__(self, catalogue_path: str = "../docs_catalogue_v2.json"):
         self.catalogue_path = Path(catalogue_path)
-        with open(self.catalogue_path, 'r') as f:
+        with open(self.catalogue_path) as f:
             self.catalogue = json.load(f)
 
         self.all_doc_ids = set()
@@ -39,15 +38,15 @@ class CrossReferenceRepair:
                         else:
                             self.broken_refs.add(ref)
 
-    def get_broken_references(self) -> Set[str]:
+    def get_broken_references(self) -> set[str]:
         """Get all broken reference IDs"""
         return self.broken_refs
 
-    def get_orphaned_documents(self) -> Set[str]:
+    def get_orphaned_documents(self) -> set[str]:
         """Get all orphaned document IDs"""
         return self.all_doc_ids - self.referenced_docs
 
-    def get_document_info(self, doc_id: str) -> Dict:
+    def get_document_info(self, doc_id: str) -> dict:
         """Get document information by ID"""
         for category in self.catalogue['categories']:
             for doc in category['documents']:
@@ -61,7 +60,7 @@ class CrossReferenceRepair:
                     }
         return None
 
-    def suggest_repairs(self) -> Dict[str, List[str]]:
+    def suggest_repairs(self) -> dict[str, list[str]]:
         """Suggest repairs for broken references"""
         suggestions = {}
 
@@ -170,7 +169,7 @@ def main():
     broken = repair_tool.get_broken_references()
     orphaned = repair_tool.get_orphaned_documents()
 
-    print(f"\n📊 SUMMARY:")
+    print("\n📊 SUMMARY:")
     print(f"- Broken References: {len(broken)}")
     print(f"- Orphaned Documents: {len(orphaned)}")
     print(f"- Documents with References: {len(repair_tool.referenced_docs)}")

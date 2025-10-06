@@ -3,7 +3,7 @@ import re
 
 for f in glob.glob('**/*.md', recursive=True):
     try:
-        with open(f, 'r', encoding='utf-8') as fh:
+        with open(f, encoding='utf-8') as fh:
             lines = fh.readlines()
         if not lines:
             continue

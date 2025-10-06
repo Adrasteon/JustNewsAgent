@@ -56,7 +56,7 @@ def request_story_brief(topic: str, scope: str):
     logger.info(f"Requesting story brief for topic: {topic}, scope: {scope}")
     brief = f"Story brief for topic '{topic}' within scope '{scope}'."
     log_feedback("request_story_brief", {"topic": topic, "scope": scope, "brief": brief})
-    
+
     # Collect prediction for training
     try:
         from training_system import collect_prediction
@@ -73,7 +73,7 @@ def request_story_brief(topic: str, scope: str):
         logger.debug("Training system not available - skipping data collection")
     except Exception as e:
         logger.warning(f"Failed to collect training data: {e}")
-    
+
     return brief
 
 def publish_story(story_id: str):
@@ -90,14 +90,14 @@ def publish_story(story_id: str):
         resp.raise_for_status()
         result = resp.json()
         log_feedback("publish_story", {"story_id": story_id, "result": result})
-        
+
         result_dict = {
             "status": "published",
             "story_id": story_id,
             "mcp_result": result,
             "message": "Librarian Agent notified and story status updated via MCP bus."
         }
-        
+
         # Collect prediction for training
         try:
             from training_system import collect_prediction
@@ -114,18 +114,18 @@ def publish_story(story_id: str):
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         return result_dict
     except Exception as e:
         logger.error(f"Error calling MCP bus for publish_story: {e}")
         log_feedback("publish_story_error", {"story_id": story_id, "error": str(e)})
-        
+
         error_result = {
             "status": "error",
             "story_id": story_id,
             "error": str(e)
         }
-        
+
         # Collect prediction for training even on error
         try:
             from training_system import collect_prediction
@@ -142,5 +142,5 @@ def publish_story(story_id: str):
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         return error_result

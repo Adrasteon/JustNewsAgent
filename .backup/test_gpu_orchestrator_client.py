@@ -6,12 +6,12 @@ simulated via monkeypatching `requests.get`.
 
 from __future__ import annotations
 
-import time
 from typing import Any
 
-import pytest
-
-from agents.common.gpu_orchestrator_client import GPUOrchestratorClient, _FALLBACK_POLICY  # type: ignore
+from agents.common.gpu_orchestrator_client import (  # type: ignore
+    _FALLBACK_POLICY,
+    GPUOrchestratorClient,
+)
 
 
 class DummyResponse:

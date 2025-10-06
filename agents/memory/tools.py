@@ -163,7 +163,7 @@ def save_article(content: str, metadata: dict, embedding_model=None) -> dict:
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         # Return both 'article_id' and legacy 'id' key for backward compatibility
         return result
     except Exception as e:
@@ -288,7 +288,7 @@ def vector_search_articles_local(query: str, top_k: int = 5) -> list:
                 "content": contents[aid],
                 "metadata": metas.get(aid),
             })
-        
+
         # Collect prediction for training
         try:
             from training_system import collect_prediction
@@ -306,7 +306,7 @@ def vector_search_articles_local(query: str, top_k: int = 5) -> list:
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         return results
     except Exception:
         logger.exception("vector_search_articles_local: error computing similarities")
@@ -324,7 +324,7 @@ def log_training_example(task: str, input: dict, output: dict, critique: str) ->
             result = res
         else:
             result = {"status": "logged"}
-        
+
         # Collect prediction for training
         try:
             from training_system import collect_prediction
@@ -341,13 +341,13 @@ def log_training_example(task: str, input: dict, output: dict, critique: str) ->
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         return result
     except requests.exceptions.RequestException as e:
         logger.warning(f"log_training_example: memory agent request failed: {e}")
-        
+
         error_result = {"status": "logged", "error": "memory_agent_unavailable"}
-        
+
         # Collect prediction for training even on error
         try:
             from training_system import collect_prediction
@@ -364,5 +364,5 @@ def log_training_example(task: str, input: dict, output: dict, critique: str) ->
             logger.debug("Training system not available - skipping data collection")
         except Exception as e:
             logger.warning(f"Failed to collect training data: {e}")
-        
+
         return error_result

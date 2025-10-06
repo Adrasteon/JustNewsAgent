@@ -2,8 +2,8 @@
 Main file for the Analyst Agent.
 """
 
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 
 import requests
 from fastapi import FastAPI, HTTPException, Request
@@ -11,11 +11,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 
-from common.observability import get_logger
-from common.metrics import JustNewsMetrics
-from common.version_utils import get_version
-
 from agents.common.database import get_db_cursor
+from common.metrics import JustNewsMetrics
+from common.observability import get_logger
+from common.version_utils import get_version
 
 from .tools import (
     analyze_content_trends,
@@ -60,6 +59,7 @@ class ToolCall(BaseModel):
 
 import time
 
+
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
@@ -70,10 +70,10 @@ class MCPBusClient:
             "address": agent_address,
             "tools": tools,
         }
-        
+
         max_retries = 5
         backoff_factor = 2
-        
+
         for attempt in range(max_retries):
             try:
                 response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(3, 10))
@@ -254,16 +254,16 @@ def analyze_sentiment_and_bias_endpoint(call: ToolCall):
 
         from .tools import analyze_sentiment_and_bias
         logger.info(f"Calling analyze_sentiment_and_bias with args: {call.args} and kwargs: {call.kwargs}")
-        
+
         # Debug: Check GPU analyst status
         from .gpu_analyst import get_gpu_analyst
         gpu_analyst = get_gpu_analyst()
         logger.info(f"GPU analyst status - models_loaded: {gpu_analyst.models_loaded}, gpu_available: {gpu_analyst.gpu_available}")
         safe, reason = gpu_analyst.is_gpu_safe_to_use()
         logger.info(f"GPU safe to use: {safe}, reason: {reason}")
-        
+
         result = analyze_sentiment_and_bias(*call.args, **call.kwargs)
-        logger.info(f"analyze_sentiment_and_bias completed successfully")
+        logger.info("analyze_sentiment_and_bias completed successfully")
         logger.info(f"Result methods - sentiment: {result.get('sentiment_analysis', {}).get('method')}, bias: {result.get('bias_analysis', {}).get('method')}")
         return result
     except Exception as e:
@@ -508,8 +508,9 @@ def analyze_content_trends_endpoint(call: ToolCall):
 # @app.post("/analyze_sentiment_and_bias") - REMOVED
 
 if __name__ == "__main__":
-    import uvicorn
     import os
+
+    import uvicorn
 
     host = os.environ.get("ANALYST_HOST", "0.0.0.0")
     port = int(os.environ.get("ANALYST_PORT", 8004))

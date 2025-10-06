@@ -9,10 +9,11 @@ Outputs:
 - orchestrator_demo_results/metrics_snapshot.txt
 """
 from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 RESULTS_DIR = Path(__file__).parent / "orchestrator_demo_results"
 CYCLE_FILES = {
@@ -30,8 +31,8 @@ SELECT_METRICS = [
     "gpu_orchestrator_requests_total",
 ]
 
-def extract_metrics(lines: list[str]) -> Dict[str, float]:
-    metrics: Dict[str, float] = {}
+def extract_metrics(lines: list[str]) -> dict[str, float]:
+    metrics: dict[str, float] = {}
     for line in lines:
         m = RE_LINE.match(line.strip())
         if m:
@@ -43,7 +44,7 @@ def extract_metrics(lines: list[str]) -> Dict[str, float]:
     return metrics
 
 
-def load_cycle(path: Path) -> Dict[str, Any]:
+def load_cycle(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
     metrics_map = extract_metrics(data.get("metrics_text", []))
@@ -52,14 +53,14 @@ def load_cycle(path: Path) -> Dict[str, Any]:
 
 
 def main():  # pragma: no cover - utility script
-    summary: Dict[str, Any] = {}
+    summary: dict[str, Any] = {}
     for label, path in CYCLE_FILES.items():
         if not path.exists():
             raise SystemExit(f"Missing expected file: {path}")
         summary[label] = load_cycle(path)
 
     # Build comparison table
-    diff: Dict[str, float] = {}
+    diff: dict[str, float] = {}
     on_metrics = summary["safe_mode_on"]["parsed_metrics"]
     off_metrics = summary["safe_mode_off"]["parsed_metrics"]
     for metric in SELECT_METRICS:

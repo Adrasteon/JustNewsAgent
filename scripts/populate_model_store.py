@@ -67,15 +67,15 @@ def download_spacy_model(model: str, target: Path) -> bool:
         print(f"Downloading spacy model: {model}")
         # It's easier to download and then move.
         subprocess.check_call([sys.executable, "-m", "spacy", "download", model])
-        
+
         import spacy
         nlp = spacy.load(model)
         model_path = nlp.path
-        
+
         model_target_path = target / model
         if model_target_path.exists():
             shutil.rmtree(model_target_path)
-            
+
         shutil.copytree(model_path, model_target_path)
         print(f"Copied spacy model {model} from {model_path} to {model_target_path}")
         return True

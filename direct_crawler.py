@@ -14,13 +14,13 @@ Requirements:
 - Network access for crawling
 """
 
-import asyncio
 import argparse
+import asyncio
 import logging
 import os
 import sys
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -42,8 +42,8 @@ os.environ['POSTGRES_DB'] = 'justnews'
 os.environ['POSTGRES_USER'] = 'justnews_user'
 os.environ['POSTGRES_PASSWORD'] = 'password123'
 
-from agents.crawler.unified_production_crawler import UnifiedProductionCrawler
 from agents.crawler.crawler_utils import get_active_sources
+from agents.crawler.unified_production_crawler import UnifiedProductionCrawler
 
 
 class DirectArticleCrawler:
@@ -64,7 +64,7 @@ class DirectArticleCrawler:
         self.start_time = datetime.now()
         logger.info(f"Target: {self.target_articles} articles")
 
-    async def get_sources_batch(self) -> List[str]:
+    async def get_sources_batch(self) -> list[str]:
         """Get a batch of source domains to crawl"""
         try:
             sources = get_active_sources()
@@ -81,7 +81,7 @@ class DirectArticleCrawler:
             logger.error(f"Failed to get sources: {e}")
             return []
 
-    async def crawl_batch(self, domains: List[str]) -> Dict[str, Any]:
+    async def crawl_batch(self, domains: list[str]) -> dict[str, Any]:
         """Crawl a batch of domains"""
         logger.info(f"Starting crawl batch with {len(domains)} domains...")
 

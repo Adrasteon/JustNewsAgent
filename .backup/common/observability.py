@@ -2,9 +2,8 @@
 Common observability utilities for JustNewsAgent
 """
 
-import os
 import logging
-from typing import Optional
+import os
 from logging.handlers import RotatingFileHandler
 
 # Ensure LOG_DIR is defined
@@ -29,14 +28,14 @@ def get_logger(name: str) -> logging.Logger:
     log_file_path = os.path.join(LOG_DIR, f'{log_file_name}.log')
 
     logger = logging.getLogger(name)
-    
+
     # Prevent duplicate handlers if logger is already configured
     if logger.hasHandlers():
         return logger
 
     # Set logging level to DEBUG for detailed information
     logger.setLevel(logging.DEBUG)
-    
+
     # Create a rotating file handler
     handler = RotatingFileHandler(
         log_file_path,
@@ -44,15 +43,15 @@ def get_logger(name: str) -> logging.Logger:
         backupCount=5,
         encoding='utf-8'
     )
-    
+
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     )
     handler.setFormatter(formatter)
-    
+
     logger.addHandler(handler)
-    
+
     # Also add a console handler for immediate feedback during development
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
@@ -61,7 +60,7 @@ def get_logger(name: str) -> logging.Logger:
     return logger
 
 
-def setup_logging(level: int = logging.INFO, format_string: Optional[str] = None) -> None:
+def setup_logging(level: int = logging.INFO, format_string: str | None = None) -> None:
     """
     Setup basic logging configuration for the application.
     This function is now a compatibility wrapper and the main configuration
@@ -73,7 +72,7 @@ def setup_logging(level: int = logging.INFO, format_string: Optional[str] = None
     """
     if format_string is None:
         format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    
+
     # This basicConfig will apply to any loggers that don't get configured
     # by get_logger, but our goal is to use get_logger everywhere.
     logging.basicConfig(

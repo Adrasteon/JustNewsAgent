@@ -6,9 +6,10 @@ Fix the final 2 broken cross-references
 import json
 from pathlib import Path
 
+
 def fix_final_broken_refs():
     catalogue_path = Path("../docs_catalogue_v2.json")
-    with open(catalogue_path, 'r') as f:
+    with open(catalogue_path) as f:
         catalogue = json.load(f)
 
     # Fix the 2 remaining broken references

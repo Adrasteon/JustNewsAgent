@@ -11,8 +11,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from agents.analytics.dashboard import create_analytics_app
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 logger = get_logger(__name__)
@@ -183,7 +183,9 @@ def get_agent_profile(call: ToolCall):
 def get_optimization_recommendations(call: ToolCall):
     """Get advanced optimization recommendations"""
     try:
-        from agents.common.advanced_optimization import generate_optimization_recommendations
+        from agents.common.advanced_optimization import (
+            generate_optimization_recommendations,
+        )
 
         kwargs = call.kwargs or {}
         hours = kwargs.get("hours", 24)
@@ -217,8 +219,12 @@ def get_optimization_recommendations(call: ToolCall):
 def record_performance_metric(call: ToolCall):
     """Record a custom performance metric"""
     try:
-        from agents.common.advanced_analytics import get_analytics_engine, PerformanceMetrics
         from datetime import datetime
+
+        from agents.common.advanced_analytics import (
+            PerformanceMetrics,
+            get_analytics_engine,
+        )
 
         kwargs = call.kwargs or {}
 

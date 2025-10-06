@@ -22,16 +22,15 @@ Usage:
     python doc_management_tools/catalogue_expansion.py --validate
 """
 
-import os
-import json
-import re
 import argparse
+import json
+import logging
+import re
+from collections import defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-import logging
-from dataclasses import dataclass, asdict
-from collections import defaultdict
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -48,11 +47,11 @@ class DocumentMetadata:
     path: str
     description: str
     category: str
-    tags: List[str]
+    tags: list[str]
     word_count: int
     last_modified: str
     status: str
-    related_documents: List[str]
+    related_documents: list[str]
     search_content: str
 
 class CatalogueExpansionSystem:
@@ -90,15 +89,15 @@ class CatalogueExpansionSystem:
         # Load existing catalogue
         self.catalogue = self._load_catalogue()
 
-    def _load_catalogue(self) -> Dict[str, Any]:
+    def _load_catalogue(self) -> dict[str, Any]:
         """Load existing catalogue or create new one"""
         if self.catalogue_path.exists():
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 return json.load(f)
         else:
             return self._create_empty_catalogue()
 
-    def _create_empty_catalogue(self) -> Dict[str, Any]:
+    def _create_empty_catalogue(self) -> dict[str, Any]:
         """Create empty catalogue structure"""
         return {
             "catalogue_metadata": {
@@ -121,7 +120,7 @@ class CatalogueExpansionSystem:
             }
         }
 
-    def discover_markdown_files(self, directories: List[str]) -> List[Path]:
+    def discover_markdown_files(self, directories: list[str]) -> list[Path]:
         """Discover all .md files in specified directories"""
         discovered_files = []
 
@@ -144,7 +143,7 @@ class CatalogueExpansionSystem:
     def extract_metadata(self, file_path: Path) -> DocumentMetadata:
         """Extract comprehensive metadata from a markdown file"""
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding='utf-8', errors='ignore') as f:
                 content = f.read()
         except Exception as e:
             logger.warning(f"Could not read {file_path}: {e}")
@@ -201,7 +200,7 @@ class CatalogueExpansionSystem:
                 return category
         return "general_documentation"
 
-    def _extract_tags(self, content: str, title: str) -> List[str]:
+    def _extract_tags(self, content: str, title: str) -> list[str]:
         """Extract relevant tags from content and title"""
         tags = []
 
@@ -237,7 +236,7 @@ class CatalogueExpansionSystem:
         doc_id = str(relative_path).replace('/', '_').replace('\\', '_').replace('.md', '')
         return doc_id.lower()
 
-    def update_catalogue(self, new_documents: List[DocumentMetadata]):
+    def update_catalogue(self, new_documents: list[DocumentMetadata]):
         """Update catalogue with new documents"""
         logger.info(f"Updating catalogue with {len(new_documents)} new documents")
 
@@ -261,7 +260,7 @@ class CatalogueExpansionSystem:
         # Update maintenance info
         self.catalogue["maintenance"]["last_catalogue_update"] = datetime.now().strftime("%Y-%m-%d")
 
-    def _update_category(self, category_name: str, documents: List[DocumentMetadata]):
+    def _update_category(self, category_name: str, documents: list[DocumentMetadata]):
         """Update or create category with new documents"""
         # Find existing category
         category = None
@@ -291,7 +290,7 @@ class CatalogueExpansionSystem:
         """Count total documents across all categories"""
         return sum(len(cat["documents"]) for cat in self.catalogue["categories"])
 
-    def _update_search_index(self, new_documents: List[DocumentMetadata]):
+    def _update_search_index(self, new_documents: list[DocumentMetadata]):
         """Update search index with new document tags and keywords"""
         all_tags = set()
         all_keywords = set()
@@ -381,7 +380,7 @@ class CatalogueExpansionSystem:
 
         return content
 
-    def validate_catalogue(self) -> Dict[str, Any]:
+    def validate_catalogue(self) -> dict[str, Any]:
         """Validate catalogue integrity and identify issues"""
         issues = {
             "broken_paths": [],

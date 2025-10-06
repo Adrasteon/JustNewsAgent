@@ -7,14 +7,13 @@ Author: JustNews V4 Documentation System
 Date: September 7, 2025
 """
 
-import json
 import hashlib
+import json
 import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
-import difflib
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -30,10 +29,10 @@ class DocumentVersion:
     version: str
     timestamp: str
     author: str
-    changes: List[str]
+    changes: list[str]
     content_hash: str
-    previous_version: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    previous_version: str | None = None
+    metadata: dict[str, Any] = None
 
 @dataclass
 class ChangeRecord:
@@ -42,9 +41,9 @@ class ChangeRecord:
     timestamp: str
     author: str
     change_type: str  # 'add', 'update', 'delete', 'bulk_update'
-    affected_documents: List[str]
+    affected_documents: list[str]
     description: str
-    quality_impact: Dict[str, float]  # Before/after quality scores
+    quality_impact: dict[str, float]  # Before/after quality scores
     rollback_available: bool = True
 
 class DocumentationVersionControl:
@@ -57,8 +56,8 @@ class DocumentationVersionControl:
         self.versions_dir.mkdir(exist_ok=True)
         self.changes_dir.mkdir(exist_ok=True)
 
-        self.version_history: Dict[str, DocumentVersion] = {}
-        self.change_history: List[ChangeRecord] = []
+        self.version_history: dict[str, DocumentVersion] = {}
+        self.change_history: list[ChangeRecord] = []
 
         self._load_version_history()
         self._load_change_history()
@@ -70,7 +69,7 @@ class DocumentationVersionControl:
         history_file = self.versions_dir / "version_history.json"
         if history_file.exists():
             try:
-                with open(history_file, 'r', encoding='utf-8') as f:
+                with open(history_file, encoding='utf-8') as f:
                     data = json.load(f)
                     for doc_id, versions in data.items():
                         self.version_history[doc_id] = [
@@ -85,7 +84,7 @@ class DocumentationVersionControl:
         history_file = self.changes_dir / "change_history.json"
         if history_file.exists():
             try:
-                with open(history_file, 'r', encoding='utf-8') as f:
+                with open(history_file, encoding='utf-8') as f:
                     data = json.load(f)
                     self.change_history = [ChangeRecord(**c) for c in data]
                 logger.info("Change history loaded")
@@ -110,13 +109,13 @@ class DocumentationVersionControl:
         with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
-    def _calculate_content_hash(self, content: Dict[str, Any]) -> str:
+    def _calculate_content_hash(self, content: dict[str, Any]) -> str:
         """Calculate hash of document content"""
         content_str = json.dumps(content, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(content_str.encode('utf-8')).hexdigest()
 
-    def _detect_changes(self, old_content: Dict[str, Any],
-                       new_content: Dict[str, Any]) -> List[str]:
+    def _detect_changes(self, old_content: dict[str, Any],
+                       new_content: dict[str, Any]) -> list[str]:
         """Detect specific changes between versions"""
         changes = []
 
@@ -147,7 +146,7 @@ class DocumentationVersionControl:
     def create_version_snapshot(self, author: str = "system") -> str:
         """Create a snapshot of current documentation state"""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 catalogue = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load catalogue: {e}")
@@ -175,8 +174,8 @@ class DocumentationVersionControl:
         logger.info(f"Version snapshot created: {snapshot_id}")
         return snapshot_id
 
-    def track_document_changes(self, document_id: str, old_content: Dict[str, Any],
-                             new_content: Dict[str, Any], author: str = "system") -> None:
+    def track_document_changes(self, document_id: str, old_content: dict[str, Any],
+                             new_content: dict[str, Any], author: str = "system") -> None:
         """Track changes to a specific document"""
         if document_id not in self.version_history:
             self.version_history[document_id] = []
@@ -210,7 +209,7 @@ class DocumentationVersionControl:
 
         logger.info(f"Document version tracked: {document_id} {version_id}")
 
-    def track_bulk_changes(self, change_description: str, affected_docs: List[str],
+    def track_bulk_changes(self, change_description: str, affected_docs: list[str],
                           author: str = "system", change_type: str = "bulk_update") -> str:
         """Track bulk changes to multiple documents"""
         change_id = f"change_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -253,7 +252,7 @@ class DocumentationVersionControl:
 
         # Load current catalogue
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 catalogue = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load catalogue: {e}")
@@ -303,7 +302,7 @@ class DocumentationVersionControl:
 
         return report
 
-    def get_document_history(self, document_id: str) -> List[DocumentVersion]:
+    def get_document_history(self, document_id: str) -> list[DocumentVersion]:
         """Get version history for a specific document"""
         return self.version_history.get(document_id, [])
 

@@ -3,8 +3,8 @@ Main file for the MCP Bus.
 """
 # main.py for MCP Message Bus
 import atexit
-import time
 import os
+import time
 from contextlib import asynccontextmanager
 
 import requests
@@ -12,8 +12,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 app = FastAPI()
 
@@ -82,7 +82,7 @@ def call_tool(call: ToolCall):
     payload = {"args": call.args, "kwargs": call.kwargs}
     # Correctly join the agent address and the tool path
     url = f"{agent_address.rstrip('/')}/{call.tool.lstrip('/')}"
-    
+
     # Configurable timeouts via environment (defaults: connect 3s, read 120s for long-running tools)
     connect_timeout = float(os.getenv("MCP_CALL_CONNECT_TIMEOUT", "3"))
     read_timeout = float(os.getenv("MCP_CALL_READ_TIMEOUT", "120"))

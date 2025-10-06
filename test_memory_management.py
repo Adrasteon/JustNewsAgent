@@ -4,7 +4,6 @@ Test script for NewsReader memory management improvements
 """
 
 import sys
-import os
 
 # Add the project root to the path
 sys.path.insert(0, '/home/adra/justnewsagent/JustNewsAgent')
@@ -17,11 +16,11 @@ def test_memory_management():
     try:
         # Import the tools
         from agents.newsreader.tools import (
-            get_engine,
-            clear_engine,
-            health_check,
             _check_and_cleanup_memory,
-            _force_memory_cleanup
+            _force_memory_cleanup,
+            clear_engine,
+            get_engine,
+            health_check,
         )
 
         print("✅ Imports successful")

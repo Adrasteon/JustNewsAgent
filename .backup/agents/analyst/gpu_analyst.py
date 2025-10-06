@@ -23,12 +23,11 @@ in hybrid_tools_v4.py to break the circular import with native_tensorrt_engine.p
 
 
 import time
-from typing import Optional
 
 try:
     # Lightweight orchestrator client (Phase 1 integration)
     from agents.common.gpu_orchestrator_client import GPUOrchestratorClient
-    _orchestrator_client: Optional[GPUOrchestratorClient] = GPUOrchestratorClient()
+    _orchestrator_client: GPUOrchestratorClient | None = GPUOrchestratorClient()
 except Exception:
     _orchestrator_client = None
 
@@ -93,7 +92,7 @@ class GPUAcceleratedAnalyst:
                 orchestrator_allows_gpu = bool(decision.get("use_gpu", False))
                 orchestrator_safe_mode = bool(decision.get("safe_mode", True))
                 logger.info(
-                    "🔐 Orchestrator decision: use_gpu=%s safe_mode=%s gpu_available=%s", 
+                    "🔐 Orchestrator decision: use_gpu=%s safe_mode=%s gpu_available=%s",
                     orchestrator_allows_gpu,
                     orchestrator_safe_mode,
                     decision.get("gpu_available")
@@ -263,7 +262,7 @@ class GPUAcceleratedAnalyst:
         """
         if not (TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()):
             return False
-            
+
         try:
             # Get current GPU memory info
             device = torch.cuda.current_device()
@@ -271,14 +270,14 @@ class GPUAcceleratedAnalyst:
             free_memory_gb = memory_info[0] / (1024**3)  # Free memory in GB
             total_memory_gb = memory_info[1] / (1024**3)  # Total memory in GB
             used_memory_gb = total_memory_gb - free_memory_gb
-            
+
             # Log memory status periodically
             if self.performance_stats["total_requests"] % 100 == 0:
                 logger.info(
                     f"GPU Memory Status: {used_memory_gb:.2f}GB used, "
                     f"{free_memory_gb:.2f}GB free, {total_memory_gb:.1f}GB total"
                 )
-            
+
             # Critical memory warning (less than 2GB free)
             critical_threshold_gb = 2.0
             if free_memory_gb < critical_threshold_gb and not hasattr(self, '_critical_memory_warned'):
@@ -287,12 +286,12 @@ class GPUAcceleratedAnalyst:
                     f"(< {critical_threshold_gb}GB threshold)"
                 )
                 self._critical_memory_warned = True
-            
+
             # Reset warning flag when memory recovers
             if free_memory_gb >= critical_threshold_gb + 1.0 and hasattr(self, '_critical_memory_warned'):
                 logger.info(f"✅ GPU memory recovered: {free_memory_gb:.2f}GB free")
                 delattr(self, '_critical_memory_warned')
-            
+
             # Update circuit breaker based on available memory
             if free_memory_gb < self.memory_threshold_gb:
                 if not self.memory_circuit_breaker:
@@ -310,7 +309,7 @@ class GPUAcceleratedAnalyst:
                     )
                 self.memory_circuit_breaker = False
                 return True
-                
+
         except Exception as e:
             logger.error(f"Failed to check GPU memory: {e}")
             # On error, activate circuit breaker for safety
@@ -325,13 +324,13 @@ class GPUAcceleratedAnalyst:
         """
         if not (TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()):
             return {"error": "GPU not available"}
-            
+
         try:
             device = torch.cuda.current_device()
             memory_info = torch.cuda.mem_get_info(device)
             free_memory_bytes = memory_info[0]
             total_memory_bytes = memory_info[1]
-            
+
             return {
                 "free_memory_gb": free_memory_bytes / (1024**3),
                 "total_memory_gb": total_memory_bytes / (1024**3),
@@ -352,21 +351,21 @@ class GPUAcceleratedAnalyst:
         """
         if not self.models_loaded:
             return False, "GPU models not loaded"
-            
+
         if not (TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()):
             return False, "CUDA not available"
-            
+
         if self.memory_circuit_breaker:
             return False, "Memory circuit breaker active"
-            
+
         memory_stats = self.get_gpu_memory_stats()
         if "error" in memory_stats:
             return False, f"Memory check failed: {memory_stats['error']}"
-            
+
         free_memory_gb = memory_stats.get("free_memory_gb", 0)
         if free_memory_gb < self.memory_threshold_gb:
             return False, f"Insufficient free memory: {free_memory_gb:.2f}GB < {self.memory_threshold_gb}GB"
-            
+
         return True, "GPU safe to use"
 
     def score_sentiment_gpu(self, text: str) -> float | None:
@@ -402,7 +401,7 @@ class GPUAcceleratedAnalyst:
                 except Exception:
                     pass
             return None
-            
+
         # Check memory circuit breaker
         if not self._check_gpu_memory_circuit_breaker():
             if end_event is not None and event_id is not None:
@@ -484,7 +483,7 @@ class GPUAcceleratedAnalyst:
             TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
         ):
             return None
-            
+
         # Check memory circuit breaker
         if not self._check_gpu_memory_circuit_breaker():
             return None
@@ -546,7 +545,7 @@ class GPUAcceleratedAnalyst:
             TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
         ):
             return [None] * len(texts) if texts else []
-            
+
         # Check memory circuit breaker
         if not self._check_gpu_memory_circuit_breaker():
             return [None] * len(texts)
@@ -609,7 +608,7 @@ class GPUAcceleratedAnalyst:
             TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()
         ):
             return [None] * len(texts) if texts else []
-            
+
         # Check memory circuit breaker
         if not self._check_gpu_memory_circuit_breaker():
             return [None] * len(texts)
@@ -680,20 +679,20 @@ def cleanup_gpu_analyst():
             # Force garbage collection before cleanup
             import gc
             gc.collect()
-            
+
             # Clear any cached tensors and models
             if hasattr(_gpu_analyst, 'sentiment_analyzer') and _gpu_analyst.sentiment_analyzer:
                 try:
                     del _gpu_analyst.sentiment_analyzer
                 except Exception:
                     pass
-                    
+
             if hasattr(_gpu_analyst, 'bias_detector') and _gpu_analyst.bias_detector:
                 try:
                     del _gpu_analyst.bias_detector
                 except Exception:
                     pass
-            
+
             # Release GPU allocation
             if _gpu_analyst.gpu_allocated:
                 try:
@@ -702,7 +701,7 @@ def cleanup_gpu_analyst():
                     logger.info("✅ Analyst GPU allocation released")
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to release Analyst GPU allocation: {e}")
-            
+
             # Aggressive GPU cache clearing
             if TORCH_AVAILABLE and torch is not None and torch.cuda.is_available():
                 try:
@@ -710,13 +709,13 @@ def cleanup_gpu_analyst():
                     torch.cuda.synchronize()  # Ensure all operations complete
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to clear GPU cache during cleanup: {e}")
-            
+
             # Clear instance
             _gpu_analyst = None
-            
+
             # Final garbage collection
             gc.collect()
-            
+
             logger.info("🧹 GPU analyst cleaned up thoroughly")
         except Exception as e:
             logger.error(f"Error during GPU analyst cleanup: {e}")

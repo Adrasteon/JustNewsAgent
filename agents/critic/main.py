@@ -23,10 +23,9 @@ import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from common.observability import get_logger
-
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 
@@ -212,8 +211,9 @@ def get_critic_performance_endpoint(call: ToolCall):
         }
 
 if __name__ == "__main__":
-    import uvicorn
     import os
+
+    import uvicorn
 
     host = os.environ.get("CRITIC_HOST", "0.0.0.0")
     port = int(os.environ.get("CRITIC_PORT", 8006))

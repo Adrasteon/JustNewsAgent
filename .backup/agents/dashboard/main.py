@@ -6,19 +6,19 @@ Main file for the Dashboard Agent.
 import os
 import sys
 import time
-import uvicorn
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import requests
+import uvicorn
 from fastapi import (
     FastAPI,
     HTTPException,
     Request,
 )
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from common.observability import get_logger
@@ -545,7 +545,7 @@ def serve_article_page(article_id: str):
         # Try to serve the public website HTML file with article context
         public_website_path = Path(__file__).parent / "public_website.html"
         if public_website_path.exists():
-            with open(public_website_path, 'r', encoding='utf-8') as f:
+            with open(public_website_path, encoding='utf-8') as f:
                 content = f.read()
             # Add article ID to the page for JavaScript to handle
             content = content.replace(
@@ -567,7 +567,7 @@ def serve_search_page(request: Request):
         query = request.query_params.get('q', '')
         public_website_path = Path(__file__).parent / "public_website.html"
         if public_website_path.exists():
-            with open(public_website_path, 'r', encoding='utf-8') as f:
+            with open(public_website_path, encoding='utf-8') as f:
                 content = f.read()
             # Add search query to the page for JavaScript to handle
             content = content.replace(
@@ -588,7 +588,7 @@ def serve_about_page():
     try:
         public_website_path = Path(__file__).parent / "public_website.html"
         if public_website_path.exists():
-            with open(public_website_path, 'r', encoding='utf-8') as f:
+            with open(public_website_path, encoding='utf-8') as f:
                 content = f.read()
             # Add about flag to the page for JavaScript to handle
             content = content.replace(
@@ -609,7 +609,7 @@ def serve_api_docs():
     try:
         public_website_path = Path(__file__).parent / "public_website.html"
         if public_website_path.exists():
-            with open(public_website_path, 'r', encoding='utf-8') as f:
+            with open(public_website_path, encoding='utf-8') as f:
                 content = f.read()
             # Add API docs flag to the page for JavaScript to handle
             content = content.replace(
@@ -857,7 +857,7 @@ def ingest_gpu_jsonl(req: IngestRequest):
         ingested_points = 0
         max_lines = req.max_lines or 10000
 
-        with open(in_path, "r", encoding="utf-8", errors="ignore") as fh:
+        with open(in_path, encoding="utf-8", errors="ignore") as fh:
             import json
             # First attempt: line-by-line JSONL
             any_line_parsed = False
@@ -1504,7 +1504,7 @@ async def get_crawl_status():
         response = requests.post(f"{MCP_BUS_URL}/call", json=payload, timeout=5)
         response.raise_for_status()
         jobs = response.json()
-        
+
         # Get details for each job
         job_details = {}
         for job_id, status in jobs.items():
@@ -1520,7 +1520,7 @@ async def get_crawl_status():
                 job_details[job_id] = detail_response.json()
             except Exception:
                 job_details[job_id] = {"status": "unknown"}
-        
+
         return job_details
     except requests.RequestException as e:
         logger.error(f"Failed to get crawl status: {str(e)}")
@@ -1602,12 +1602,12 @@ async def get_system_health():
         ("memory", 8007),
         ("mcp_bus", 8000)
     ]
-    
+
     for name, port in agents:
         try:
             response = requests.get(f"http://localhost:{port}/health", timeout=2)
             health[name] = response.status_code == 200
         except Exception:
             health[name] = False
-    
+
     return health

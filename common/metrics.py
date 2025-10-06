@@ -3,19 +3,20 @@ JustNews Metrics Library - Prometheus Integration
 Provides standardized metrics collection for all JustNews agents
 """
 
+import logging
 import time
-from typing import Optional, Dict, Any
 from contextlib import contextmanager
 from functools import wraps
 
-from prometheus_client import (
-    Counter, Gauge, Histogram, Summary,
-    CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
-)
-from prometheus_client.multiprocess import MultiProcessCollector
-import psutil
 import GPUtil
-import logging
+import psutil
+from prometheus_client import (
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ class JustNewsMetrics:
         '503': 'service-unavailable'
     }
 
-    def __init__(self, agent_name: str, registry: Optional[CollectorRegistry] = None):
+    def __init__(self, agent_name: str, registry: CollectorRegistry | None = None):
         """
         Initialize metrics for an agent.
 

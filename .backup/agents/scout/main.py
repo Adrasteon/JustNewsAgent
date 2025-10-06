@@ -16,8 +16,8 @@ from pydantic import BaseModel
 
 # Import security utilities
 from agents.scout.security_utils import log_security_event, rate_limit, validate_url
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 

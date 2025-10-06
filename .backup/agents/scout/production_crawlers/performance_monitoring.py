@@ -6,13 +6,12 @@ PHASE 3 ENHANCEMENT: Comprehensive performance tracking and metrics collection
 for the unified production crawler with real-time monitoring and optimization.
 """
 
-import asyncio
 import json
 import threading
 import time
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any
 
 from common.observability import get_logger
 
@@ -98,7 +97,7 @@ class PerformanceMetrics:
             error_rate = self.errors_total / total_runtime
             self.error_rate_history.append(error_rate)
 
-    def get_current_metrics(self) -> Dict[str, Any]:
+    def get_current_metrics(self) -> dict[str, Any]:
         """Get current performance metrics"""
         current_time = time.time()
         total_runtime = current_time - self.start_time
@@ -133,7 +132,7 @@ class PerformanceMetrics:
             "site_metrics": dict(self.site_metrics)
         }
 
-    def get_recent_performance(self, window_seconds: int = 300) -> Dict[str, Any]:
+    def get_recent_performance(self, window_seconds: int = 300) -> dict[str, Any]:
         """Get performance metrics for recent time window"""
         current_time = time.time()
         window_start = current_time - window_seconds
@@ -151,7 +150,7 @@ class PerformanceMetrics:
             "processing_count": len(recent_times)
         }
 
-    def get_site_performance_report(self) -> List[Dict[str, Any]]:
+    def get_site_performance_report(self) -> list[dict[str, Any]]:
         """Get performance report for each site"""
         report = []
 
@@ -247,7 +246,7 @@ class PerformanceOptimizer:
     def __init__(self, metrics: PerformanceMetrics):
         self.metrics = metrics
 
-    def get_optimization_recommendations(self) -> List[str]:
+    def get_optimization_recommendations(self) -> list[str]:
         """Get optimization recommendations based on current performance"""
         recommendations = []
 
@@ -296,7 +295,7 @@ class PerformanceOptimizer:
 
         return recommendations
 
-    def suggest_configuration_changes(self) -> Dict[str, Any]:
+    def suggest_configuration_changes(self) -> dict[str, Any]:
         """Suggest configuration changes for optimization"""
         suggestions = {}
 

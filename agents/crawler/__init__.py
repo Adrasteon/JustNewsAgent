@@ -5,8 +5,8 @@ Unified production crawling agent for JustNewsAgent.
 Provides intelligent multi-strategy crawling with AI analysis.
 """
 
-import sys
 import os
+import sys
 
 # Add project root to path for version import
 _project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

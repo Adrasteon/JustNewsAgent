@@ -6,8 +6,8 @@ from contextlib import asynccontextmanager
 
 import requests
 
-from common.observability import get_logger
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 try:
     # Optional import for Hugging Face hub login and snapshot_download
@@ -22,8 +22,11 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 # Import database utilities
-from agents.common.database import close_connection_pool, initialize_connection_pool
-from agents.common.database import execute_query
+from agents.common.database import (
+    close_connection_pool,
+    execute_query,
+    initialize_connection_pool,
+)
 from agents.common.database import get_db_connection as get_pooled_connection
 from agents.memory.tools import (
     get_all_article_ids,
@@ -84,6 +87,7 @@ class ToolCall(BaseModel):
 
 import time
 
+
 class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
@@ -94,10 +98,10 @@ class MCPBusClient:
             "address": agent_address,
             "tools": tools,
         }
-        
+
         max_retries = 5
         backoff_factor = 2
-        
+
         for attempt in range(max_retries):
             try:
                 response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(3, 10))
@@ -281,6 +285,7 @@ except Exception:
 
 from fastapi import Request
 
+
 @app.get("/health")
 @app.post("/health")
 async def health(request: Request):
@@ -322,6 +327,7 @@ def save_article_endpoint(request: dict):
 
 from fastapi import Request
 
+
 @app.post("/get_article")
 async def get_article_endpoint(request: Request):
     """
@@ -332,7 +338,7 @@ async def get_article_endpoint(request: Request):
     try:
         payload = await request.json()
         retrieval_id = None
-        
+
         # The payload from the bus is a dict: {"args": [], "kwargs": {...}}
         if "kwargs" in payload and "article_id" in payload["kwargs"]:
             retrieval_id = int(payload["kwargs"]["article_id"])
@@ -355,7 +361,6 @@ async def get_article_endpoint(request: Request):
 async def get_all_article_ids_endpoint(request: Request):
     """Retrieves all article IDs from the database."""
     logger.info("Received request for get_all_article_ids_endpoint")
-    from agents.memory.tools import get_all_article_ids
     result = get_all_article_ids()
     logger.info(f"Returning result from get_all_article_ids_endpoint: {result}")
     return result
@@ -442,21 +447,21 @@ def ingest_article_endpoint(request: dict):
         else:
             # Direct call format
             kwargs = request
-            
+
         article_payload = kwargs.get("article_payload", {})
         statements = kwargs.get("statements", [])
-        
+
         if not article_payload:
             raise HTTPException(status_code=400, detail="Missing article_payload")
-            
+
         logger.info(f"Ingesting article: {article_payload.get('url')}")
-        
+
         # Execute statements transactionally
         chosen_source_id = None
         try:
             # Use the database connection utilities
             from agents.common.database import execute_query_single
-            
+
             for sql, params in statements:
                 try:
                     # Execute each statement - the crawler builds the right SQL
@@ -483,11 +488,11 @@ def ingest_article_endpoint(request: dict):
                     else:
                         # Re-raise non-duplicate errors
                         raise stmt_e
-                    
+
         except Exception as e:
             logger.error(f"Database transaction failed: {e}")
             raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-            
+
         # Now save the article content using the memory agent's save_article function
         try:
             content = article_payload.get("content", "")
@@ -503,7 +508,7 @@ def ingest_article_endpoint(request: dict):
                 "url_hash": article_payload.get("url_hash"),
                 "canonical": article_payload.get("canonical"),
             }
-            
+
             if content:  # Only save if there's actual content
                 save_result = save_article(content, metadata, embedding_model=embedding_model)
                 if save_result.get("status") == "duplicate":
@@ -516,13 +521,13 @@ def ingest_article_endpoint(request: dict):
             else:
                 logger.warning(f"No content to save for article: {article_payload.get('url')}")
                 resp = {"status": "ok", "url": article_payload.get('url'), "no_content": True}
-            
+
         except Exception as e:
             logger.warning(f"Failed to save article content: {e}")
             # Don't fail the whole ingestion if content saving fails
             resp = {"status": "ok", "url": article_payload.get('url'), "content_save_error": str(e)}
         return resp
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -558,24 +563,25 @@ def get_sources_endpoint(request: dict):
         else:
             # Direct call format
             kwargs = request
-            
+
         limit = kwargs.get("limit", 10)
-        
+
         from agents.common.database import execute_query
         sources = execute_query(
-            "SELECT id, url, domain, name, description, country, language FROM sources ORDER BY id LIMIT %s", 
+            "SELECT id, url, domain, name, description, country, language FROM sources ORDER BY id LIMIT %s",
             (limit,)
         )
-        
+
         return {"sources": sources}
-        
+
     except Exception as e:
         logger.error(f"Error getting sources: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving sources: {str(e)}")
 
 if __name__ == "__main__":
-    import uvicorn
     import os
+
+    import uvicorn
 
     host = os.environ.get("MEMORY_HOST", "0.0.0.0")
     port = int(os.environ.get("MEMORY_PORT", 8007))

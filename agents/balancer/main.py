@@ -11,10 +11,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from agents.balancer import tools
-from common.observability import get_logger
 
 # Import metrics library
 from common.metrics import JustNewsMetrics
+from common.observability import get_logger
 
 # Configure logging
 logger = get_logger(__name__)

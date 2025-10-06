@@ -237,7 +237,10 @@ def get_engine():
             if torch.cuda.is_available():
                 # Use GPU manager for allocation if available
                 try:
-                    from common.gpu_manager_production import request_agent_gpu, release_agent_gpu
+                    from common.gpu_manager_production import (
+                        release_agent_gpu,
+                        request_agent_gpu,
+                    )
 
                     # Request GPU allocation through manager
                     allocation = request_agent_gpu(

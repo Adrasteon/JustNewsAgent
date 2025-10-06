@@ -19,13 +19,13 @@ Success Criteria:
 - Training loop integration verified
 """
 
-import subprocess
-import time
-import logging
 import json
+import logging
+import subprocess
 import sys
-from typing import List, Dict, Any
+import time
 from datetime import datetime
+from typing import Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class CompleteTestRunner:
             "test_training_loop.py"
         ]
 
-    def run_single_test(self, script_name: str) -> Dict[str, Any]:
+    def run_single_test(self, script_name: str) -> dict[str, Any]:
         """Run a single test script and capture results"""
         logger.info(f"🚀 Running {script_name}")
 
@@ -104,7 +104,7 @@ class CompleteTestRunner:
                 "output": None
             }
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all test scripts in sequence"""
         logger.info("🎯 Starting Complete Segmented Test Suite")
 
@@ -141,7 +141,7 @@ class CompleteTestRunner:
         logger.info(f"🏁 Test suite completed: {successful_tests}/{total_tests} tests passed")
         return summary
 
-    def save_results(self, results: Dict[str, Any], filename: str = "segmented_test_results.json"):
+    def save_results(self, results: dict[str, Any], filename: str = "segmented_test_results.json"):
         """Save test results to file"""
         with open(filename, 'w') as f:
             json.dump(results, f, indent=2)

@@ -4,9 +4,11 @@ JustNews Metrics Library Test Script
 Demonstrates the core metrics functionality
 """
 
-import time
 import asyncio
+import time
+
 from common.metrics import JustNewsMetrics, measure_processing_time
+
 
 def test_basic_metrics():
     """Test basic metrics functionality."""

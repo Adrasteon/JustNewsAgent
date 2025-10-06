@@ -26,9 +26,8 @@ Examples:
 
 import json
 import sys
-import os
-from typing import Dict, List, Any, Optional
-from datetime import datetime
+from typing import Any
+
 
 class DocsNavigator:
     """Documentation catalogue navigator and search tool."""
@@ -37,10 +36,10 @@ class DocsNavigator:
         self.catalogue_path = catalogue_path
         self.catalogue = self._load_catalogue()
 
-    def _load_catalogue(self) -> Dict[str, Any]:
+    def _load_catalogue(self) -> dict[str, Any]:
         """Load the documentation catalogue."""
         try:
-            with open(self.catalogue_path, 'r', encoding='utf-8') as f:
+            with open(self.catalogue_path, encoding='utf-8') as f:
                 return json.load(f)
         except FileNotFoundError:
             print(f"Error: Catalogue file not found at {self.catalogue_path}")
@@ -49,7 +48,7 @@ class DocsNavigator:
             print(f"Error: Invalid JSON in catalogue file: {e}")
             sys.exit(1)
 
-    def list_documents(self, category: Optional[str] = None) -> None:
+    def list_documents(self, category: str | None = None) -> None:
         """List all documents, optionally filtered by category."""
         print("📚 JustNewsAgent Documentation Catalogue")
         print("=" * 50)
@@ -151,7 +150,7 @@ class DocsNavigator:
                     doc_id in doc['title'].lower() or
                     doc_id in doc['path'].lower()):
 
-                    print(f"📄 Found Document")
+                    print("📄 Found Document")
                     print("=" * 30)
                     print(f"🏷️  Title: {doc['title']}")
                     print(f"🆔 ID: {doc['id']}")
@@ -259,7 +258,7 @@ class DocsNavigator:
         }
         return status_emojis.get(status, '❓')
 
-    def _calculate_relevance(self, query: str, doc: Dict[str, Any]) -> int:
+    def _calculate_relevance(self, query: str, doc: dict[str, Any]) -> int:
         """Calculate relevance score for search results."""
         score = 0
 
