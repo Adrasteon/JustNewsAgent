@@ -150,7 +150,7 @@ def discover_sources(call: ToolCall):
         return discover_sources(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in discover_sources: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/crawl_url")
 def crawl_url(call: ToolCall):
@@ -170,14 +170,14 @@ def crawl_url(call: ToolCall):
         return crawl_url(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in crawl_url: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(f"An error occurred in crawl_url: {e}")
         log_security_event('endpoint_error', {
             'endpoint': '/crawl_url',
             'error': str(e)
         })
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post("/deep_crawl_site")
 def deep_crawl_site(call: ToolCall):
@@ -187,7 +187,7 @@ def deep_crawl_site(call: ToolCall):
         return deep_crawl_site(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in deep_crawl_site: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/enhanced_deep_crawl_site")
 async def enhanced_deep_crawl_site_endpoint(call: ToolCall):
@@ -207,14 +207,14 @@ async def enhanced_deep_crawl_site_endpoint(call: ToolCall):
         return await enhanced_deep_crawl_site(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in enhanced_deep_crawl_site: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(f"An error occurred in enhanced_deep_crawl_site: {e}")
         log_security_event('endpoint_error', {
             'endpoint': '/enhanced_deep_crawl_site',
             'error': str(e)
         })
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post("/intelligent_source_discovery")
 def intelligent_source_discovery_endpoint(call: ToolCall):
