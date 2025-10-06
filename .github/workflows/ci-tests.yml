@@ -1,0 +1,49 @@
+name: CI Tests (Conda)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniforge-variant: Mambaforge
+          python-version: 3.12
+
+      - name: Cache conda package cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.conda/pkgs
+            ~/miniconda3/pkgs
+            ~/.cache/pip
+          key: ${{ runner.os }}-conda-pkgs-${{ hashFiles('environment.yml') }}
+          restore-keys: ${{ runner.os }}-conda-pkgs-
+
+      - name: Create conda env (prefer mamba)
+        run: |
+          # Prefer mamba when available (Mambaforge image provides it). Fall back to conda.
+          if command -v mamba >/dev/null 2>&1; then
+            echo "Using mamba to create/update environment"
+            mamba env create -f environment.yml -n justnews-v2-py312 || mamba env update -f environment.yml -n justnews-v2-py312
+          else
+            echo "Mamba not found, falling back to conda"
+            conda env create -f environment.yml -n justnews-v2-py312 || conda env update -f environment.yml -n justnews-v2-py312
+          fi
+
+      - name: Apply executable permissions
+        run: |
+          chmod +x scripts/apply_executable_permissions.sh || true
+          bash scripts/apply_executable_permissions.sh
+
+      - name: Run pytest
+        run: conda run -n justnews-v2-py312 pytest -q

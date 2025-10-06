@@ -38,7 +38,18 @@ CLEAN_PORTS=true
 HEALTH_CHECK=true
 DRY_RUN=false
 
-PORTS=(8000 8001 8002 8003 8004 8005 8006 8007 8008 8009 8011 8012 8013 8014 8015 8016)
+## Derive PORTS from the canonical agents manifest so we don't drift between scripts
+PORTS=()
+if [[ -f "$PROJECT_ROOT/deploy/agents_manifest.sh" ]]; then
+  # shellcheck disable=SC1090
+  . "$PROJECT_ROOT/deploy/agents_manifest.sh"
+  for e in "${AGENTS_MANIFEST[@]}"; do
+    IFS='|' read -r _name _module port <<< "$e"
+    PORTS+=("$port")
+  done
+else
+  PORTS=(8000 8001 8002 8003 8004 8005 8006 8007 8008 8009 8011 8012 8013 8014 8015 8016)
+fi
 UNIT_TEMPLATE_SRC="$PROJECT_ROOT/deploy/systemd/units/justnews@.service"
 UNIT_TEMPLATE_DST="/etc/systemd/system/justnews@.service"
 START_SCRIPT_SRC="$PROJECT_ROOT/deploy/systemd/justnews-start-agent.sh"
@@ -55,6 +66,8 @@ WRAPPER_MAP=(
   "/usr/local/bin/health_check.sh|$PROJECT_ROOT/deploy/systemd/scripts/health_check.sh"
   "/usr/local/bin/reset_and_start.sh|$PROJECT_ROOT/deploy/systemd/scripts/reset_and_start.sh"
   "/usr/local/bin/cold_start.sh|$PROJECT_ROOT/deploy/systemd/scripts/cold_start.sh"
+  "/usr/local/bin/stop_services.sh|$PROJECT_ROOT/scripts/stop_services.sh"
+  "/usr/local/bin/create_kg_storage.sh|$PROJECT_ROOT/deploy/systemd/scripts/create_kg_storage.sh"
 )
 
 # New: allow operator to pass an explicit python path
@@ -129,6 +142,18 @@ parse_args() {
           log_error "--set-python-bin requires an absolute path to a Python interpreter"; exit 1
         fi
         ;;
+          --model-store-root)
+            MODEL_STORE_ROOT_OVERRIDE="${2:-}"; shift 2 || true
+            if [[ -z "$MODEL_STORE_ROOT_OVERRIDE" ]]; then
+              log_error "--model-store-root requires an absolute path"; exit 1
+            fi
+            ;;
+          --archive-kg-storage)
+            ARCHIVE_KG_STORAGE_OVERRIDE="${2:-}"; shift 2 || true
+            if [[ -z "$ARCHIVE_KG_STORAGE_OVERRIDE" ]]; then
+              log_error "--archive-kg-storage requires an absolute path"; exit 1
+            fi
+            ;;
       --justnews-group)
         JUSTNEWS_GROUP="${2:-}"; shift 2 || true
         if [[ -z "$JUSTNEWS_GROUP" ]]; then
@@ -242,7 +267,80 @@ create_system_user() {
   log_info "Created system user: $u"
 }
 
+create_system_symlink_opt() {
+    # Create /opt/justnews pointing to the project root so services don't need
+    # to rely on a user's home directory being accessible. The target keeps
+    # its existing ownership, but we ensure the link and mountpoint are
+    # controlled by root and group-owned by the justnews group with
+    # restrictive mode so only the service user/group can traverse it.
+    local target="$PROJECT_ROOT"
+    local link="/opt/justnews"
+
+    if [ -L "$link" ] || [ -e "$link" ]; then
+        echo "[INFO] $link already exists; skipping create (will validate ownership)."
+    else
+        if [ "$DRY_RUN" = true ]; then
+            echo "[DRY RUN] Would create symlink $link -> $target"
+        else
+            echo "[INFO] Creating symlink $link -> $target"
+            sudo mkdir -p /opt
+            sudo ln -s "$target" "$link"
+            sudo chown root:"$JUSTNEWS_GROUP" "$link" || true
+            sudo chmod 2750 "$target" || true
+        fi
+    fi
+
+    # Ensure the resolved target is group-executable so the justnews user
+    # can traverse into it. This sets group execute (x) and setgid on
+    # directories to preserve group ownership for new files.
+    if [ "$DRY_RUN" = true ]; then
+        echo "[DRY RUN] Would set group permissions on $target (g+rx and setgid)"
+    else
+        echo "[INFO] Ensuring group-exec and setgid on $target"
+        sudo chgrp -R "$JUSTNEWS_GROUP" "$target" || true
+        sudo chmod -R g+rX "$target" || true
+        find "$target" -type d -exec sudo chmod g+s '{}' + || true
+    fi
+}
+
+ensure_opt_traversable_or_clone() {
+    local link="/opt/justnews"
+    local target="$PROJECT_ROOT"
+
+    # Quick test: can the service user traverse the link and the root of the project?
+    if sudo -u "$DEFAULT_SERVICE_USER" -- test -x "$link" 2>/dev/null; then
+        log_info "$link is traversable by $DEFAULT_SERVICE_USER"
+        return 0
+    fi
+
+    log_warn "$link is not traversable by $DEFAULT_SERVICE_USER; creating a local clone under /opt"
+    if [ "$DRY_RUN" = true ]; then
+        echo "[DRY RUN] Would create directory /opt/justnews and rsync project contents"
+        return 0
+    fi
+
+    # Remove symlink if present and create actual directory
+    if [ -L "$link" ] || [ -e "$link" ]; then
+        rm -rf "$link" || true
+    fi
+    mkdir -p "$link"
+
+    # Use rsync to copy project files; exclude .git to keep the clone small
+    rsync -a --delete --exclude '.git' "$target/" "$link/" || true
+
+    # Set ownership and restrictive perms for the clone
+    chown -R root:"$JUSTNEWS_GROUP" "$link" || true
+    chmod -R g+rX "$link" || true
+    find "$link" -type d -exec chmod 2750 '{}' + || true
+
+    log_success "Created /opt/justnews clone (root:$JUSTNEWS_GROUP)"
+}
+
 reinstall_units_scripts() {
+  # Ensure symlink under /opt exists so systemd WorkingDirectory is accessible
+  create_system_symlink_opt
+  # Verify the symlink is traversable by the service user; if not, create a clone
+  ensure_opt_traversable_or_clone
   # Ensure the target group exists before attempting to chown helper scripts
   ensure_group_exists
 
@@ -491,6 +589,89 @@ inject_python_bin_into_global_env() {
   fi
 }
 
+## Model store detection and injection
+detect_model_store() {
+  # Priority: explicit override, common attached media, /var/lib, /opt, project-local
+  if [[ -n "${MODEL_STORE_ROOT_OVERRIDE:-}" ]]; then
+    DETECTED_MODEL_STORE_ROOT="$MODEL_STORE_ROOT_OVERRIDE"
+    log_info "Using model store from CLI override: $DETECTED_MODEL_STORE_ROOT"
+    return 0
+  fi
+
+  local candidates=(/media/*/justnews/model_store /media/*/Data/justnews/model_store /var/lib/justnews/model_store /opt/justnews/model_store "$PROJECT_ROOT/model_store")
+  for c in "${candidates[@]}"; do
+    for path in $c; do
+      if [[ -d "$path" ]]; then
+        DETECTED_MODEL_STORE_ROOT="$path"
+        log_info "Auto-detected model store at: $DETECTED_MODEL_STORE_ROOT"
+        return 0
+      fi
+    done
+  done
+
+  # Fallback: prefer /var/lib/justnews (createable by reset script)
+  DETECTED_MODEL_STORE_ROOT="/var/lib/justnews/model_store"
+  log_warn "No existing model store found; defaulting to $DETECTED_MODEL_STORE_ROOT (will create if necessary)"
+}
+
+inject_model_store_into_global_env() {
+  # Ensure file exists
+  if [[ ! -f "$GLOBAL_ENV" ]]; then
+    echo "# Auto-created by reset_and_start.sh" > "$GLOBAL_ENV"
+  fi
+  backup_file "$GLOBAL_ENV"
+
+  # Write MODEL_STORE_ROOT
+  if grep -q '^MODEL_STORE_ROOT=' "$GLOBAL_ENV" 2>/dev/null; then
+    sed -i "s|^MODEL_STORE_ROOT=.*|MODEL_STORE_ROOT=$DETECTED_MODEL_STORE_ROOT|" "$GLOBAL_ENV" || true
+    log_info "Updated MODEL_STORE_ROOT in $GLOBAL_ENV -> $DETECTED_MODEL_STORE_ROOT"
+  else
+    echo "MODEL_STORE_ROOT=$DETECTED_MODEL_STORE_ROOT" >> "$GLOBAL_ENV"
+    log_info "Inserted MODEL_STORE_ROOT into $GLOBAL_ENV -> $DETECTED_MODEL_STORE_ROOT"
+  fi
+
+  # Compute ARCHIVE_KG_STORAGE
+  if [[ -n "${ARCHIVE_KG_STORAGE_OVERRIDE:-}" ]]; then
+    DETECTED_ARCHIVE_KG_STORAGE="$ARCHIVE_KG_STORAGE_OVERRIDE"
+  else
+    DETECTED_ARCHIVE_KG_STORAGE="${DETECTED_MODEL_STORE_ROOT%/}/kg_storage"
+  fi
+
+  if grep -q '^ARCHIVE_KG_STORAGE=' "$GLOBAL_ENV" 2>/dev/null; then
+    sed -i "s|^ARCHIVE_KG_STORAGE=.*|ARCHIVE_KG_STORAGE=$DETECTED_ARCHIVE_KG_STORAGE|" "$GLOBAL_ENV" || true
+    log_info "Updated ARCHIVE_KG_STORAGE in $GLOBAL_ENV -> $DETECTED_ARCHIVE_KG_STORAGE"
+  else
+    echo "ARCHIVE_KG_STORAGE=$DETECTED_ARCHIVE_KG_STORAGE" >> "$GLOBAL_ENV"
+    log_info "Inserted ARCHIVE_KG_STORAGE into $GLOBAL_ENV -> $DETECTED_ARCHIVE_KG_STORAGE"
+  fi
+}
+
+create_kg_storage() {
+  # Create the kg storage directory with secure group ownership so service user can write
+  local kg_dir
+  kg_dir="${DETECTED_ARCHIVE_KG_STORAGE:-${ARCHIVE_KG_STORAGE_OVERRIDE:-${MODEL_STORE_ROOT_OVERRIDE:-}}}"
+  # If still empty, try to source GLOBAL_ENV to read final value
+  if [[ -z "$kg_dir" && -f "$GLOBAL_ENV" ]]; then
+    # shellcheck disable=SC1091
+    source "$GLOBAL_ENV"
+    kg_dir="${ARCHIVE_KG_STORAGE:-${MODEL_STORE_ROOT:-}/kg_storage}"
+  fi
+  if [[ -z "$kg_dir" ]]; then
+    log_error "Unable to determine kg storage path; skipping creation"
+    return 1
+  fi
+
+  log_info "Ensuring kg storage exists at: $kg_dir"
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: mkdir -p $kg_dir; chown root:$JUSTNEWS_GROUP $kg_dir; chmod 2775 $kg_dir"
+    return 0
+  fi
+  mkdir -p "$kg_dir" || true
+  chown root:"$JUSTNEWS_GROUP" "$kg_dir" || true
+  chmod 2775 "$kg_dir" || true
+  log_success "kg storage ensured: $kg_dir (owner root:$JUSTNEWS_GROUP, mode 2775)"
+}
+
 # Create a dedicated group for service files and ensure proper permissions
 ensure_justnews_group_and_perms() {
   local g="$JUSTNEWS_GROUP"
@@ -558,6 +739,28 @@ ensure_justnews_group_and_perms() {
   fi
 }
 
+# Make project readable/executable by the service group so systemd services
+# running as the service user can chdir into the repo and read files.
+adjust_project_permissions() {
+  # Make project readable/executable by the service group so systemd services
+  # running as the service user can chdir into the repo and read files.
+  local proj="$PROJECT_ROOT"
+  local g="$JUSTNEWS_GROUP"
+  log_info "Adjusting project directory permissions to be group-readable by $g (excluding .git)"
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "DRY-RUN: chgrp -R $g $proj && chmod -R g+rX $proj && find $proj -type d -exec chmod g+s {} +"
+    return 0
+  fi
+  # Change group ownership of the project (preserve owner)
+  chgrp -R "$g" "$proj" || true
+  # Set directories to be rx for group, files to be r for group; preserve executables
+  # Use g+X which only sets execute bit if already executable for someone
+  chmod -R g+rX "$proj" || true
+  # Ensure group setgid on directories for new files to inherit group
+  find "$proj" -type d -exec chmod g+s {} + || true
+  log_success "Adjusted project directory group ownership and permissions"
+}
+
 # Defaults and constants for new functions
 JUSTNEWS_GROUP="justnews"
 DEFAULT_SERVICE_USER="adra"
@@ -580,7 +783,14 @@ main() {
   # Ensure dedicated system user and admin groups exist and are configured
   create_system_user
   ensure_admin_group_exists
+  # Adjust project permissions so the 'justnews' service user can access working dir
+  adjust_project_permissions
   inject_python_bin_into_global_env
+  # Detect model store and inject settings so services know where to write heavy state
+  detect_model_store
+  inject_model_store_into_global_env
+  # Create kg storage directory (group-owned) so services running as 'justnews' can write
+  create_kg_storage
   ensure_justnews_group_and_perms
   toggle_safe_mode
   daemon_reload

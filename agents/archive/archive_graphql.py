@@ -812,11 +812,44 @@ async def lifespan(app: FastAPI):
 
     try:
         # Initialize knowledge graph manager
-        kg_manager = KnowledgeGraphManager()
+        # Allow overriding the KG storage location via environment variable so
+        # dev and production runs can place large state on the model store
+        # rather than inside the repository working tree.
+        import os
+        # Prefer explicit ARCHIVE_KG_STORAGE; fall back to central MODEL_STORE_ROOT
+        kg_path = os.environ.get("ARCHIVE_KG_STORAGE")
+        if not kg_path:
+            model_store = os.environ.get("MODEL_STORE_ROOT")
+            if model_store:
+                kg_path = os.path.join(model_store, "kg_storage")
+            else:
+                kg_path = "./kg_storage"
+        logger.info(f"Using kg_storage path (pre-resolve): {kg_path}")
+        # Resolve to absolute path and ensure we can create it. If the repo
+        # working tree is not writable (common when mounted), fall back to
+        # MODEL_STORE_ROOT if available.
+        kg_path = os.path.abspath(kg_path)
+        try:
+            os.makedirs(kg_path, exist_ok=True)
+        except PermissionError:
+            model_store = os.environ.get("MODEL_STORE_ROOT")
+            if model_store:
+                kg_path = os.path.join(model_store, "kg_storage")
+                os.makedirs(kg_path, exist_ok=True)
+                logger.info(f"Falling back to model store kg path: {kg_path}")
+            else:
+                logger.error(f"Cannot create kg storage at {kg_path} and MODEL_STORE_ROOT not set")
+                raise
+        kg_manager = KnowledgeGraphManager(kg_path)
         logger.info("✅ Knowledge Graph Manager initialized")
 
-        # Initialize archive manager
-        archive_manager = ArchiveManager()
+        # Initialize archive manager and ensure it uses the same KG storage
+        archive_storage_path = os.environ.get("ARCHIVE_STORAGE_PATH", "./archive_storage")
+        archive_manager = ArchiveManager({
+            "type": "local",
+            "local_path": archive_storage_path,
+            "kg_storage_path": kg_path,
+        })
         logger.info("✅ Archive Manager initialized")
 
         logger.info("🎉 GraphQL API startup complete")

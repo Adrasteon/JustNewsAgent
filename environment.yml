@@ -26,6 +26,9 @@ dependencies:
   - uvicorn>=0.24.0
   - pydantic>=2.5.0
   - requests>=2.31.0
+  - graphene
+  - slowapi
+  - playwright
 
   # Utilities (use conda-forge to avoid pip installs inside the environment)
   - prometheus_client

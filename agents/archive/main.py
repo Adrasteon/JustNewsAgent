@@ -42,11 +42,15 @@ class MCPBusClient:
             logger.error(f"Failed to register {agent_name} with MCP Bus: {e}")
             raise
 
-# Initialize archive manager
+# Initialize archive manager. Allow overriding the KG storage location via an
+# environment variable so deployed systems can place large state outside the
+# repository working tree (which may be owned by root or read-only).
+KG_STORAGE_PATH = os.environ.get("ARCHIVE_KG_STORAGE", "./kg_storage")
+
 archive_manager = ArchiveManager({
     "type": "local",
-    "local_path": "./archive_storage",
-    "kg_storage_path": "./kg_storage"
+    "local_path": os.environ.get("ARCHIVE_STORAGE_PATH", "./archive_storage"),
+    "kg_storage_path": KG_STORAGE_PATH,
 })
 
 # Define the lifespan context manager

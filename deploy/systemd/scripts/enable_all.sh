@@ -7,26 +7,41 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Service definitions in startup order
-SERVICES=(
-    "gpu_orchestrator" # GPU Orchestrator (port 8014) — MUST start before mcp_bus
-    "mcp_bus"
-    "chief_editor"
-    "scout"
-    "fact_checker"
-    "analyst"
-    "synthesizer"
-    "critic"
-    "memory"
-    "reasoning"
-    "newsreader"
-    "balancer"
-    "analytics"      # Analytics service (port 8011 per canonical mapping)
-    "archive"        # Archive agent (port 8012)
-    "dashboard"      # Dashboard agent (port 8013)
-    "crawler"        # Unified Production Crawler - intelligent multi-strategy
-    "crawler_control" # Crawler Control web interface (port 8016)
-)
+# Service definitions in startup order — derived from the canonical manifest
+# We keep an explicit preferred start order for services where ordering matters
+if [ -f "$(dirname "${BASH_SOURCE[0]}")/../agents_manifest.sh" ]; then
+    # shellcheck disable=SC1090
+    . "$(dirname "${BASH_SOURCE[0]}")/../agents_manifest.sh"
+    # Build a service name array and canonical ordering; GPU orchestrator and mcp_bus must start early
+    SERVICES=("gpu_orchestrator" "mcp_bus")
+    for entry in "${AGENTS_MANIFEST[@]}"; do
+        IFS='|' read -r name module port <<< "$entry"
+        # Skip already-seeded entries
+        case "${SERVICES[*]}" in *"$name"*) continue ;; esac
+        SERVICES+=("$name")
+    done
+else
+    SERVICES=(
+        "gpu_orchestrator"
+        "mcp_bus"
+        "chief_editor"
+        "scout"
+        "fact_checker"
+        "analyst"
+        "synthesizer"
+        "critic"
+        "memory"
+        "reasoning"
+        "newsreader"
+        "balancer"
+        "analytics"
+        "archive_graphql"
+        "archive_api"
+        "dashboard"
+        "crawler"
+        "crawler_control"
+    )
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -203,6 +218,23 @@ start_services() {
 
     # 3) Start remaining services
     for service in "${SERVICES[@]:2}"; do
+        # Ensure kg storage exists before starting archive services
+        if [[ "$service" == "archive_graphql" || "$service" == "archive_api" ]]; then
+            if [[ -x "/usr/local/bin/create_kg_storage.sh" ]]; then
+                log_info "Creating kg storage before starting $service"
+                /usr/local/bin/create_kg_storage.sh || log_warning "create_kg_storage.sh returned non-zero"
+            else
+                log_info "create_kg_storage.sh not installed; attempting best-effort create from /etc/justnews/global.env"
+                if [[ -r /etc/justnews/global.env ]]; then
+                    # shellcheck disable=SC1091
+                    source /etc/justnews/global.env || true
+                    KG_DIR="${ARCHIVE_KG_STORAGE:-${MODEL_STORE_ROOT:-/var/lib/justnews/model_store}/kg_storage}"
+                    mkdir -p "$KG_DIR" || true
+                    chown root:justnews "$KG_DIR" || true
+                    chmod 2775 "$KG_DIR" || true
+                fi
+            fi
+        fi
         log_info "Starting justnews@${service}..."
         systemctl start "justnews@${service}"
         sleep 2

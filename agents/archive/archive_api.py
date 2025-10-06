@@ -160,12 +160,37 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting JustNews Archive API...")
 
     try:
-        # Initialize knowledge graph manager
-        kg_manager = KnowledgeGraphManager()
+        # Initialize knowledge graph manager using configured model store
+        kg_path = os.environ.get("ARCHIVE_KG_STORAGE")
+        if not kg_path:
+            model_store = os.environ.get("MODEL_STORE_ROOT")
+            if model_store:
+                kg_path = os.path.join(model_store, "kg_storage")
+            else:
+                kg_path = "./kg_storage"
+        logger.info(f"Using kg_storage path (pre-resolve): {kg_path}")
+        kg_path = os.path.abspath(kg_path)
+        try:
+            os.makedirs(kg_path, exist_ok=True)
+        except PermissionError:
+            model_store = os.environ.get("MODEL_STORE_ROOT")
+            if model_store:
+                kg_path = os.path.join(model_store, "kg_storage")
+                os.makedirs(kg_path, exist_ok=True)
+                logger.info(f"Falling back to model store kg path: {kg_path}")
+            else:
+                logger.error(f"Cannot create kg storage at {kg_path} and MODEL_STORE_ROOT not set")
+                raise
+        kg_manager = KnowledgeGraphManager(kg_path)
         logger.info("✅ Knowledge Graph Manager initialized")
 
-        # Initialize archive manager
-        archive_manager = ArchiveManager()
+        # Initialize archive manager and ensure it uses the same KG storage location
+        archive_storage_path = os.environ.get("ARCHIVE_STORAGE_PATH", "./archive_storage")
+        archive_manager = ArchiveManager({
+            "type": "local",
+            "local_path": archive_storage_path,
+            "kg_storage_path": kg_path,
+        })
         logger.info("✅ Archive Manager initialized")
 
         # Attempt MCP Bus registration (non-fatal if bus not running)

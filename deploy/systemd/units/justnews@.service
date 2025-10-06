@@ -22,12 +22,15 @@ ProtectSystem=full
 ProtectHome=read-only
 PrivateTmp=yes
 NoNewPrivileges=yes
-# Use an absolute working directory (systemd requires absolute paths)
-WorkingDirectory=/home/adra/JustNewsAgent
-# Start from a shell to allow cd into repo and use env var expansion safely
-# Skip MCP wait for mcp_bus and gpu_orchestrator (they must start before/without the bus)
-ExecStartPre=/bin/bash -c 'if [ "%i" = "mcp_bus" ]; then /home/adra/JustNewsAgent/deploy/systemd/scripts/justnews-preflight-check.sh --gate-only; else [ "${REQUIRE_BUS:-1}" = "0" ] || [ "%i" = "gpu_orchestrator" ] || /home/adra/JustNewsAgent/deploy/systemd/scripts/wait_for_mcp.sh; fi'
-ExecStart=/home/adra/JustNewsAgent/deploy/systemd/scripts/justnews-start-agent.sh %i
+# Use an absolute working directory (systemd requires absolute paths).
+# For production and multi-user systems we map the project into /opt/justnews
+# (a root-owned path) and make the project readable by the justnews group.
+WorkingDirectory=/opt/justnews
+# Start from WorkingDirectory so ExecStart/ExecStartPre may use relative
+# paths (the installer creates /opt/justnews -> project root and ensures
+# group permissions so the service user can traverse the path).
+ExecStartPre=/bin/bash -c 'if [ "%i" = "mcp_bus" ]; then ./deploy/systemd/scripts/justnews-preflight-check.sh --gate-only; else [ "${REQUIRE_BUS:-1}" = "0" ] || [ "%i" = "gpu_orchestrator" ] || ./deploy/systemd/scripts/wait_for_mcp.sh; fi'
+ExecStart=/bin/bash -c './deploy/systemd/scripts/justnews-start-agent.sh %i'
 Restart=on-failure
 RestartSec=3
 

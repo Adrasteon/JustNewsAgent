@@ -1,48 +1,46 @@
 #!/usr/bin/env bash
-# start_services_daemon.sh
-# Starts the justnewsagent set of FastAPI/uvicorn agent services using the
-# `justnews-v2-py312` conda environment. Performs simple health checks and
-# writes per-agent logs to ./logs/
+
+# start_services_daemon.sh — start agents for development/testing
+# - Uses the canonical deploy/agents_manifest.sh
+# - Starts uvicorn instances with conda run
+# - Provides graceful shutdown attempts and force-kill fallback
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
-mkdir -p "$LOG_DIR"
+mkdir -p "$LOG_DIR" || true
 
-# Conda environment name used by the project
-CONDA_ENV="justnews-v2-py312"
+# Logging helpers
+timestamp() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
+log() { printf "%s [%s] %s\n" "$(timestamp)" "$1" "$2"; }
+info() { log INFO "$*"; }
+warn() { log WARN "$*"; }
+error() { log ERROR "$*" >&2; }
 
-# Default timeout for healthchecks (seconds)
-HEALTH_TIMEOUT=10
+# Conda environment name and health timeout (overridable)
+CONDA_ENV="${CONDA_ENV:-justnews-v2-py312}"
+HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-20}"
 
-# Agent definitions: name|python_module:app|port
-# Keep this list in sync with agents/*/main.py and the dashboard mapping
-AGENTS=(
-  "mcp_bus|agents.mcp_bus.main:app|8000"
-  "chief_editor|agents.chief_editor.main:app|8001"
-  "scout|agents.scout.main:app|8002"
-  "fact_checker|agents.fact_checker.main:app|8003"
-  "analyst|agents.analyst.main:app|8004"
-  "synthesizer|agents.synthesizer.main:app|8005"
-  "critic|agents.critic.main:app|8006"
-  "memory|agents.memory.main:app|8007"
-  "reasoning|agents.reasoning.main:app|8008"
-  "newsreader|agents.newsreader.main:app|8009"
-  "db_worker|agents.db_worker.worker:app|8010"
-  "dashboard|agents.dashboard.main:app|8011"
-  "analytics|agents.analytics.dashboard:analytics_app|8012"
-  "balancer|agents.balancer.main:app|8013"
-  # Newly added GPU orchestrator service (was missing previously)
-  "gpu_orchestrator|agents.gpu_orchestrator.main:app|8014"
-  "archive_graphql|agents.archive.archive_graphql:app|8020"
-  "archive_api|agents.archive.archive_api:app|8021"
-)
+# Source canonical manifest
+if [ -f "$SCRIPT_DIR/deploy/agents_manifest.sh" ]; then
+  # shellcheck disable=SC1090
+  . "$SCRIPT_DIR/deploy/agents_manifest.sh"
+  AGENTS=("${AGENTS_MANIFEST[@]}")
+else
+  warn "deploy/agents_manifest.sh not found; falling back to a minimal AGENTS list"
+  AGENTS=(
+    "mcp_bus|agents.mcp_bus.main:app|8000"
+    "chief_editor|agents.chief_editor.main:app|8001"
+  )
+fi
 
 PIDS=()
 
 activate_conda_env() {
-  # Use conda run in commands below; this function is a placeholder for future activation.
-  return 0
+  if command -v conda >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
 }
 
 # Check whether a TCP port is currently listening on localhost
@@ -54,23 +52,24 @@ is_port_in_use() {
   return 1
 }
 
-# Try to request a graceful shutdown on the given port by calling /shutdown
+# Attempt a graceful shutdown on the given port by calling /shutdown
 attempt_shutdown_port() {
   local port="$1"
   local url="http://localhost:${port}/shutdown"
-  echo "Attempting graceful shutdown on port $port via $url"
-  # Try POST then GET, with short timeout
+  info "Attempting graceful shutdown on port $port via $url"
   if command -v curl >/dev/null 2>&1; then
-    code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --max-time 3 "$url" || true)
+    code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --max-time 5 "$url" || true)
     if [ "$code" = "200" ] || [ "$code" = "202" ] || [ "$code" = "204" ]; then
-      echo "Shutdown endpoint accepted POST on $port (code $code)"
+      info "Shutdown endpoint accepted POST on $port (code $code)"
       return 0
     fi
-    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 "$url" || true)
+    code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$url" || true)
     if [ "$code" = "200" ] || [ "$code" = "202" ] || [ "$code" = "204" ]; then
-      echo "Shutdown endpoint accepted GET on $port (code $code)"
+      info "Shutdown endpoint accepted GET on $port (code $code)"
       return 0
     fi
+  else
+    warn "curl not found — cannot attempt HTTP shutdown on port $port"
   fi
   return 1
 }
@@ -78,37 +77,35 @@ attempt_shutdown_port() {
 # Kill processes holding a port. Attempts graceful TERM then SIGKILL if necessary.
 free_port_force() {
   local port="$1"
-  echo "Attempting to free port $port by killing process(es)"
+  info "Attempting to free port $port by killing process(es)"
   local pids=""
   if command -v lsof >/dev/null 2>&1; then
     pids=$(lsof -ti tcp:"$port" || true)
   fi
   if [ -z "$pids" ]; then
-    # Fallback to ss parsing for PID (format: users:("...",pid=1234,fd=3))
-    pids=$(ss -ltnp 2>/dev/null | grep -E ":[.]?$port\b" | sed -n 's/.*pid=\([0-9]*\),.*/\1/p' | tr '\n' ' ')
+    pids=$(ss -ltnp 2>/dev/null | grep -E ":$port\b" | sed -n 's/.*pid=\([0-9]*\),.*/\1/p' | tr '\n' ' ')
   fi
   if [ -z "$pids" ]; then
-    echo "No PID found for port $port; nothing to kill"
+    info "No PID found for port $port; nothing to kill"
     return 1
   fi
   for pid in $pids; do
-    echo "Sending TERM to pid $pid (port $port)"
+    info "Sending TERM to pid $pid (port $port)"
     kill -TERM "$pid" 2>/dev/null || true
   done
   sleep 3
-  # Check if port still in use
   if is_port_in_use "$port"; then
-    echo "Port $port still in use; sending SIGKILL to PIDs: $pids"
+    info "Port $port still in use; sending SIGKILL to PIDs: $pids"
     for pid in $pids; do
       kill -9 "$pid" 2>/dev/null || true
     done
     sleep 1
   fi
   if is_port_in_use "$port"; then
-    echo "Failed to free port $port"
+    warn "Failed to free port $port"
     return 1
   fi
-  echo "Port $port freed"
+  info "Port $port freed"
   return 0
 }
 
@@ -154,6 +151,10 @@ fi
 export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-"$DEFAULT_BASE_MODELS_DIR/model_store"}"
 export BASE_MODEL_DIR="${BASE_MODEL_DIR:-"$DEFAULT_BASE_MODELS_DIR/agents"}"
 
+# Ensure archive knowledge-graph storage is placed inside the model store so the
+# agent can create and write files without requiring repository write access.
+export ARCHIVE_KG_STORAGE="${ARCHIVE_KG_STORAGE:-"$MODEL_STORE_ROOT/kg_storage"}"
+
 # Enforce strict ModelStore usage by default for production runs started via this script.
 # Set STRICT_MODEL_STORE=0 to allow fallbacks for development/testing.
 export STRICT_MODEL_STORE="${STRICT_MODEL_STORE:-1}"
@@ -194,24 +195,25 @@ for d in "$BASE_MODEL_DIR" "$SYNTHESIZER_MODEL_CACHE" "$MEMORY_MODEL_CACHE" "$CH
   fi
 done
 
-echo "Checking ports 8000..8021 for running agents..."
-for port in $(seq 8000 8021); do
+info "Checking agent ports for running agents and attempting graceful shutdown if occupied..."
+for entry in "${AGENTS[@]}"; do
+  IFS='|' read -r _name _module port <<< "$entry"
   if is_port_in_use "$port"; then
-    echo "Port $port is currently in use. Attempting graceful shutdown..."
+    info "Port $port is currently in use — attempting graceful shutdown"
     if attempt_shutdown_port "$port"; then
-      # Wait up to 10s for port to close
-      deadline=$(( $(date +%s) + 10 ))
-      while is_port_in_use "$port" && [ "$(date +%s)" -le "$deadline" ]; do
+      # Wait up to 20s for port to close
+      local_deadline=$(( $(date +%s) + 20 ))
+      while is_port_in_use "$port" && [ "$(date +%s)" -le "$local_deadline" ]; do
         sleep 1
       done
       if is_port_in_use "$port"; then
-        echo "Shutdown endpoint did not free port $port in time; forcing kill"
+        warn "Shutdown endpoint did not free port $port in time; forcing kill"
         free_port_force "$port" || true
       else
-        echo "Port $port freed by graceful shutdown"
+        info "Port $port freed by graceful shutdown"
       fi
     else
-      echo "No shutdown endpoint or it failed for port $port; forcing kill"
+      warn "No shutdown endpoint or it failed for port $port; forcing kill"
       free_port_force "$port" || true
     fi
   fi
@@ -223,7 +225,7 @@ done
 # Requires: psql in PATH and scripts/news_outlets.py present.
 # ------------------------------------------------------------
 if [ "${AUTO_SEED_SOURCES:-0}" = "1" ]; then
-  echo "[startup] AUTO_SEED_SOURCES=1 → attempting sources table seed"
+  info "[startup] AUTO_SEED_SOURCES=1 → attempting sources table seed"
   if command -v psql >/dev/null 2>&1; then
     set +e
     SOURCE_COUNT=$(psql "postgresql://$JUSTNEWS_DB_USER:$JUSTNEWS_DB_PASSWORD@$JUSTNEWS_DB_HOST:${JUSTNEWS_DB_PORT}/$JUSTNEWS_DB_NAME" -tAc "SELECT count(*) FROM public.sources" 2>/dev/null)
@@ -241,9 +243,13 @@ if [ "${AUTO_SEED_SOURCES:-0}" = "1" ]; then
     fi
     if [ "${NEED_SEED:-0}" = "1" ]; then
       if [ -f "$SCRIPT_DIR/scripts/news_outlets.py" ]; then
-        echo "[startup] Seeding sources from potential_news_sources.md"
-        conda run --name "$CONDA_ENV" python "$SCRIPT_DIR/scripts/news_outlets.py" \
-          --file "$SCRIPT_DIR/markdown_docs/agent_documentation/potential_news_sources.md" || echo "[startup] WARNING: source seeding script failed"
+        info "[startup] Seeding sources from potential_news_sources.md"
+        if command -v conda >/dev/null 2>&1; then
+          conda run --name "$CONDA_ENV" python "$SCRIPT_DIR/scripts/news_outlets.py" \
+            --file "$SCRIPT_DIR/markdown_docs/agent_documentation/potential_news_sources.md" || warn "[startup] source seeding script failed"
+        else
+          warn "conda not available — cannot run seed script"
+        fi
       else
         echo "[startup] WARNING: scripts/news_outlets.py not found – cannot seed sources"
       fi
@@ -258,12 +264,17 @@ start_agent() {
   local out_log="$LOG_DIR/${name}.out.log"
   local err_log="$LOG_DIR/${name}.err.log"
 
-  echo "Starting $name -> $module on port $port"
+  info "Starting $name -> $module on port $port"
   # Start uvicorn via conda run so the right env is used. Run in background.
-  conda run --name "$CONDA_ENV" uvicorn "$module" --host 0.0.0.0 --port "$port" --log-level info >"$out_log" 2>"$err_log" &
+  if activate_conda_env; then
+    conda run --name "$CONDA_ENV" uvicorn "$module" --host 0.0.0.0 --port "$port" --log-level info >"$out_log" 2>"$err_log" &
+  else
+    warn "conda not detected — attempting to run uvicorn from PATH"
+    uvicorn "$module" --host 0.0.0.0 --port "$port" --log-level info >"$out_log" 2>"$err_log" &
+  fi
   local pid=$!
   PIDS+=("$pid")
-  echo "$name started (pid $pid), logs: $out_log, $err_log"
+  info "$name started (pid $pid), logs: $out_log, $err_log"
 }
 
 wait_for_health() {
@@ -281,12 +292,12 @@ wait_for_health() {
       ;;
   esac
 
-  echo "Waiting for $name to become healthy at $url (timeout ${HEALTH_TIMEOUT}s)"
+  info "Waiting for $name to become healthy at $url (timeout ${HEALTH_TIMEOUT}s)"
   local attempts=0
   while [ "$(date +%s)" -le "$deadline" ]; do
     attempts=$((attempts + 1))
     if curl -s --max-time 2 "$url" >/dev/null 2>&1; then
-      echo "✅ $name is healthy (after ${attempts}s)"
+      info "$name is healthy (after ${attempts}s)"
       return 0
     fi
     # Show progress every 5 seconds for MCP Bus
@@ -295,24 +306,24 @@ wait_for_health() {
     fi
     sleep 1
   done
-  echo "⚠️ WARNING: $name did not report healthy within ${HEALTH_TIMEOUT}s (tried $attempts times)"
+  warn "$name did not report healthy within ${HEALTH_TIMEOUT}s (tried $attempts times)"
   return 1
 }
 
 if [ "$DETACH" = false ]; then
-  trap 'echo "Shutting down agents..."; for pid in "${PIDS[@]:-}"; do echo "Killing $pid"; kill "$pid" 2>/dev/null || true; done; exit 0' SIGINT SIGTERM EXIT
+  trap 'info "Shutting down agents..."; for pid in "${PIDS[@]:-}"; do info "Killing $pid"; kill "$pid" 2>/dev/null || true; done; exit 0' SIGINT SIGTERM EXIT
 else
-  echo "Running in detach mode: started agents will continue running after this script exits."
+  info "Running in detach mode: started agents will continue running after this script exits."
 fi
 
-echo "Starting agents using conda env: $CONDA_ENV"
+info "Starting agents using conda env: $CONDA_ENV"
 for entry in "${AGENTS[@]}"; do
   IFS='|' read -r name module port <<< "$entry"
   start_agent "$name" "$module" "$port"
 done
 
-echo "All agents started; performing health checks"
-echo "Waiting 3 seconds for services to initialize..."
+info "All agents started; performing health checks"
+info "Waiting 3 seconds for services to initialize..."
 sleep 3
 
 ALL_OK=0
@@ -324,16 +335,15 @@ for entry in "${AGENTS[@]}"; do
 done
 
 if [ $ALL_OK -eq 0 ]; then
-  echo "✅ All agents reported healthy (or responded)"
+  info "All agents reported healthy (or responded)"
 else
-  echo "⚠️ Some agents failed health checks; check logs under $LOG_DIR"
+  warn "Some agents failed health checks; check logs under $LOG_DIR"
 fi
 
 if [ "$DETACH" = true ]; then
-  echo "Start script completed in detach mode. Agents will keep running. Started PIDs: ${PIDS[*]}"
-  echo "Use ./stop_services.sh to stop all agents when needed."
-  # Do not kill agents; exit successfully
+  info "Start script completed in detach mode. Agents will keep running. Started PIDs: ${PIDS[*]}"
+  info "Use ./stop_services.sh to stop all agents when needed."
   exit 0
 else
-  echo "Start script completed in test mode. To stop all started agents, send SIGINT to this script or kill PIDs: ${PIDS[*]}"
+  info "Start script completed in test mode. To stop all started agents, send SIGINT to this script or kill PIDs: ${PIDS[*]}"
 fi

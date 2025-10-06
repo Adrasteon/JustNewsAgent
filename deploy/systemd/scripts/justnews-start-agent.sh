@@ -209,6 +209,14 @@ setup_environment() {
     fi
 
     log_success "Environment setup complete"
+
+    # Provide sensible defaults for model store paths so agents do not attempt
+    # to write into the repository root. Prefer environment overrides in
+    # /etc/justnews/global.env or per-agent env files.
+    export MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-$PROJECT_ROOT/model_store}"
+    export ARCHIVE_KG_STORAGE="${ARCHIVE_KG_STORAGE:-${MODEL_STORE_ROOT%/}/kg_storage}"
+    log_info "MODEL_STORE_ROOT=$MODEL_STORE_ROOT"
+    log_info "ARCHIVE_KG_STORAGE=$ARCHIVE_KG_STORAGE"
 }
 
 # Wait for dependencies
