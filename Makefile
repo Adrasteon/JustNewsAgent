@@ -12,7 +12,7 @@ PKG_MGR := $(if $(MAMBA),mamba,conda)
 .DEFAULT_GOAL := help
 
 .PHONY: help env-create env-install env-rapids env-report test-dev test-unit \
-  test-smoke test-tensorrt test-ci test-py-override check-env
+  test-smoke test-tensorrt test-ci test-py-override check-env check-install
 
 help:
 	@echo "JustNewsAgent Makefile - common developer tasks"
@@ -29,12 +29,15 @@ help:
 	@echo "  test-py-override  Run canonical runner with explicit PY override (useful for CI)"
 	@echo "  test-ci           CI-friendly wrapper (uses PY override and runs all tests)"
 	@echo "  check-env         Print detected package manager and env status"
+	@echo "  check-install     Run local installation checks (unit template & env examples)"
 
 env-create:
 	@echo "Using package manager: $(PKG_MGR)"
 	@if command -v mamba >/dev/null 2>&1; then \
+		echo "Mamba detected — using mamba for faster environment creation"; \
 		mamba create -n $(ENV_NAME) python=3.12 -c conda-forge -y; \
 	else \
+		echo "Mamba not detected — falling back to conda"; \
 		conda create -n $(ENV_NAME) python=3.12 -c conda-forge -y; \
 	fi
 	@echo "Created environment '$(ENV_NAME)'. Activate with: conda activate $(ENV_NAME)"
@@ -103,6 +106,11 @@ test-py-override:
 	@echo "Running canonical runner with explicit PY override using env $(ENV_NAME)"
 	PY='conda run -n $(ENV_NAME) python' ./Canonical_Test_RUNME.sh --all
 
+ci-tests:
+	@echo "Run tests locally in conda env $(ENV_NAME)"
+	conda run -n $(ENV_NAME) bash scripts/apply_executable_permissions.sh
+	conda run -n $(ENV_NAME) pytest -q
+
 # CI-friendly non-interactive test target. Useful for CI pipelines.
 test-ci:
 	@echo "CI test run (non-interactive) using env $(ENV_NAME)"
@@ -117,3 +125,7 @@ check-env:
 	else \
 		echo "Environment $(ENV_NAME) not found"; \
 	fi
+
+check-install:
+	@echo "Running local installation checks (unit template & env examples)"
+	@bash scripts/ci/check_unit_and_env.sh

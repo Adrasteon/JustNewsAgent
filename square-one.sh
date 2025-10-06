@@ -7,23 +7,91 @@
 
 set -euo pipefail
 
+# --- Basic logging & helper functions (must be available before use) ---
+timestamp() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
+log() { printf "%s [%s] %s\n" "$(timestamp)" "$1" "$2"; }
+error() { log "ERROR" "$*" >&2; }
+info() { log "INFO" "$*"; }
+warn() { log "WARN" "$*"; }
+debug() { log "DEBUG" "$*"; }
+
+# Check whether a command exists
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
+
 # Determine script path using shell parameter expansion so we don't depend on external `dirname`/`basename`
-# This makes the script robust when PATH is restricted in tests (e.g., PATH=/nonexistent)
 SCRIPT_SOURCE="${BASH_SOURCE[0]}"
 SCRIPT_NAME="${SCRIPT_SOURCE##*/}"
 SCRIPT_DIR="${SCRIPT_SOURCE%/*}"
 if [ -z "$SCRIPT_DIR" ] || [ "$SCRIPT_DIR" = "$SCRIPT_SOURCE" ]; then
- SCRIPT_DIR="."
+  SCRIPT_DIR="."
 fi
+
+# Resolve a canonical project root so the script works when installed globally.
+resolve_project_root() {
+  # If an operator provided JUSTNEWS_ROOT use it
+  if [ -n "${JUSTNEWS_ROOT:-}" ] && [ -d "$JUSTNEWS_ROOT" ]; then
+    echo "$JUSTNEWS_ROOT"; return 0
+  fi
+  # If script appears inside the repo tree (deploy/ exists) prefer that
+  if [ -d "$SCRIPT_DIR/deploy" ]; then
+    echo "$SCRIPT_DIR"; return 0
+  fi
+  # If installed under /usr/local/bin, prefer /opt/justnews if present
+  if [ "${SCRIPT_DIR}" = "/usr/local/bin" ] || [ "${SCRIPT_DIR}" = "/usr/bin" ]; then
+    if [ -d "/opt/justnews" ]; then
+      echo "/opt/justnews"; return 0
+    fi
+  fi
+  # Fall back to current directory
+  echo "$SCRIPT_DIR"; return 0
+}
+
+PROJECT_ROOT="$(resolve_project_root)"
+SCRIPT_DIR="$PROJECT_ROOT"
 LOG_DIR="$SCRIPT_DIR/logs"
-# Only attempt to create the logs directory if mkdir is available in PATH
-if has_cmd mkdir; then
- mkdir -p "$LOG_DIR"
-fi
+mkdir -p "$LOG_DIR" || true
+
 
 # Default project conventions (can be overridden by env)
 CONDA_ENV="${CONDA_ENV:-justnews-v2-py312}"
-REQUIRED_PORTS=(8000 8001 8002 8003 8004 8005 8006 8007 8008 8009 8010 8011 8012 8013 8014 8020 8021)
+
+# Load canonical agent manifest if available (single source of truth)
+if [ -f "$SCRIPT_DIR/deploy/agents_manifest.sh" ]; then
+  # shellcheck disable=SC1090
+  . "$SCRIPT_DIR/deploy/agents_manifest.sh"
+else
+  warn "Missing deploy/agents_manifest.sh — falling back to built-in agent list"
+  AGENTS=(
+    "mcp_bus|8000"
+    "chief_editor|8001"
+    "scout|8002"
+    "fact_checker|8003"
+    "analyst|8004"
+    "synthesizer|8005"
+    "critic|8006"
+    "memory|8007"
+    "reasoning|8008"
+    "newsreader|8009"
+    "db_worker|8010"
+    "dashboard|8011"
+    "analytics|8012"
+    "balancer|8013"
+    "gpu_orchestrator|8014"
+    "archive_graphql|8020"
+    "archive_api|8021"
+  )
+fi
+
+# Compute required port list from manifest (preserve backwards compatibility)
+REQUIRED_PORTS=()
+AGENTS=()
+if [ "${AGENTS_MANIFEST+set}" = "set" ] && [ "${#AGENTS_MANIFEST[@]}" -gt 0 ]; then
+  for entry in "${AGENTS_MANIFEST[@]}"; do
+    IFS='|' read -r name module port <<< "$entry"
+    REQUIRED_PORTS+=("$port")
+    AGENTS+=("$name|$port")
+  done
+fi
 MODEL_STORE_ROOT_DEFAULT="${HOME}/.local/share/justnews/model_store"
 MODEL_STORE_ROOT="${MODEL_STORE_ROOT:-$MODEL_STORE_ROOT_DEFAULT}"
 BASE_MODEL_DIR="${BASE_MODEL_DIR:-${HOME}/.local/share/justnews/agents}"
@@ -34,14 +102,6 @@ POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 POSTGRES_DB="${POSTGRES_DB:-justnews}"
 POSTGRES_USER="${POSTGRES_USER:-justnews_user}"
 POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-password123}"
-
-# Helpers
-error() { printf "ERROR: %s\n" "$*" >&2; }
-info() { printf "[info] %s\n" "$*"; }
-warn() { printf "[warn] %s\n" "$*"; }
-
-# Check whether a command exists
-has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
 # Port check
 is_port_in_use() {
@@ -89,27 +149,6 @@ conda_env_exists() {
   return 1
 }
 
-# Agent definitions (name|port) used for graceful systemd stop attempts and nicer logging
-AGENTS=(
-  "mcp_bus|8000"
-  "chief_editor|8001"
-  "scout|8002"
-  "fact_checker|8003"
-  "analyst|8004"
-  "synthesizer|8005"
-  "critic|8006"
-  "memory|8007"
-  "reasoning|8008"
-  "newsreader|8009"
-  "db_worker|8010"
-  "dashboard|8011"
-  "analytics|8012"
-  "balancer|8013"
-  "gpu_orchestrator|8014"
-  "archive_graphql|8020"
-  "archive_api|8021"
-)
-
 # Force-kill helper (tries TERM then KILL) for a given port (uses lsof/ss)
 free_port_force() {
   local port="$1"
@@ -155,12 +194,22 @@ shutdown_justnews_services() {
     for entry in "${AGENTS[@]}"; do
       name="${entry%%|*}"
       unit="justnews@${name}.service"
-      if systemctl list-unit-files | grep -q "^justnews@${name}\.service" 2>/dev/null; then
+      if systemctl is-active --quiet "justnews@${name}" 2>/dev/null || systemctl list-unit-files | grep -q "^justnews@${name}\.service" 2>/dev/null; then
         info "Stopping systemd unit: $unit"
         systemctl stop "justnews@${name}" || true
+        # Wait up to 15s for it to stop
+        local deadline=$(( $(date +%s) + 15 ))
+        while systemctl is-active --quiet "justnews@${name}" 2>/dev/null && [ $(date +%s) -le $deadline ]; do
+          sleep 1
+        done
+        if systemctl is-active --quiet "justnews@${name}" 2>/dev/null; then
+          warn "$unit did not stop cleanly within grace window"
+        else
+          info "$unit stopped"
+        fi
       fi
     done
-    # Give systemd a short grace window to stop processes
+    # Short sleep to let systemd release ports
     sleep 2
   fi
 
@@ -173,10 +222,11 @@ shutdown_justnews_services() {
     if is_port_in_use "$port"; then
       info "Service detected listening on port $port — attempting graceful shutdown via /shutdown"
       if has_cmd curl; then
-        code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --max-time 3 "http://localhost:$port/shutdown" || true)
+        info "Attempting graceful shutdown on port $port via POST /shutdown"
+        code=$(curl -s -o /dev/null -w "%{http_code}" -X POST --max-time 5 "http://localhost:$port/shutdown" || true)
         if [ "$code" = "200" ] || [ "$code" = "202" ] || [ "$code" = "204" ]; then
-          info "Shutdown endpoint accepted POST on port $port (code $code). Waiting for port to close..."
-          deadline=$(( $(date +%s) + 10 ))
+          info "Shutdown endpoint accepted POST on port $port (code $code). Waiting up to 20s for port to close..."
+          deadline=$(( $(date +%s) + 20 ))
           while is_port_in_use "$port" && [ "$(date +%s)" -le "$deadline" ]; do
             sleep 1
           done
@@ -200,6 +250,44 @@ shutdown_justnews_services() {
     fi
   done
   info "Shutdown pass completed"
+}
+
+# Preflight for start: ensure ports are free and essential files/envs exist
+preflight_for_start() {
+  info "Running preflight checks for start"
+  local failed=0
+  if try_source_conda; then
+    info "Conda runtime available"
+    if conda_env_exists; then
+      info "Conda env '$CONDA_ENV' exists"
+    else
+      warn "Conda env '$CONDA_ENV' not present"
+      failed=1
+    fi
+  else
+    warn "Conda not available"
+    failed=1
+  fi
+  if check_postgres_conn; then
+    info "Postgres connectivity OK"
+  else
+    warn "Postgres connectivity failed"
+    failed=1
+  fi
+  for p in "${REQUIRED_PORTS[@]}"; do
+    if is_port_in_use "$p"; then
+      warn "Port $p still in use — cannot start until it is freed"
+      failed=1
+    else
+      info "Port $p is free"
+    fi
+  done
+  if [ $failed -eq 0 ]; then
+    info "Preflight-for-start OK"
+    return 0
+  fi
+  warn "Preflight-for-start detected issues"
+  return 1
 }
 
 # Start services: decide systemd or dev script
@@ -336,6 +424,24 @@ preflight() {
 # Ensure the script is accessible globally by copying to /usr/local/bin
 install_global() {
   local dest="/usr/local/bin/square-one"
+  local opt_link="/opt/justnews"
+  # Ensure /opt/justnews points at the project root so systemd units and installed wrapper resolve files correctly
+  if [ -L "$opt_link" ] || [ -d "$opt_link" ]; then
+    info "$opt_link already exists — leaving as-is"
+  else
+    info "Creating symlink $opt_link -> $SCRIPT_DIR (requires sudo)"
+    if [ "$EUID" -ne 0 ]; then
+      sudo mkdir -p /opt
+      sudo ln -s "$SCRIPT_DIR" "$opt_link"
+      sudo chown -h root:root "$opt_link" || true
+    else
+      mkdir -p /opt
+      ln -s "$SCRIPT_DIR" "$opt_link"
+      chown -h root:root "$opt_link" || true
+    fi
+  fi
+
+  # Install a small wrapper in /usr/local/bin that delegates to /opt/justnews/square-one.sh
   if [ -f "$dest" ]; then
     info "A square-one installation already exists at $dest — backing it up to $dest.bak"
     if [ "$EUID" -ne 0 ]; then
@@ -344,15 +450,16 @@ install_global() {
       cp "$dest" "$dest.bak"
     fi
   fi
-  info "Installing $SCRIPT_NAME to $dest (requires sudo if not root)"
+  info "Installing wrapper $dest (requires sudo if not root)"
+  wrapper_content="#!/usr/bin/env bash\nexec \"/opt/justnews/$SCRIPT_NAME\" \"\$@\"\n"
   if [ "$EUID" -ne 0 ]; then
-    sudo cp "$SCRIPT_DIR/$SCRIPT_NAME" "$dest"
+    printf "%s" "$wrapper_content" | sudo tee "$dest" >/dev/null
     sudo chmod +x "$dest"
   else
-    cp "$SCRIPT_DIR/$SCRIPT_NAME" "$dest"
+    printf "%s" "$wrapper_content" >"$dest"
     chmod +x "$dest"
   fi
-  info "Installed. You can now run 'square-one' from any directory."
+  info "Installed. You can now run 'square-one' from any directory. (/opt/justnews points to project root)"
 }
 
 usage() {
@@ -413,6 +520,7 @@ CMD=""
 ASSUME_YES=0
 FORCE_SYSTEMD=0
 DRY_RUN=0
+START_MODE=""
 if [ $# -gt 0 ]; then
   case "$1" in
     preflight|start|install|status|check-db|help)
@@ -420,6 +528,13 @@ if [ $# -gt 0 ]; then
       ;;
     *)
       usage; exit 1
+      ;;
+  esac
+fi
+if [ "$CMD" = "start" ] && [ $# -gt 0 ]; then
+  case "$1" in
+    auto|systemd|dev)
+      START_MODE="$1"; shift
       ;;
   esac
 fi
@@ -479,14 +594,13 @@ case "$CMD" in
     info "Initiating pre-start shutdown of any running JustNews services (Postgres will be preserved)"
     shutdown_justnews_services
 
-    # Call preflight after shutdown to validate we are in a clean state. If
-    # preflight fails we still allow continuation when user confirmed start
-    # earlier (--yes) or else we surface the warnings and abort.
-    if ! preflight; then
+    # After shutdown, validate that the environment is ready to start.
+    # Use a start-focused preflight that expects ports to be free.
+    if ! preflight_for_start; then
       if [ $ASSUME_YES -eq 1 ]; then
-        warn "Preflight detected issues but continuing because --yes was provided"
+        warn "Preflight-for-start detected issues but continuing because --yes was provided"
       else
-        warn "Preflight detected issues. Re-run with --yes to force start despite warnings, or fix issues and retry."
+        warn "Preflight-for-start detected issues. Re-run with --yes to force start despite warnings, or fix issues and retry."
         exit 1
       fi
     fi
@@ -503,7 +617,13 @@ case "$CMD" in
       exit 0
     fi
 
-    start_services "${FORCE_SYSTEMD:+systemd}"
+    if [ -n "$START_MODE" ]; then
+      start_services "$START_MODE"
+    elif [ "$FORCE_SYSTEMD" = "1" ]; then
+      start_services systemd
+    else
+      start_services
+    fi
     ;;
   help|"")
     usage ;;

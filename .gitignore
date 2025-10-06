@@ -204,6 +204,11 @@ deep_content_analysis.py
 !deploy/systemd/scripts/*.sh
 !deploy/systemd/helpers/*.sh
 
+# Allowlist sanitized env examples and CI checks
+!deploy/systemd/env/global.env.example
+!deploy/systemd/env/README.md
+!scripts/ci/*.sh
+
 # Allowlist unified startup script
 !square-one.sh
 !Canonical_Test_RUNME.sh
