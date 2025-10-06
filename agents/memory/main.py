@@ -126,7 +126,7 @@ def get_db_connection():
         return get_pooled_connection()
     except Exception as e:
         logger.error(f"Could not connect to PostgreSQL database: {e}")
-        raise HTTPException(status_code=500, detail="Database connection error")
+        raise HTTPException(status_code=500, detail="Database connection error") from e
 
 
 async def _storage_consumer():
@@ -323,7 +323,7 @@ def save_article_endpoint(request: dict):
         # Use pre-warmed embedding_model if available to avoid re-loading the model
         return save_article(article.content, article.metadata, embedding_model=embedding_model)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error saving article: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error saving article: {str(e)}") from e
 
 from fastapi import Request
 
@@ -355,7 +355,7 @@ async def get_article_endpoint(request: Request):
         raise  # Re-raise known HTTP exceptions
     except Exception as e:
         logger.error(f"Error retrieving article: {e}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving article: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving article: {str(e)}") from e
 
 @app.post("/get_all_article_ids")
 async def get_all_article_ids_endpoint(request: Request):
@@ -385,7 +385,7 @@ def vector_search_articles_endpoint(request: dict):
         # requests to ourselves which can cause recursive blocking behavior.
         return vector_search_articles_local(search.query, search.top_k)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error searching articles: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error searching articles: {str(e)}") from e
 
 @app.post("/get_recent_articles")
 def get_recent_articles_endpoint(request: dict):
@@ -424,7 +424,7 @@ def get_recent_articles_endpoint(request: dict):
                     pass
         return {"articles": rows}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error retrieving recent articles: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving recent articles: {str(e)}") from e
 
 @app.post("/log_training_example")
 def log_training_example_endpoint(example: TrainingExample):
@@ -491,7 +491,7 @@ def ingest_article_endpoint(request: dict):
 
         except Exception as e:
             logger.error(f"Database transaction failed: {e}")
-            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}") from e
 
         # Now save the article content using the memory agent's save_article function
         try:
@@ -532,7 +532,7 @@ def ingest_article_endpoint(request: dict):
         raise
     except Exception as e:
         logger.error(f"Ingestion failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ingestion error: {str(e)}") from e
 
 # Improved error handling and logging
 @app.get("/get_article_count")
@@ -544,7 +544,7 @@ def get_article_count_endpoint():
         return {"count": result.get("count", 0) if result else 0}
     except Exception as e:
         logger.error(f"Error getting article count: {e}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving article count: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving article count: {str(e)}") from e
 
 @app.post("/get_sources")
 def get_sources_endpoint(request: dict):
@@ -576,7 +576,7 @@ def get_sources_endpoint(request: dict):
 
     except Exception as e:
         logger.error(f"Error getting sources: {e}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving sources: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving sources: {str(e)}") from e
 
 if __name__ == "__main__":
     import os
