@@ -224,7 +224,7 @@ def intelligent_source_discovery_endpoint(call: ToolCall):
         return intelligent_source_discovery(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in intelligent_source_discovery: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/intelligent_content_crawl")
 def intelligent_content_crawl_endpoint(call: ToolCall):
@@ -234,7 +234,7 @@ def intelligent_content_crawl_endpoint(call: ToolCall):
         return intelligent_content_crawl(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in intelligent_content_crawl: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/intelligent_batch_analysis")
 def intelligent_batch_analysis_endpoint(call: ToolCall):
@@ -244,7 +244,7 @@ def intelligent_batch_analysis_endpoint(call: ToolCall):
         return intelligent_batch_analysis(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in intelligent_batch_analysis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/enhanced_newsreader_crawl")
 def enhanced_newsreader_crawl_endpoint(call: ToolCall):
@@ -254,7 +254,7 @@ def enhanced_newsreader_crawl_endpoint(call: ToolCall):
         return enhanced_newsreader_crawl(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in enhanced_newsreader_crawl: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/health")
 def health():
@@ -281,7 +281,7 @@ def log_feedback(call: ToolCall):
         return feedback_data
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_sentiment")
 def analyze_sentiment_endpoint(call: ToolCall):
@@ -301,7 +301,7 @@ def analyze_sentiment_endpoint(call: ToolCall):
         return result
     except Exception as e:
         logger.error(f"An error occurred in analyze_sentiment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/detect_bias")
 def detect_bias_endpoint(call: ToolCall):
@@ -321,7 +321,7 @@ def detect_bias_endpoint(call: ToolCall):
         return result
     except Exception as e:
         logger.error(f"An error occurred in detect_bias: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 # =============================================================================
 # PRODUCTION CRAWLER ENDPOINTS
@@ -346,14 +346,14 @@ async def production_crawl_ai_enhanced_endpoint(call: ToolCall):
         return await production_crawl_ai_enhanced(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in production_crawl_ai_enhanced: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(f"An error occurred in production_crawl_ai_enhanced: {e}")
         log_security_event('endpoint_error', {
             'endpoint': '/production_crawl_ai_enhanced',
             'error': str(e)
         })
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post("/production_crawl_ultra_fast")
 async def production_crawl_ultra_fast_endpoint(call: ToolCall):
@@ -373,14 +373,14 @@ async def production_crawl_ultra_fast_endpoint(call: ToolCall):
         return await production_crawl_ultra_fast(*call.args, **call.kwargs)
     except ValueError as e:
         logger.warning(f"Validation error in production_crawl_ultra_fast: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         logger.error(f"An error occurred in production_crawl_ultra_fast: {e}")
         log_security_event('endpoint_error', {
             'endpoint': '/production_crawl_ultra_fast',
             'error': str(e)
         })
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post("/get_production_crawler_info")
 def get_production_crawler_info_endpoint(call: ToolCall):
@@ -390,7 +390,7 @@ def get_production_crawler_info_endpoint(call: ToolCall):
         return get_production_crawler_info(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in get_production_crawler_info: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/production_crawl_dynamic")
 async def production_crawl_dynamic_endpoint(call: ToolCall):
@@ -401,7 +401,7 @@ async def production_crawl_dynamic_endpoint(call: ToolCall):
         return await production_crawl_dynamic(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in production_crawl_dynamic: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 # =============================================================================
 # SERVER STARTUP
