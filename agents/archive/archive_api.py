@@ -1196,7 +1196,7 @@ async def _perform_entities_export(job_id: str, filters: dict[str, Any], format_
                 if include_relationships:
                     # Get relationships for this entity
                     relationships = []
-                    for source, target, edge_type, edge_data in kg_manager.kg.graph.edges(entity["node_id"], keys=True, data=True):
+                    for _source, target, edge_type, edge_data in kg_manager.kg.graph.edges(entity["node_id"], keys=True, data=True):
                         relationships.append({
                             "target_entity": target,
                             "relationship_type": edge_type,

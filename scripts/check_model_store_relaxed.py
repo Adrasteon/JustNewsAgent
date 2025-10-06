@@ -71,7 +71,7 @@ def main():
         'checked_at': None,
         'summary': {},
         'per_agent': {},
-        'agents_on_disk': sorted(list(present.keys()))
+        'agents_on_disk': sorted(present.keys())
     }
 
     total_required = 0

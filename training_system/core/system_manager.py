@@ -92,7 +92,7 @@ class SystemWideTrainingManager:
                                source_url: str = "") -> None:
         """
         Collect prediction data from agents for training
-        
+
         This should be called by agents after making predictions
         """
         try:
@@ -128,7 +128,7 @@ class SystemWideTrainingManager:
                              explanation: str = "") -> dict[str, Any]:
         """
         Submit user correction for immediate model improvement
-        
+
         Args:
             agent_name: Name of the agent being corrected
             task_type: Type of task being corrected
@@ -137,7 +137,7 @@ class SystemWideTrainingManager:
             correct_output: What the correct output should be
             priority: Correction priority (0=low, 1=medium, 2=high, 3=critical)
             explanation: Optional explanation of the correction
-            
+
         Returns:
             Confirmation of correction submission
         """
@@ -265,12 +265,12 @@ class SystemWideTrainingManager:
     def bulk_correction_import(self, corrections: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Import multiple corrections in bulk (for admin use)
-        
+
         Args:
             corrections: List of correction dictionaries with required fields:
                 - agent_name, task_type, input_text, incorrect_output, correct_output
                 - Optional: priority, explanation
-                
+
         Returns:
             Summary of import results
         """

@@ -4,7 +4,7 @@ from common.observability import get_logger
 """
 Practical NewsReader Solution - Implementing User's Insight on INT8 Quantization
 
-The user correctly identified that INT8 quantization is simpler and more reliable 
+The user correctly identified that INT8 quantization is simpler and more reliable
 than complex dynamic loading. This implements a practical approach.
 
 Key Insight: Use smaller, quantizable models instead of forcing large models to fit.
@@ -38,7 +38,7 @@ class ToolCall(BaseModel):
 class PracticalNewsReader:
     """
     Practical approach to NewsReader with proper model sizing and quantization.
-    
+
     User's insight: Instead of forcing a 15GB model into 3.5GB,
     use a model that naturally fits with quantization.
     """
@@ -195,7 +195,7 @@ class PracticalNewsReader:
     async def analyze_image_url(self, image_url: str, prompt: str = None) -> dict[str, Any]:
         """
         Analyze image with text generation.
-        
+
         Args:
             image_url: URL of image to analyze
             prompt: Optional custom prompt (uses news analysis default)

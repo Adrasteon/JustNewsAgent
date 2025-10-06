@@ -479,7 +479,7 @@ class UnifiedProductionCrawler:
 
         # Flatten results for easier processing
         all_articles = []
-        for domain, articles in results.items():
+        for _domain, articles in results.items():
             all_articles.extend(articles)
 
         summary = {

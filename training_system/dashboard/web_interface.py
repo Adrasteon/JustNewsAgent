@@ -1,7 +1,7 @@
 """
 Online Training Dashboard - Web Interface (Future Implementation)
 
-This module will provide a web-based dashboard for monitoring and managing 
+This module will provide a web-based dashboard for monitoring and managing
 the online training system across all V2 agents.
 
 Features to implement:
@@ -72,7 +72,7 @@ class TrainingDashboard:
                 <p>📊 Managed Agents: <strong>7</strong></p>
                 <p>🎯 Total Models: <strong>27+</strong></p>
             </div>
-            
+
             <h2>Agent Status</h2>
             <div class="agent">
                 <strong>Scout V2</strong> - News Classification & Quality Assessment<br>
@@ -86,7 +86,7 @@ class TrainingDashboard:
                 <strong>Analyst V2</strong> - Entity Extraction & Analysis<br>
                 Training Buffer: Collecting examples
             </div>
-            
+
             <p><em>Full dashboard implementation coming soon...</em></p>
         </body>
         </html>

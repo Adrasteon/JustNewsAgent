@@ -135,7 +135,7 @@ class PerformanceMetrics:
     def get_recent_performance(self, window_seconds: int = 300) -> dict[str, Any]:
         """Get performance metrics for recent time window"""
         current_time = time.time()
-        window_start = current_time - window_seconds
+        current_time - window_seconds
 
         # Filter recent processing times
         recent_times = [t for t in self.processing_times if (current_time - t) <= window_seconds]

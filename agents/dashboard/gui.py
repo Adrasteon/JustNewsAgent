@@ -485,7 +485,7 @@ class DashboardGUI(QMainWindow):
         start_btn.setEnabled(False)
         stop_btn.setEnabled(False)
         success = False
-        for attempt in range(3):
+        for _attempt in range(3):
             try:
                 if port == 8000:
                     resp = requests.get(f"http://localhost:{port}/agents", timeout=1)

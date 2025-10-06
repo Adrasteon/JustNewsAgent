@@ -69,7 +69,7 @@ def log_feedback(event: str, details: dict):
 class GPUAcceleratedSynthesizer:
     """
     GPU-accelerated synthesizer following proven analyst patterns
-    
+
     Capabilities:
     - Semantic clustering of articles using sentence-transformers
     - Theme identification through ML pipeline
@@ -290,10 +290,10 @@ class GPUAcceleratedSynthesizer:
     def synthesize_articles_gpu(self, articles: list[dict[str, Any]]) -> dict[str, Any]:
         """
         GPU-accelerated article synthesis with theme identification
-        
+
         Args:
             articles: List of article dictionaries with 'content', 'title', 'url' fields
-            
+
         Returns:
             Dict with synthesis results, themes, and performance metrics
         """
@@ -565,7 +565,7 @@ class GPUAcceleratedSynthesizer:
 
                 # Sample key points from theme articles
                 sample_size = min(3, len(theme['articles']))
-                for j, article in enumerate(theme['articles'][:sample_size]):
+                for _j, article in enumerate(theme['articles'][:sample_size]):
                     title = article['metadata'].get('title', 'Untitled')
                     synopsis = article['text'][:150] + "..." if len(article['text']) > 150 else article['text']
                     synthesis_parts.append(f"   • {title}: {synopsis}")

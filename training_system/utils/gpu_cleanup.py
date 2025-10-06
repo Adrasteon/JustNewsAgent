@@ -1,15 +1,14 @@
 """GPU Cleanup Utilities for PyTorch Models"""
 
 import atexit
-
-from common.observability import get_logger, setup_logging
-
-setup_logging()
 import gc
 import signal
 import sys
 from typing import Any
 
+from common.observability import get_logger, setup_logging
+
+setup_logging()
 logger = get_logger(__name__)
 
 class GPUModelManager:

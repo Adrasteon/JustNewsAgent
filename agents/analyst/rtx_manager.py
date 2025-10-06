@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 class RTXManager:
     """
     NVIDIA RTX AI Toolkit Manager for JustNews V4
-    
+
     Manages RTX 3090-optimized inference with the following features:
     - TensorRT-LLM primary inference (4x performance improvement)
     - Docker Model Runner fallback for reliability
@@ -152,12 +152,12 @@ class RTXManager:
     async def query_model(self, prompt: str, max_tokens: int | None = None, temperature: float = 0.1) -> tuple[str, str]:
         """
         Query model with RTX-optimized hybrid routing.
-        
+
         Priority:
         1. TensorRT-LLM (if engine available)
         2. Docker Model Runner (fallback)
         3. Error response
-        
+
         Returns:
             Tuple[str, str]: (response, source) where source is 'tensorrt', 'docker', or 'error'
         """

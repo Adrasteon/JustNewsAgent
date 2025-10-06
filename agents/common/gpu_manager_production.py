@@ -701,7 +701,7 @@ class MultiAgentGPUManager:
         """Attempt to recover an unhealthy GPU (CUDA or MPS)"""
         try:
             if device_id.startswith("cuda:"):
-                cuda_device_id = int(device_id.split(":")[1])
+                int(device_id.split(":")[1])
                 # Clear CUDA cache
                 if TORCH_AVAILABLE and torch.cuda.is_available():
                     torch.cuda.empty_cache()

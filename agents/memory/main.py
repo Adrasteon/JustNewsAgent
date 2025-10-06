@@ -436,7 +436,7 @@ def log_training_example_endpoint(example: TrainingExample):
 @app.post("/ingest_article")
 def ingest_article_endpoint(request: dict):
     """Handles article ingestion with sources and article_source_map operations.
-    
+
     This endpoint replaces the db_worker functionality, handling the transactional
     insertion of sources, article_source_map, and articles as expected by crawlers.
     """
@@ -549,10 +549,10 @@ def get_article_count_endpoint():
 @app.post("/get_sources")
 def get_sources_endpoint(request: dict):
     """Get list of sources from the database.
-    
+
     Args:
         limit: Maximum number of sources to return (default: 10)
-        
+
     Returns:
         List of source dictionaries with domain, name, etc.
     """

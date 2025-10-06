@@ -293,15 +293,7 @@ class UnifiedProductionCrawler:
                     return best_strategy
 
         # Fallback to rule-based strategy selection
-        ultra_fast_domains = [
-            'bbc.com', 'bbc.co.uk', 'cnn.com', 'reuters.com',
-            'apnews.com', 'npr.org', 'nytimes.com', 'washingtonpost.com'
-        ]
 
-        ai_enhanced_domains = [
-            'wsj.com', 'ft.com', 'economist.com', 'newyorker.com',
-            'theatlantic.com', 'foreignaffairs.com'
-        ]
 
         # 1. Check for pre-defined ultra-fast sites
         # These are high-volume, well-structured sites with dedicated parsers
@@ -490,7 +482,7 @@ class UnifiedProductionCrawler:
 
         # Flatten results for easier processing
         all_articles = []
-        for domain, articles in results.items():
+        for _domain, articles in results.items():
             all_articles.extend(articles)
 
         # Ingest articles to database via memory agent
@@ -519,7 +511,7 @@ class UnifiedProductionCrawler:
     async def _ingest_articles(self, articles: list[dict]) -> dict[str, int]:
         """
         Ingest articles to database via memory agent MCP calls
-        
+
         Returns:
             Dict with counts: {'new_articles': int, 'duplicates': int, 'errors': int}
         """

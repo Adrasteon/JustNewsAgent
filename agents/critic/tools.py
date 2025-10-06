@@ -4,7 +4,7 @@ Production-ready implementation with zero warnings and clean imports
 
 SPECIALIZATION FOCUS:
 1. Argument Structure Analysis - Identifying premises, conclusions, logical flow
-2. Editorial Consistency - Checking for internal contradictions, coherence  
+2. Editorial Consistency - Checking for internal contradictions, coherence
 3. Logical Fallacy Detection - Identifying logical errors and weak reasoning
 4. Source Credibility Assessment - Evaluating evidence quality and sourcing
 
@@ -52,11 +52,11 @@ def log_feedback(event: str, details: dict[str, Any]) -> None:
 def analyze_argument_structure(text: str, url: str = None) -> dict[str, Any]:
     """
     Analyze the logical structure of arguments in text content.
-    
+
     Args:
         text (str): Content to analyze for argument structure
         url (str, optional): Source URL for context
-        
+
     Returns:
         Dict containing argument analysis including premises, conclusions,
         logical flow, and argument strength assessment
@@ -230,11 +230,11 @@ def assess_source_credibility(text: str, url: str = None) -> dict[str, Any]:
 def critique_synthesis(content: str, url: str = None) -> dict[str, Any]:
     """
     Synthesize comprehensive content critique using all available analysis tools
-    
+
     Args:
         content (str): Content to critique
         url (str, optional): Source URL for context
-        
+
     Returns:
         Dict containing comprehensive critique analysis
     """
@@ -309,11 +309,11 @@ def critique_synthesis(content: str, url: str = None) -> dict[str, Any]:
 def critique_neutrality(content: str, url: str = None) -> dict[str, Any]:
     """
     Analyze content neutrality and bias indicators
-    
+
     Args:
         content (str): Content to analyze for neutrality
         url (str, optional): Source URL for context
-        
+
     Returns:
         Dict containing neutrality analysis
     """
@@ -479,7 +479,7 @@ def _detect_contradictions(text: str) -> list[dict[str, Any]]:
 
     # Simple contradiction detection
     for i, sentence1 in enumerate(sentences):
-        for j, sentence2 in enumerate(sentences[i+1:], i+1):
+        for _j, sentence2 in enumerate(sentences[i+1:], i+1):
             if 'not' in sentence1.lower() and any(word in sentence2.lower() for word in sentence1.lower().split() if word != 'not'):
                 contradictions.append({
                     "sentence1": sentence1.strip(),

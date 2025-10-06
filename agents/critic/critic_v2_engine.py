@@ -139,7 +139,7 @@ class CriticV2Config:
 class CriticV2Engine:
     """
     Advanced 5-Model Content Review Engine for Comprehensive Quality Control
-    
+
     Capabilities:
     - Content quality assessment with BERT
     - Advanced bias detection with RoBERTa
@@ -697,7 +697,7 @@ class CriticV2Engine:
     def comprehensive_review(self, text: str, context: str = "", reference_texts: list[str] | None = None) -> ReviewResult:
         """
         Perform comprehensive content review using all 5 models
-        
+
         Returns:
             ReviewResult with detailed analysis and recommendations
         """
@@ -1033,7 +1033,7 @@ class CriticV2Engine:
     def cleanup(self):
         """Clean up GPU memory and models"""
         try:
-            for model_name, model in self.models.items():
+            for _model_name, model in self.models.items():
                 if model is not None and hasattr(model, 'cpu'):
                     model.cpu()
                     del model
@@ -1061,8 +1061,8 @@ def run_critic_v2_engine_test():
 
         # Test data
         sample_text = """
-        Scientists have discovered a groundbreaking treatment for cancer that could revolutionize medicine. 
-        The research team, led by Dr. Smith, conducted extensive studies over five years. 
+        Scientists have discovered a groundbreaking treatment for cancer that could revolutionize medicine.
+        The research team, led by Dr. Smith, conducted extensive studies over five years.
         Their findings show a 90% success rate in early trials, which is unprecedented in oncology.
         However, critics argue that the sample size was too small and more research is needed.
         The treatment involves innovative gene therapy techniques that target specific cancer markers.

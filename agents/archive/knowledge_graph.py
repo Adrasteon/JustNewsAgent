@@ -710,7 +710,7 @@ class EntityClustering:
         """
         merged_entities = {}
 
-        for representative, cluster_entities in self.clusters.items():
+        for _representative, cluster_entities in self.clusters.items():
             if len(cluster_entities) > 1:
                 # Find all nodes for these entities
                 entity_nodes = []
@@ -1088,10 +1088,10 @@ class TemporalKnowledgeGraph:
 
         # Look for existing mentions of this entity
         entity_mentions = []
-        for node_id, node_data in self.graph.nodes(data=True):
+        for _node_id, node_data in self.graph.nodes(data=True):
             if node_data.get("node_type") == "article":
                 entities = node_data["properties"].get("entities", {})
-                for entity_type, entity_list in entities.items():
+                for _entity_type, entity_list in entities.items():
                     if entity_name in entity_list:
                         timestamp = node_data["properties"].get("published_date")
                         if timestamp:
@@ -1169,7 +1169,7 @@ class TemporalKnowledgeGraph:
 
         # Collect all entity names by type
         entities_by_type = {}
-        for node_id, node_data in self.graph.nodes(data=True):
+        for _node_id, node_data in self.graph.nodes(data=True):
             if node_data.get("node_type") == "entity":
                 entity_type = node_data["properties"].get("entity_type", "unknown")
                 entity_name = node_data["properties"].get("name", "")
@@ -1240,7 +1240,7 @@ class TemporalKnowledgeGraph:
             "largest_cluster": 0
         }
 
-        for node_id, node_data in self.graph.nodes(data=True):
+        for _node_id, node_data in self.graph.nodes(data=True):
             if node_data.get("node_type") == "entity":
                 stats["total_entity_nodes"] += 1
 
@@ -1391,7 +1391,7 @@ class TemporalKnowledgeGraph:
         }
 
         # Node type distribution
-        for node_id, node_data in self.graph.nodes(data=True):
+        for _node_id, node_data in self.graph.nodes(data=True):
             node_type = node_data.get("node_type", "unknown")
             stats["node_types"][node_type] = stats["node_types"].get(node_type, 0) + 1
 

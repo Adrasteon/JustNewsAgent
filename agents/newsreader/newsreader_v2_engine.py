@@ -117,7 +117,7 @@ class NewsReaderV2Config:
 class NewsReaderV2Engine:
     """
     NewsReader V2 Engine - Multi-Modal Vision Processing
-    
+
     Features:
     - Multi-modal content processing with LLaVA integration
     - Advanced OCR and layout analysis (integrated with LLaVA)

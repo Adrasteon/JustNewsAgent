@@ -4,7 +4,7 @@ Synthesizer V3 Production Engine - Production-Ready Content Synthesis
 
 Production Fixes Applied:
 1. ✅ DialoGPT (deprecated) REMOVED - Replaced with FLAN-T5 for better quality
-2. ✅ T5 Legacy Warning FIXED - Modern tokenizer configuration  
+2. ✅ T5 Legacy Warning FIXED - Modern tokenizer configuration
 3. ✅ UMAP Clustering FIXED - Proper error handling and fallbacks
 4. ✅ BART Configuration OPTIMIZED - Dynamic parameters, no invalid flags
 5. ✅ Model Loading OPTIMIZED - No redundant loading, memory efficient
@@ -333,7 +333,7 @@ class SynthesizerV3ProductionEngine:
             if not self.embedding_model:
                 # Ultimate fallback: simple division
                 mid_point = len(texts) // 2
-                clusters = [[i for i in range(mid_point)], [i for i in range(mid_point, len(texts))]]
+                clusters = [list(range(mid_point)), list(range(mid_point, len(texts)))]
                 clusters = [c for c in clusters if c]  # Remove empty clusters
 
                 return {
@@ -370,7 +370,7 @@ class SynthesizerV3ProductionEngine:
             # Ultimate fallback
             return {
                 "method": "no_clustering",
-                "clusters": [[i for i in range(len(texts))]],
+                "clusters": [list(range(len(texts)))],
                 "n_clusters": 1,
                 "articles_processed": len(texts),
                 "success": False,
@@ -611,7 +611,7 @@ class SynthesizerV3ProductionEngine:
                 aggregated = self.aggregate_cluster_content(article_texts)
                 return {
                     "synthesis": aggregated.get("best_result", " ".join(article_texts[:2])),
-                    "clusters": [[i for i in range(len(article_texts))]],
+                    "clusters": [list(range(len(article_texts)))],
                     "n_clusters": 1,
                     "articles_processed": len(article_texts),
                     "success": True,
@@ -619,7 +619,7 @@ class SynthesizerV3ProductionEngine:
                 }
 
             # Extract clusters from results
-            clusters = cluster_results.get('clusters', [[i for i in range(len(article_texts))]])
+            clusters = cluster_results.get('clusters', [list(range(len(article_texts)))])
 
             # Synthesize content for each cluster
             cluster_syntheses = []
@@ -648,7 +648,7 @@ class SynthesizerV3ProductionEngine:
             # Emergency fallback
             return {
                 "synthesis": " ".join(article_texts[:2]) if article_texts else "",
-                "clusters": [[i for i in range(len(article_texts))]],
+                "clusters": [list(range(len(article_texts)))],
                 "n_clusters": 1,
                 "articles_processed": len(article_texts),
                 "success": False,

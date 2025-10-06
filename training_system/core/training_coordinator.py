@@ -87,7 +87,7 @@ class OnTheFlyTrainingCoordinator:
                  rollback_threshold: float = 0.05):
         """
         Initialize training coordinator
-        
+
         Args:
             update_threshold: Number of examples before triggering model update
             max_buffer_size: Maximum training examples to keep in memory
@@ -152,7 +152,7 @@ class OnTheFlyTrainingCoordinator:
                            correction_priority: int = 0):
         """
         Add a training example to the appropriate agent buffer
-        
+
         High uncertainty or user corrections get prioritized for training
         """
         example = TrainingExample(
@@ -193,7 +193,7 @@ class OnTheFlyTrainingCoordinator:
                               confidence_score: float):
         """
         Add feedback from agent predictions to improve training
-        
+
         This is called automatically when agents make predictions
         """
         # Calculate uncertainty (1 - confidence)
@@ -792,8 +792,8 @@ class OnTheFlyTrainingCoordinator:
         try:
             # Use the new connection pooling execute_query function
             execute_query("""
-                INSERT INTO training_examples 
-                (agent_name, task_type, input_text, expected_output, uncertainty_score, 
+                INSERT INTO training_examples
+                (agent_name, task_type, input_text, expected_output, uncertainty_score,
                  importance_score, source_url, timestamp, user_feedback, correction_priority)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (

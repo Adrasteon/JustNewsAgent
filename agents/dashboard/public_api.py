@@ -22,8 +22,10 @@ try:
     from common.observability import get_logger
 except ImportError:
     import logging
-    get_logger = lambda name: logging.getLogger(name)
-    JustNewsMetrics = lambda name: None
+    def get_logger(name):
+        return logging.getLogger(name)
+    def JustNewsMetrics(name):
+        return None
 
 logger = get_logger(__name__)
 

@@ -116,10 +116,10 @@ class ChiefEditorV2Config:
 class ChiefEditorV2Engine:
     """
     Advanced 5-Model Editorial Workflow Engine for Content Decision Making
-    
+
     Capabilities:
     - Content quality assessment with BERT
-    - Fast article categorization with DistilBERT  
+    - Fast article categorization with DistilBERT
     - Editorial sentiment analysis with RoBERTa
     - Commentary generation with T5
     - Workflow embeddings with SentenceTransformer
@@ -561,7 +561,7 @@ class ChiefEditorV2Engine:
     def make_editorial_decision(self, content: str, metadata: dict[str, Any] = None) -> EditorialDecision:
         """
         Make comprehensive editorial decision using all 5 models
-        
+
         Returns:
             EditorialDecision with priority, stage, and next actions
         """
@@ -750,7 +750,7 @@ class ChiefEditorV2Engine:
     def cleanup(self):
         """Clean up GPU memory and models"""
         try:
-            for model_name, model in self.models.items():
+            for _model_name, model in self.models.items():
                 if model is not None and hasattr(model, 'cpu'):
                     model.cpu()
                     del model

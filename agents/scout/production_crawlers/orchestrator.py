@@ -236,8 +236,8 @@ class ProductionCrawlerOrchestrator:
         """Get statistics about available sources"""
         try:
             sources = get_active_sources()
-            domains = list(set(s['domain'] for s in sources))
-            publishers = list(set(s['name'] for s in sources if s.get('name')))
+            domains = list({s['domain'] for s in sources})
+            publishers = list({s['name'] for s in sources if s.get('name')})
 
             return {
                 "total_sources": len(sources),
@@ -264,11 +264,11 @@ class ProductionCrawlerOrchestrator:
     async def crawl_site_ultra_fast(self, site: str, target_articles: int = 100) -> dict[str, Any]:
         """
         High-speed crawling for maximum throughput (8.14+ articles/second)
-        
+
         Args:
             site: Site identifier ('bbc', 'cnn', etc.)
             target_articles: Number of articles to crawl
-            
+
         Returns:
             Dict with crawl results and performance metrics
         """
@@ -312,11 +312,11 @@ class ProductionCrawlerOrchestrator:
     async def crawl_site_ai_enhanced(self, site: str, target_articles: int = 50) -> dict[str, Any]:
         """
         AI-enhanced crawling with NewsReader integration (0.86+ articles/second)
-        
+
         Args:
             site: Site identifier ('bbc', 'cnn', etc.)
             target_articles: Number of articles to crawl with AI analysis
-            
+
         Returns:
             Dict with crawl results, AI analysis, and performance metrics
         """
@@ -361,12 +361,12 @@ class ProductionCrawlerOrchestrator:
     async def crawl_multi_site(self, sites: list[str], mode: str = 'ultra_fast', articles_per_site: int = 50) -> list[dict[str, Any]]:
         """
         Crawl multiple sites concurrently for maximum efficiency
-        
+
         Args:
             sites: List of site identifiers
             mode: 'ultra_fast' or 'ai_enhanced'
             articles_per_site: Articles to crawl per site
-            
+
         Returns:
             List of crawl results for each site
         """

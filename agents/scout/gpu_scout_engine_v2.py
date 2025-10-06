@@ -114,7 +114,7 @@ class OptimizedNewsDataset(Dataset):
 class NextGenGPUScoutEngine:
     """
     Next-Generation GPU-Accelerated Scout Intelligence Engine
-    
+
     Features:
     - AI-first approach with specialized models
     - BERT-based news classification
@@ -129,7 +129,7 @@ class NextGenGPUScoutEngine:
     def __init__(self, enable_training: bool = False, device: str | None = None):
         """
         Initialize Next-Gen GPU Scout Engine with specialized models
-        
+
         Args:
             enable_training: Enable model training capabilities
             device: GPU device ('cuda' or 'cpu')
@@ -577,12 +577,12 @@ class NextGenGPUScoutEngine:
         """
         AI-First news content classification using specialized BERT model
         Production-ready with comprehensive error handling
-        
+
         Args:
             text: Content text to classify
             url: Optional URL for context
             use_ensemble: Use ensemble prediction for higher accuracy
-        
+
         Returns:
             Classification results with confidence scores
         """
@@ -668,11 +668,11 @@ class NextGenGPUScoutEngine:
         """
         AI-powered content quality assessment using BERT model
         Production-ready with warning suppression
-        
+
         Args:
             text: Content to assess
             url: Optional URL context
-            
+
         Returns:
             Quality assessment scores and metrics
         """
@@ -765,11 +765,11 @@ class NextGenGPUScoutEngine:
         """
         AI-powered sentiment analysis using specialized RoBERTa model
         Production-ready with comprehensive error handling
-        
+
         Args:
             text: Content to analyze for sentiment
             url: Optional URL context
-            
+
         Returns:
             Sentiment analysis results and scores
         """
@@ -864,11 +864,11 @@ class NextGenGPUScoutEngine:
         """
         AI-powered bias detection using specialized classification model
         Production-ready with comprehensive error handling
-        
+
         Args:
             text: Content to analyze for bias
             url: Optional URL context
-            
+
         Returns:
             Bias detection results and scores
         """
@@ -950,11 +950,11 @@ class NextGenGPUScoutEngine:
     def analyze_visual_content(self, image_path: str, prompt: str = "Describe this image and determine if it contains news-worthy content") -> dict[str, Any]:
         """
         AI-powered visual content analysis using local LLaVA model
-        
+
         Args:
             image_path: Path to the image file
             prompt: Analysis prompt for the model
-            
+
         Returns:
             Visual analysis results
         """
@@ -1026,12 +1026,12 @@ class NextGenGPUScoutEngine:
     def comprehensive_content_analysis(self, text: str, url: str = "", image_path: str = None) -> dict[str, Any]:
         """
         Complete AI-powered content analysis using all specialized models
-        
+
         Args:
             text: Content text to analyze
             url: Optional URL context
             image_path: Optional image for visual analysis
-            
+
         Returns:
             Comprehensive analysis results
         """
@@ -1075,7 +1075,7 @@ class NextGenGPUScoutEngine:
     def add_training_example(self, task: str, text: str, label: int | str, url: str = ""):
         """
         Add training example for continuous learning
-        
+
         Args:
             task: Training task ('news_classification', 'quality_assessment', 'sentiment_analysis', 'bias_detection')
             text: Input text
@@ -1113,7 +1113,7 @@ class NextGenGPUScoutEngine:
     def fine_tune_model(self, task: str, epochs: int = 3, learning_rate: float = 2e-5, batch_size: int = 8):
         """
         Fine-tune a specific model with collected training data
-        
+
         Args:
             task: Model to fine-tune ('news_classification', 'quality_assessment', 'bias_detection')
             epochs: Number of training epochs

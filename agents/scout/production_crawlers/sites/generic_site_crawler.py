@@ -558,7 +558,7 @@ class MultiSiteCrawler:
 
         # Flatten results for easier processing
         all_articles = []
-        for domain, articles in site_results.items():
+        for _domain, articles in site_results.items():
             all_articles.extend(articles)
 
         processing_time = time.time() - start_time

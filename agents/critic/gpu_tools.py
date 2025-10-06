@@ -17,7 +17,7 @@ Architecture:
 
 Expected Performance:
 - GPU: 30-80 articles/sec (8x improvement over CPU)
-- CPU Fallback: 4-10 articles/sec baseline  
+- CPU Fallback: 4-10 articles/sec baseline
 - Memory: 4-5GB VRAM allocation via MultiAgentGPUManager
 """
 
@@ -71,7 +71,7 @@ def log_feedback(event: str, details: dict):
 class GPUAcceleratedCritic:
     """
     GPU-accelerated critic following proven analyst patterns
-    
+
     Capabilities:
     - Content critique using DialoGPT (deprecated)-medium (355M parameters)
     - Quality assessment with GPU acceleration
@@ -265,10 +265,10 @@ class GPUAcceleratedCritic:
     def critique_content_gpu(self, articles: list[dict[str, Any]]) -> dict[str, Any]:
         """
         GPU-accelerated content critique
-        
+
         Args:
             articles: List of article dictionaries with 'content', 'title', 'url' fields
-            
+
         Returns:
             Dict with critique results and performance metrics
         """
@@ -573,17 +573,17 @@ class GPUAcceleratedCritic:
     def _detect_bias_indicators(self, content: str) -> list[str]:
         """
         DEPRECATED: Bias detection functionality moved to Scout V2 Agent
-        
+
         This method is kept for backward compatibility but should not be used.
         All bias detection is now centralized in Scout V2 Agent using specialized models.
-        
+
         Use Scout V2 endpoints:
         - POST /comprehensive_content_analysis (includes bias detection)
         - POST /detect_bias (dedicated bias detection)
-        
+
         Args:
             content: Content text (unused)
-            
+
         Returns:
             Empty list (bias detection moved to Scout V2)
         """

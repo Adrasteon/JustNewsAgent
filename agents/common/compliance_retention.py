@@ -147,7 +147,7 @@ class DataRetentionManager:
                 with open(self.config_path, encoding='utf-8') as f:
                     data = json.load(f)
                     policies = {}
-                    for key, policy_data in data.items():
+                    for _key, policy_data in data.items():
                         policy = RetentionPolicy.from_dict(policy_data)
                         policies[policy.data_type] = policy
                     return policies

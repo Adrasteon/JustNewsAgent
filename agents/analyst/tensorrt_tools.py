@@ -69,10 +69,10 @@ def log_feedback(event: str, details: dict):
 def score_sentiment(text: str) -> float | None:
     """
     Score the sentiment of a text using native TensorRT acceleration.
-    
+
     Args:
         text: The text to analyze
-        
+
     Returns:
         Sentiment score (0-1, where 1 is most positive) or None if error
     """
@@ -99,10 +99,10 @@ def score_sentiment(text: str) -> float | None:
 def score_bias(text: str) -> float | None:
     """
     Score the bias of a text using native TensorRT acceleration.
-    
+
     Args:
         text: The text to analyze
-        
+
     Returns:
         Bias score (0-1, where 1 is most biased) or None if error
     """
@@ -129,10 +129,10 @@ def score_bias(text: str) -> float | None:
 def score_sentiment_batch(texts: list[str]) -> list[float | None]:
     """
     Score sentiment for a batch of texts using native TensorRT acceleration.
-    
+
     Args:
         texts: List of texts to analyze
-        
+
     Returns:
         List of sentiment scores corresponding to input texts
     """
@@ -159,10 +159,10 @@ def score_sentiment_batch(texts: list[str]) -> list[float | None]:
 def score_bias_batch(texts: list[str]) -> list[float | None]:
     """
     Score bias for a batch of texts using native TensorRT acceleration.
-    
+
     Args:
         texts: List of texts to analyze
-        
+
     Returns:
         List of bias scores corresponding to input texts
     """
@@ -190,10 +190,10 @@ def identify_entities(text: str) -> list[str]:
     """
     Identify entities in text. Currently returns empty list as TensorRT engines
     are focused on sentiment/bias analysis. This can be expanded with NER models.
-    
+
     Args:
         text: Text to analyze for entities
-        
+
     Returns:
         List[str]: List of identified entities (currently empty)
     """
@@ -212,7 +212,7 @@ def identify_entities(text: str) -> list[str]:
 def get_engine_info() -> dict:
     """
     Get information about loaded TensorRT engines.
-    
+
     Returns:
         dict: Engine information and performance stats
     """
@@ -238,11 +238,11 @@ def get_engine_info() -> dict:
 def analyze_article(article_text: str, metadata: dict = None) -> dict:
     """
     Comprehensive article analysis using native TensorRT acceleration.
-    
+
     Args:
         article_text: The article text to analyze
         metadata: Optional metadata about the article
-        
+
     Returns:
         Analysis results dictionary
     """
@@ -289,10 +289,10 @@ def analyze_article(article_text: str, metadata: dict = None) -> dict:
 def analyze_articles_batch(texts: list[str]) -> list[dict]:
     """
     Analyze multiple articles using native TensorRT batch processing.
-    
+
     Args:
         texts: List of article texts to analyze
-        
+
     Returns:
         List[dict]: Analysis results for each article
     """

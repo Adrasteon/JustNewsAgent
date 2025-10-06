@@ -25,7 +25,7 @@ logger = get_logger(__name__)
 class TensorRTAnalyst:
     """
     TensorRT-optimized analyst with HuggingFace fallback
-    
+
     Current Implementation:
     1. Use existing GPU-accelerated HuggingFace models as baseline
     2. Add TensorRT optimization layer when available
@@ -167,7 +167,7 @@ class TensorRTAnalyst:
     def _build_tensorrt_engine(self, model_name: str, task_type: str, max_batch_size: int = 32):
         """
         Build TensorRT engine from HuggingFace model
-        
+
         Args:
             model_name: HuggingFace model identifier
             task_type: 'sentiment' or 'bias'
@@ -599,7 +599,7 @@ def score_sentiment_with_tensorrt(text: str) -> float:
 
 def score_bias_with_tensorrt(text: str) -> float:
     """
-    TensorRT-first bias scoring with HuggingFace fallback  
+    TensorRT-first bias scoring with HuggingFace fallback
     Target: 2-4x performance improvement (300-600 articles/sec)
     """
     analyst = get_tensorrt_analyst()

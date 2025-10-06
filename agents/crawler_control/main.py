@@ -257,7 +257,7 @@ async def get_crawl_status_endpoint(call: ToolCall):
 
         # Get details for each job
         job_details = {}
-        for job_id, status in jobs.items():
+        for job_id, _status in jobs.items():
             try:
                 detail_response = requests.get(f"{CRAWLER_AGENT_URL}/job_status/{job_id}")
                 detail_response.raise_for_status()
@@ -438,7 +438,7 @@ async def api_get_crawl_status():
 
         # Get details for each job
         job_details = {}
-        for job_id, status in jobs.items():
+        for job_id, _status in jobs.items():
             try:
                 detail_response = requests.get(f"{CRAWLER_AGENT_URL}/job_status/{job_id}")
                 detail_response.raise_for_status()

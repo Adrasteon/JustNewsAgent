@@ -474,11 +474,11 @@ async def enhanced_deep_crawl_site(*args, **kwargs):
     Enhanced deep crawl using proven BestFirstCrawlingStrategy.
     Based on comprehensive testing that showed 13 pages + 542k chars for Hacker News.
     Integrates Scout intelligence for content quality assessment.
-    
+
     Parameters:
     - url (str): Target website URL
     - max_depth (int): Maximum crawl depth (default: 4, user requested)
-    - max_pages (int): Maximum pages to crawl (default: 100, user requested) 
+    - max_pages (int): Maximum pages to crawl (default: 100, user requested)
     - word_count_threshold (int): Minimum words per page (default: 500, user requested)
     - quality_threshold (float): Scout intelligence quality threshold (default: 0.6)
     - analyze_content (bool): Apply Scout intelligence analysis (default: True)
@@ -1050,11 +1050,11 @@ async def production_crawl_ultra_fast(site: str, target_articles: int = 100):
     """
     Ultra-fast production crawling for maximum throughput (8+ articles/second)
     Now calls the separate Crawler agent via MCP Bus.
-    
+
     Args:
         site: News site identifier ('bbc', 'cnn', 'reuters', etc.)
         target_articles: Number of articles to crawl
-        
+
     Returns:
         Dict with crawl results and performance metrics
     """
@@ -1124,7 +1124,7 @@ async def production_crawl_ai_enhanced(site: str, target_articles: int = 100):
     """
     AI-enhanced production crawling for full article extraction and NewsReader analysis.
     Now calls the separate Crawler agent via MCP Bus.
-    
+
     Args:
         site: News site identifier (e.g., 'bbc')
         target_articles: Number of articles to crawl

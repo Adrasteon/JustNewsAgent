@@ -1507,7 +1507,7 @@ async def get_crawl_status():
 
         # Get details for each job
         job_details = {}
-        for job_id, status in jobs.items():
+        for job_id, _status in jobs.items():
             try:
                 detail_payload = {
                     "agent": "crawler",

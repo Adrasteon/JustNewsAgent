@@ -5,7 +5,7 @@ IMPORTANT: Bias detection functionality has been centralized in Scout V2 Agent
 for consistency and improved performance. Critic Agent now focuses on:
 
 - Editorial logic and argument structure analysis
-- Content synthesis critique 
+- Content synthesis critique
 - Neutrality assessment and factual consistency
 - Logical fallacy detection (future enhancement)
 

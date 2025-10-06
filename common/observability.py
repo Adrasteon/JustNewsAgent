@@ -19,7 +19,7 @@ def get_logger(name: str) -> logging.Logger:
 
     Args:
         name: Logger name (typically __name__)
-        
+
     Returns:
         Configured logger instance
     """
@@ -65,7 +65,7 @@ def setup_logging(level: int = logging.INFO, format_string: str | None = None) -
     Setup basic logging configuration for the application.
     This function is now a compatibility wrapper and the main configuration
     is handled by get_logger to ensure file-based logging.
-    
+
     Args:
         level: Logging level (default: INFO)
         format_string: Custom format string (optional)

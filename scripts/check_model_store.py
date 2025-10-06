@@ -75,7 +75,7 @@ def audit():
 
         # Extra models on disk for this agent
         extras = []
-        allowed = set([m for m in models] + [m.split('/')[-1] for m in models])
+        allowed = set(list(models) + [m.split('/')[-1] for m in models])
         for dm in disk_models:
             if dm not in allowed:
                 extras.append(dm)

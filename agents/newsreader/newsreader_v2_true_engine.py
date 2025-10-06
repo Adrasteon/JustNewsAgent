@@ -131,7 +131,7 @@ class NewsReaderV2Config:
 class NewsReaderV2Engine:
     """
     NewsReader V2 Engine - True Multi-Modal Vision Processing
-    
+
     CORE: Screenshot-based webpage processing using LLaVA
     Features:
     - Playwright screenshot capture with optimizations
@@ -412,13 +412,13 @@ class NewsReaderV2Engine:
 
     def _load_clip_model(self):
         """CLIP model DISABLED - Testing redundancy with LLaVA vision analysis
-        
+
         ANALYSIS: CLIP appears redundant because:
         1. Only returns hardcoded confidence (0.9) and image feature dimensions
         2. Results stored as unused metadata like OCR
         3. LLaVA provides superior vision understanding
         4. Saves ~1-2GB memory without functionality loss
-        
+
         TODO: Remove CLIP completely after validation testing
         """
         logger.info("🔧 CLIP model disabled - using LLaVA for vision analysis (redundancy test)")
@@ -427,13 +427,13 @@ class NewsReaderV2Engine:
 
     def _load_ocr_engine(self):
         """OCR engine DISABLED - Testing redundancy with LLaVA text extraction
-        
+
         ANALYSIS: OCR appears redundant because:
         1. Primary content extraction uses LLaVA exclusively
         2. OCR results only stored as unused metadata in model_outputs
         3. LLaVA provides superior contextual text understanding
         4. Saves 200-500MB memory without functionality loss
-        
+
         TODO: Remove OCR completely after validation testing confirms no impact
         """
         logger.info("🔧 OCR engine disabled - using LLaVA for text extraction (redundancy test)")
@@ -441,10 +441,10 @@ class NewsReaderV2Engine:
 
     def _load_layout_parser(self):
         """Layout Parser DEPRECATED - LLaVA provides superior layout understanding
-        
+
         DEPRECATED: Layout Parser caused GPU memory crashes and is redundant
         - LLaVA natively understands document structure and layout
-        - Layout Parser consumed 500MB-1GB GPU memory unnecessarily  
+        - Layout Parser consumed 500MB-1GB GPU memory unnecessarily
         - LLaVA provides contextual layout analysis in natural language
         - Eliminates complex computer vision pipeline overhead
         """
@@ -476,7 +476,7 @@ class NewsReaderV2Engine:
     async def capture_webpage_screenshot(self, url: str, screenshot_path: str = "page_v2.png") -> str:
         """
         CORE FUNCTIONALITY: Capture screenshot of webpage for LLaVA analysis
-        
+
         This is the key differentiator - taking screenshots and using LLaVA's
         vision capabilities to understand webpage content
         """
@@ -522,7 +522,7 @@ class NewsReaderV2Engine:
     def analyze_screenshot_with_llava(self, screenshot_path: str, custom_prompt: str | None = None) -> dict[str, Any]:
         """
         CORE FUNCTIONALITY: Analyze screenshot using LLaVA vision-language model
-        
+
         This is where the magic happens - LLaVA reads the screenshot like a human
         and extracts structured information (headlines, articles, etc.)
         """
@@ -538,17 +538,17 @@ class NewsReaderV2Engine:
         # Default news extraction prompt
         if not custom_prompt:
             custom_prompt = """
-            Analyze this webpage screenshot for news content. 
-            
+            Analyze this webpage screenshot for news content.
+
             Please extract:
             1. The main headline (if visible)
             2. The main news article content (if visible)
             3. Any other relevant news text
-            
+
             Format your response as:
             HEADLINE: [extracted headline]
             ARTICLE: [extracted article content]
-            
+
             If no clear news content is visible, describe what you see.
             """
 
@@ -694,7 +694,7 @@ class NewsReaderV2Engine:
     ) -> ProcessingResult:
         """
         MAIN V2 PIPELINE: Screenshot → LLaVA Analysis → Enhanced Processing
-        
+
         This is the core NewsReader V2 workflow:
         1. Capture webpage screenshot
         2. Analyze with LLaVA vision model
@@ -797,7 +797,7 @@ class NewsReaderV2Engine:
             extracted_text = []
             confidence_scores = []
 
-            for (bbox, text, confidence) in results:
+            for (_bbox, text, confidence) in results:
                 extracted_text.append(text)
                 confidence_scores.append(confidence)
 

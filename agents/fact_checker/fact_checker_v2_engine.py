@@ -7,7 +7,7 @@ AI Models:
             if pipeline_fn is None:
                 self.pipelines['fact_verification'] = None
                 return
-                
+
             device = 0 if (self.device.type == "cuda") else -1
             self.pipelines['fact_verification'] = pipeline_fn(
                 "text-classification",
@@ -18,7 +18,7 @@ AI Models:
                 truncation=True,  # Add truncation for long inputs
                 max_length=512  # Limit input length
             )fication (factual/questionable classification)
-2. RoBERTa-base: Source credibility assessment (reliability scoring)  
+2. RoBERTa-base: Source credibility assessment (reliability scoring)
 3. SentenceTransformers: Evidence retrieval (semantic search)
 4. spaCy NER: Claim extraction (verifiable claims identification)
 

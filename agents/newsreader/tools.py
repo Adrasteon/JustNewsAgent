@@ -664,7 +664,7 @@ async def analyze_content_structure(
 ) -> dict[str, Any]:
     """
     Analyze content structure and organization
-    
+
     V2 Features:
     - Advanced structural analysis
     - Content hierarchy detection
@@ -807,7 +807,7 @@ async def extract_multimedia_content(
 ) -> dict[str, Any]:
     """
     Extract multimedia content from various sources
-    
+
     V2 Features:
     - Multi-format support (images, video, audio, documents)
     - Advanced content recognition
@@ -910,7 +910,7 @@ def _extract_metadata_content(content: Any) -> dict[str, Any]:
 async def extract_news_from_url(url: str, screenshot_path: str | None = None) -> dict[str, Any]:
     """
     Legacy compatibility function - enhanced with TRUE V2 screenshot-based processing
-    
+
     This function now uses the REAL LLaVA screenshot analysis instead of simulation
     """
 
@@ -965,7 +965,7 @@ async def extract_news_from_url(url: str, screenshot_path: str | None = None) ->
 async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.png") -> dict[str, Any]:
     """
     Legacy compatibility function for screenshot capture
-    
+
     This function now uses the REAL Playwright screenshot system
     """
 
@@ -1008,7 +1008,7 @@ async def capture_webpage_screenshot(url: str, output_path: str = "page_llava.pn
 def analyze_image_with_llava(image_path: str) -> dict[str, Any]:
     """
     Legacy compatibility function - enhanced with TRUE V2 LLaVA processing
-    
+
     This function now uses the REAL LLaVA analysis instead of simulation
     """
 
@@ -1148,18 +1148,18 @@ async def test_newsreader_v2():
     # Test V2 capabilities
     test_content = """
     Breaking News: Major Development in Technology Sector
-    
+
     In a significant announcement today, leading technology companies
     reported breakthrough innovations in artificial intelligence and
     machine learning applications. The developments are expected to
     transform multiple industries including healthcare, finance,
     and education.
-    
+
     Key highlights include:
     - Advanced neural network architectures
     - Improved processing efficiency
     - Enhanced user experience capabilities
-    
+
     Industry experts predict this will accelerate digital transformation
     across various sectors in the coming years.
     """

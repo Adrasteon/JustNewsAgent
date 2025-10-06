@@ -172,10 +172,10 @@ class Nucleoid:
     def run(self, statement: str):
         """
         Execute a Nucleoid statement.
-        
+
         Args:
             statement: The statement to execute
-            
+
         Returns:
             The result of the statement execution
         """

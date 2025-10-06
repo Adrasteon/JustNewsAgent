@@ -462,7 +462,7 @@ def main(argv: list[str] | None = None) -> int:
     summary["dry_run"] = args.dry_run
     summary["nvml_requested"] = args.enable_nvml
     summary["env_injected_count"] = len(injected_env)
-    summary["env_injected_keys"] = sorted(list(injected_env.keys()))[:40]  # trim for brevity
+    summary["env_injected_keys"] = sorted(injected_env.keys())[:40]  # trim for brevity
     if injected_env and len(injected_env) > 40:
         summary["env_injected_truncated"] = True
     if 'missing_crit' in locals() and missing_crit:
@@ -496,7 +496,7 @@ def run_crawl(args: argparse.Namespace) -> dict[str, Any]:
     Spawns a fresh orchestrator instance (SAFE_MODE=false) to ensure it is
     available during the crawl since earlier phase process was terminated.
     """
-    phase_cfg = {"SAFE_MODE": "false", "ENABLE_NVML": str(args.enable_nvml).lower()}
+    {"SAFE_MODE": "false", "ENABLE_NVML": str(args.enable_nvml).lower()}
     env = os.environ.copy()
     env["SAFE_MODE"] = "FALSE"
     env["GPU_ORCHESTRATOR_PORT"] = str(ORCH_PORT)

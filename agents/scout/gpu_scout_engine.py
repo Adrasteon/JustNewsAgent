@@ -23,10 +23,10 @@ logger = get_logger(__name__)
 class GPUScoutInferenceEngine:
     """
     Production-ready Scout agent with LLaMA-3-8B intelligence for content pre-filtering
-    
+
     Features:
     - News vs non-news classification
-    - Content quality assessment  
+    - Content quality assessment
     - Bias detection and flagging
     - Source credibility scoring
     - Batch processing for efficiency

@@ -150,7 +150,7 @@ def ensure_spacy_model_loaded():
 def log_feedback(event_or_details, details=None) -> None:
     """
     Production-standard feedback logging with structured format.
-    
+
     Args:
         event_or_details: Either event name (str) or details dict (for backward compatibility)
         details: Event details and metadata (optional if first arg is details)
@@ -181,7 +181,7 @@ def log_feedback(event_or_details, details=None) -> None:
 def get_spacy_model():
     """
     Load spaCy model with production error handling.
-    
+
     Returns:
         spaCy Language model or None if unavailable
     """
@@ -205,7 +205,7 @@ def get_mistral_model():
 def get_ner_pipeline():
     """
     Load transformer-based NER pipeline as fallback.
-    
+
     Returns:
         HuggingFace NER pipeline or None if unavailable
     """
@@ -241,10 +241,10 @@ def get_ner_pipeline():
 def _extract_entities_patterns(text: str) -> list[dict[str, Any]]:
     """
     Pattern-based entity extraction as last resort fallback.
-    
+
     Args:
         text: Input text
-        
+
     Returns:
         List of entity dictionaries
     """
@@ -272,10 +272,10 @@ def _extract_entities_patterns(text: str) -> list[dict[str, Any]]:
 def _clean_entities(entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Clean and deduplicate entity list.
-    
+
     Args:
         entities: Raw entity list
-        
+
     Returns:
         Cleaned entity list
     """
@@ -300,10 +300,10 @@ def _clean_entities(entities: list[dict[str, Any]]) -> list[dict[str, Any]]:
 def identify_entities(text: str) -> dict[str, Any]:
     """
     Advanced entity extraction using spaCy NER with transformer fallback.
-    
+
     Args:
         text: Input text for entity extraction
-        
+
     Returns:
         Dictionary containing entity extraction results
     """
@@ -391,10 +391,10 @@ def identify_entities(text: str) -> dict[str, Any]:
 def analyze_text_statistics(text: str) -> dict[str, Any]:
     """
     Comprehensive text statistical analysis for news content.
-    
+
     Args:
         text: Input text for analysis
-        
+
     Returns:
         Dictionary containing statistical metrics
     """
@@ -469,11 +469,11 @@ def analyze_text_statistics(text: str) -> dict[str, Any]:
 def extract_key_metrics(text: str, url: str = None) -> dict[str, Any]:
     """
     Extract key numerical and statistical metrics from news text.
-    
+
     Args:
         text (str): Article text to analyze
         url (str, optional): Article URL for context
-        
+
     Returns:
         Dict containing extracted metrics
     """
@@ -516,11 +516,11 @@ def extract_key_metrics(text: str, url: str = None) -> dict[str, Any]:
 def analyze_content_trends(texts: list[str], urls: list[str] = None) -> dict[str, Any]:
     """
     Analyze trends across multiple content pieces.
-    
+
     Args:
         texts (List[str]): List of article texts to analyze
         urls (List[str], optional): Corresponding URLs for context
-        
+
     Returns:
         Dict containing trend analysis
     """
@@ -631,7 +631,7 @@ def _calculate_vocabulary_diversity(words: list[str]) -> float:
     if not words:
         return 0.0
 
-    unique_words = set(word.lower().strip('.,!?;:"()[]') for word in words)
+    unique_words = {word.lower().strip('.,!?;:"()[]') for word in words}
     return round(len(unique_words) / len(words), 3) if words else 0.0
 
 def _extract_financial_metrics(text: str) -> list[dict[str, Any]]:
@@ -805,10 +805,10 @@ def _analyze_temporal_patterns(texts: list[str]) -> dict[str, Any]:
 def _heuristic_sentiment_analysis(text: str) -> dict[str, Any]:
     """
     Heuristic sentiment analysis fallback when AI models are not available.
-    
+
     Args:
         text: Text to analyze
-        
+
     Returns:
         Sentiment analysis results
     """
@@ -880,10 +880,10 @@ def _heuristic_sentiment_analysis(text: str) -> dict[str, Any]:
 def _heuristic_bias_detection(text: str) -> dict[str, Any]:
     """
     Heuristic bias detection fallback when AI models are not available.
-    
+
     Args:
         text: Text to analyze for bias
-        
+
     Returns:
         Bias detection results
     """
@@ -945,11 +945,11 @@ def _heuristic_bias_detection(text: str) -> dict[str, Any]:
 def _calculate_combined_reliability(sentiment_result: dict, bias_result: dict) -> float:
     """
     Calculate combined reliability score from sentiment and bias analysis.
-    
+
     Args:
         sentiment_result: Results from sentiment analysis
         bias_result: Results from bias detection
-        
+
     Returns:
         Combined reliability score (0-1)
     """
@@ -975,11 +975,11 @@ def _calculate_combined_reliability(sentiment_result: dict, bias_result: dict) -
 def _calculate_content_quality(sentiment_result: dict, bias_result: dict) -> float:
     """
     Calculate content quality score based on sentiment and bias analysis.
-    
+
     Args:
         sentiment_result: Results from sentiment analysis
         bias_result: Results from bias detection
-        
+
     Returns:
         Content quality score (0-1)
     """
@@ -1001,11 +1001,11 @@ def _calculate_content_quality(sentiment_result: dict, bias_result: dict) -> flo
 def _generate_analysis_recommendations(sentiment_result: dict, bias_result: dict) -> list[str]:
     """
     Generate recommendations based on sentiment and bias analysis.
-    
+
     Args:
         sentiment_result: Results from sentiment analysis
         bias_result: Results from bias detection
-        
+
     Returns:
         List of recommendation strings
     """
@@ -1039,10 +1039,10 @@ def analyze_sentiment(text: str) -> dict[str, Any]:
     """
     Analyze sentiment of text content using local GPU-accelerated models.
     This function provides sentiment analysis capabilities to the Analyst Agent.
-    
+
     Args:
         text: Text content to analyze for sentiment
-        
+
     Returns:
         Dictionary containing sentiment analysis results
     """
@@ -1114,10 +1114,10 @@ def detect_bias(text: str) -> dict[str, Any]:
     """
     Detect bias in text content using local GPU-accelerated models.
     This function provides bias detection capabilities to the Analyst Agent.
-    
+
     Args:
         text: Text content to analyze for bias
-        
+
     Returns:
         Dictionary containing bias detection results
     """
@@ -1185,10 +1185,10 @@ def analyze_sentiment_and_bias(text: str) -> dict[str, Any]:
     """
     Comprehensive analysis combining sentiment and bias detection.
     This function provides combined analysis capabilities to the Analyst Agent.
-    
+
     Args:
         text: Text content to analyze
-        
+
     Returns:
         Dictionary containing combined sentiment and bias analysis results
     """
@@ -1232,10 +1232,10 @@ def analyze_sentiment_and_bias(text: str) -> dict[str, Any]:
 def score_bias(text: str) -> dict[str, Any]:
     """
     Legacy bias scoring function for backward compatibility.
-    
+
     Args:
         text: Text to score for bias
-        
+
     Returns:
         Bias score results
     """
@@ -1244,10 +1244,10 @@ def score_bias(text: str) -> dict[str, Any]:
 def score_sentiment(text: str) -> dict[str, Any]:
     """
     Legacy sentiment scoring function for backward compatibility.
-    
+
     Args:
         text: Text to score for sentiment
-        
+
     Returns:
         Sentiment score results
     """

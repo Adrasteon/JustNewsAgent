@@ -100,7 +100,7 @@ class EntityType(graphene.ObjectType):
         relationships = []
 
         # Get outgoing relationships
-        for source, target, edge_type, edge_data in kg_manager.kg.graph.edges(self.entity_id, keys=True, data=True):
+        for _source, target, edge_type, edge_data in kg_manager.kg.graph.edges(self.entity_id, keys=True, data=True):
             if relationship_type and edge_type != relationship_type:
                 continue
             if edge_data.get("strength", 0) < min_strength:

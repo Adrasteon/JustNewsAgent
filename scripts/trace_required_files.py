@@ -61,7 +61,7 @@ def module_name_to_paths(modname: str) -> list[Path]:
 def trace():
     seeds = find_seed_files()
     print('Seeds:', len(seeds))
-    required: set[Path] = set(Path(s) for s in seeds)
+    required: set[Path] = {Path(s) for s in seeds}
     queue = list(required)
     seen_modules = set()
 

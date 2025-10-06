@@ -34,7 +34,7 @@ logger = get_logger(__name__)
 class GPUAcceleratedFactChecker:
     """
     GPU-accelerated fact checking using GPT-2 Medium (355M parameters) - Modern replacement for deprecated DialoGPT
-    
+
     Based on proven GPUAcceleratedAnalyst pattern:
     - Professional GPU memory management (4GB VRAM allocation)
     - Batch processing for optimal throughput
@@ -157,7 +157,7 @@ class GPUAcceleratedFactChecker:
 
                 # Extract results from zero-shot classification format
                 if isinstance(result, dict) and 'labels' in result and 'scores' in result:
-                    scores = {label: score for label, score in zip(result['labels'], result['scores'], strict=False)}
+                    scores = dict(zip(result['labels'], result['scores'], strict=False))
                     is_news = result['labels'][0] == "news article" and result['scores'][0] > 0.5
                     confidence = result['scores'][0]
                 else:

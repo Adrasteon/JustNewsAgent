@@ -69,7 +69,7 @@ class UltraFastBBCCrawler:
                 '.banner-actions-button', '.cookie-banner button',
                 '[class*="cookie"] button', '[class*="consent"] button'
             ];
-            
+
             // Dismiss/close patterns - comprehensive
             const dismissSelectors = [
                 'button:contains("Not now")', 'button:contains("Skip")',
@@ -80,7 +80,7 @@ class UltraFastBBCCrawler:
                 '[data-testid="close"]', '[data-testid="dismiss"]',
                 '.close', '.dismiss', '[class*="close"]'
             ];
-            
+
             // Try all selectors immediately with fallback methods
             const trySelector = (selector) => {
                 try {
@@ -102,25 +102,25 @@ class UltraFastBBCCrawler:
                     }
                 } catch(e) {}
             };
-            
+
             // Execute all dismissal patterns
             [...cookieSelectors, ...dismissSelectors].forEach(trySelector);
-            
+
             // Remove common overlay containers aggressively
-            ['.modal', '.overlay', '.popup', '.banner', '.consent', 
+            ['.modal', '.overlay', '.popup', '.banner', '.consent',
              '.cookie-banner', '.privacy-banner', '.gdpr-banner',
              '[class*="modal"]', '[class*="overlay"]', '[class*="popup"]'
             ].forEach(cls => {
                 document.querySelectorAll(cls).forEach(el => {
-                    if (el.style.zIndex > 100 || 
-                        el.style.position === 'fixed' || 
+                    if (el.style.zIndex > 100 ||
+                        el.style.position === 'fixed' ||
                         el.style.position === 'absolute') {
                         el.style.display = 'none';
                         el.remove();
                     }
                 });
             });
-            
+
             // Final cleanup: hide high z-index elements that might be modals
             document.querySelectorAll('*').forEach(el => {
                 const zIndex = parseInt(window.getComputedStyle(el).zIndex);

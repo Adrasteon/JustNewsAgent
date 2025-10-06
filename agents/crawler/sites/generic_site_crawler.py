@@ -342,7 +342,7 @@ class GenericSiteCrawler:
         try:
             if not self.robots_checker.check_robots_txt(url):
                 logger.info(f"⚠️ Robots.txt disallows crawling: {url}")
-                processing_time = time.time() - start_time
+                time.time() - start_time
                 # _record_scout_performance({  # Commented out - Scout-specific performance tracking
                 #     "agent_name": "scout",
                 #     "operation": "process_single_url",
@@ -394,7 +394,7 @@ class GenericSiteCrawler:
                             self.site_config.name + " Article"
                         )
                         if len(clean_text) > 80 and len(title) > 5:
-                            processing_time = time.time() - start_time
+                            time.time() - start_time
                             # _record_scout_performance({  # Commented out - Scout-specific performance tracking
                             #     "agent_name": "scout",
                             #     "operation": "process_single_url",
@@ -431,7 +431,7 @@ class GenericSiteCrawler:
                 await page.goto(url, wait_until="domcontentloaded", timeout=12000)
                 await ModalDismisser.dismiss_modals(page)
                 await asyncio.sleep(1.5)
-                content_data = await self.extract_content(page)
+                await self.extract_content(page)
                 await context.close()
                 context = None  # Mark as closed
                 await asyncio.sleep(random.uniform(1.0, 3.0))
@@ -445,7 +445,7 @@ class GenericSiteCrawler:
                         logger.debug(f"Error closing context for {url}: {e}")
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to process {url}: {e}")
-            processing_time = time.time() - start_time
+            time.time() - start_time
             # _record_scout_performance({  # Commented out - Scout-specific performance tracking
             #     "agent_name": "scout",
             #     "operation": "process_single_url",
@@ -635,7 +635,7 @@ class MultiSiteCrawler:
 
         # Flatten results for easier processing
         all_articles = []
-        for domain, articles in site_results.items():
+        for _domain, articles in site_results.items():
             all_articles.extend(articles)
 
         processing_time = time.time() - start_time

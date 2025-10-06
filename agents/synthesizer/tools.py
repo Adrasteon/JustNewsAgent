@@ -80,10 +80,10 @@ except ImportError as e:
 def synthesize_news_articles_gpu(articles: list[dict[str, Any]]) -> dict[str, Any]:
     """
     GPU-accelerated news article synthesis with fallback to CPU
-    
+
     Args:
         articles: List of article dictionaries to synthesize
-    
+
     Returns:
         Dict with synthesis results
     """
@@ -110,7 +110,7 @@ def synthesize_news_articles_gpu(articles: list[dict[str, Any]]) -> dict[str, An
 def get_synthesizer_performance() -> dict[str, Any]:
     """
     Get synthesizer performance statistics with fallback
-    
+
     Returns:
         Dict with performance statistics
     """
@@ -414,7 +414,7 @@ def cluster_articles(article_texts: list[str], n_clusters: int = 2) -> dict[str,
             logger.error(f"Error in cluster_articles: {e}")
             log_feedback("cluster_articles_error", {"error": str(e), "method": method})
             result = {
-                "clusters": [[i for i in range(len(article_texts))]],  # Fallback: all in one cluster
+                "clusters": [list(range(len(article_texts)))],  # Fallback: all in one cluster
                 "cluster_labels": ["fallback_cluster"],
                 "n_clusters": 1,
                 "articles_processed": len(article_texts),
@@ -573,11 +573,11 @@ def aggregate_cluster(article_texts: list[str]) -> dict[str, Any]:
 def synthesize_content_v2(article_texts: list[str], synthesis_type: str = "aggregate") -> dict[str, Any]:
     """
     V2 Content synthesis with training integration using 5-model architecture
-    
+
     Args:
         article_texts: List of article texts to synthesize
         synthesis_type: Type of synthesis ('aggregate', 'summarize', 'neutralize', 'refine')
-    
+
     Returns:
         Dict with synthesized content and metadata
     """
@@ -675,11 +675,11 @@ def synthesize_content_v2(article_texts: list[str], synthesis_type: str = "aggre
 def cluster_and_synthesize_v2(article_texts: list[str], n_clusters: int = 2) -> dict[str, Any]:
     """
     V2 Advanced clustering and synthesis with training integration
-    
+
     Args:
         article_texts: List of article texts to cluster and synthesize
         n_clusters: Number of clusters to create
-    
+
     Returns:
         Dict with clustered and synthesized content
     """
@@ -746,12 +746,12 @@ def cluster_and_synthesize_v2(article_texts: list[str], n_clusters: int = 2) -> 
 def add_synthesis_correction(original_input: str, expected_output: str, synthesis_type: str = "aggregate") -> dict[str, Any]:
     """
     Add user correction for synthesis training
-    
+
     Args:
         original_input: Original input text
-        expected_output: Expected synthesis output  
+        expected_output: Expected synthesis output
         synthesis_type: Type of synthesis task
-    
+
     Returns:
         Dict with correction status
     """
@@ -782,19 +782,19 @@ def add_synthesis_correction(original_input: str, expected_output: str, synthesi
 def synthesize_content_v3(article_texts: list[str], context: str = "news analysis") -> dict[str, Any]:
     """
     V3 Production content synthesis with training integration using 4-model architecture
-    
+
     Features:
     - BERTopic clustering with proper UMAP parameters
-    - BART summarization with minimum text validation  
+    - BART summarization with minimum text validation
     - FLAN-T5 neutralization and refinement (DialoGPT (deprecated) replacement)
     - SentenceTransformers embeddings
     - Training system integration with feedback collection
     - Comprehensive error handling and fallbacks
-    
+
     Args:
         article_texts: List of article texts to synthesize
         context: Context for synthesis (default: "news analysis")
-    
+
     Returns:
         Dict with synthesis results and metadata
     """
@@ -819,7 +819,7 @@ def synthesize_content_v3(article_texts: list[str], context: str = "news analysi
             aggregated = engine.aggregate_cluster_content(article_texts)
             result = {
                 "synthesis": aggregated.get("best_result", ""),
-                "clusters": [[i for i in range(len(article_texts))]],
+                "clusters": [list(range(len(article_texts)))],
                 "n_clusters": 1,
                 "articles_processed": len(article_texts),
                 "success": True,
@@ -880,19 +880,19 @@ def synthesize_content_v3(article_texts: list[str], context: str = "news analysi
 def cluster_and_synthesize_v3(article_texts: list[str], max_clusters: int = 5, context: str = "news analysis") -> dict[str, Any]:
     """
     V3 Production advanced clustering and synthesis with training integration
-    
+
     Features:
     - Advanced BERTopic clustering with proper UMAP configuration
     - Per-cluster BART summarization
     - FLAN-T5 cross-cluster synthesis and refinement
     - Training feedback collection
     - Robust error handling with V2 fallback
-    
+
     Args:
         article_texts: List of article texts to cluster and synthesize
         max_clusters: Maximum number of clusters to create
         context: Context for synthesis
-    
+
     Returns:
         Dict with clustering results and synthesized content
     """
@@ -915,7 +915,7 @@ def cluster_and_synthesize_v3(article_texts: list[str], max_clusters: int = 5, c
             logger.warning("V3 clustering failed, using fallback approach")
             # Fallback: treat all as one cluster
             result = {
-                "clusters": [[i for i in range(len(article_texts))]],
+                "clusters": [list(range(len(article_texts)))],
                 "n_clusters": 1,
                 "cluster_labels": ["general"] * len(article_texts),
                 "synthesis": "",
@@ -928,7 +928,7 @@ def cluster_and_synthesize_v3(article_texts: list[str], max_clusters: int = 5, c
 
         # Step 2: Synthesize content for each cluster
         cluster_syntheses = []
-        clusters = result.get('clusters', [[i for i in range(len(article_texts))]])
+        clusters = result.get('clusters', [list(range(len(article_texts)))])
 
         for i, cluster_indices in enumerate(clusters):
             if not cluster_indices:
@@ -1018,12 +1018,12 @@ def cluster_and_synthesize_v3(article_texts: list[str], max_clusters: int = 5, c
 def add_synthesis_correction_v3(original_input: str, expected_output: str, synthesis_type: str = "aggregate") -> dict[str, Any]:
     """
     Add user correction for V3 synthesis training
-    
+
     Args:
         original_input: Original input text
-        expected_output: Expected synthesis output  
+        expected_output: Expected synthesis output
         synthesis_type: Type of synthesis task
-    
+
     Returns:
         Dict with correction status
     """
@@ -1051,7 +1051,7 @@ def add_synthesis_correction_v3(original_input: str, expected_output: str, synth
 def get_synthesizer_status() -> dict[str, Any]:
     """
     Get comprehensive status of both V2 and V3 synthesizer engines
-    
+
     Returns:
         Dict with status of all available engines
     """

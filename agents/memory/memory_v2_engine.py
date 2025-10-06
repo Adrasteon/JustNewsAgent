@@ -193,7 +193,7 @@ class MemoryV2Config:
 class MemoryV2Engine:
     """
     Advanced 5-Component Memory Engine for Semantic Storage and Intelligent Retrieval
-    
+
     Capabilities:
     - Semantic content understanding with BERT
     - High-quality embeddings with SentenceTransformer
@@ -668,7 +668,7 @@ class MemoryV2Engine:
 
                 # Store memory item
                 cursor.execute('''
-                    INSERT OR REPLACE INTO memory_items 
+                    INSERT OR REPLACE INTO memory_items
                     (id, content, content_type, metadata, timestamp, tags, embedding_hash)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
@@ -829,7 +829,7 @@ class MemoryV2Engine:
                 where_clause = " AND ".join(conditions) if conditions else "1=1"
 
                 cursor.execute(f'''
-                    SELECT * FROM memory_items 
+                    SELECT * FROM memory_items
                     WHERE {where_clause}
                     ORDER BY timestamp DESC
                     LIMIT ?
@@ -973,7 +973,7 @@ class MemoryV2Engine:
 
             # Select diverse results (one from each cluster)
             cluster_representatives = {}
-            for i, (result, label) in enumerate(zip(results, cluster_labels, strict=False)):
+            for _i, (result, label) in enumerate(zip(results, cluster_labels, strict=False)):
                 if label not in cluster_representatives or result.score > cluster_representatives[label].score:
                     cluster_representatives[label] = result
                     result.explanation += f" (cluster {label})"
@@ -1005,8 +1005,8 @@ class MemoryV2Engine:
                 stats["total_items"] = cursor.fetchone()["count"]
 
                 cursor.execute('''
-                    SELECT content_type, COUNT(*) as count 
-                    FROM memory_items 
+                    SELECT content_type, COUNT(*) as count
+                    FROM memory_items
                     GROUP BY content_type
                 ''')
 
@@ -1046,7 +1046,7 @@ class MemoryV2Engine:
             if self.sqlite_conn is not None:
                 cursor = self.sqlite_conn.cursor()
                 cursor.execute('''
-                    DELETE FROM memory_items 
+                    DELETE FROM memory_items
                     WHERE timestamp < ?
                 ''', (cutoff_date.isoformat(),))
 
@@ -1055,7 +1055,7 @@ class MemoryV2Engine:
 
                 # Clean up orphaned embeddings
                 cursor.execute('''
-                    DELETE FROM embeddings 
+                    DELETE FROM embeddings
                     WHERE hash NOT IN (SELECT embedding_hash FROM memory_items)
                 ''')
 
@@ -1111,7 +1111,7 @@ class MemoryV2Engine:
         query_embedding = self.generate_embedding(query)
 
         # Search in memory cache
-        for item_id, memory_item in self.memory_cache.items():
+        for _item_id, memory_item in self.memory_cache.items():
             if content_type is None or memory_item.content_type == content_type:
                 item_embedding = memory_item.embedding
                 if item_embedding is None:
@@ -1156,7 +1156,7 @@ class MemoryV2Engine:
                 self.sqlite_conn.close()
 
             # Clean up models
-            for model_name, model in self.models.items():
+            for _model_name, model in self.models.items():
                 if model is not None and hasattr(model, 'cpu'):
                     model.cpu()
                     del model

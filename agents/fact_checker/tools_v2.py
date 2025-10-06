@@ -4,7 +4,7 @@ Specialized fact verification with 5 AI models matching Scout V2 standard
 
 AI Models:
 1. DistilBERT-base: Fact verification (factual/questionable classification)
-2. RoBERTa-base: Source credibility assessment (reliability scoring)  
+2. RoBERTa-base: Source credibility assessment (reliability scoring)
 3. BERT-large: Contradiction detection (logical consistency)
 4. SentenceTransformers: Evidence retrieval (semantic search)
 5. spaCy NER: Claim extraction (verifiable claims identification)
@@ -68,12 +68,12 @@ def log_feedback(event: str, details: dict):
 def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
     """
     V2 Fact Verification using 5 specialized AI models
-    
+
     Args:
         claim: The factual claim to verify
         context: Additional context for verification
         source_url: URL of the source (for credibility assessment)
-        
+
     Returns:
         Comprehensive fact-check analysis with verification scores
     """
@@ -123,12 +123,12 @@ def verify_claim(claim: str, context: str = "", source_url: str = "") -> dict:
 def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: dict | None = None) -> dict:
     """
     V2 Comprehensive Fact-Checking using all 5 AI models
-    
+
     Args:
         article_text: Full article text to fact-check
         source_url: URL of the article source
         metadata: Additional article metadata
-        
+
     Returns:
         Complete fact-checking analysis with multiple model outputs
     """
@@ -168,10 +168,10 @@ def comprehensive_fact_check(article_text: str, source_url: str = "", metadata: 
 def detect_contradictions(text_passages: list[str]) -> dict:
     """
     V2 Contradiction Detection using BERT-large
-    
+
     Args:
         text_passages: List of text passages to check for contradictions
-        
+
     Returns:
         Contradiction analysis with detected conflicts
     """
@@ -235,10 +235,10 @@ def detect_contradictions(text_passages: list[str]) -> dict:
 def extract_verifiable_claims(text: str) -> dict:
     """
     V2 Claim Extraction using spaCy NER + custom patterns
-    
+
     Args:
         text: Text to extract verifiable claims from
-        
+
     Returns:
         Extracted claims with entities and verification potential
     """
@@ -286,11 +286,11 @@ def extract_verifiable_claims(text: str) -> dict:
 def assess_source_credibility(source_text: str, domain: str = "") -> dict:
     """
     V2 Source Credibility Assessment using RoBERTa
-    
+
     Args:
         source_text: Text content from the source
         domain: Domain name of the source
-        
+
     Returns:
         Credibility assessment with reliability scoring
     """

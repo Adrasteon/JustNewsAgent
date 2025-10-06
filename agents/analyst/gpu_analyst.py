@@ -257,7 +257,7 @@ class GPUAcceleratedAnalyst:
 
     def _check_gpu_memory_circuit_breaker(self) -> bool:
         """Check GPU memory and update circuit breaker status.
-        
+
         Returns True if processing should be allowed, False if circuit breaker is active.
         """
         if not (TORCH_AVAILABLE and torch is not None and torch.cuda.is_available()):
@@ -318,7 +318,7 @@ class GPUAcceleratedAnalyst:
 
     def get_gpu_memory_stats(self) -> dict[str, float]:
         """Get comprehensive GPU memory statistics.
-        
+
         Returns:
             Dictionary with memory statistics in GB
         """
@@ -345,7 +345,7 @@ class GPUAcceleratedAnalyst:
 
     def is_gpu_safe_to_use(self) -> tuple[bool, str]:
         """Check if GPU is safe to use based on memory and other conditions.
-        
+
         Returns:
             Tuple of (is_safe, reason)
         """

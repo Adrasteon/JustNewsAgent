@@ -8,7 +8,7 @@ Integration: Complete V2 upgrade with professional model management
 
 Models:
 1. BERTopic: Advanced topic modeling and article clustering
-2. BART: Neural abstractive summarization 
+2. BART: Neural abstractive summarization
 3. T5: Text-to-text generation and neutralization
 4. DialoGPT (deprecated): Conversational text generation and refinement
 5. SentenceTransformer: Semantic embeddings for clustering
@@ -116,12 +116,12 @@ class SynthesizerV2Config:
 class SynthesizerV2Engine:
     """
     Advanced 5-Model Synthesis Engine for Content Analysis and Generation
-    
+
     Capabilities:
     - Advanced topic modeling with BERTopic
     - Neural abstractive summarization with BART
     - Text-to-text generation with T5
-    - Conversational refinement with DialoGPT (deprecated)  
+    - Conversational refinement with DialoGPT (deprecated)
     - Semantic clustering with SentenceTransformer
     """
 
@@ -346,7 +346,7 @@ class SynthesizerV2Engine:
     def cluster_articles_advanced(self, article_texts: list[str]) -> dict[str, Any]:
         """
         Advanced article clustering using BERTopic or fallback methods
-        
+
         Returns:
             Dict containing clusters, topics, and metadata
         """
@@ -564,7 +564,7 @@ class SynthesizerV2Engine:
     def aggregate_cluster_content(self, article_texts: list[str]) -> dict[str, str]:
         """
         Comprehensive cluster aggregation using all available models
-        
+
         Returns:
             Dict with different aggregation methods
         """
@@ -672,7 +672,7 @@ class SynthesizerV2Engine:
     def cleanup(self):
         """Clean up GPU memory and models"""
         try:
-            for model_name, model in self.models.items():
+            for _model_name, model in self.models.items():
                 if model is not None and hasattr(model, 'cpu'):
                     model.cpu()
                     del model
