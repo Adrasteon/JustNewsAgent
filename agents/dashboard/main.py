@@ -509,7 +509,7 @@ def get_status():
         return response.json()
     except Exception as e:
         logger.error(f"An error occurred while fetching agent status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/health")
@@ -637,7 +637,7 @@ def send_command(call: ToolCall):
         return response.json()
     except Exception as e:
         logger.error(f"An error occurred while sending a command: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # GPU Monitoring Endpoints
@@ -650,7 +650,7 @@ def get_gpu_info():
         return gpu_info
     except Exception as e:
         logger.error(f"Error in get_gpu_info endpoint: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/history")
@@ -667,7 +667,7 @@ def get_gpu_history(hours: int = 1):
         }
     except Exception as e:
         logger.error(f"Error in get_gpu_history endpoint: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/agents")
@@ -678,7 +678,7 @@ def get_agent_gpu_usage():
         return agent_usage
     except Exception as e:
         logger.error(f"Error in get_agent_gpu_usage endpoint: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/config")
@@ -729,7 +729,7 @@ def update_gpu_config(new_config: dict):
             }
     except Exception as e:
         logger.error(f"Error updating GPU config: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/manager/status")
@@ -753,7 +753,7 @@ def get_gpu_manager_status():
             }
     except Exception as e:
         logger.error(f"Error getting GPU manager status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/allocations")
@@ -786,7 +786,7 @@ def get_gpu_allocations():
             }
     except Exception as e:
         logger.error(f"Error getting GPU allocations: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/metrics")
@@ -813,7 +813,7 @@ def get_gpu_metrics():
             }
     except Exception as e:
         logger.error(f"Error getting GPU metrics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 class IngestRequest(BaseModel):
@@ -923,7 +923,7 @@ def ingest_gpu_jsonl(req: IngestRequest):
         raise
     except Exception as e:
         logger.error(f"Error ingesting GPU JSONL: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def _ingest_single_gpu_record(record: dict) -> None:
@@ -1062,7 +1062,7 @@ def get_gpu_dashboard_data():
         }
     except Exception as e:
         logger.error(f"Error in get_gpu_dashboard_data endpoint: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/history/db")
@@ -1111,7 +1111,7 @@ def get_gpu_history_from_db(hours: int = 24, gpu_index: int | None = None, metri
         }
     except Exception as e:
         logger.error(f"Error getting GPU history from DB: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/allocations/history")
@@ -1129,7 +1129,7 @@ def get_allocation_history(hours: int = 24, agent_name: str | None = None):
         }
     except Exception as e:
         logger.error(f"Error getting allocation history: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/trends")
@@ -1145,7 +1145,7 @@ def get_performance_trends(hours: int = 24):
         }
     except Exception as e:
         logger.error(f"Error getting performance trends: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/gpu/alerts")
@@ -1162,7 +1162,7 @@ def get_recent_alerts(limit: int = 50):
         }
     except Exception as e:
         logger.error(f"Error getting recent alerts: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/storage/stats")
@@ -1177,7 +1177,7 @@ def get_storage_stats():
         }
     except Exception as e:
         logger.error(f"Error getting storage stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def get_fallback_dashboard_html():
@@ -1488,7 +1488,7 @@ async def start_crawl(request: CrawlRequest):
         return response.json()
     except requests.RequestException as e:
         logger.error(f"Failed to start crawl: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to start crawl: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to start crawl: {str(e)}") from e
 
 @app.get("/api/crawl/status")
 async def get_crawl_status():
@@ -1524,7 +1524,7 @@ async def get_crawl_status():
         return job_details
     except requests.RequestException as e:
         logger.error(f"Failed to get crawl status: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get crawl status: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get crawl status: {str(e)}") from e
 
 @app.get("/api/metrics/crawler")
 async def get_crawler_metrics():
