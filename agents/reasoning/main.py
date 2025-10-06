@@ -733,7 +733,7 @@ def pipeline_validate(payload: ReasoningInput) -> dict[str, Any]:
 
     except Exception as e:
         log_feedback("pipeline_error", {"error": str(e)})
-        raise HTTPException(status_code=500, detail=str(e))
+    raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # --- API Endpoints ---
@@ -767,7 +767,7 @@ def add_fact_endpoint(call: ToolCall):
             "fact_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.post("/add_facts")
 def add_facts_endpoint(call: ToolCall):
@@ -806,7 +806,7 @@ def add_facts_endpoint(call: ToolCall):
             "facts_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.post("/add_rule")
 def add_rule_endpoint(call: ToolCall):
@@ -841,7 +841,7 @@ def add_rule_endpoint(call: ToolCall):
             "rule_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.post("/query")
 def query_endpoint(call: ToolCall):
@@ -876,7 +876,7 @@ def query_endpoint(call: ToolCall):
             "query_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.post("/evaluate")
 def evaluate_endpoint(call: ToolCall):
@@ -928,7 +928,7 @@ def evaluate_endpoint(call: ToolCall):
             "evaluation_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.get("/facts")
 def get_facts():
@@ -1022,7 +1022,7 @@ def call_tool(request: dict[str, Any]):
             "request": request,
             "error": str(e)
         })
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 # --- News Analysis Specific Functions ---
 @app.post("/validate_claim")
@@ -1091,7 +1091,7 @@ def validate_claim(call: ToolCall):
             "claim_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+    raise HTTPException(status_code=500, detail=error_msg) from e
 
 @app.post("/explain_reasoning")
 def explain_reasoning(call: ToolCall):
@@ -1145,7 +1145,7 @@ def explain_reasoning(call: ToolCall):
             "query_data": call.args if call.args else call.kwargs,
             "error": error_msg
         })
-        raise HTTPException(status_code=500, detail=error_msg)
+        raise HTTPException(status_code=500, detail=error_msg) from e
 
 # Startup/shutdown logic is handled by the lifespan context manager above.
 

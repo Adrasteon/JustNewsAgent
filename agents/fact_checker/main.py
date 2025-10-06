@@ -112,7 +112,7 @@ def validate_is_news(call: ToolCall):
         return _validate_is_news(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in validate_is_news: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/verify_claims")
 def verify_claims(call: ToolCall):
@@ -123,7 +123,7 @@ def verify_claims(call: ToolCall):
         return _verify_claims(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in verify_claims: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/validate_claims")
 def validate_claims_endpoint(request: dict):
@@ -146,7 +146,7 @@ def validate_claims_endpoint(request: dict):
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         logger.error(f"An error occurred in validate_claims: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 # GPU-Enhanced Endpoints (New V4 Performance)
 @app.post("/validate_is_news_gpu")
@@ -194,7 +194,7 @@ def log_feedback(call: ToolCall):
         return feedback_data
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 if __name__ == "__main__":
     import os

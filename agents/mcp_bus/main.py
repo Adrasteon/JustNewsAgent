@@ -90,6 +90,7 @@ def call_tool(call: ToolCall):
 
     # Simple retry with backoff
     last_error = None
+    last_error_exc = None
     for attempt in range(3):
         try:
             response = requests.post(url, json=payload, timeout=timeout)
@@ -99,6 +100,7 @@ def call_tool(call: ToolCall):
             return {"status": "success", "data": response.json()}
         except requests.exceptions.RequestException as e:
             last_error = str(e)
+            last_error_exc = e
             time.sleep(0.2 * (2 ** attempt))
 
     # Failure after retries: increment failure count
@@ -109,6 +111,9 @@ def call_tool(call: ToolCall):
     else:
         cb_state[agent_name] = {"fails": fails, "open_until": 0}
 
+    # Preserve original request exception when raising HTTPException so traceback is not lost
+    if last_error_exc is not None:
+        raise HTTPException(status_code=502, detail=f"Tool call failed: {last_error}") from last_error_exc
     raise HTTPException(status_code=502, detail=f"Tool call failed: {last_error}")
 
 @app.get("/agents")
