@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: RESTful Archive API
@@ -39,6 +37,7 @@ from slowapi.util import get_remote_address
 
 from agents.archive.archive_manager import ArchiveManager
 from agents.archive.knowledge_graph import KnowledgeGraphManager
+from common.observability import get_logger
 from agents.common.auth_api import router as auth_router
 
 logger = get_logger(__name__)
@@ -274,7 +273,7 @@ async def archive_from_crawler_endpoint(request: Request, call: ToolCall, archiv
         raise
     except Exception as e:
         logger.error(f"archive_from_crawler endpoint failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/articles", response_model=PaginatedResponse)
 @limiter.limit("20/minute")  # List operations are resource intensive
@@ -388,7 +387,7 @@ async def list_articles(
 
     except Exception as e:
         logger.error(f"Error listing articles: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/articles/{article_id}")
 @limiter.limit("60/minute")  # Individual item retrieval can be more frequent
@@ -440,7 +439,7 @@ async def get_article(
         raise
     except Exception as e:
         logger.error(f"Error getting article {article_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/entities", response_model=PaginatedResponse)
 @limiter.limit("20/minute")  # Entity listing is resource intensive
@@ -505,7 +504,7 @@ async def list_entities(
 
     except Exception as e:
         logger.error(f"Error listing entities: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/entities/{entity_id}")
 @limiter.limit("60/minute")  # Individual entity retrieval
@@ -567,7 +566,7 @@ async def get_entity(
         raise
     except Exception as e:
         logger.error(f"Error getting entity {entity_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.post("/search")
 @limiter.limit("10/minute")  # Search is computationally expensive, more restrictive
@@ -667,7 +666,7 @@ async def search_content(
 
     except Exception as e:
         logger.error(f"Error performing search: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/graph/statistics")
 @limiter.limit("30/minute")  # Statistics can be moderately frequent
@@ -693,7 +692,7 @@ async def get_graph_statistics(request: Request, kg_manager: KnowledgeGraphManag
 
     except Exception as e:
         logger.error(f"Error getting graph statistics: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/relationships")
 @limiter.limit("15/minute")  # Relationship queries are complex
@@ -782,7 +781,7 @@ async def get_relationships(
 
     except Exception as e:
         logger.error(f"Error getting relationships: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/entities/{entity_id}/external-info")
 @limiter.limit("30/minute")  # External info queries
@@ -827,7 +826,7 @@ async def get_entity_external_info(
         raise
     except Exception as e:
         logger.error(f"Error getting external info for entity {entity_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.post("/entities/enrich")
 @limiter.limit("5/minute")  # Enrichment is computationally expensive
@@ -866,7 +865,7 @@ async def enrich_entities(
 
     except Exception as e:
         logger.error(f"Error starting entity enrichment: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/entities/enrichment-statistics")
 @limiter.limit("20/minute")  # Statistics queries
@@ -884,7 +883,7 @@ async def get_entity_enrichment_statistics(request: Request, kg_manager: Knowled
 
     except Exception as e:
         logger.error(f"Error getting enrichment statistics: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 # Export endpoints
 @app.post("/export/articles")
@@ -944,7 +943,7 @@ async def export_articles(
         raise
     except Exception as e:
         logger.error(f"Error queuing article export: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.post("/export/entities")
 @limiter.limit("3/minute")  # Bulk exports are resource intensive
@@ -1003,7 +1002,7 @@ async def export_entities(
         raise
     except Exception as e:
         logger.error(f"Error queuing entity export: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.post("/export/relationships")
 @limiter.limit("3/minute")  # Bulk exports are resource intensive
@@ -1058,7 +1057,7 @@ async def export_relationships(
         raise
     except Exception as e:
         logger.error(f"Error queuing relationship export: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/export/status/{job_id}")
 @limiter.limit("20/minute")  # Status checks can be frequent
@@ -1082,7 +1081,7 @@ async def get_export_status(request: Request, job_id: str):
         raise
     except Exception as e:
         logger.error(f"Error getting export status for job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 @app.get("/export/download/{job_id}")
 @limiter.limit("10/minute")  # Downloads are bandwidth intensive
@@ -1106,7 +1105,7 @@ async def download_export(request: Request, job_id: str):
         raise
     except Exception as e:
         logger.error(f"Error downloading export for job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}") from e
 
 # Background export functions
 async def _perform_articles_export(job_id: str, filters: dict[str, Any], format_type: str,

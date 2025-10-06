@@ -1,6 +1,4 @@
 #!/home/adra/miniconda3/condabin/conda run -n justnews-v2-py312 python3
-from common.observability import get_logger
-
 """
 Production BBC NewsReader Crawler - Robust Implementation
 
@@ -33,6 +31,7 @@ from production_newsreader_fixed import ProductionNewsReader
 from scripts.db_dedupe import ensure_table, register_url
 
 # Configure logging
+from common.observability import get_logger
 logger = get_logger(__name__)
 
 class ProductionBBCNewsReaderCrawler:

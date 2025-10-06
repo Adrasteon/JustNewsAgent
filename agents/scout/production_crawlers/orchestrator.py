@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Scout Agent Production Crawler Orchestrator
@@ -36,6 +34,7 @@ from .crawler_utils import (
     initialize_connection_pool,
 )
 from .sites.generic_site_crawler import MultiSiteCrawler, SiteConfig
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 

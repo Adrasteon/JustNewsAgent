@@ -344,7 +344,7 @@ async def get_dashboard_api():
         return JSONResponse(content=dashboard)
     except Exception as e:
         logger.error(f"Error getting dashboard: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/api/trends")
 async def get_trends_api(hours: int = 24):
@@ -354,7 +354,7 @@ async def get_trends_api(hours: int = 24):
         return JSONResponse(content=trends)
     except Exception as e:
         logger.error(f"Error getting trends: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/api/system-status")
 async def get_system_status():
@@ -370,7 +370,7 @@ async def get_system_status():
         })
     except Exception as e:
         logger.error(f"Error getting system status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/api/alerts/clear")
 async def clear_alerts():
@@ -382,7 +382,7 @@ async def clear_alerts():
         return JSONResponse(content={"message": "Alerts cleared"})
     except Exception as e:
         logger.error(f"Error clearing alerts: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/api/health")
 async def health_check():

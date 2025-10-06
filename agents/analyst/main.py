@@ -219,7 +219,7 @@ def score_bias_endpoint(call: ToolCall):
         return score_bias(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in score_bias: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/score_sentiment")
 def score_sentiment_endpoint(call: ToolCall):
@@ -238,7 +238,7 @@ def score_sentiment_endpoint(call: ToolCall):
         return score_sentiment(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in score_sentiment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_sentiment_and_bias")
 def analyze_sentiment_and_bias_endpoint(call: ToolCall):
@@ -271,7 +271,7 @@ def analyze_sentiment_and_bias_endpoint(call: ToolCall):
         logger.error(f"Error details: {type(e).__name__}: {str(e)}")
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_sentiment")
 def analyze_sentiment_endpoint(call: ToolCall):
@@ -290,7 +290,7 @@ def analyze_sentiment_endpoint(call: ToolCall):
         return analyze_sentiment(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in analyze_sentiment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/detect_bias")
 def detect_bias_endpoint(call: ToolCall):
@@ -309,7 +309,7 @@ def detect_bias_endpoint(call: ToolCall):
         return detect_bias(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in detect_bias: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/identify_entities")
 def identify_entities_endpoint(call: ToolCall):
@@ -326,7 +326,7 @@ def identify_entities_endpoint(call: ToolCall):
         return identify_entities(*call.args, **call.kwargs)
     except Exception as e:
         logger.error(f"An error occurred in identify_entities: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/log_feedback")
 def log_feedback_endpoint(call: ToolCall):
@@ -337,7 +337,7 @@ def log_feedback_endpoint(call: ToolCall):
         return {"status": "logged"}
     except Exception as e:
         logger.error(f"An error occurred while logging feedback: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_article")
 def analyze_article_endpoint(call: ToolCall):
@@ -380,7 +380,7 @@ def analyze_article_endpoint(call: ToolCall):
 
     except Exception as e:
         logger.error("An error occurred in analyze_article: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 def fetch_article_from_db(article_id: int) -> dict:
     """Fetch article from the database."""

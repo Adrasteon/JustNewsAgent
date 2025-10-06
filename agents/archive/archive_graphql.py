@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Phase 3 Sprint 3-4: GraphQL Query Interface
@@ -40,6 +38,7 @@ from slowapi.util import get_remote_address
 from agents.archive.archive_manager import ArchiveManager
 from agents.archive.knowledge_graph import KnowledgeGraphManager
 
+from common.observability import get_logger
 logger = get_logger(__name__)
 
 # Rate Limiting Configuration

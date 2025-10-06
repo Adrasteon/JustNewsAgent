@@ -1,5 +1,3 @@
-from common.observability import get_logger
-
 #!/usr/bin/env python3
 """
 Practical NewsReader Solution - Implementing User's Insight on INT8 Quantization
@@ -28,6 +26,8 @@ from transformers import (
 )
 
 # Configure logging
+
+from common.observability import get_logger
 
 logger = get_logger(__name__)
 

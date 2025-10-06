@@ -163,7 +163,7 @@ async def archive_articles(call: ToolCall):
         return {"status": "success", "data": archive_summary}
     except Exception as e:
         logger.error(f"Error archiving articles: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/retrieve_article")
 async def retrieve_article(call: ToolCall):
@@ -185,7 +185,7 @@ async def retrieve_article(call: ToolCall):
         return {"status": "success", "data": article_data}
     except Exception as e:
         logger.error(f"Error retrieving article: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/search_archive")
 async def search_archive(call: ToolCall):
@@ -205,7 +205,7 @@ async def search_archive(call: ToolCall):
         return {"status": "success", "data": {"query": query, "results": storage_keys, "count": len(storage_keys)}}
     except Exception as e:
         logger.error(f"Error searching archive: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/get_archive_stats")
 def get_archive_stats(call: ToolCall):
@@ -243,7 +243,7 @@ def get_archive_stats(call: ToolCall):
         return {"status": "success", "data": stats}
     except Exception as e:
         logger.error(f"Error getting archive stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/store_single_article")
 async def store_single_article(call: ToolCall):
@@ -284,7 +284,7 @@ async def store_single_article(call: ToolCall):
         return {"status": "success", "data": {"storage_key": storage_key, "article_title": kwargs["title"]}}
     except Exception as e:
         logger.error(f"Error storing single article: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 if __name__ == "__main__":
     import uvicorn

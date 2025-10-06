@@ -346,7 +346,7 @@ async def extract_news(request: URLRequest):
 
     except Exception as e:
         logger.error(f"News extraction failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_content")
 @security_wrapper
@@ -384,7 +384,7 @@ async def analyze_content(request: ContentRequest):
 
     except Exception as e:
         logger.error(f"Content analysis failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/extract_structure")
 @security_wrapper
@@ -407,7 +407,7 @@ async def extract_structure(request: StructureRequest):
 
     except Exception as e:
         logger.error(f"Structure analysis failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/extract_multimedia")
 @security_wrapper
@@ -426,7 +426,7 @@ async def extract_multimedia(request: MultimediaRequest):
 
     except Exception as e:
         logger.error(f"Multimedia extraction failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/capture_screenshot")
 @security_wrapper
@@ -449,7 +449,7 @@ async def capture_screenshot(request: URLRequest):
 
     except Exception as e:
         logger.error(f"Screenshot capture failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/analyze_image")
 @security_wrapper
@@ -469,7 +469,7 @@ async def analyze_image(request: ImageRequest):
 
     except Exception as e:
         logger.error(f"Image analysis failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 # MCP Bus compatible endpoints (legacy compatibility)
 @app.post("/extract_news_content")
@@ -524,7 +524,7 @@ async def clear_cache(background_tasks: BackgroundTasks):
         return {"status": "cache_clearing_scheduled"}
     except Exception as e:
         logger.error(f"Cache clearing failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/emergency_memory_cleanup")
 async def emergency_memory_cleanup():
@@ -554,7 +554,7 @@ async def emergency_memory_cleanup():
 
     except Exception as e:
         logger.error(f"Emergency cleanup failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 # Tool functions for direct import (legacy compatibility)
 async def extract_news_content(url: str, screenshot_path: str = None) -> dict[str, Any]:

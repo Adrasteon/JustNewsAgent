@@ -51,7 +51,7 @@ async def get_system_health():
         health = analytics_engine.get_system_health_score()
         return JSONResponse(content=health)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}") from e
 
 @analytics_app.get("/api/realtime/{hours}")
 async def get_realtime_analytics(hours: int = 1):
@@ -63,7 +63,7 @@ async def get_realtime_analytics(hours: int = 1):
         analytics = analytics_engine.get_real_time_analytics(hours=hours)
         return JSONResponse(content=analytics.__dict__)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analytics retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Analytics retrieval failed: {str(e)}") from e
 
 @analytics_app.get("/api/agent/{agent_name}/{hours}")
 async def get_agent_profile(agent_name: str, hours: int = 24):
@@ -75,7 +75,7 @@ async def get_agent_profile(agent_name: str, hours: int = 24):
         profile = analytics_engine.get_agent_performance_profile(agent_name, hours=hours)
         return JSONResponse(content=profile)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Agent profile retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Agent profile retrieval failed: {str(e)}") from e
 
 @analytics_app.get("/api/trends/{hours}")
 async def get_performance_trends(hours: int = 24):
@@ -88,7 +88,7 @@ async def get_performance_trends(hours: int = 24):
             "recommendations": analytics.optimization_recommendations
         })
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Trends analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Trends analysis failed: {str(e)}") from e
 
 @analytics_app.get("/api/report/{hours}")
 async def get_analytics_report(hours: int = 24):
@@ -97,7 +97,7 @@ async def get_analytics_report(hours: int = 24):
         report = analytics_engine.export_analytics_report(hours=hours)
         return JSONResponse(content=report)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Report generation failed: {str(e)}") from e
 
 @analytics_app.get("/api/optimization-recommendations")
 async def get_optimization_recommendations(hours: int = 24):
@@ -123,7 +123,7 @@ async def get_optimization_recommendations(hours: int = 24):
             for rec in recommendations
         ])
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Optimization analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Optimization analysis failed: {str(e)}") from e
 
 @analytics_app.get("/api/optimization-insights")
 async def get_optimization_insights():
@@ -134,7 +134,7 @@ async def get_optimization_insights():
         insights = get_optimization_insights()
         return JSONResponse(content=insights)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Insights generation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Insights generation failed: {str(e)}") from e
 
 @analytics_app.post("/api/record-metric")
 async def record_custom_metric(metric_data: dict[str, Any]):
@@ -169,7 +169,7 @@ async def record_custom_metric(metric_data: dict[str, Any]):
 
         return JSONResponse(content={"status": "success", "message": "Metric recorded successfully"})
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Metric recording failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Metric recording failed: {str(e)}") from e
 
 def create_analytics_app() -> FastAPI:
     """Create and return the analytics dashboard FastAPI app"""

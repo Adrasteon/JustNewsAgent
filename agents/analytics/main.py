@@ -131,7 +131,7 @@ def get_system_health(call: ToolCall):
         return {"status": "success", "data": health}
     except Exception as e:
         logger.error(f"Error getting system health: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/get_performance_metrics")
 def get_performance_metrics(call: ToolCall):
@@ -152,7 +152,7 @@ def get_performance_metrics(call: ToolCall):
         return {"status": "success", "data": analytics.__dict__}
     except Exception as e:
         logger.error(f"Error getting performance metrics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/get_agent_profile")
 def get_agent_profile(call: ToolCall):
@@ -177,7 +177,7 @@ def get_agent_profile(call: ToolCall):
         return {"status": "success", "data": profile}
     except Exception as e:
         logger.error(f"Error getting agent profile: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/get_optimization_recommendations")
 def get_optimization_recommendations(call: ToolCall):
@@ -213,7 +213,7 @@ def get_optimization_recommendations(call: ToolCall):
         return {"status": "success", "data": result}
     except Exception as e:
         logger.error(f"Error getting optimization recommendations: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.post("/record_performance_metric")
 def record_performance_metric(call: ToolCall):
@@ -258,7 +258,7 @@ def record_performance_metric(call: ToolCall):
         return {"status": "success", "message": "Metric recorded successfully"}
     except Exception as e:
         logger.error(f"Error recording performance metric: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 if __name__ == "__main__":
     import uvicorn
