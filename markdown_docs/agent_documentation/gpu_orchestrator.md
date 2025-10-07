@@ -1,7 +1,7 @@
 ---
 title: gpu orchestrator
-description: Auto-generated description for gpu orchestrator
-tags: [documentation]
+description: '- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md - Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md'
+tags: ["architecture", "catalogue", "docs"]
 status: current
 last_updated: 2025-09-12
 ---

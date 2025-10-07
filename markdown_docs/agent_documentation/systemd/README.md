@@ -1,7 +1,7 @@
 ---
 title: Systemd scaffold for JustNews
-description: Auto-generated description for Systemd scaffold for JustNews
-tags: [documentation]
+description: 'This folder contains a native deployment scaffold and links to all systemd docs moved under markdown_docs.'
+tags: ["docs", "scaffold", "systemd"]
 status: current
 last_updated: 2025-09-12
 ---
