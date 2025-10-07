@@ -1,0 +1,268 @@
+{
+  "generated_at": "2025-10-07T17:13:23.161072Z",
+  "workspace": "/home/adra/JustNewsAgent",
+  "suggestions": {
+    "markdown_docs/agent_documentation/gpu_orchestrator.md": {
+      "title": "Gpu Orchestrator",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Gpu Orchestrator",
+      "suggested_description": "- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md - Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md",
+      "current_tags": [
+        "gpu",
+        "architecture"
+      ],
+      "suggested_tags": [
+        "architecture",
+        "catalogue",
+        "docs"
+      ]
+    },
+    "markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md": {
+      "title": "Operations Quick Reference",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Operations Quick Reference",
+      "suggested_description": "See also: Systemd Operations Guide, GPU Orchestrator Operations, MCP Bus Operations, Preflight Runbook",
+      "current_tags": [
+        "production",
+        "scout",
+        "gpu",
+        "models",
+        "ai-agents"
+      ],
+      "suggested_tags": [
+        "operations",
+        "also",
+        "guide"
+      ]
+    },
+    "markdown_docs/agent_documentation/gpu_orchestrator_checklist.md": {
+      "title": "Gpu Orchestrator Checklist",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Gpu Orchestrator Checklist",
+      "suggested_description": "--- Authoritative tracking document for GPU Orchestrator readiness.",
+      "current_tags": [
+        "production",
+        "archive",
+        "gpu",
+        "dashboard",
+        "memory"
+      ],
+      "suggested_tags": [
+        "orchestrator",
+        "authoritative",
+        "checklist"
+      ]
+    },
+    "markdown_docs/agent_documentation/systemd/README.md": {
+      "title": "Systemd scaffold for JustNews",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Systemd scaffold for JustNews",
+      "suggested_description": "This folder contains a native deployment scaffold and links to all systemd docs moved under markdown_docs.",
+      "current_tags": [
+        "ai-agents",
+        "multi-agent",
+        "monitoring",
+        "architecture",
+        "deployment"
+      ],
+      "suggested_tags": [
+        "docs",
+        "scaffold",
+        "systemd"
+      ]
+    },
+    "agents/scout/production_crawlers/README.md": {
+      "title": "Unified Production Crawler",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "## Overview...",
+      "suggested_description": "The **Unified Production Crawler** is an intelligent, multi-strategy news article collection system that combines the best aspects of Jus...",
+      "current_tags": [
+        "production",
+        "performance",
+        "scout",
+        "gpu",
+        "optimization"
+      ],
+      "suggested_tags": [
+        "production",
+        "crawler",
+        "unified"
+      ]
+    },
+    "agents/memory/agents/memory/models/all-MiniLM-L6-v2/README.md": {
+      "title": "all-MiniLM-L6-v2",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for all-MiniLM-L6-v2",
+      "suggested_description": "This README was added automatically by `scripts/fix_catalogue_issues.py` to resolve a broken catalogue reference.",
+      "current_tags": [
+        "training",
+        "version-specific",
+        "models"
+      ],
+      "suggested_tags": [
+        "catalogue",
+        "added",
+        "automatically"
+      ]
+    },
+    "agents/memory/agents/memory/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md": {
+      "title": "all-MiniLM-L6-v2",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for all-MiniLM-L6-v2",
+      "suggested_description": "This README was added automatically by `scripts/fix_catalogue_issues.py` to resolve a broken catalogue reference.",
+      "current_tags": [
+        "training",
+        "version-specific",
+        "models"
+      ],
+      "suggested_tags": [
+        "catalogue",
+        "added",
+        "automatically"
+      ]
+    },
+    "deploy/monitoring/README.md": {
+      "title": "Readme",
+      "issues": [
+        "description_too_short",
+        "no_tags"
+      ],
+      "current_description": "Documentation for Readme",
+      "suggested_description": "Overview of Readme. Expand with key details and examples.",
+      "current_tags": [],
+      "suggested_tags": [
+        "readme"
+      ]
+    },
+    "deploy/systemd/postgresql_integration.md": {
+      "title": "PostgreSQL integration",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for PostgreSQL integration",
+      "suggested_description": "Set the database URL in `/etc/justnews/global.env` (adjust credentials/host):",
+      "current_tags": [
+        "memory"
+      ],
+      "suggested_tags": [
+        "adjust",
+        "credentials",
+        "database"
+      ]
+    },
+    "deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md": {
+      "title": "Comprehensive systemd guide",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Comprehensive systemd guide",
+      "suggested_description": "This guide explains how the native systemd deployment works, with special focus on gating, environment files, and unit drop-ins.",
+      "current_tags": [
+        "scout",
+        "gpu",
+        "cuda",
+        "models",
+        "ai-agents"
+      ],
+      "suggested_tags": [
+        "guide",
+        "systemd",
+        "comprehensive"
+      ]
+    },
+    "deploy/systemd/phase5_advanced_monitoring_plan.md": {
+      "title": "Phase5 Advanced Monitoring Plan",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Phase5 Advanced Monitoring Plan",
+      "suggested_description": "Overview of Phase5 Advanced Monitoring Plan. Expand with key details and examples.",
+      "current_tags": [
+        "monitoring"
+      ],
+      "suggested_tags": [
+        "advanced",
+        "monitoring",
+        "phase"
+      ]
+    },
+    "deploy/systemd/QUICK_REFERENCE.md": {
+      "title": "Quick Reference – systemd",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Quick Reference – systemd",
+      "suggested_description": "This enables units (if needed), ensures GPU orchestrator is READY, starts all services in order, and verifies health.",
+      "current_tags": [
+        "reasoning",
+        "scout",
+        "archive",
+        "gpu",
+        "dashboard"
+      ],
+      "suggested_tags": [
+        "enables",
+        "ensures",
+        "health"
+      ]
+    },
+    "deploy/systemd/deployment_status.md": {
+      "title": "Deployment Status",
+      "issues": [
+        "description_too_short"
+      ],
+      "current_description": "Documentation for Deployment Status",
+      "suggested_description": "Overview of Deployment Status. Expand with key details and examples.",
+      "current_tags": [
+        "deployment"
+      ],
+      "suggested_tags": [
+        "deployment",
+        "status"
+      ]
+    },
+    "deploy/systemd/action_systemd_prod.md": {
+      "title": "Action Systemd Prod",
+      "issues": [
+        "description_too_short",
+        "no_tags"
+      ],
+      "current_description": "Documentation for Action Systemd Prod",
+      "suggested_description": "Overview of Action Systemd Prod. Expand with key details and examples.",
+      "current_tags": [],
+      "suggested_tags": [
+        "action",
+        "prod",
+        "systemd"
+      ]
+    },
+    "deploy/systemd/shortfalls_analysis.md": {
+      "title": "Shortfalls Analysis",
+      "issues": [
+        "description_too_short",
+        "no_tags"
+      ],
+      "current_description": "Documentation for Shortfalls Analysis",
+      "suggested_description": "Overview of Shortfalls Analysis. Expand with key details and examples.",
+      "current_tags": [],
+      "suggested_tags": [
+        "analysis",
+        "shortfalls"
+      ]
+    }
+  }
+}
