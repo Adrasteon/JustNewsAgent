@@ -1,7 +1,7 @@
 ---
 title: gpu orchestrator checklist
-description: Auto-generated description for gpu orchestrator checklist
-tags: [documentation]
+description: '--- Authoritative tracking document for GPU Orchestrator readiness.'
+tags: ["orchestrator", "authoritative", "checklist"]
 status: current
 last_updated: 2025-09-12
 ---

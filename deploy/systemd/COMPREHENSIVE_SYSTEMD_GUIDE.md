@@ -1,6 +1,8 @@
 ---
 title: Comprehensive systemd guide
-description: Gating internals, drop-ins, environment tuning for JustNews
+description: 'This guide explains how the native systemd deployment works, with special focus on gating, environment files, and unit drop-ins.'
+
+tags: ["guide", "systemd", "comprehensive"]
 ---
 
 # Comprehensive systemd guide

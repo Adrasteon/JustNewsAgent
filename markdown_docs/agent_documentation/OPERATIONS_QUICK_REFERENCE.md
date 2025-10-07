@@ -1,7 +1,7 @@
 ---
 title: Operations Quick Reference
-description: Fast, copy-pasteable commands for health checks, service management, preflight gating, GPU orchestrator, and MCP bus operations in production.
-tags: [operations, systemd, preflight, orchestrator, mcp, health]
+description: 'See also: Systemd Operations Guide, GPU Orchestrator Operations, MCP Bus Operations, Preflight Runbook'
+tags: ["operations", "also", "guide"]
 status: current
 last_updated: 2025-09-12
 ---

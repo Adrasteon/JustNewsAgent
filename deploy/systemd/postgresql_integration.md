@@ -1,6 +1,8 @@
 ---
 title: PostgreSQL integration
-description: Configure and verify DB connectivity for JustNews Memory
+description: 'Set the database URL in `/etc/justnews/global.env` (adjust credentials/host):'
+
+tags: ["adjust", "credentials", "database"]
 ---
 
 # PostgreSQL integration

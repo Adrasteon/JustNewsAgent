@@ -1,6 +1,8 @@
 ---
 title: Systemd Quick Reference
-description: Copy-paste operations for JustNews native deployment
+description: 'This enables units (if needed), ensures GPU orchestrator is READY, starts all services in order, and verifies health.'
+
+tags: ["enables", "ensures", "health"]
 ---
 
 # Quick Reference – systemd
