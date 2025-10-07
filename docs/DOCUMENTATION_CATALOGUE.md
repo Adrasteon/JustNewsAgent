@@ -225,7 +225,6 @@ Nucleoid has two modes; decl... | agent, reasoning, logic | current |
 **Priority:** medium
 **Documents:** 0
 
-
 ---
 
 ## Monitoring & Analytics
@@ -245,7 +244,6 @@ Nucleoid has two modes; decl... | agent, reasoning, logic | current |
 **Category ID:** compliance_security
 **Priority:** high
 **Documents:** 0
-
 
 ---
 
@@ -421,7 +419,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Priority:** high
 **Documents:** 0
 
-
 ---
 
 ## Implementation Reports
@@ -429,7 +426,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** development_reports_implementation
 **Priority:** high
 **Documents:** 0
-
 
 ---
 
@@ -439,7 +435,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Priority:** high
 **Documents:** 0
 
-
 ---
 
 ## Testing & Quality Assurance Reports
@@ -447,7 +442,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** development_reports_testing
 **Priority:** medium
 **Documents:** 0
-
 
 ---
 
@@ -457,7 +451,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Priority:** medium
 **Documents:** 0
 
-
 ---
 
 ## Training & Learning Reports
@@ -465,7 +458,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** development_reports_training
 **Priority:** high
 **Documents:** 0
-
 
 ---
 
@@ -475,7 +467,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Priority:** medium
 **Documents:** 0
 
-
 ---
 
 ## Maintenance & Housekeeping Reports
@@ -483,7 +474,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** development_reports_maintenance
 **Priority:** low
 **Documents:** 0
-
 
 ---
 
@@ -518,7 +508,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Priority:** low
 **Documents:** 0
 
-
 ---
 
 ## Agent Management & Tools
@@ -526,7 +515,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** agent_documentation_agent_management
 **Priority:** medium
 **Documents:** 0
-
 
 ---
 
@@ -547,7 +535,6 @@ systemd units and sim... | mcp, models, logging | current |
 **Category ID:** agent_documentation_crawling_systems
 **Priority:** medium
 **Documents:** 0
-
 
 ---
 

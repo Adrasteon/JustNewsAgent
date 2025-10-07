@@ -278,7 +278,6 @@ python docs/doc_management_tools/doc_linter.py --report --fix
 python docs/doc_management_tools/generate_docs_index.py --write
 ```
 
-
 ---
 
 ## 📋 **Contributing to Documentation**

@@ -91,7 +91,6 @@ Which quick task should we start with? I recommend starting with crawler enrichm
   - `markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md`
   - `docs/IMPLEMENTATION_PLAN.md`, `docs/JustNews_Plan_V4.md`, `docs/New_Blueprint_Agents.md`
 
-
 ---
 
 Generated: 2025-08-29

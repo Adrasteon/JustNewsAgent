@@ -476,7 +476,6 @@ Structure:
 
 ## Appendix: flat manifest (all discovered paths)
 
-
 /home/adra/JustNewsAgentic/ruff.toml
 /home/adra/JustNewsAgentic/production_bbc_crawler.py
 /home/adra/JustNewsAgentic/newsreader_v2_true_engine.py

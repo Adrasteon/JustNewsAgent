@@ -20,7 +20,6 @@ I inspected representative `main.py` entrypoints for the following agents: `scou
 
 This matches the high-level design in `docs/JustNews_Plan_V4.md` which specifies specialized agents, RTX/TensorRT optimization for performance, and a hybrid fallback architecture.
 
-
 ## Per-agent assessment (contract + notes)
 
 ### Scout
@@ -92,7 +91,6 @@ This matches the high-level design in `docs/JustNews_Plan_V4.md` which specifies
 - Outputs: {status, data} or errors
 - Notes: lightweight router used in tests/integration and possibly for internal orchestration.
 
-
 ## Alignment with JustNews_Plan_V4.md
 - The agents implement the same responsibilities and endpoints described in the Plan (Reasoning endpoints match exactly, Synthesizer/Critic/Facts reference GPU paths and 5-model architectures, Analyst references RTX/TensorRT optimizations). The code and docs are consistent in intent: specialized agents, MCP Bus registration, GPU-first with CPU fallback, and a training/feedback loop.
 
@@ -112,10 +110,8 @@ This matches the high-level design in `docs/JustNews_Plan_V4.md` which specifies
 4. Document requirements per-agent (models needed, GPU expectations, DB env vars) in `markdown_docs/agent_documentation/`.
 5. Add a system-level health aggregator script that polls `/ready` endpoints and returns cluster readiness.
 
-
 ## Conclusion
 Agents are implemented as FastAPI services with clear tool endpoints and match the roles described in Plan V4. The primary work remaining is integration testing, centralizing repeated logic (MCP client), and adding robust health/monitoring for GPU/DB dependencies.
-
 
 ---
 
