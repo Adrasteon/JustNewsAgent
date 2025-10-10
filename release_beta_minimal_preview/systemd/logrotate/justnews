@@ -1,0 +1,79 @@
+# JustNews log rotation configuration
+# This file manages log rotation for all JustNews agent logs
+#
+# Installation:
+#   1. Copy this file to /etc/logrotate.d/justnews
+#   2. Ensure the log directory exists: mkdir -p /var/log/justnews
+#   3. Set permissions: chown -R justnews:justnews /var/log/justnews
+#
+# Log locations (if using file-based logging):
+#   /var/log/justnews/mcp_bus.log
+#   /var/log/justnews/chief_editor.log
+#   /var/log/justnews/scout.log
+#   /var/log/justnews/analyst.log
+#   /var/log/justnews/synthesizer.log
+#   /var/log/justnews/fact_checker.log
+#   /var/log/justnews/critic.log
+#   /var/log/justnews/memory.log
+#   /var/log/justnews/reasoning.log
+#   /var/log/justnews/gpu_orchestrator.log
+#
+# Note: If using systemd journal (recommended), this file may not be needed
+# as systemd handles log rotation automatically.
+
+/var/log/justnews/*.log {
+    # Rotate daily
+    daily
+    
+    # Keep 14 days of logs
+    rotate 14
+    
+    # Don't error if log file is missing
+    missingok
+    
+    # Don't rotate if log file is empty
+    notifempty
+    
+    # Compress old logs
+    compress
+    delaycompress
+    
+    # Don't mail old logs
+    nomail
+    
+    # Create new log file with these permissions
+    create 0640 justnews justnews
+    
+    # Use date as suffix instead of numbers
+    dateext
+    dateformat -%Y%m%d
+    
+    # Run postrotate script after rotation
+    postrotate
+        # Signal services to reopen log files if needed
+        # (Not needed if using systemd journal)
+        # systemctl reload justnews@*.service 2>/dev/null || true
+    endscript
+    
+    # Shared script runs once after all logs are rotated
+    sharedscripts
+}
+
+# Separate rule for high-volume GPU orchestrator logs
+/var/log/justnews/gpu_orchestrator.log {
+    # Rotate more frequently for GPU logs
+    hourly
+    
+    # Keep 48 hours of GPU logs
+    rotate 48
+    
+    missingok
+    notifempty
+    compress
+    delaycompress
+    nomail
+    create 0640 justnews justnews
+    dateext
+    dateformat -%Y%m%d-%H
+    sharedscripts
+}
