@@ -176,10 +176,11 @@ archive_obsolete_files/backup_*/
 
 # Documentation Organization (Only essential .md files in root)
 # All other .md files should be in markdown_docs/ subdirectories
-# Keep only: README.md, CHANGELOG.md in root
+# Keep only: README.md, CHANGELOG.md, PREVIEW_CI_SUMMARY.md in root
 /*.md
 !/README.md
 !/CHANGELOG.md
+!/PREVIEW_CI_SUMMARY.md
 
 # Encrypted Secrets Vault (contains sensitive data)
 ~/.justnews/secrets.vault
