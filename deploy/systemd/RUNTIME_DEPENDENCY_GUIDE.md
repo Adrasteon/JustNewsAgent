@@ -97,11 +97,19 @@ Minimal runtime-only dependencies for Preview workspace. Contains only packages 
    conda activate justnews-v2-py312
    ```
 
-2. Dependency checks automatically prefer conda:
+2. Dependency checks automatically prefer conda when available:
    ```bash
-   # Automatically uses: conda run -n justnews-v2-py312 python
+   # Automatically detects and uses: conda run -n justnews-v2-py312 python
+   # Falls back to PYTHON_BIN or system python3 if conda is not available
    ./deploy/systemd/scripts/justnews-start-agent.sh mcp_bus
    ```
+
+**How conda preference works:**
+- Scripts first check if `conda` command is available
+- If available, they verify the configured conda environment exists (default: `justnews-v2-py312`)
+- If both conditions are met, they use `conda run -n <env> python` for all checks
+- Otherwise, they fall back to `PYTHON_BIN` environment variable or system `python3`
+- This ensures dependency checks match the runtime environment
 
 ### For Production
 

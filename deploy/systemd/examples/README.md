@@ -12,19 +12,24 @@ GPU orchestrator-specific environment configuration. Copy to `/etc/justnews/gpu_
 
 ## Usage
 
-1. Copy example files and remove `.example` extension:
+1. Create the JustNews configuration directory:
+   ```bash
+   sudo mkdir -p /etc/justnews
+   ```
+
+2. Copy example files and remove `.example` extension:
    ```bash
    sudo cp justnews.env.example /etc/justnews/global.env
    sudo cp gpu_orchestrator.env.example /etc/justnews/gpu_orchestrator.env
    ```
 
-2. Edit the files with your specific configuration:
+3. Edit the files with your specific configuration:
    ```bash
    sudo nano /etc/justnews/global.env
    sudo nano /etc/justnews/gpu_orchestrator.env
    ```
 
-3. Ensure proper permissions:
+4. Ensure proper permissions:
    ```bash
    sudo chown root:justnews /etc/justnews/*.env
    sudo chmod 640 /etc/justnews/*.env
