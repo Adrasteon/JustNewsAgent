@@ -612,7 +612,11 @@ gate_models_only() {
             fi
             return 1
         fi
-        sleep "$backoff"; if [[ $backoff -lt 8 ]]; then backoff=$((backoff*2)); fi
+        # Sleep using the current (possibly fractional) backoff and double it
+        sleep "$backoff"
+        if awk -v b="$backoff" 'BEGIN{ if (b < 8) exit 0; exit 1 }'; then
+            backoff=$(awk -v b="$backoff" 'BEGIN{ printf "%.6f", b * 2 }')
+        fi
     done
     # Timeout path: emit a brief summary and fail
     if command -v jq >/dev/null 2>&1; then
@@ -726,10 +730,12 @@ main() {
                             break
                         fi
                     else
-                        # In progress; backoff up to 8s
-                        echo -n "."
-                        sleep "$BACKOFF"
-                        if [[ $BACKOFF -lt 8 ]]; then BACKOFF=$((BACKOFF*2)); fi
+                                # In progress; backoff up to 8s
+                                echo -n "."
+                                sleep "$BACKOFF"
+                                if awk -v b="$BACKOFF" 'BEGIN{ if (b < 8) exit 0; exit 1 }'; then
+                                    BACKOFF=$(awk -v b="$BACKOFF" 'BEGIN{ printf "%.6f", b * 2 }')
+                                fi
                     fi
                 done
                 echo

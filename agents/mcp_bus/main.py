@@ -7,7 +7,11 @@ import time
 import os
 from contextlib import asynccontextmanager
 
-import requests
+# Make 'requests' optional so MCP Bus can start in constrained environments.
+try:
+    import requests
+except Exception:
+    requests = None
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -90,6 +94,10 @@ def call_tool(call: ToolCall):
 
     # Simple retry with backoff
     last_error = None
+    if requests is None:
+        # Cannot make outbound calls; fail fast so caller gets a clear error.
+        raise HTTPException(status_code=502, detail="Requests library unavailable on host")
+
     for attempt in range(3):
         try:
             response = requests.post(url, json=payload, timeout=timeout)
@@ -137,12 +145,15 @@ async def lifespan(app):
 
     # Notify GPU Orchestrator
     orchestrator_url = "http://localhost:8014/notify_ready"
-    try:
-        response = requests.post(orchestrator_url, timeout=10)
-        response.raise_for_status()
-        logger.info("Successfully notified GPU Orchestrator that MCP Bus is ready.")
-    except requests.RequestException as e:
-        logger.error(f"Failed to notify GPU Orchestrator: {e}")
+    if requests is None:
+        logger.warning("Requests library not available; skipping notification to GPU Orchestrator")
+    else:
+        try:
+            response = requests.post(orchestrator_url, timeout=10)
+            response.raise_for_status()
+            logger.info("Successfully notified GPU Orchestrator that MCP Bus is ready.")
+        except requests.RequestException as e:
+            logger.error(f"Failed to notify GPU Orchestrator: {e}")
 
     yield
     logger.info("MCP_Bus is shutting down.")

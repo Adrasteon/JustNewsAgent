@@ -1,0 +1,203 @@
+# Beta release candidate files
+Generated: 2025-10-08T11:53:47.640735+00:00
+
+- `agents/newsreader/IMPLEMENTATION_SUMMARY.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/newsreader/LIFESPAN_MIGRATION.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/analyst/NATIVE_AGENT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/NATIVE_TENSORRT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/TENSORRT_QUICKSTART.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/scout/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.519638+00:00
+- `agents/reasoning/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.518637+00:00
+- `agents/scout/production_crawlers/README.md` (score=81.0) — agent-path, doc — mtime=2025-10-07T17:20:52.783236+00:00
+- `agents/reasoning/nucleoid_repo/arc/README.md` (score=81.0) — agent-path, doc — mtime=2025-10-07T17:07:21.049527+00:00
+- `agents/reasoning/nucleoid_repo/CONTRIBUTING.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/README.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/crawler/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.511637+00:00
+- `agents/dashboard/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.514637+00:00
+- `agents/reasoning/nucleoid_repo/python/tests/__init__.py` (score=78.8) — agent-path, test — mtime=2025-10-06T15:01:50.166080+00:00
+- `agents/reasoning/nucleoid_repo/python/tests/test_nucleoid.py` (score=78.8) — agent-path, test — mtime=2025-10-06T16:51:32.678260+00:00
+- `scripts/README_BOOTSTRAP_MODELS.md` (score=77.0) — scripts-path, doc, frontmatter-last-updated — mtime=2025-10-07T17:20:52.798236+00:00
+- `scripts/README_MIRROR.md` (score=76.5) — scripts-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.127067+00:00
+- `agents/scout/gpu_scout_engine_v2.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/practical_newsreader_solution.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/orchestrator.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/sites/bbc_ai_crawler.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:04:51.736746+00:00
+- `agents/scout/production_crawlers/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/gpu_orchestrator/preload.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/utils.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/nvml.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/crawler/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/dashboard/public_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/gui.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/dashboard/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/newsreader/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/newsreader/newsreader_agent.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.734746+00:00
+- `agents/critic/critic_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/fact_checker/fact_checker_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/archive/entity_linker.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/balancer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/balancer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/common/data_minimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_cluster_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_orchestrator_client.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/common/tracing.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.731746+00:00
+- `agents/common/consent_management.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_dashboard_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_audit.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_monitoring_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/advanced_optimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager_production.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/database.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/consent_validation_middleware.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_optimizer_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/advanced_analytics.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/memory/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/memory/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/chief_editor/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/reasoning/nucleoid_implementation.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/reasoning/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/mcp_bus/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/synthesizer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/synthesizer/gpu_tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/analyst/hybrid_tools_v4.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tensorrt_acceleration.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analyst/online_learning_trainer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analytics/dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analytics/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/scout/production_crawlers/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/crawler/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/reasoning/reasoning_state.json` (score=75.0) — agent-path — mtime=2025-10-07T17:04:51.735746+00:00
+- `agents/analyst/main.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/graph.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165872+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/__init__.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165775+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/nucleoid.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T16:51:32.677260+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/parse.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T16:51:32.677260+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/state.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165872+00:00
+- `agents/reasoning/nucleoid_repo/bin.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/package.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.165462+00:00
+- `agents/reasoning/nucleoid_repo/helloworld.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/LICENSE` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/tsconfig.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/jest.config.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/index.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/server.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166171+00:00
+- `agents/reasoning/nucleoid_repo/arc/package.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/LICENSE` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123003+00:00
+- `agents/reasoning/nucleoid_repo/arc/server.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/dist/llama/__init__.py` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123207+00:00
+- `agents/reasoning/nucleoid_repo/arc/dist/llama/llama.py` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123257+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/app.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/llm.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/openai.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/mistral.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/llama.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/gemini.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/nucleoid.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/Markdown.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162643+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/analyzer.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/claude.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/Matrix.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/Zoom.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/azure.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/lib/visualizer.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/.github/workflows/test.yml` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/.github/workflows/beta.yml` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.121442+00:00
+- `agents/reasoning/nucleoid_repo/.github/workflows/tag.yml` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/.github/media/neuro-symbolic.png` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.121442+00:00
+- `agents/reasoning/nucleoid_repo/.github/media/banner.gif` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.117442+00:00
+- `agents/reasoning/nucleoid_repo/.github/media/graph.gif` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.121442+00:00
+- `agents/reasoning/nucleoid_repo/.github/media/banner.png` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.119442+00:00
+- `agents/reasoning/nucleoid_repo/python/pyproject.toml` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166080+00:00
+- `agents/reasoning/nucleoid_repo/python/__init__.py` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.165614+00:00
+- `agents/reasoning/nucleoid_repo/python/poetry.lock` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.165872+00:00
+- `agents/reasoning/nucleoid_repo/python/lang/handlers/assignment_handler.py` (score=74.8) — agent-path — mtime=2025-10-06T16:51:32.681260+00:00
+- `agents/reasoning/nucleoid_repo/python/lang/handlers/expression_handler.py` (score=74.8) — agent-path — mtime=2025-10-06T16:51:32.682261+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/process.py` (score=74.8) — agent-path — mtime=2025-10-06T16:51:32.677260+00:00
+- `agents/reasoning/nucleoid_repo/src/event.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/transaction.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/src/state.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170094+00:00
+- `agents/reasoning/nucleoid_repo/src/Instruction.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/types.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/src/Scope.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/config.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/cache.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/nucleoid.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.169443+00:00
+- `agents/reasoning/nucleoid_repo/src/cluster.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/express.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/config.d.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/datastore.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/prototype.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.169443+00:00
+- `agents/reasoning/nucleoid_repo/src/runtime.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170094+00:00
+- `agents/reasoning/nucleoid_repo/src/process.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.169443+00:00
+- `agents/reasoning/nucleoid_repo/src/context.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166295+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/Evaluation.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/estree/generator.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168070+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/estree/estree.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167937+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts.skip` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168070+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168070+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/estree/test/estree.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168070+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$New.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167375+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/Identifier.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Array.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/Node.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/convert.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Node.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Object.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Call.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167375+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Literal.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167375+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Operator.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Template.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/$Function.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167375+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/test/Identifier.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167937+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/test/Call.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167443+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/ast/test/Function.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.167937+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$IF.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$FUNCTION.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$ALIAS.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$BLOCK.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$EXPRESSION.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$CALL.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$CLASS.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$RETURN.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$THROW.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$FOR.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/revive.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$PROPERTY.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$VARIABLE.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$ASSIGNMENT.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/lang/$nuc/$INSTANCE.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166729+00:00
+- `agents/reasoning/nucleoid_repo/src/test/context.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170431+00:00
+- `agents/reasoning/nucleoid_repo/src/test/$nuc.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170094+00:00
+- `agents/reasoning/nucleoid_repo/src/test/openapi.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/src/test/nucleoid.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/src/test/api.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170431+00:00
+- `agents/reasoning/nucleoid_repo/src/test/scope.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/openapi.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168324+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/test.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168419+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/statement.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168419+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/random.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168324+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/serialize.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168419+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/test/deep.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168419+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/test/serialize.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168583+00:00
+- `agents/reasoning/nucleoid_repo/src/lib/test/random.spec.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.168583+00:00
+- `agents/reasoning/nucleoid_repo/src/routes/logs.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.169911+00:00
+- `agents/reasoning/nucleoid_repo/src/routes/metrics.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.169911+00:00

@@ -108,7 +108,12 @@ class MCPBusClient:
 		self.base_url = base_url
 
 	def register_agent(self, agent_name: str, agent_address: str, tools: List[str]):
-		import requests
+		# Make 'requests' optional at import time so the agent can start in
+		# constrained environments where the package is not installed.
+		try:
+			import requests
+		except Exception:
+			requests = None
 
 
 		registration_data = {
@@ -119,6 +124,9 @@ class MCPBusClient:
 
 		for attempt in range(5): # Retry up to 5 times
 			try:
+				if requests is None:
+					logger.warning("Requests library not available; skipping MCP Bus registration attempt")
+					return
 				response = requests.post(f"{self.base_url}/register", json=registration_data, timeout=(2, 5))
 				response.raise_for_status()
 				logger.info(f"Successfully registered {agent_name} with MCP Bus on attempt {attempt + 1}")

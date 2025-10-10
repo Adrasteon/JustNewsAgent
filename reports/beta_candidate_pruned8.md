@@ -1,0 +1,153 @@
+# Beta release candidate files
+Generated: 2025-10-08T12:00:11.396085+00:00
+
+- `agents/newsreader/IMPLEMENTATION_SUMMARY.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/newsreader/LIFESPAN_MIGRATION.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/analyst/NATIVE_AGENT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/NATIVE_TENSORRT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/TENSORRT_QUICKSTART.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/scout/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.519638+00:00
+- `agents/reasoning/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.518637+00:00
+- `agents/scout/production_crawlers/README.md` (score=81.0) — agent-path, doc — mtime=2025-10-07T17:20:52.783236+00:00
+- `agents/crawler/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.511637+00:00
+- `agents/dashboard/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.514637+00:00
+- `scripts/README_BOOTSTRAP_MODELS.md` (score=77.0) — scripts-path, doc, frontmatter-last-updated — mtime=2025-10-07T17:20:52.798236+00:00
+- `scripts/README_MIRROR.md` (score=76.5) — scripts-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.127067+00:00
+- `agents/scout/gpu_scout_engine_v2.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/practical_newsreader_solution.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/orchestrator.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/sites/bbc_ai_crawler.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:04:51.736746+00:00
+- `agents/scout/production_crawlers/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/gpu_orchestrator/preload.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/utils.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/nvml.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/crawler/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/dashboard/public_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/gui.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/dashboard/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/newsreader/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/newsreader/newsreader_agent.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.734746+00:00
+- `agents/critic/critic_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/fact_checker/fact_checker_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/archive/entity_linker.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/balancer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/balancer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/common/data_minimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_cluster_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_orchestrator_client.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/common/tracing.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.731746+00:00
+- `agents/common/consent_management.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_dashboard_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_audit.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_monitoring_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/advanced_optimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager_production.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/database.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/consent_validation_middleware.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_optimizer_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/advanced_analytics.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/memory/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/memory/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/chief_editor/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/reasoning/nucleoid_implementation.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/reasoning/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/mcp_bus/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/synthesizer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/synthesizer/gpu_tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/analyst/hybrid_tools_v4.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tensorrt_acceleration.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analyst/online_learning_trainer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analytics/dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analytics/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/scout/production_crawlers/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/crawler/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/reasoning/reasoning_state.json` (score=75.0) — agent-path — mtime=2025-10-07T17:04:51.735746+00:00
+- `agents/analyst/main.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/scout/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/scout/regenerate_hashes.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/scout/production_crawlers/sites/__init__.py` (score=74.5) — agent-path, deduped_4 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/auth/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.085067+00:00
+- `agents/dashboard/config.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/dashboard/dashboard_config.json` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/critic/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/fact_checker/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/balancer/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.085067+00:00
+- `agents/common/consent_ui_components.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/evidence.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/ingest.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/gpu_config_manager.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/auth_models.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/gpu_manager_backup.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/async_database.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/common/gpu_metrics.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/memory/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/memory/config/gpu/gpu_config.json` (score=74.5) — agent-path, deduped_4 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/chief_editor/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.086067+00:00
+- `agents/reasoning/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.088531+00:00
+- `agents/reasoning/enhanced_reasoning_architecture.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.088531+00:00
+- `agents/reasoning/local_nucleoid/lang/handlers/assignment_handler.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089077+00:00
+- `agents/reasoning/local_nucleoid/lang/handlers/expression_handler.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089077+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/graph.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089077+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/nucleoid.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/parse.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/state.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/reasoning/local_nucleoid/nucleoid/process.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/mcp_bus/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.087067+00:00
+- `agents/synthesizer/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.089191+00:00
+- `agents/analyst/native_tensorrt_compiler.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/native_tensorrt_engine.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analytics/__init__.py` (score=74.5) — agent-path, deduped_2 — mtime=2025-10-04T13:56:27.085067+00:00
+- `agents/dashboard/web_interface/index.html` (score=74.0) — agent-path, deduped_4 — mtime=2025-10-01T14:46:07.515637+00:00
+- `agents/dashboard/templates/dashboard.html` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.515637+00:00
+- `agents/newsreader/archive/=0.44.0` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.517637+00:00
+- `agents/memory/db_migrations/003_create_article_vectors_table.sql` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.517637+00:00
+- `agents/memory/db_migrations/002_create_training_examples_table.sql` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.517637+00:00
+- `agents/memory/db_migrations/004_add_performance_indexes.sql` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.517637+00:00
+- `agents/memory/db_migrations/001_create_articles_table.sql` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.516638+00:00
+- `agents/chief_editor/evidence_review_queue.jsonl` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.509637+00:00
+- `agents/analytics/analytics/templates/dashboard.html` (score=74.0) — agent-path, deduped_2 — mtime=2025-10-01T14:46:07.507638+00:00
+- `agents/scout/production_crawlers/crawler_utils.py` (score=74.0) — agent-path — mtime=2025-10-01T14:46:07.520638+00:00
+- `agents/memory/db_migrations/-- @pgsql Chat Query Editor (localhost).sql` (score=74.0) — agent-path — mtime=2025-10-01T14:46:07.516638+00:00
+- `agents/memory/db_migrations/005_fix_index_row_size_limit.sql` (score=74.0) — agent-path — mtime=2025-10-01T14:46:07.517637+00:00
+- `agents/scout/tools.py` (score=72.0) — agent-path, todo, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/crawler_control/main.py` (score=72.0) — agent-path, todo, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/dashboard/web_interface/server.py` (score=72.0) — agent-path, todo, deduped_4 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/common/auth_api.py` (score=72.0) — agent-path, todo, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/analyst/tensorrt_tools.py` (score=72.0) — agent-path, todo, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/dashboard/web_interface/justnews_website.html` (score=71.0) — agent-path, todo, deduped_2 — mtime=2025-10-01T14:46:07.515637+00:00
+- `docs/README.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.279930+00:00
+- `markdown_docs/README.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:04:51.737746+00:00
+- `markdown_docs/production_status/PUBLIC_API_SECURITY_IMPLEMENTATION_COMPLETE.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.282930+00:00
+- `markdown_docs/development_reports/GPU_Audit_Report.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:04:51.738746+00:00
+- `markdown_docs/development_reports/agent_assessment_2025-08-18.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.282930+00:00
+- `markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:04:51.738746+00:00
+- `markdown_docs/agent_documentation/PUBLIC_API_DOCUMENTATION.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.282930+00:00
+- `.github/copilot-instructions.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.265930+00:00
+- `markdown_docs/development_reports/markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md` (score=71.0) — doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-07T17:09:58.594365+00:00
+- `markdown_docs/technical_architecture.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:07:20.869932+00:00
+- `markdown_docs/production_status/deployment_guide.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.594931+00:00
+- `markdown_docs/production_status/monitoring_setup.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.594931+00:00
+- `markdown_docs/development_reports/GPU_ANALYSIS_RESOLUTION_REPORT.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.282930+00:00
+- `markdown_docs/development_reports/REFactor_SCOUT_CRAWLER_PLAN.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-08T10:29:02.406743+00:00
+- `markdown_docs/development_reports/markdown_docs/development_reports/SYSTEM_ARCHITECTURE_ASSESSMENT.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.594365+00:00
+- `markdown_docs/development_reports/markdown_docs/development_reports/COMPLETE_V2_UPGRADE_ASSESSMENT.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.594365+00:00
+- `markdown_docs/development_reports/markdown_docs/development_reports/PRODUCTION_DEPLOYMENT_GUIDE.md` (score=71.0) — doc, frontmatter-last-updated — mtime=2025-10-07T17:09:58.594365+00:00

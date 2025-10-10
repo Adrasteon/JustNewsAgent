@@ -1,0 +1,303 @@
+# Beta release candidate files
+Generated: 2025-10-08T11:51:43.820472+00:00
+
+- `agents/newsreader/IMPLEMENTATION_SUMMARY.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/newsreader/LIFESPAN_MIGRATION.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.088067+00:00
+- `agents/analyst/NATIVE_AGENT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/NATIVE_TENSORRT_README.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/analyst/TENSORRT_QUICKSTART.md` (score=85.5) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.084354+00:00
+- `agents/scout/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.519638+00:00
+- `agents/reasoning/README.md` (score=85.0) — agent-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-01T14:46:07.518637+00:00
+- `agents/scout/production_crawlers/README.md` (score=81.0) — agent-path, doc — mtime=2025-10-07T17:20:52.783236+00:00
+- `agents/reasoning/nucleoid_repo/arc/README.md` (score=81.0) — agent-path, doc — mtime=2025-10-07T17:07:21.049527+00:00
+- `agents/reasoning/nucleoid_repo/CONTRIBUTING.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/README.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/nucleoid.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.162643+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/arc.md` (score=80.8) — agent-path, doc — mtime=2025-10-06T15:01:50.162443+00:00
+- `agents/crawler/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.511637+00:00
+- `agents/dashboard/README.md` (score=80.0) — agent-path, doc, deduped_2 — mtime=2025-10-01T14:46:07.514637+00:00
+- `agents/reasoning/nucleoid_repo/python/tests/__init__.py` (score=78.8) — agent-path, test — mtime=2025-10-06T15:01:50.166080+00:00
+- `agents/reasoning/nucleoid_repo/python/tests/test_nucleoid.py` (score=78.8) — agent-path, test — mtime=2025-10-06T16:51:32.678260+00:00
+- `scripts/README_BOOTSTRAP_MODELS.md` (score=77.0) — scripts-path, doc, frontmatter-last-updated — mtime=2025-10-07T17:20:52.798236+00:00
+- `scripts/README_MIRROR.md` (score=76.5) — scripts-path, doc, frontmatter-last-updated, deduped_2 — mtime=2025-10-04T13:56:27.127067+00:00
+- `agents/scout/gpu_scout_engine_v2.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/practical_newsreader_solution.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/orchestrator.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/scout/production_crawlers/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/scout/production_crawlers/sites/bbc_ai_crawler.py` (score=75.0) — agent-path, deduped_4 — mtime=2025-10-07T17:04:51.736746+00:00
+- `agents/scout/production_crawlers/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/gpu_orchestrator/preload.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/utils.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/gpu_orchestrator/nvml.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/crawler/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/unified_production_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/performance_monitoring.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/generic_site_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/crawler/sites/bbc_crawler.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/dashboard/public_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/gui.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/dashboard/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/dashboard/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/newsreader/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/newsreader/newsreader_agent.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.734746+00:00
+- `agents/critic/critic_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/critic/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.272930+00:00
+- `agents/fact_checker/fact_checker_v2_engine.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/fact_checker/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.273930+00:00
+- `agents/archive/entity_linker.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/balancer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/balancer/balancer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.729746+00:00
+- `agents/common/data_minimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_cluster_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_orchestrator_client.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/common/tracing.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.731746+00:00
+- `agents/common/consent_management.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_dashboard_api.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_audit.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/gpu_monitoring_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/advanced_optimization.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager_production.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/database.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/consent_validation_middleware.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/gpu_optimizer_enhanced.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/common/compliance_dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:04:51.730746+00:00
+- `agents/common/advanced_analytics.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/common/gpu_manager.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.270930+00:00
+- `agents/memory/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/memory/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/chief_editor/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.269930+00:00
+- `agents/reasoning/nucleoid_implementation.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/reasoning/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.275930+00:00
+- `agents/mcp_bus/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.274930+00:00
+- `agents/synthesizer/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/synthesizer/gpu_tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.277930+00:00
+- `agents/analyst/hybrid_tools_v4.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tensorrt_acceleration.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tools.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analyst/online_learning_trainer.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analytics/dashboard.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/analytics/main.py` (score=75.0) — agent-path, deduped_2 — mtime=2025-10-07T17:09:58.268930+00:00
+- `agents/scout/production_crawlers/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.276930+00:00
+- `agents/crawler/__init__.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.271930+00:00
+- `agents/reasoning/reasoning_state.json` (score=75.0) — agent-path — mtime=2025-10-07T17:04:51.735746+00:00
+- `agents/analyst/main.py` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tensorrt_engines/native_sentiment_roberta.json` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/analyst/tensorrt_engines/native_bias_bert.json` (score=75.0) — agent-path — mtime=2025-10-07T17:09:58.267930+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/graph.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165872+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/__init__.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165775+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/nucleoid.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T16:51:32.677260+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/parse.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T16:51:32.677260+00:00
+- `agents/reasoning/nucleoid_repo/python/nucleoid/state.py` (score=74.8) — agent-path, deduped_3 — mtime=2025-10-06T15:01:50.165872+00:00
+- `agents/dashboard/dashboard_history.db` (score=74.8) — agent-path — mtime=2025-10-06T15:01:51.030448+00:00
+- `agents/reasoning/nucleoid_repo/bin.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/package.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.165462+00:00
+- `agents/reasoning/nucleoid_repo/helloworld.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/LICENSE` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.122472+00:00
+- `agents/reasoning/nucleoid_repo/tsconfig.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.170443+00:00
+- `agents/reasoning/nucleoid_repo/jest.config.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/index.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.162971+00:00
+- `agents/reasoning/nucleoid_repo/server.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.166171+00:00
+- `agents/reasoning/nucleoid_repo/arc/package.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/LICENSE` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123003+00:00
+- `agents/reasoning/nucleoid_repo/arc/server.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/dist/llama/__init__.py` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123207+00:00
+- `agents/reasoning/nucleoid_repo/arc/dist/llama/llama.py` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123257+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/app.ts` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.123442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a5313dff.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/90c28cc7.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/bb43febb.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ed36ccf7.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e8dc4411.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/27a28665.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/97999447.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e26a3af2.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/36fdfd69.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a5f85a15.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d364b489.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/7df24a62.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/36d67576.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6e02f1e3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/913fb3ed.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a416b8f3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/67a423a3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2dd70a9a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/c8f0f002.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.157443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/77fdfe62.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f1cefba8.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/39e1d7f9.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/4258a5f9.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3631a71a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2281f1f4.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/941d9a10.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/54d82841.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d9fac9be.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a78176bb.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/68b16354.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/29623171.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/91413438.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b60334d2.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f5b8619d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b7249182.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1b2d62fb.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1b60fb0c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/25d8a9c8.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6455b5f5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ae4f1146.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/67a3c6ac.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e50d258f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ecdecbb3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e179c5f4.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/5c0a986e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/eb281b96.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1f0c79e5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/4093f84a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1bfc4729.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d07ae81c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1f642eb9.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/44d8ac46.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/c3f564a4.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.157443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/445eab21.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/97a05b5b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/780d0b14.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2dee498d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3af2c5a8.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d687bc17.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/4290ef0e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a87f7484.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3618c87e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/72ca375d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2013d3e2.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/484b58aa.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ea32f347.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/4c5c2cf0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/85c4e7cd.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/447fd412.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/cbded52d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.157443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/99b1bc43.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b0c4d837.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/9ecd008a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e48d4e1a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/32597951.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f8b3ba0a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/963e52fc.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/83302e8f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/82819916.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/539a4f51.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/28e73c20.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/7e0986d6.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f8ff0b80.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/93b581b8.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ff28f65a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/8731374e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/05269061.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/017c7c7b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e76a88a6.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/bdad9b1f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/62c24649.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/681b3aeb.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e509e548.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/80af3007.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/22168020.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ac0a08a4.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6cdd2623.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ff805c23.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/9d9215db.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/9172f3a0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d13f3404.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3aa6fb7a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a2fd1cf0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2bee17df.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/7fe24cdd.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/2dc579da.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e98196ab.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ce9e57f2.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/48d8fb45.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ba26e723.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/7ddcd7ec.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/239be575.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a61f2674.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/8f2ea7aa.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/855e0971.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3ac3eb23.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/41e4d17e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e9afcf9a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/11852cab.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/cf98881b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/0a938d79.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/95990924.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/1c786137.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/99fa7670.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/045e512c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/22eb0ac0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.145442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/49d1d64f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6d75e8bb.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ba97ae07.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/23b5c85d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.146442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/952a094c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/007bbfb7.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ae3edfdc.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b2862040.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d0f5fe59.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/9f236235.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/db3e9e38.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/e9614598.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/56dc2b01.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a79310a0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/8403a5d5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6c434453.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/7b7f7511.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ec883f72.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/feca6190.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f8a8fe49.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/c1d99e64.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.157443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d4f3cd78.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ded97339.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/cdecee7f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.157443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a3df8b1e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a8c38be5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b27ca6d3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/94f9d214.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/8be77c9e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b8cdaf2b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d89b689b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/868de0fa.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6d58a25d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/995c5fa3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a699fb00.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a68b268e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a8d7556c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.155442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3f7978a0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b94a9452.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/5168d44c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6a1e5592.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6f8cd79b.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/0d3d703e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/b548a754.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.156443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ddf7fa4f.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/ea786f4a.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.160443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/8efcae92.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.153443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a61ba2ce.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/694f12f3.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.150443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/73251a56.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/dae9d2b5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/6e19193c.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.151443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/f76d97a5.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/a3325580.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.154443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/fcc82909.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.161443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/3befdf3e.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.147443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/db93a21d.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/5614dbcf.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.149442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/dc1df850.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d9f24cd1.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.159443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/05f2a901.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.144769+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/46f33fce.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.148443+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/d22278a0.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.158442+00:00
+- `agents/reasoning/nucleoid_repo/arc/src/data/training/88a10436.json` (score=74.8) — agent-path — mtime=2025-10-06T15:01:50.152442+00:00
