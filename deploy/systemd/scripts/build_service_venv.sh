@@ -69,9 +69,12 @@ if ! command -v "$PYTHON_VERSION" >/dev/null 2>&1; then
 fi
 
 # Validate Python version is 3.x
-PY_VERSION=$("$PYTHON_VERSION" --version 2>&1 | awk '{print $2}' | cut -d. -f1)
+if ! PY_VERSION=$("$PYTHON_VERSION" -c "import sys; print(sys.version_info.major)" 2>/dev/null); then
+    log_error "Failed to determine Python version"
+    exit 1
+fi
 if [[ "$PY_VERSION" != "3" ]]; then
-    log_error "Python 3.x is required, but found: $("$PYTHON_VERSION" --version)"
+    log_error "Python 3.x is required, but found Python $PY_VERSION"
     log_error "Set PYTHON_VERSION to a Python 3.x interpreter (e.g., python3, python3.12)"
     exit 1
 fi
@@ -164,7 +167,9 @@ if [[ -f "deploy/systemd/scripts/ci_check_deps.py" ]]; then
         log_warning "Dependency check reported missing packages"
         log_warning "The runtime requirements may need additional modules beyond the minimal set"
         log_warning "Check the output above for specific packages to add to $REQUIREMENTS_FILE"
-        log_warning "This is expected if using requirements-runtime.txt; full deps are in environment.yml"
+        if [[ -f "environment.yml" ]]; then
+            log_warning "Full dependencies are defined in environment.yml for development environments"
+        fi
     fi
 fi
 
