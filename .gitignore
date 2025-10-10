@@ -74,6 +74,9 @@ tmp/
 *.csv
 *.png
 *.txt
+# Exception: Allow requirements files
+!requirements*.txt
+!**/requirements*.txt
 batch_*.json
 production_*.json
 ultra_fast_*.json
