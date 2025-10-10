@@ -1,0 +1,15 @@
+# Runtime-only requirements for JustNews Preview workspace
+# Small, focused set of packages needed to run core services in production
+# Used by CI to validate the minimal runtime environment for systemd services
+
+# Core FastAPI stack for REST APIs
+# Aligned with environment.yml versions for consistency
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# HTTP client for inter-service communication (MCP Bus, etc.)
+requests>=2.31.0
+
+# Optional: Prometheus client for metrics (lightweight)
+prometheus-client>=0.19.0
