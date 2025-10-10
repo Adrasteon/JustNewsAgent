@@ -1,0 +1,79 @@
+name: Preview - Runtime Dependency Validation
+
+# Run on pull requests to validate runtime dependencies for the Preview workspace
+on:
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/ci_check_deps.py'
+      - 'deploy/systemd/scripts/build_service_venv.sh'
+      - '.github/workflows/preview.yml'
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/ci_check_deps.py'
+      - 'deploy/systemd/scripts/build_service_venv.sh'
+      - '.github/workflows/preview.yml'
+  workflow_dispatch: {}
+
+jobs:
+  preview-deps-check:
+    name: Preview Runtime Dependencies Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build lightweight runtime venv
+        run: |
+          cd release_beta_minimal_preview
+          bash ../deploy/systemd/scripts/build_service_venv.sh ./venv ./requirements-runtime.txt
+
+      - name: Verify venv created successfully
+        run: |
+          if [[ ! -d "release_beta_minimal_preview/venv" ]]; then
+            echo "ERROR: Virtual environment not created"
+            exit 1
+          fi
+          echo "✓ Virtual environment created successfully"
+          release_beta_minimal_preview/venv/bin/python --version
+          release_beta_minimal_preview/venv/bin/pip list
+
+      - name: Check runtime dependencies
+        run: |
+          # Use the venv we just built to validate runtime deps
+          release_beta_minimal_preview/venv/bin/python deploy/systemd/scripts/ci_check_deps.py
+
+      - name: Validate dependency check script
+        run: |
+          # Ensure the CI check script itself is valid Python
+          python -m py_compile deploy/systemd/scripts/ci_check_deps.py
+          echo "✓ CI dependency checker validated"
+
+      - name: Report results
+        if: success()
+        run: |
+          echo "========================================="
+          echo "Preview Runtime Dependency Check: PASSED"
+          echo "========================================="
+          echo "All required runtime Python modules are available."
+          echo "The Preview workspace is ready for deployment."
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "========================================="
+          echo "Preview Runtime Dependency Check: FAILED"
+          echo "========================================="
+          echo "Missing runtime dependencies detected."
+          echo "Review the logs above for specific missing modules."
+          echo "Update requirements-runtime.txt or install missing packages."
+          exit 1
