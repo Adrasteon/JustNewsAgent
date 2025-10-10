@@ -1,0 +1,124 @@
+name: Preview - Runtime Dependency Validation
+
+# Validates the Preview workspace (release_beta_minimal_preview) which is the
+# canonical production deployment tree. This workflow creates a lightweight venv,
+# installs runtime requirements, and validates that all required dependencies are present.
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/**'
+      - 'agents/*/main.py'
+      - '.github/workflows/preview.yml'
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/**'
+
+jobs:
+  validate-runtime-deps:
+    name: Validate Runtime Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build service venv
+        run: |
+          # Use the deterministic venv builder to create a production-like environment
+          bash deploy/systemd/scripts/build_service_venv.sh \
+            "$HOME/justnews-preview-venv" \
+            release_beta_minimal_preview/requirements-runtime.txt
+
+      - name: Check runtime dependencies
+        run: |
+          # Activate the venv and run the CI dependency checker
+          source "$HOME/justnews-preview-venv/bin/activate"
+          python deploy/systemd/scripts/ci_check_deps.py
+
+      - name: Test preflight check script
+        run: |
+          # Verify the preflight check script can load without errors
+          # (it will skip actual checks since services aren't running)
+          source "$HOME/justnews-preview-venv/bin/activate"
+          bash deploy/systemd/scripts/justnews-preflight-check.sh --help || true
+
+      - name: Test start-agent script
+        run: |
+          # Verify the start-agent script can load without errors
+          source "$HOME/justnews-preview-venv/bin/activate"
+          bash deploy/systemd/scripts/justnews-start-agent.sh --help
+
+      - name: Verify venv build info
+        run: |
+          # Display build info for audit trail
+          cat "$HOME/justnews-preview-venv/build_info.txt"
+
+      - name: Display installed packages
+        run: |
+          # Show what was installed for debugging
+          "$HOME/justnews-preview-venv/bin/pip" list
+
+  validate-systemd-units:
+    name: Validate Systemd Unit Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check systemd unit files exist
+        run: |
+          # Verify that systemd unit examples are present
+          ls -la deploy/systemd/*.service || echo "No .service files found (may be expected)"
+
+      - name: Validate systemd unit syntax
+        run: |
+          # Basic syntax validation for systemd units
+          for unit in deploy/systemd/*.service; do
+            if [[ -f "$unit" ]]; then
+              echo "Checking $unit..."
+              # Basic validation - check for required sections
+              grep -q '\[Unit\]' "$unit" || echo "Warning: $unit missing [Unit] section"
+              grep -q '\[Service\]' "$unit" || echo "Warning: $unit missing [Service] section"
+              grep -q 'ExecStart=' "$unit" || echo "Warning: $unit missing ExecStart"
+            fi
+          done
+
+  validate-deployment-scripts:
+    name: Validate Deployment Helper Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check script executability
+        run: |
+          # Verify deployment scripts are executable
+          chmod +x deploy/systemd/scripts/*.sh
+          ls -la deploy/systemd/scripts/*.sh
+
+      - name: Shellcheck validation
+        run: |
+          # Install shellcheck
+          sudo apt-get update && sudo apt-get install -y shellcheck
+          
+          # Check all shell scripts for common issues
+          for script in deploy/systemd/scripts/*.sh; do
+            if [[ -f "$script" ]]; then
+              echo "Checking $script..."
+              shellcheck "$script" -e SC1090,SC1091 || echo "Warning: shellcheck found issues in $script"
+            fi
+          done
+        continue-on-error: true

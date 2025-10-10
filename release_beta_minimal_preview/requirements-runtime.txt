@@ -1,0 +1,20 @@
+# Minimal runtime-only requirements for fast CI and lightweight production venv
+# This file contains only the essential packages needed to start agents and validate dependencies
+# Full requirements are in environment.yml or agent-specific requirements files
+
+# Core web framework (required by all agents)
+fastapi>=0.104.1
+uvicorn>=0.24.0
+pydantic>=2.5.0
+requests>=2.31.0
+
+# Observability and metrics (common dependencies)
+prometheus-client>=0.19.0
+
+# Database (required by memory agent and others)
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+
+# Testing framework (for CI validation)
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
