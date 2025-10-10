@@ -1,0 +1,27 @@
+# JustNews V4 - Minimal Runtime Dependencies
+# This file contains only the essential packages needed to run the core JustNews agents
+# in production. It excludes development tools, testing frameworks, and optional ML packages.
+#
+# Usage:
+#   pip install -r requirements-runtime.txt
+#
+# This minimal set is used for:
+# - Fast CI validation (dependency checks)
+# - Lightweight production venv builds
+# - Preview workspace testing
+
+# Web framework - required by all agents
+fastapi>=0.104.1
+uvicorn>=0.24.0
+pydantic>=2.5.0
+
+# HTTP client - required by MCP bus and inter-agent communication
+requests>=2.31.0
+
+# Basic utilities
+python-dateutil>=2.8.2
+pytz>=2023.3
+
+# Database support (Memory agent)
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0

@@ -1,0 +1,56 @@
+# JustNews Agent Service Template
+# This is a minimal systemd unit template for JustNews agents
+# Copy to /etc/systemd/system/ and customize for your deployment
+#
+# Usage:
+#   1. Copy this file to /etc/systemd/system/justnews@.service
+#   2. Enable agents: systemctl enable justnews@mcp_bus justnews@chief_editor ...
+#   3. Start agents: systemctl start justnews@mcp_bus
+#
+# Example instances:
+#   justnews@mcp_bus.service
+#   justnews@chief_editor.service
+#   justnews@scout.service
+#   justnews@analyst.service
+
+[Unit]
+Description=JustNews %I Agent
+Documentation=https://github.com/Adrasteon/JustNewsAgent
+After=network.target
+# For agents that depend on MCP Bus, add:
+# Wants=justnews@mcp_bus.service
+# After=justnews@mcp_bus.service
+
+[Service]
+Type=simple
+User=justnews
+Group=justnews
+WorkingDirectory=/opt/justnews/JustNewsAgent
+
+# Environment configuration
+Environment="JUSTNEWS_ROOT=/opt/justnews/JustNewsAgent"
+Environment="PYTHON_BIN=/opt/justnews/venv/bin/python"
+Environment="MCP_BUS_URL=http://127.0.0.1:8000"
+EnvironmentFile=-/etc/justnews/global.env
+
+# Start the agent using the startup script
+ExecStart=/opt/justnews/JustNewsAgent/deploy/systemd/scripts/justnews-start-agent.sh %i
+
+# Process management
+Restart=on-failure
+RestartSec=10s
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Resource limits (adjust as needed)
+MemoryLimit=2G
+CPUQuota=200%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=justnews-%i
+
+[Install]
+WantedBy=multi-user.target

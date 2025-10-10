@@ -3,12 +3,23 @@ title: Changelog
 description: Auto-generated description for Changelog
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-10-10
 ---
 
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### 🔧 **Preview Workspace - Runtime Dependency Validation**
+- **✅ CI Dependency Checker**: Added `deploy/systemd/scripts/ci_check_deps.py` for validating runtime Python modules
+- **✅ Reproducible Venv Builder**: Created `deploy/systemd/scripts/build_service_venv.sh` for building isolated production venvs
+- **✅ Minimal Runtime Dependencies**: Added `release_beta_minimal_preview/requirements-runtime.txt` with essential packages only
+- **✅ Preview CI Workflow**: Implemented `.github/workflows/preview-ci.yml` for automated dependency validation
+- **✅ Systemd Templates**: Added minimal service unit templates and logrotate configuration to preview workspace
+- **✅ Production Deployment Artifacts**: Preview workspace now serves as single source-of-truth for production deployments
+- **Technical**: Fast CI validation (<2 min), lightweight venv builds, and deterministic deployment artifacts
 
 ## [0.8.0] - 2025-09-25 - **BETA RELEASE CANDIDATE**
 

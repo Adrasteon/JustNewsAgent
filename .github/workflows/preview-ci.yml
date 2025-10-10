@@ -1,0 +1,96 @@
+name: Preview CI - Runtime Dependency Validation
+
+# Run on manual dispatch, pull requests, and pushes to main/dev
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/**'
+      - '.github/workflows/preview-ci.yml'
+  push:
+    branches: [ main, dev ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/**'
+      - '.github/workflows/preview-ci.yml'
+
+jobs:
+  preview-runtime-validation:
+    name: Preview - Runtime Dependency Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Create isolated venv for preview
+        run: |
+          echo "=========================================="
+          echo "Creating isolated preview virtualenv"
+          echo "=========================================="
+          
+          # Use the build_service_venv.sh script to create a reproducible venv
+          bash deploy/systemd/scripts/build_service_venv.sh \
+            --venv /tmp/preview-venv \
+            --requirements release_beta_minimal_preview/requirements-runtime.txt \
+            --python python3
+
+      - name: Verify venv contains required packages
+        run: |
+          echo "=========================================="
+          echo "Verifying venv installation"
+          echo "=========================================="
+          
+          # Check that uvicorn and requests are installed
+          /tmp/preview-venv/bin/python -c "import uvicorn; print(f'uvicorn version: {uvicorn.__version__}')"
+          /tmp/preview-venv/bin/python -c "import requests; print(f'requests version: {requests.__version__}')"
+          /tmp/preview-venv/bin/python -c "import fastapi; print(f'fastapi version: {fastapi.__version__}')"
+          
+          echo ""
+          echo "✓ All critical packages present in venv"
+
+      - name: Run runtime dependency checker
+        run: |
+          echo "=========================================="
+          echo "Running ci_check_deps.py"
+          echo "=========================================="
+          
+          # Run the CI dependency checker using the isolated venv
+          /tmp/preview-venv/bin/python deploy/systemd/scripts/ci_check_deps.py
+          
+          echo ""
+          echo "✓ Runtime dependency check passed"
+
+      - name: Test venv can start uvicorn
+        run: |
+          echo "=========================================="
+          echo "Testing uvicorn startup"
+          echo "=========================================="
+          
+          # Quick smoke test: check uvicorn help runs
+          /tmp/preview-venv/bin/uvicorn --help > /dev/null
+          
+          echo "✓ uvicorn executable works"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo ""
+          echo "=========================================="
+          echo "✓ Preview CI validation PASSED"
+          echo "=========================================="
+          echo ""
+          echo "Results:"
+          echo "  - Isolated venv created successfully"
+          echo "  - requirements-runtime.txt installed"
+          echo "  - ci_check_deps.py validation passed"
+          echo "  - uvicorn & requests verified present"
+          echo ""
+          echo "The preview workspace is ready for production deployment."
