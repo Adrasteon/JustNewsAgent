@@ -71,6 +71,35 @@ jobs:
           name: codecov-umbrella
         continue-on-error: true
 
+  runtime-deps-check:
+    name: Runtime Dependencies Check (Preview)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install minimal runtime dependencies
+        run: |
+          pip install -U pip setuptools wheel
+          pip install -r release_beta_minimal_preview/requirements-runtime.txt
+        continue-on-error: false
+
+      - name: Run runtime dependency check
+        run: |
+          python ci_check_deps.py
+        continue-on-error: false
+
+      - name: Report results
+        if: always()
+        run: |
+          echo "Runtime dependency check completed"
+          echo "See job output for any missing dependencies"
+
   version-compliance:
     name: Version Compliance Check
     runs-on: ubuntu-latest
