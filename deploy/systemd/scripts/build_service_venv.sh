@@ -5,6 +5,40 @@
 
 set -euo pipefail
 
+# Show usage if requested
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    cat << 'EOF'
+JustNews Service Virtual Environment Builder
+
+USAGE:
+    build_service_venv.sh [VENV_PATH] [REQUIREMENTS_FILE]
+
+ARGUMENTS:
+    VENV_PATH           Path to create the virtual environment
+                        (default: /opt/justnews/venv)
+    REQUIREMENTS_FILE   Requirements file to install
+                        (default: release_beta_minimal_preview/requirements-runtime.txt)
+
+ENVIRONMENT VARIABLES:
+    PYTHON_VERSION      Python interpreter to use (default: python3)
+
+EXAMPLES:
+    # Build default production venv
+    sudo ./build_service_venv.sh
+
+    # Build custom venv for CI
+    ./build_service_venv.sh ~/test-venv release_beta_minimal_preview/requirements-runtime.txt
+
+    # Use specific Python version
+    PYTHON_VERSION=python3.12 ./build_service_venv.sh /tmp/my-venv
+
+EXIT CODES:
+    0 - Success
+    1 - Error (missing Python, requirements file, or installation failure)
+EOF
+    exit 0
+fi
+
 # Configuration
 VENV_PATH="${1:-/opt/justnews/venv}"
 REQUIREMENTS_FILE="${2:-release_beta_minimal_preview/requirements-runtime.txt}"
