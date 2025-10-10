@@ -1,0 +1,134 @@
+# JustNews V4 - Preview Minimal Runtime Requirements
+# 
+# This file contains the minimal set of Python packages required to run
+# the JustNews V4 agent system in Preview mode.
+#
+# Install with: pip install -r requirements-runtime.txt
+#
+# Note: This is a subset of the full dependency tree. For development,
+# use the main environment.yml file instead.
+
+# ============================================================================
+# CORE WEB FRAMEWORK (Required for all agents)
+# ============================================================================
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+requests>=2.31.0
+
+# ============================================================================
+# CORE DATA PROCESSING (Required by most agents)
+# ============================================================================
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# ============================================================================
+# CORE ML/NLP (Required by analyst, scout, synthesizer, fact_checker)
+# ============================================================================
+torch>=2.4.1
+transformers>=4.56.0
+sentence-transformers>=2.2.2
+tokenizers>=0.22.0
+accelerate>=1.10.1
+safetensors>=0.4.3
+
+# ============================================================================
+# NLP TOOLS (Required by multiple agents)
+# ============================================================================
+spacy>=3.7.0
+networkx>=3.0
+
+# ============================================================================
+# DATABASE (Required by memory agent)
+# ============================================================================
+psycopg2-binary>=2.9.0
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+
+# ============================================================================
+# ASYNC HTTP (Used by scout, crawler)
+# ============================================================================
+aiohttp>=3.9.0
+httpx>=0.25.0
+
+# ============================================================================
+# WEB SCRAPING (Required by scout, crawler)
+# ============================================================================
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+playwright>=1.40.0
+crawl4ai>=0.3.0
+
+# ============================================================================
+# AUTHENTICATION & SECURITY (Used by API endpoints)
+# ============================================================================
+pyjwt>=2.8.0
+cryptography>=41.0.0
+slowapi>=0.1.9
+
+# ============================================================================
+# CONFIGURATION & SERIALIZATION
+# ============================================================================
+pyyaml>=6.0.0
+python-dotenv>=1.0.0
+
+# ============================================================================
+# MONITORING & OBSERVABILITY
+# ============================================================================
+prometheus-client>=0.19.0
+psutil>=5.9.0
+structlog>=23.2.0
+
+# ============================================================================
+# GPU SUPPORT (Optional - graceful fallback if not available)
+# ============================================================================
+# Uncomment if GPU acceleration is available:
+# nvidia-ml-py3>=7.352.0
+# GPUtil>=1.4.0
+# pycuda>=2024.1
+
+# ============================================================================
+# ADVANCED ML (Optional - used by specific agents)
+# ============================================================================
+# Uncomment if using advanced ML features:
+# bertopic>=0.16.0
+# hdbscan>=0.8.33
+# umap-learn>=0.5.5
+# faiss-cpu>=1.7.4  # or faiss-gpu for GPU support
+# chromadb>=0.4.0
+# tomotopy>=0.12.4
+# textstat>=0.7.3
+
+# ============================================================================
+# GRAPHQL API (Optional - for archive agent)
+# ============================================================================
+# graphene>=3.3.0
+# graphql-core>=3.2.0
+
+# ============================================================================
+# IMAGE PROCESSING (Optional - for newsreader agent)
+# ============================================================================
+# Pillow>=10.0.0
+
+# ============================================================================
+# SYMBOLIC REASONING (Optional - for reasoning agent)
+# ============================================================================
+# nucleoid>=0.1.0  # If available
+
+# ============================================================================
+# TESTING & DEVELOPMENT
+# ============================================================================
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# - This manifest is designed for minimal Preview deployments
+# - GPU dependencies are commented out but can be enabled as needed
+# - Advanced ML dependencies are optional and can be installed on-demand
+# - For production deployments, use the full environment.yml
+# - TensorRT and other platform-specific packages may need special installation
