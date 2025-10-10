@@ -3,6 +3,12 @@
 # Starts the justnewsagent set of FastAPI/uvicorn agent services using the
 # `justnews-v2-py312` conda environment. Performs simple health checks and
 # writes per-agent logs to ./logs/
+#
+# Preview Mode Enhancements:
+# - ORCHESTRATOR_FIRST sequencing for GPU orchestrator
+# - PYTHONPATH export for reliable module imports
+# - uvicorn --app-dir for consistent working directory
+# - copy_module_from_archive() for idempotent module restoration
 
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -14,6 +20,38 @@ CONDA_ENV="justnews-v2-py312"
 
 # Default timeout for healthchecks (seconds)
 HEALTH_TIMEOUT=10
+
+# Enable ORCHESTRATOR_FIRST to start GPU orchestrator before other agents
+# This ensures GPU resources are managed before agents try to use them
+ORCHESTRATOR_FIRST="${ORCHESTRATOR_FIRST:-1}"
+
+# Export PYTHONPATH to ensure agents can import from project root
+export PYTHONPATH="${PYTHONPATH:-$SCRIPT_DIR}"
+
+# Helper function for idempotent module restoration from archive
+# Usage: copy_module_from_archive <relative_path>
+# Example: copy_module_from_archive "agents/scout/tools.py"
+copy_module_from_archive() {
+  local rel_path="$1"
+  local target="$SCRIPT_DIR/$rel_path"
+  local archive_source="$SCRIPT_DIR/.backup/$rel_path"
+  
+  if [ -f "$target" ] && [ -s "$target" ]; then
+    # File exists and is non-empty, skip restoration
+    return 0
+  fi
+  
+  if [ ! -f "$archive_source" ]; then
+    echo "WARNING: Archive source not found for $rel_path"
+    return 1
+  fi
+  
+  echo "Restoring $rel_path from archive..."
+  mkdir -p "$(dirname "$target")"
+  cp "$archive_source" "$target"
+  echo "✓ Restored $rel_path"
+  return 0
+}
 
 # Agent definitions: name|python_module:app|port
 # Keep this list in sync with agents/*/main.py and the dashboard mapping
@@ -259,8 +297,14 @@ start_agent() {
   local err_log="$LOG_DIR/${name}.err.log"
 
   echo "Starting $name -> $module on port $port"
-  # Start uvicorn via conda run so the right env is used. Run in background.
-  conda run --name "$CONDA_ENV" uvicorn "$module" --host 0.0.0.0 --port "$port" --log-level info >"$out_log" 2>"$err_log" &
+  # Start uvicorn with --app-dir for reliable imports and PYTHONPATH
+  # This ensures the working directory is set correctly for module resolution
+  conda run --name "$CONDA_ENV" uvicorn "$module" \
+    --host 0.0.0.0 \
+    --port "$port" \
+    --app-dir "$SCRIPT_DIR" \
+    --log-level info \
+    >"$out_log" 2>"$err_log" &
   local pid=$!
   PIDS+=("$pid")
   echo "$name started (pid $pid), logs: $out_log, $err_log"
@@ -306,8 +350,32 @@ else
 fi
 
 echo "Starting agents using conda env: $CONDA_ENV"
+
+# ORCHESTRATOR_FIRST: Start GPU orchestrator first if enabled
+if [ "$ORCHESTRATOR_FIRST" = "1" ]; then
+  echo "ORCHESTRATOR_FIRST=1: Starting GPU orchestrator before other agents"
+  for entry in "${AGENTS[@]}"; do
+    IFS='|' read -r name module port <<< "$entry"
+    if [ "$name" = "gpu_orchestrator" ]; then
+      start_agent "$name" "$module" "$port"
+      echo "Waiting for GPU orchestrator to be ready..."
+      sleep 2
+      if wait_for_health "$name" "$port"; then
+        echo "✓ GPU orchestrator ready"
+      else
+        echo "⚠️ GPU orchestrator not responding - continuing anyway"
+      fi
+      break
+    fi
+  done
+fi
+
+# Start remaining agents (skip gpu_orchestrator if already started)
 for entry in "${AGENTS[@]}"; do
   IFS='|' read -r name module port <<< "$entry"
+  if [ "$ORCHESTRATOR_FIRST" = "1" ] && [ "$name" = "gpu_orchestrator" ]; then
+    continue  # Skip - already started
+  fi
   start_agent "$name" "$module" "$port"
 done
 
