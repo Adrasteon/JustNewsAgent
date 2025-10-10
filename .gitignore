@@ -74,6 +74,11 @@ tmp/
 *.csv
 *.png
 *.txt
+# Exception: Allow requirements files for dependency management
+!requirements.txt
+!requirements-*.txt
+!**/requirements.txt
+!**/requirements-*.txt
 batch_*.json
 production_*.json
 ultra_fast_*.json

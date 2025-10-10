@@ -1,0 +1,108 @@
+name: Preview CI - Runtime Dependency Checks
+
+# Validate that the preview workspace has all required runtime dependencies
+# and that the deterministic venv builder works correctly
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [ main, fix/deps-ci-preflight ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/**'
+      - 'requirements*.txt'
+      - '.github/workflows/preview-ci.yml'
+  push:
+    branches: [ main, fix/deps-ci-preflight ]
+    paths:
+      - 'release_beta_minimal_preview/**'
+      - 'deploy/systemd/scripts/**'
+      - 'requirements*.txt'
+
+jobs:
+  preview-runtime-check:
+    name: Preview Runtime Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build deterministic runtime venv
+        run: |
+          # Use the deterministic venv builder script
+          bash deploy/systemd/scripts/build_service_venv.sh \
+            --venv .preview-venv \
+            --requirements release_beta_minimal_preview/requirements-runtime.txt \
+            --verify
+
+      - name: Verify runtime dependencies with CI checker
+        run: |
+          # Run the CI dependency checker inside the venv
+          .preview-venv/bin/python deploy/systemd/scripts/ci_check_deps.py
+
+      - name: Test MCP bus startup (smoke test)
+        run: |
+          # Quick smoke test: can mcp_bus import its modules?
+          .preview-venv/bin/python -c "
+import sys
+try:
+    import fastapi
+    import uvicorn
+    import pydantic
+    import requests
+    print('✓ All MCP bus runtime dependencies available')
+    sys.exit(0)
+except ImportError as e:
+    print(f'✗ Import failed: {e}')
+    sys.exit(1)
+"
+
+      - name: Verify venv reproducibility
+        run: |
+          # Build a second venv and compare package lists
+          bash deploy/systemd/scripts/build_service_venv.sh \
+            --venv .preview-venv-2 \
+            --requirements release_beta_minimal_preview/requirements-runtime.txt \
+            --no-verify
+          
+          # Compare installed packages (should be identical)
+          diff \
+            <(.preview-venv/bin/pip list --format=freeze | sort) \
+            <(.preview-venv-2/bin/pip list --format=freeze | sort) \
+            || echo "Warning: venv reproducibility check found differences"
+
+  preview-full-dependencies:
+    name: Preview Full Development Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build full development venv
+        run: |
+          bash deploy/systemd/scripts/build_service_venv.sh \
+            --venv .dev-venv \
+            --requirements requirements.txt \
+            --full \
+            --verify
+
+      - name: Run linting checks
+        run: |
+          # Install ruff if not already present
+          .dev-venv/bin/pip install ruff || true
+          # Run ruff check (non-blocking for now)
+          .dev-venv/bin/ruff check . || echo "Linting found issues (non-blocking)"
+        continue-on-error: true
+
+      - name: Verify all runtime dependencies present
+        run: |
+          .dev-venv/bin/python deploy/systemd/scripts/ci_check_deps.py
