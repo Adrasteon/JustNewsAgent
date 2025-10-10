@@ -1,17 +1,22 @@
-# Minimal runtime-only dependencies for Preview CI validation
-# This file contains only the Python packages needed to start and run
-# JustNews agents, without development, testing, or full ML dependencies.
-# Used by CI to validate deployment dependency management.
+# JustNews V4 Runtime-Only Requirements
+# Minimal production dependencies for Preview workspace deployment
+#
+# Usage:
+#   python3 -m venv /opt/justnews/venv
+#   /opt/justnews/venv/bin/pip install -r requirements-runtime.txt
+#
+# Version constraints aligned with environment.yml for consistency
 
-# Core web framework dependencies (essential for all agents)
+# Core FastAPI stack for agent APIs
 fastapi>=0.104.1
-uvicorn>=0.24.0
+uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
+
+# HTTP client for MCP inter-agent communication
 requests>=2.31.0
 
-# Database connectivity (required by memory agent and others)
-psycopg2-binary>=2.9.0
-sqlalchemy>=2.0.0
+# Observability and monitoring
+prometheus-client>=0.19.0
 
-# Basic utilities used across agents
-python-dotenv>=1.0.0
+# Database client (runtime PostgreSQL connections)
+psycopg2-binary>=2.9.9

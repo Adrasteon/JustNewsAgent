@@ -54,46 +54,68 @@ if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
     exit 1
 fi
 
-log_info "Building venv at: $TARGET_DIR"
-log_info "Using requirements: $REQUIREMENTS_FILE"
-
-# Remove existing venv if present
-if [[ -d "$TARGET_DIR" ]]; then
-    log_warning "Removing existing venv at $TARGET_DIR"
-    rm -rf "$TARGET_DIR"
-fi
-
-# Create virtual environment
-log_info "Creating virtual environment..."
-"$PYTHON_BIN" -m venv "$TARGET_DIR"
-
-if [[ ! -d "$TARGET_DIR" ]] || [[ ! -f "$TARGET_DIR/bin/activate" ]]; then
-    log_error "Failed to create virtual environment"
+# Check Python command availability
+if ! command -v "$PYTHON_CMD" &> /dev/null; then
+    log_error "Python command not found: $PYTHON_CMD"
     exit 1
 fi
 
-log_success "Virtual environment created"
+# Display Python version
+PY_VERSION=$("$PYTHON_CMD" --version 2>&1)
+log_info "Using Python: $PY_VERSION"
 
-# Upgrade pip to avoid warnings
-log_info "Upgrading pip..."
-"$TARGET_DIR/bin/pip" install --quiet --upgrade pip setuptools wheel
+# Remove existing venv if present
+if [[ -d "$VENV_PATH" ]]; then
+    log_warn "Removing existing venv: $VENV_PATH"
+    rm -rf "$VENV_PATH"
+fi
+
+# Create new venv
+log_info "Creating virtual environment at: $VENV_PATH"
+"$PYTHON_CMD" -m venv "$VENV_PATH"
+
+# Activate venv (for verification only; actual activation happens in caller's shell)
+VENV_PYTHON="$VENV_PATH/bin/python"
+VENV_PIP="$VENV_PATH/bin/pip"
+
+if [[ ! -f "$VENV_PYTHON" ]]; then
+    log_error "Failed to create venv: $VENV_PYTHON not found"
+    exit 1
+fi
+
+# Upgrade pip, setuptools, and wheel for deterministic installs
+log_info "Upgrading pip, setuptools, and wheel..."
+"$VENV_PIP" install --upgrade pip setuptools wheel
 
 # Install requirements
-log_info "Installing runtime dependencies from $REQUIREMENTS_FILE..."
-"$TARGET_DIR/bin/pip" install --quiet -r "$REQUIREMENTS_FILE"
+log_info "Installing requirements from: $REQUIREMENTS_FILE"
+"$VENV_PIP" install -r "$REQUIREMENTS_FILE"
 
-# Verify installation
-log_info "Verifying installation..."
-INSTALLED_COUNT=$("$TARGET_DIR/bin/pip" list --format=freeze | wc -l)
-log_success "Installed $INSTALLED_COUNT packages"
+# Verification step
+if [[ "$VERIFY" == true ]]; then
+    log_info "Running post-install verification..."
+    
+    # Check core runtime modules
+    MODULES=("fastapi" "uvicorn" "pydantic" "requests")
+    MISSING=()
+    
+    for module in "${MODULES[@]}"; do
+        if ! "$VENV_PYTHON" -c "import $module" 2>/dev/null; then
+            MISSING+=("$module")
+        fi
+    done
+    
+    if [[ ${#MISSING[@]} -gt 0 ]]; then
+        log_error "Verification failed: missing modules: ${MISSING[*]}"
+        exit 1
+    fi
+    
+    log_info "Verification passed: all core runtime modules present"
+    
+    # Display installed packages summary
+    log_info "Installed packages summary:"
+    "$VENV_PIP" list --format=columns | head -15
+fi
 
-# Show venv info
-log_info "Virtual environment info:"
-echo "  Location: $TARGET_DIR"
-echo "  Python: $("$TARGET_DIR/bin/python" --version)"
-echo "  Pip: $("$TARGET_DIR/bin/pip" --version | awk '{print $1, $2}')"
-
-log_success "Virtual environment build complete"
-log_info "Activate with: source $TARGET_DIR/bin/activate"
-
-exit 0
+log_info "✓ Virtual environment built successfully: $VENV_PATH"
+log_info "Activate with: source $VENV_PATH/bin/activate"

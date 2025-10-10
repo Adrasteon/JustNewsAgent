@@ -1,23 +1,31 @@
-# Additional pip requirements for JustNews V4
-# These are packages not available or better managed through pip than conda
-# This file is referenced by environment.yml
+# JustNews V4 - Full Development and Production Requirements
+# This file provides a complete pip-based install for development environments
+# that don't use conda. For production deployments, see:
+# - release_beta_minimal_preview/requirements-runtime.txt (minimal runtime deps)
+# - environment.yml (conda environment specification)
 
-# Additional utilities
-python-dotenv>=1.0.0
+# Core FastAPI stack for agent APIs
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
 
-# Development and testing extras
+# HTTP client for MCP inter-agent communication
+requests>=2.31.0
+
+# Observability and monitoring
+prometheus-client>=0.19.0
+
+# Database client (PostgreSQL)
+psycopg2-binary>=2.9.9
+sqlalchemy>=2.0.0
+
+# Testing dependencies
+pytest>=7.4.3
 pytest-cov>=4.1.0
-coverage>=7.3.0
-ruff>=0.1.0
+pytest-asyncio>=0.21.1
 
-# Documentation
-mkdocs>=1.5.0
-mkdocs-material>=9.4.0
+# Code quality tools
+ruff>=0.1.6
 
 # Type checking
 mypy>=1.7.0
-types-requests>=2.31.0
-
-# Additional ML/NLP utilities
-ftfy>=6.1.0
-emoji>=2.8.0
