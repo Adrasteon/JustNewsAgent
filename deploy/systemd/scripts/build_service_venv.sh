@@ -21,6 +21,8 @@ ARGUMENTS:
 
 ENVIRONMENT VARIABLES:
     PYTHON_VERSION      Python interpreter to use (default: python3)
+    REQUIRE_HASHES      Enable hash verification (1 to enable, 0 to disable)
+                        Requires hashes in requirements file for security
 
 EXAMPLES:
     # Build default production venv
@@ -31,6 +33,9 @@ EXAMPLES:
 
     # Use specific Python version
     PYTHON_VERSION=python3.12 ./build_service_venv.sh /tmp/my-venv
+
+    # Enable hash verification for production
+    REQUIRE_HASHES=1 ./build_service_venv.sh /opt/justnews/venv requirements-locked.txt
 
 EXIT CODES:
     0 - Success
@@ -60,6 +65,14 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 if ! command -v "$PYTHON_VERSION" >/dev/null 2>&1; then
     log_error "Python interpreter '$PYTHON_VERSION' not found"
     log_error "Set PYTHON_VERSION environment variable to a valid python3 executable"
+    exit 1
+fi
+
+# Validate Python version is 3.x
+PY_VERSION=$("$PYTHON_VERSION" --version 2>&1 | awk '{print $2}' | cut -d. -f1)
+if [[ "$PY_VERSION" != "3" ]]; then
+    log_error "Python 3.x is required, but found: $("$PYTHON_VERSION" --version)"
+    log_error "Set PYTHON_VERSION to a Python 3.x interpreter (e.g., python3, python3.12)"
     exit 1
 fi
 
@@ -103,10 +116,16 @@ log_success "Virtual environment created"
 log_info "Upgrading pip, setuptools, and wheel..."
 "$VENV_PATH/bin/python" -m pip install --upgrade pip setuptools wheel
 
-# Install requirements with hash checking disabled for flexibility
-# In production, consider using --require-hashes with a full lock file
+# Install requirements with optional hash checking for security
+# Set REQUIRE_HASHES=1 to enable hash verification (requires hashes in requirements file)
 log_info "Installing runtime requirements..."
-"$VENV_PATH/bin/pip" install -r "$REQUIREMENTS_FILE"
+if [[ "${REQUIRE_HASHES:-0}" == "1" ]]; then
+    log_info "Hash verification enabled (REQUIRE_HASHES=1)"
+    "$VENV_PATH/bin/pip" install --require-hashes -r "$REQUIREMENTS_FILE"
+else
+    log_info "Hash verification disabled (set REQUIRE_HASHES=1 to enable)"
+    "$VENV_PATH/bin/pip" install -r "$REQUIREMENTS_FILE"
+fi
 
 # Verify critical packages
 log_info "Verifying installation..."
@@ -142,7 +161,10 @@ if [[ -f "deploy/systemd/scripts/ci_check_deps.py" ]]; then
     if "$VENV_PATH/bin/python" deploy/systemd/scripts/ci_check_deps.py; then
         log_success "Dependency check passed!"
     else
-        log_warning "Dependency check reported missing packages (may need more modules)"
+        log_warning "Dependency check reported missing packages"
+        log_warning "The runtime requirements may need additional modules beyond the minimal set"
+        log_warning "Check the output above for specific packages to add to $REQUIREMENTS_FILE"
+        log_warning "This is expected if using requirements-runtime.txt; full deps are in environment.yml"
     fi
 fi
 
