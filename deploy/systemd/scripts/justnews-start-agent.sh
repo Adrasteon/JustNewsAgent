@@ -243,17 +243,80 @@ wait_for_dependencies() {
     log_success "Dependency check complete"
 }
 
+# Sanity check: ensure runtime python modules exist for this agent before launching.
+# This is called from start_agent to produce clearer errors when venvs are misconfigured.
+check_python_deps_and_exit_if_missing() {
+    local agent="$1"
+    # Prefer developer conda env when available (so checks match developer setup)
+    local py_cmd=""
+    local conda_env_to_try="${CONDA_ENV:-justnews-v2-py312}"
+    if command -v conda >/dev/null 2>&1; then
+        if conda env list 2>/dev/null | awk '{print $1}' | grep -xq "$conda_env_to_try"; then
+            py_cmd="conda run -n $conda_env_to_try python"
+        fi
+    fi
+    if [[ -z "$py_cmd" ]]; then
+        local py="${PYTHON_BIN:-/opt/justnews/venv/bin/python}"
+        if [[ ! -x "$py" ]]; then
+            py="$(command -v python3 || command -v python || true)"
+        fi
+        if [[ -z "$py" ]]; then
+            log_warning "No python interpreter available to validate modules; continuing"
+            return 0
+        fi
+        py_cmd="$py"
+    fi
+
+    # Modules per agent (keep minimal to avoid import side-effects)
+    local modules=(requests)
+    if [[ "$agent" == "gpu_orchestrator" ]]; then
+        modules=(requests uvicorn)
+    fi
+
+    local modules_var="${modules[*]}"
+    local missing
+    missing=$(eval "$py_cmd - <<PYCODE 2>/dev/null
+import importlib, sys
+mods = \"${modules_var}\".split()
+missing = [m for m in mods if importlib.util.find_spec(m) is None]
+sys.stdout.write(' '.join(missing))
+PYCODE
+")
+
+    if [[ -n "$missing" ]]; then
+        log_error "Missing python modules for agent '$agent': $missing"
+        if [[ "$py_cmd" == conda* ]]; then
+            log_error "Install into the developer conda env (example): conda run -n ${conda_env_to_try} pip install $missing"
+        else
+            local py_path="$py_cmd"
+            py_path="${py_path%% *}"
+            log_error "Install them into the service venv (example): sudo ${py_path%/*}/pip install $missing"
+        fi
+        exit 1
+    fi
+
+    # Export the resolved python command so callers can reuse the same interpreter selection
+    export SELECTED_PY_CMD="$py_cmd"
+}
+
 # Start the agent
 start_agent() {
     local agent="$1"
 
     log_info "Starting $agent agent..."
 
+    # Fail fast with actionable advice if runtime deps are missing in the chosen interpreter
+    check_python_deps_and_exit_if_missing "$agent"
+
     # Build the command - use module invocation to fix relative imports
-    # Prefer interpreter from env if provided
+    # Prefer interpreter from env if provided; reuse the interpreter resolution from dependency check when possible
     local py_interpreter
-    py_interpreter="${PYTHON_BIN:-python3}"
-    if ! command -v "$py_interpreter" >/dev/null 2>&1; then
+    if [[ -n "${SELECTED_PY_CMD:-}" ]]; then
+        py_interpreter="${SELECTED_PY_CMD}"
+    else
+        py_interpreter="${PYTHON_BIN:-python3}"
+    fi
+    if ! command -v $(echo "$py_interpreter" | awk '{print $1}') >/dev/null 2>&1; then
         log_warning "Configured PYTHON_BIN not found (PYTHON_BIN='${PYTHON_BIN:-}'), falling back to 'python3'"
         py_interpreter="python3"
     fi
@@ -261,7 +324,7 @@ start_agent() {
     if [[ "$agent" == "gpu_orchestrator" ]]; then
         # Prefer uvicorn runner for orchestrator for clearer server logs and binding
         local port="${GPU_ORCHESTRATOR_PORT:-8014}"
-        if "$py_interpreter" -c "import uvicorn" >/dev/null 2>&1; then
+        if $py_interpreter -c "import uvicorn" >/dev/null 2>&1; then
             cmd=("$py_interpreter" "-m" "uvicorn" "agents.gpu_orchestrator.main:app" "--host" "0.0.0.0" "--port" "$port" "--log-level" "info")
             log_info "Using uvicorn runner on port $port"
         else

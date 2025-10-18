@@ -20,6 +20,75 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+# Load global env if available so we can consult PYTHON_BIN for dependency checks
+if [[ -f "/etc/justnews/global.env" ]]; then
+    # shellcheck source=/dev/null
+    set -a; source "/etc/justnews/global.env"; set +a
+fi
+
+# Helper paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Check that required Python modules are present for a given agent. This uses
+# the configured PYTHON_BIN (if present) or falls back to system python. This
+# mirrors the behavior used in deployment start scripts to provide consistent,
+# actionable errors when venvs are missing packages.
+check_agent_python_deps() {
+    local agent="$1"
+    # Prefer using a developer conda env when present (so checks match developer setup)
+    local py_cmd=""
+    local conda_env_to_try="${CONDA_ENV:-justnews-v2-py312}"
+    if command -v conda >/dev/null 2>&1; then
+        if conda env list 2>/dev/null | awk '{print $1}' | grep -xq "$conda_env_to_try"; then
+            py_cmd="conda run -n $conda_env_to_try python"
+        fi
+    fi
+    if [[ -z "$py_cmd" ]]; then
+        local py="${PYTHON_BIN:-/opt/justnews/venv/bin/python}"
+        if [[ ! -x "$py" ]]; then
+            py="$(command -v python3 || command -v python || true)"
+        fi
+        if [[ -z "$py" ]]; then
+            log_warning "No Python interpreter found to perform dependency check; skipping"
+            return 0
+        fi
+        py_cmd="$py"
+    fi
+
+    local req_mods
+    case "$agent" in
+        mcp_bus) req_mods=(requests) ;;
+        gpu_orchestrator) req_mods=(requests uvicorn) ;;
+        chief_editor) req_mods=(requests) ;;
+        *) req_mods=(requests) ;;
+    esac
+
+    local modules_var="${req_mods[*]}"
+    local missing
+    missing=$(eval "$py_cmd - <<PYCODE 2>/dev/null
+import importlib,sys
+mods = \"${modules_var}\".split()
+missing = [m for m in mods if importlib.util.find_spec(m) is None]
+sys.stdout.write(' '.join(missing))
+PYCODE
+")
+
+    if [[ -n "$missing" ]]; then
+        log_error "Missing python modules for agent '$agent': $missing"
+        if [[ "$py_cmd" == conda* ]]; then
+            log_error "Install into the developer conda env (example): conda run -n ${conda_env_to_try} pip install $missing"
+        else
+            local py_path="$py_cmd"
+            py_path="${py_path%% *}"
+            log_error "Install them into the service venv (example): sudo ${py_path%/*}/pip install $missing"
+        fi
+        return 2
+    fi
+    log_success "Python dependencies present for agent '$agent'"
+    return 0
+}
+
 # Parse arguments
 for arg in "$@"; do
     case $arg in
@@ -44,6 +113,16 @@ fi
 if [ "$GATE_ONLY" = true ]; then
     log_info "Gate-only mode: ensuring gpu_orchestrator is up and models are ready"
     
+    # 0. Quick dependency sanity for the MCP Bus itself so we fail early
+    log_info "Checking Python runtime dependencies for mcp_bus..."
+    if ! check_agent_python_deps "mcp_bus"; then
+        log_error "Dependency check failed for mcp_bus — aborting gate. See messages above."
+        if [[ -x "$SCRIPT_DIR/ci_check_deps.py" || -f "$SCRIPT_DIR/ci_check_deps.py" ]]; then
+            python3 "$SCRIPT_DIR/ci_check_deps.py" || true
+        fi
+        exit 1
+    fi
+
     # 1. Wait for GPU Orchestrator to be healthy
     log_info "Waiting for GPU Orchestrator at $GPU_ORCHESTRATOR_URL..."
     start_time=$(date +%s)

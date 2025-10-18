@@ -37,6 +37,12 @@ jobs:
           # Install requirements.txt dependencies (if not already covered by environment.yml)
           pip install -r requirements.txt
 
+      - name: Check production runtime dependencies
+        shell: bash -l {0}
+        run: |
+          # Run the CI helper to assert production runtime dependencies are present
+          python deploy/systemd/scripts/ci_check_deps.py
+
       - name: Run unit tests
         shell: bash -l {0}
         run: |

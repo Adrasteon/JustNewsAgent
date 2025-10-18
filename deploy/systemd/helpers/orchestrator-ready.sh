@@ -12,7 +12,12 @@ while [[ $(date +%s) -le $end_ts ]]; do
   if curl -fsS --max-time 5 "$url" >/dev/null; then
     echo "READY"; exit 0
   fi
-  sleep "$backoff"; if [[ $backoff -lt 8 ]]; then backoff=$((backoff*2)); fi
+  # Sleep using the current (possibly fractional) backoff
+  sleep "$backoff"
+  # Double the backoff while capping at 8s. Use awk for float-safe arithmetic
+  if awk -v b="$backoff" 'BEGIN{ if (b < 8) exit 0; exit 1 }'; then
+    backoff=$(awk -v b="$backoff" 'BEGIN{ printf "%.6f", b * 2 }')
+  fi
 
 done
 echo "NOT READY after ${TIMEOUT}s: $url" >&2

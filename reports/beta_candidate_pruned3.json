@@ -1,0 +1,2511 @@
+{
+  "generated_at": "2025-10-08T11:53:47.638781+00:00",
+  "candidates": {
+    "/home/adra/JustNewsAgent/agents/newsreader/IMPLEMENTATION_SUMMARY.md": {
+      "path": "/home/adra/JustNewsAgent/agents/newsreader/IMPLEMENTATION_SUMMARY.md",
+      "mtime": 1759586187.088067,
+      "size": 308,
+      "sha256": "77a9fc6ed701549d36c68d2976dff66f026e17e6164e4f8c32efa6532068db22",
+      "ext": ".md",
+      "score": 85.5068493150685,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/newsreader/LIFESPAN_MIGRATION.md": {
+      "path": "/home/adra/JustNewsAgent/agents/newsreader/LIFESPAN_MIGRATION.md",
+      "mtime": 1759586187.088067,
+      "size": 300,
+      "sha256": "178a7ee2e0d5abe88438d7289181257c3508afb74b849dcb4758d5457b056a46",
+      "ext": ".md",
+      "score": 85.5068493150685,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/NATIVE_AGENT_README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/NATIVE_AGENT_README.md",
+      "mtime": 1759586187.084354,
+      "size": 5142,
+      "sha256": "3573bfc38e3c9161ddd4dd751808cd853b010053785b001413a8a8b1dee484d5",
+      "ext": ".md",
+      "score": 85.5068493150685,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/NATIVE_TENSORRT_README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/NATIVE_TENSORRT_README.md",
+      "mtime": 1759586187.084354,
+      "size": 8690,
+      "sha256": "3d5efe1d6141f6bfb7a2a1c687d63f0aa1c6b6e08e0927582d03fee38e2e9f4d",
+      "ext": ".md",
+      "score": 85.5068493150685,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/TENSORRT_QUICKSTART.md": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/TENSORRT_QUICKSTART.md",
+      "mtime": 1759586187.084354,
+      "size": 1960,
+      "sha256": "d5c6ae853d9e1cd8ceb4f8b40b464d2e62760d96933113eed50772002a9c0f13",
+      "ext": ".md",
+      "score": 85.5068493150685,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/scout/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/README.md",
+      "mtime": 1759329967.5196376,
+      "size": 13617,
+      "sha256": "c2566e15ee585fd4013fd6046b3789fdca475468640d83d3e3dba7e3c7fc1e6c",
+      "ext": ".md",
+      "score": 85.01369863013699,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/README.md",
+      "mtime": 1759329967.5186374,
+      "size": 1145,
+      "sha256": "339265401ee446799a94fb332ef5411b73058efefb3c195230d1feb33779ee54",
+      "ext": ".md",
+      "score": 85.01369863013699,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/README.md",
+      "mtime": 1759857652.7832358,
+      "size": 10522,
+      "sha256": "6d665c5edeaf246c4be1009d4b4e4bacd9b7e251f4694a27494a7013424a38a9",
+      "ext": ".md",
+      "score": 81.0,
+      "reasons": [
+        "agent-path",
+        "doc"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/README.md",
+      "mtime": 1759856841.0495267,
+      "size": 7012,
+      "sha256": "849f7dbf0c8d741ff096198397eedb7058b30cd2b709d76000774e1bb68e1ad2",
+      "ext": ".md",
+      "score": 81.0,
+      "reasons": [
+        "agent-path",
+        "doc"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/CONTRIBUTING.md": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/CONTRIBUTING.md",
+      "mtime": 1759762910.1224723,
+      "size": 1725,
+      "sha256": "c392cbcc056533792f0ef15b52d1055fa7b97db5f555599dd0a270f4aa7cff96",
+      "ext": ".md",
+      "score": 80.83561643835617,
+      "reasons": [
+        "agent-path",
+        "doc"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/README.md",
+      "mtime": 1759762910.1224723,
+      "size": 18224,
+      "sha256": "e83241b1eda628c010aa0dc737075d3f3a35c4962b5b57077cfc13fcb9eeeeea",
+      "ext": ".md",
+      "score": 80.83561643835617,
+      "reasons": [
+        "agent-path",
+        "doc"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md",
+      "mtime": 1759762910.1224723,
+      "size": 5221,
+      "sha256": "148028c0faf6a5af04f58038a7de07ee2096d8ed43465df896e3553113166322",
+      "ext": ".md",
+      "score": 80.83561643835617,
+      "reasons": [
+        "agent-path",
+        "doc"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/README.md",
+      "mtime": 1759329967.5116374,
+      "size": 20128,
+      "sha256": "422037e1070944c6fd8b291447d06dc49dff32fd5b3091c5c7b8e6bb26257ab9",
+      "ext": ".md",
+      "score": 80.01369863013699,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/dashboard/README.md": {
+      "path": "/home/adra/JustNewsAgent/agents/dashboard/README.md",
+      "mtime": 1759329967.5146375,
+      "size": 6810,
+      "sha256": "76f52acf3616cbbc0cdc2b0e35ee0ea65cbebd2502f5383a9bd651796a8f131a",
+      "ext": ".md",
+      "score": 80.01369863013699,
+      "reasons": [
+        "agent-path",
+        "doc",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/tests/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/tests/__init__.py",
+      "mtime": 1759762910.1660805,
+      "size": 27,
+      "sha256": "e59ee9d0c3205dc9eef79da753702c2485996b9d6e53214d128e368004ec1f61",
+      "ext": ".py",
+      "score": 78.83561643835617,
+      "reasons": [
+        "agent-path",
+        "test"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/tests/test_nucleoid.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/tests/test_nucleoid.py",
+      "mtime": 1759769492.6782603,
+      "size": 379,
+      "sha256": "89d132ff176690f007d0639c3f9469bbd4c85d778f1877be7fd5bed9be4536c6",
+      "ext": ".py",
+      "score": 78.83561643835617,
+      "reasons": [
+        "agent-path",
+        "test"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/scripts/README_BOOTSTRAP_MODELS.md": {
+      "path": "/home/adra/JustNewsAgent/scripts/README_BOOTSTRAP_MODELS.md",
+      "mtime": 1759857652.798236,
+      "size": 5473,
+      "sha256": "0f77258eb131e1b723100dc9cab8acbb3edfa9d9142d79a96834d5dcf4be12a4",
+      "ext": ".md",
+      "score": 77.0,
+      "reasons": [
+        "scripts-path",
+        "doc",
+        "frontmatter-last-updated"
+      ],
+      "last_updated_field": "2025-10-07"
+    },
+    "/home/adra/JustNewsAgent/scripts/README_MIRROR.md": {
+      "path": "/home/adra/JustNewsAgent/scripts/README_MIRROR.md",
+      "mtime": 1759586187.127067,
+      "size": 2664,
+      "sha256": "1340d1d9dc8a70fa064f82c5186bb200d04b60b21bd356a3ffdbdc057f0a1e13",
+      "ext": ".md",
+      "score": 76.5068493150685,
+      "reasons": [
+        "scripts-path",
+        "doc",
+        "frontmatter-last-updated",
+        "deduped_2"
+      ],
+      "last_updated_field": "2025-09-12"
+    },
+    "/home/adra/JustNewsAgent/agents/scout/gpu_scout_engine_v2.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/gpu_scout_engine_v2.py",
+      "mtime": 1759856998.2769296,
+      "size": 65760,
+      "sha256": "db160921959dffdbf5c80949e52c181ad26210f4517f79b9977d5333e895fbeb",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/main.py",
+      "mtime": 1759856998.2769296,
+      "size": 17005,
+      "sha256": "ed308fd0892a6cd2deb836ff9a8060f6bfd85679064fe212d4cd9c8d9864bfb1",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/practical_newsreader_solution.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/practical_newsreader_solution.py",
+      "mtime": 1759856998.2769296,
+      "size": 14641,
+      "sha256": "d291ec49c4939aec108987aae644777d3cff342bf9ece4c6d611cc4c7d7f7033",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/unified_production_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/unified_production_crawler.py",
+      "mtime": 1759856998.2779298,
+      "size": 23153,
+      "sha256": "5da68079b9c6c330cf5be793338dfa1519bf48fd28311a682102b85c43e83fff",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/orchestrator.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/orchestrator.py",
+      "mtime": 1759856998.2769296,
+      "size": 16908,
+      "sha256": "12cebb57ed87aca4d10627665069024bd4b102be9eb92c8c2cbaa9ecb7490398",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_4"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/performance_monitoring.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/performance_monitoring.py",
+      "mtime": 1759856998.2769296,
+      "size": 14729,
+      "sha256": "17600a4caa60e10b3096b2b9012134bc112a6a2672b239b761b2e029a6898b0b",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/generic_site_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/generic_site_crawler.py",
+      "mtime": 1759856998.2779298,
+      "size": 24934,
+      "sha256": "91d7b2efb4f3828eb1d9b8b08af24487b2aa11eece0ca587c3cefb8b4a4d5e29",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/bbc_ai_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/bbc_ai_crawler.py",
+      "mtime": 1759856691.7367463,
+      "size": 14020,
+      "sha256": "02452796e2aa9458ce37de045b3d5788beb1044a4575cdba88dd6f45c8312075",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_4"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/bbc_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/sites/bbc_crawler.py",
+      "mtime": 1759856998.2779298,
+      "size": 21159,
+      "sha256": "773879cff0b157c8f2a081dfc4a3d1b70dc8ee6b6c18365591fa0181d9f8e33f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/gpu_orchestrator/preload.py": {
+      "path": "/home/adra/JustNewsAgent/agents/gpu_orchestrator/preload.py",
+      "mtime": 1759856998.2749298,
+      "size": 1611,
+      "sha256": "aaf2b243fe55f26ddc59936ea0adf5ac3680e224823d0f78732d0c7600c867ca",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/gpu_orchestrator/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/gpu_orchestrator/main.py",
+      "mtime": 1759856998.2749298,
+      "size": 27330,
+      "sha256": "539f73bdb0d72c9f133eee1f1355013163dd2442ff8fcdfdb3c02a97faadf71a",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/gpu_orchestrator/utils.py": {
+      "path": "/home/adra/JustNewsAgent/agents/gpu_orchestrator/utils.py",
+      "mtime": 1759856998.2749298,
+      "size": 793,
+      "sha256": "e8fe73115a96c5994a454873cea633a13c5bf41e5277d6bdd4b186314bcd3340",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/gpu_orchestrator/nvml.py": {
+      "path": "/home/adra/JustNewsAgent/agents/gpu_orchestrator/nvml.py",
+      "mtime": 1759856998.2749298,
+      "size": 558,
+      "sha256": "fdad7d3d02f533bb27c2b58ad0c37e926b267eabf5a992c9a1620567d8de9183",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/main.py",
+      "mtime": 1759856998.2719297,
+      "size": 8110,
+      "sha256": "a642e533d372456664f80f1309036321d9dc876090a9cfd4574cc23c253aaa2f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/unified_production_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/unified_production_crawler.py",
+      "mtime": 1759856998.2719297,
+      "size": 30343,
+      "sha256": "75b25678ee3268246828c7c9ae85e644be4e3f4b7dd76d92dbde430435dc483a",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/performance_monitoring.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/performance_monitoring.py",
+      "mtime": 1759856998.2719297,
+      "size": 15793,
+      "sha256": "db24c93bac33671e96625b5c8230e4b9490d50310b7cb8f3e794a5bb682616e9",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/sites/generic_site_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/sites/generic_site_crawler.py",
+      "mtime": 1759856998.2719297,
+      "size": 29151,
+      "sha256": "4a635077cfa42240b83ee95850d34ea440b90df336df722897c7e4ea5a177e40",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/sites/bbc_crawler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/sites/bbc_crawler.py",
+      "mtime": 1759856998.2719297,
+      "size": 21486,
+      "sha256": "d8987989891ef7028ad3a828ed4576ef14c4eb700420069025f344ae2be38ef7",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/dashboard/public_api.py": {
+      "path": "/home/adra/JustNewsAgent/agents/dashboard/public_api.py",
+      "mtime": 1759856998.2739296,
+      "size": 35369,
+      "sha256": "3a15f4d1ee6fa1b03fa2cd1f48ba75ba5f231e5d8dd4b8956832c39414a2bb3f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/dashboard/gui.py": {
+      "path": "/home/adra/JustNewsAgent/agents/dashboard/gui.py",
+      "mtime": 1759856998.2729297,
+      "size": 61621,
+      "sha256": "8717a920f905b9c70aab00adadc16dca1ba7bb6cd8a0ca6e712b28354a362426",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/dashboard/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/dashboard/main.py",
+      "mtime": 1759856998.2739296,
+      "size": 62561,
+      "sha256": "ccb1a99224e7da8e360e2047c677e976733e08e77b58a10962a9f396d3e14da4",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/dashboard/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/dashboard/tools.py",
+      "mtime": 1759856998.2739296,
+      "size": 7645,
+      "sha256": "bde2e870446e0a3ee218979ffb938a1794533f752e2f0eb75e5cde48c76b9ce6",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/newsreader/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/newsreader/main.py",
+      "mtime": 1759856998.2759297,
+      "size": 19575,
+      "sha256": "f788a84a7dc5038c8e33c46b07132d5d84a203bfbf96e3fb3411fc8d8b40e6dd",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/newsreader/newsreader_agent.py": {
+      "path": "/home/adra/JustNewsAgent/agents/newsreader/newsreader_agent.py",
+      "mtime": 1759856691.7347462,
+      "size": 13544,
+      "sha256": "abd6b05879067f94d38f208bfd202078d96c5ed10ecaba0f8ea7a32d2319dc26",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/critic/critic_v2_engine.py": {
+      "path": "/home/adra/JustNewsAgent/agents/critic/critic_v2_engine.py",
+      "mtime": 1759856998.2729297,
+      "size": 45050,
+      "sha256": "59f3a0557944c8104d1e63979c152f5f07f0e273e93b4409efbe87b59b18a416",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/critic/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/critic/main.py",
+      "mtime": 1759856998.2729297,
+      "size": 7884,
+      "sha256": "e6209441fbf51020f430489417ba2b6038ef440b33385b34f4c7ea823e34264d",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/critic/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/critic/tools.py",
+      "mtime": 1759856998.2729297,
+      "size": 33314,
+      "sha256": "421166c3826da1419a973d68d6d90f141fd43544aab90a92caf498cd5311e3e8",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/fact_checker/fact_checker_v2_engine.py": {
+      "path": "/home/adra/JustNewsAgent/agents/fact_checker/fact_checker_v2_engine.py",
+      "mtime": 1759856998.2739296,
+      "size": 25907,
+      "sha256": "f1f26adbc7e4ccf8c4417d44785e95fe44e3529f2a2ebf9025002901e29dc152",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/fact_checker/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/fact_checker/main.py",
+      "mtime": 1759856998.2739296,
+      "size": 7508,
+      "sha256": "b4f5625ed4e8ae7c5ef7a24aa323be0a47b33d4e0082f37bb32077757c7b3175",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/fact_checker/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/fact_checker/tools.py",
+      "mtime": 1759856998.2739296,
+      "size": 29693,
+      "sha256": "57c3a118f011f01a0f654421a32f859c275f18c4173ec1ffbc5aac878a88a95f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/archive/entity_linker.py": {
+      "path": "/home/adra/JustNewsAgent/agents/archive/entity_linker.py",
+      "mtime": 1759856691.7297463,
+      "size": 22806,
+      "sha256": "ced86de1ab500113642429767647c045b08bc781f204a0ccfbd08067a5309369",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/balancer/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/balancer/main.py",
+      "mtime": 1759856998.2699296,
+      "size": 5060,
+      "sha256": "a894ce43563b0468deed0c33bea60d29a5241efd95e24748b21aba898e37ce4d",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/balancer/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/balancer/tools.py",
+      "mtime": 1759856998.2699296,
+      "size": 6747,
+      "sha256": "13e3555bc0e4a2c70dddb71be0cfa50e96d264a89a89c5a64c6a547a007ed203",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/balancer/balancer.py": {
+      "path": "/home/adra/JustNewsAgent/agents/balancer/balancer.py",
+      "mtime": 1759856691.7297463,
+      "size": 18591,
+      "sha256": "cf0aba755b42a89f645da2917add50ddc5314a59fe08340557c2f78ab0c4660a",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/data_minimization.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/data_minimization.py",
+      "mtime": 1759856998.2709298,
+      "size": 18082,
+      "sha256": "36f80603367c6a7f5034b3a3cc1d9266b17f107119b671eb0c3bff24f4282676",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_cluster_manager.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_cluster_manager.py",
+      "mtime": 1759856998.2709298,
+      "size": 27613,
+      "sha256": "279ccb7aafd6cf206b6ca3fa5a0f15431e29666253d7156c23774dad344045ee",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_orchestrator_client.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_orchestrator_client.py",
+      "mtime": 1759856998.2719297,
+      "size": 6149,
+      "sha256": "62a62990e793501ad4eecef4abdf93a3e3dd2e8f25d943947c3eee84cd988023",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/tracing.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/tracing.py",
+      "mtime": 1759856691.7317462,
+      "size": 10244,
+      "sha256": "acf7dae181ade881ea0c7699ac6537039174ae0634cb10d8eb134af14d280b45",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/consent_management.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/consent_management.py",
+      "mtime": 1759856691.7307463,
+      "size": 18201,
+      "sha256": "da3a23640b3a7889de8f7ae7e5f8df999e9f5c16b40d8cd883be01841ed496a3",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_dashboard_api.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_dashboard_api.py",
+      "mtime": 1759856998.2709298,
+      "size": 14252,
+      "sha256": "1c7e939ea7359c6a1434570c8d307bb4b15188c8498b82fe1309442e6d74e4cf",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/compliance_audit.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/compliance_audit.py",
+      "mtime": 1759856691.7307463,
+      "size": 15709,
+      "sha256": "2cad953ca6b4ad2471c093de233b51b63f845be2d624c4ea17e23e7c97f80ece",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_monitoring_enhanced.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_monitoring_enhanced.py",
+      "mtime": 1759856998.2709298,
+      "size": 19813,
+      "sha256": "9a0bc5e38c6529e43498b8033a48f75d6a4ac93965b7b9b30fb5e303f9e4d0ff",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/advanced_optimization.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/advanced_optimization.py",
+      "mtime": 1759856998.2699296,
+      "size": 24979,
+      "sha256": "c828c1bd41441df80bfd11bb391654323b9d98b123052f84f256517ffc9ba463",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_manager_production.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_manager_production.py",
+      "mtime": 1759856998.2709298,
+      "size": 34057,
+      "sha256": "63f799a2b4be6302a709e3b91e7ad63a29580a3e9c0ef530539be6c1f82c1e1f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/database.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/database.py",
+      "mtime": 1759856998.2709298,
+      "size": 7076,
+      "sha256": "ebb5109e697020845dbe8f6daa4195f2ebe5e2c2ae9a2aa009f64092bc02f367",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/consent_validation_middleware.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/consent_validation_middleware.py",
+      "mtime": 1759856998.2709298,
+      "size": 14605,
+      "sha256": "769fd04663272b2b354f5800b0e72ac80b5f556893feec746e481fc9b3ccddbb",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_optimizer_enhanced.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_optimizer_enhanced.py",
+      "mtime": 1759856998.2709298,
+      "size": 19052,
+      "sha256": "b8f998e468bfe0cf917ef123a85e5b24880b9835a5d8aeeef80fd2fc063d42f3",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/compliance_dashboard.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/compliance_dashboard.py",
+      "mtime": 1759856691.7307463,
+      "size": 13521,
+      "sha256": "96e7032fe4c11a1869d977e99e186af8c8b5bb2aec799e5cd9d8ba85cfeba0df",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/advanced_analytics.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/advanced_analytics.py",
+      "mtime": 1759856998.2699296,
+      "size": 18448,
+      "sha256": "736b44de31c4ec06750a2721fc0f66645c03c4424f7d8a614c15c0716d2eba5d",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/common/gpu_manager.py": {
+      "path": "/home/adra/JustNewsAgent/agents/common/gpu_manager.py",
+      "mtime": 1759856998.2709298,
+      "size": 5063,
+      "sha256": "2db50a3a38376551909994bae0ea6b8ee5f8e1d737f93f3f10a4852dcefe0d74",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/memory/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/memory/main.py",
+      "mtime": 1759856998.2749298,
+      "size": 23146,
+      "sha256": "b45859e597d620c43ce874aafad69a25fa96d26530dab63983de145f68a4e6df",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/memory/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/memory/tools.py",
+      "mtime": 1759856998.2759297,
+      "size": 15374,
+      "sha256": "df31d21dbce20db4bc2e2c9c5f54a3263388423c08d05a0f07fc827f6b6a9312",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/chief_editor/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/chief_editor/main.py",
+      "mtime": 1759856998.2699296,
+      "size": 5704,
+      "sha256": "1f1e3635cadc73729f559fd1d44c9637084292df0f1b5266b1a9fbbbfd6fe090",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_implementation.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_implementation.py",
+      "mtime": 1759856998.2769296,
+      "size": 8438,
+      "sha256": "133906e5887b00c600ef104b91d1400d3d686d5f778b67601ba476860b7c1dfd",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/main.py",
+      "mtime": 1759856998.2759297,
+      "size": 43157,
+      "sha256": "9d2aee873d7bc2036427a5a71f798697f7c6ffde447fada28ae875cb905e304f",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/mcp_bus/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/mcp_bus/main.py",
+      "mtime": 1759856998.2749298,
+      "size": 5279,
+      "sha256": "85aa54221ef569244ee9369cda08fb335e7c85658522e9c656fff923824bab9b",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/synthesizer/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/synthesizer/main.py",
+      "mtime": 1759856998.2779298,
+      "size": 9165,
+      "sha256": "f3d367aff4d50b9d99d9940fd1da6decd39d200afc96fc6b95fc8bcb565c0d6b",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/synthesizer/gpu_tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/synthesizer/gpu_tools.py",
+      "mtime": 1759856998.2779298,
+      "size": 26605,
+      "sha256": "efc9786ff9ccdf57ce9e1f67e9ef76abc150df555889b1b0e0df2b3a87a768fe",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/hybrid_tools_v4.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/hybrid_tools_v4.py",
+      "mtime": 1759856998.2679298,
+      "size": 35206,
+      "sha256": "75e9a7d1d9a91b486728c741e0c4faa4f05083a1bb7cbee8f0a9c8ca046cd89c",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/tensorrt_acceleration.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/tensorrt_acceleration.py",
+      "mtime": 1759856998.2679298,
+      "size": 31756,
+      "sha256": "7fd2185c65e1eabeda0f1fdffe186950651d8f64725e5f07b979fecf711dafa7",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/tools.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/tools.py",
+      "mtime": 1759856998.2689297,
+      "size": 44641,
+      "sha256": "2485566ea9d1daf8527a5dece48143021bec3d7243ef3fcdce8da81de59bd24b",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/online_learning_trainer.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/online_learning_trainer.py",
+      "mtime": 1759856998.2679298,
+      "size": 14668,
+      "sha256": "b092a7eb8ca13aa95c734573404dd36d444d844c960aa540dd71b6d36515cf14",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analytics/dashboard.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analytics/dashboard.py",
+      "mtime": 1759856998.2689297,
+      "size": 7547,
+      "sha256": "e5fb40a6d459b34df2e31a11233d386650c0585ad6894810e310ec2a450f7068",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analytics/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analytics/main.py",
+      "mtime": 1759856998.2689297,
+      "size": 9390,
+      "sha256": "f8acf5f269308f709e5a0e463adfcc27ea896afb07ee5c584d2f38e7fac9338e",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path",
+        "deduped_2"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/scout/production_crawlers/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/scout/production_crawlers/__init__.py",
+      "mtime": 1759856998.2769296,
+      "size": 1383,
+      "sha256": "24bfffd075c5d3c76bd656f46faa5bd7872668291e6816a96dc8b5af340af51b",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/crawler/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/crawler/__init__.py",
+      "mtime": 1759856998.2719297,
+      "size": 635,
+      "sha256": "1f1b16230cd6319b033944e9244e7a3ef8114d27c4301d8e072bb5162203a039",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/reasoning_state.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/reasoning_state.json",
+      "mtime": 1759856691.7357464,
+      "size": 2061,
+      "sha256": "a05d06076ea39c1b357080019e14fc0285d4d795b9ced2b32a122bef0f353553",
+      "ext": ".json",
+      "score": 75.0,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/analyst/main.py": {
+      "path": "/home/adra/JustNewsAgent/agents/analyst/main.py",
+      "mtime": 1759856998.2679298,
+      "size": 20939,
+      "sha256": "32dad1480f8a27dce6c0df78cdb54654de92bb8d53a67ad2ae8254e29e0fbff8",
+      "ext": ".py",
+      "score": 75.0,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/graph.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/graph.py",
+      "mtime": 1759762910.1658719,
+      "size": 53,
+      "sha256": "bbf5a13163c6d247117ef9b750f76569b8d59f71ee72f8d6cb024a161b6539b3",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path",
+        "deduped_3"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/__init__.py",
+      "mtime": 1759762910.165775,
+      "size": 25,
+      "sha256": "cf6729e1aab102be7ad83c497fee6e53b58fee3350f4dc03c7c2679a886c3647",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path",
+        "deduped_3"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/nucleoid.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/nucleoid.py",
+      "mtime": 1759769492.6772604,
+      "size": 422,
+      "sha256": "32c8d6fcfd192587aafba6dcb04b096c3f97dbe556a8a6409422f2df6869a0d4",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path",
+        "deduped_3"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/parse.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/parse.py",
+      "mtime": 1759769492.6772604,
+      "size": 127,
+      "sha256": "fe6bd1c21e4376e6815b0e7db6fd98824978bb9300eb08c99d5faa61e9c67ca9",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path",
+        "deduped_3"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/state.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/state.py",
+      "mtime": 1759762910.1658719,
+      "size": 20,
+      "sha256": "1f70bf39fa42e14e7e70e4d46e2899d40a239caf271c6d8a9fd55ef2b7048391",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path",
+        "deduped_3"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/bin.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/bin.ts",
+      "mtime": 1759762910.1629715,
+      "size": 1410,
+      "sha256": "bb270c0306a474db59d6e301c13e84d0642dbae49494dc66a3c1c21d15a9a615",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/package.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/package.json",
+      "mtime": 1759762910.1654623,
+      "size": 1437,
+      "sha256": "d47c003f1a5bd5459d76f456911c89feb136e2250f5a461ae8a6c9eba0c2447e",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/helloworld.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/helloworld.ts",
+      "mtime": 1759762910.1629715,
+      "size": 858,
+      "sha256": "93e7e971ecc1797ff37e257f4b320add1f6407024ca58b41c96fe1dcce231a0f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/LICENSE": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/LICENSE",
+      "mtime": 1759762910.1224723,
+      "size": 11338,
+      "sha256": "b79c663dd3c9a1ccfd03f19c15b70c7b0993da3c6c4d5c5f9b39d73ca849c9fd",
+      "ext": "",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/tsconfig.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/tsconfig.json",
+      "mtime": 1759762910.1704426,
+      "size": 235,
+      "sha256": "3b98902fba959395ea238bd61a067d98d3643ffe0edaa796313ff4b9b635da30",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/jest.config.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/jest.config.json",
+      "mtime": 1759762910.1629715,
+      "size": 88,
+      "sha256": "456534b1f877e919f321399361215fbdb6d1d9e8f212eccbb72ba0ebb9d8d04c",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/index.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/index.ts",
+      "mtime": 1759762910.1629715,
+      "size": 392,
+      "sha256": "d8b55b0f062ff9283fc249b0ef3281c143823da897bd5dff0ee2accdd2b60c64",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/server.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/server.ts",
+      "mtime": 1759762910.166171,
+      "size": 98,
+      "sha256": "8d50ee9697aab2ae154365a83e742a6357d48862822ddd316a6480cec0221fa0",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/package.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/package.json",
+      "mtime": 1759762910.1234424,
+      "size": 649,
+      "sha256": "cffd065b8e4aa9bca8a431c51e93a56db4bd5141e6887ceb60da0aeb3b0929e9",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/LICENSE": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/LICENSE",
+      "mtime": 1759762910.1230032,
+      "size": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "ext": "",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/server.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/server.ts",
+      "mtime": 1759762910.1234424,
+      "size": 83,
+      "sha256": "2a6a8d2918a8f4972dcb1d8a119c730e6477a9aefc62bee7145f02d8af174b10",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/dist/llama/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/dist/llama/__init__.py",
+      "mtime": 1759762910.1232069,
+      "size": 74,
+      "sha256": "dce853f0d9961432e35597495a439003be0d42d5c57e2ca17c9cfe64171abe57",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/dist/llama/llama.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/dist/llama/llama.py",
+      "mtime": 1759762910.123257,
+      "size": 472,
+      "sha256": "f10b46d1e26c2ea3ec4527d02715b3840b5f493d804739716d8bbf8bece5fd94",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/app.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/app.ts",
+      "mtime": 1759762910.1234424,
+      "size": 4322,
+      "sha256": "a03ade95b4e79ba347819665c460ced451bdfa933615a6da7b931330cf458319",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/llm.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/llm.ts",
+      "mtime": 1759762910.1629715,
+      "size": 1573,
+      "sha256": "64db1e9de881d798ac3f32a3f6e1736d484e99f2f619797722d8982e9fcaaef0",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/openai.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/openai.ts",
+      "mtime": 1759762910.1629715,
+      "size": 967,
+      "sha256": "5db4fe74b9eabae4188bf0d4fa7849e037f8c06aad8cce224e1999fcab16e2f1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/mistral.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/mistral.ts",
+      "mtime": 1759762910.1629715,
+      "size": 862,
+      "sha256": "f350d2c2abc47f67d7530777778a3443f06ad318173e1899be95d876ca0ff2c5",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/llama.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/llama.ts",
+      "mtime": 1759762910.1629715,
+      "size": 388,
+      "sha256": "7c5339b18337d8cbb7319a7ed14bd7ad95d82b8b3ae70c840aa997c4451cf8ad",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/gemini.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/gemini.ts",
+      "mtime": 1759762910.1629715,
+      "size": 739,
+      "sha256": "674caa17dc19ccd1b0f1af000fdf802758dc56071cbc25fe4e54af9a1b5a78fb",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/nucleoid.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/nucleoid.ts",
+      "mtime": 1759762910.1629715,
+      "size": 340,
+      "sha256": "b0ce519ebc5656efbd56c37449d46c42ed8fa7ea3f361400eb751a117c7132d1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Markdown.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Markdown.ts",
+      "mtime": 1759762910.162643,
+      "size": 233,
+      "sha256": "0eadd74e20e094182de499df4e0a7a6094585210b1029633404f00a94499ccf6",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/analyzer.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/analyzer.ts",
+      "mtime": 1759762910.1629715,
+      "size": 4253,
+      "sha256": "4b4a70d9b68c5de94bd51a10a001e7e8a7a402c04c4b5cdf38c6f74aa0034b02",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/claude.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/claude.ts",
+      "mtime": 1759762910.1629715,
+      "size": 676,
+      "sha256": "6c1b76c48cf769321d427fc09798e8ae4ce0a4b67bf242a040319fe80d4f7589",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Matrix.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Matrix.ts",
+      "mtime": 1759762910.1629715,
+      "size": 2463,
+      "sha256": "dfc379290a01835577667a4fba2eba101e7059f9d7295bc30a1c1609416f0048",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Zoom.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/Zoom.ts",
+      "mtime": 1759762910.1629715,
+      "size": 1370,
+      "sha256": "7176dd6386e94745f43b63b694f773de8aaf2c0bb17836a4baf315c612f02e96",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/azure.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/azure.ts",
+      "mtime": 1759762910.1629715,
+      "size": 975,
+      "sha256": "4ebfd2aabca0eb3bab36c1778ea94b5497c5027dcf645f934fba23cd7c05d2f7",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/visualizer.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/arc/src/lib/visualizer.ts",
+      "mtime": 1759762910.1629715,
+      "size": 5220,
+      "sha256": "c5539b379cd250f75b7bafca7b0ed2f63000276ee4383ee56cb6b8a17de7d55f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/test.yml": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/test.yml",
+      "mtime": 1759762910.1224723,
+      "size": 313,
+      "sha256": "c5385dbb56075424d56518013f8d937a459fb72d5ab4c77d9f32081f51c09735",
+      "ext": ".yml",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/beta.yml": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/beta.yml",
+      "mtime": 1759762910.1214423,
+      "size": 432,
+      "sha256": "773a4232f5c54e57c27fbca597e5233d0b0200dba59a895aa6c355cca9ad4b23",
+      "ext": ".yml",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/tag.yml": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/workflows/tag.yml",
+      "mtime": 1759762910.1224723,
+      "size": 629,
+      "sha256": "11bee7ce04a7550c61a8877744820e20449439e33bd0af3351e64c5e6fa92f8b",
+      "ext": ".yml",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/neuro-symbolic.png": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/neuro-symbolic.png",
+      "mtime": 1759762910.1214423,
+      "size": 8543,
+      "sha256": "binary-8543",
+      "ext": ".png",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/banner.gif": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/banner.gif",
+      "mtime": 1759762910.1174424,
+      "size": 529865,
+      "sha256": "binary-529865",
+      "ext": ".gif",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/graph.gif": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/graph.gif",
+      "mtime": 1759762910.1214423,
+      "size": 583297,
+      "sha256": "binary-583297",
+      "ext": ".gif",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/banner.png": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/.github/media/banner.png",
+      "mtime": 1759762910.1194425,
+      "size": 325388,
+      "sha256": "binary-325388",
+      "ext": ".png",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/pyproject.toml": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/pyproject.toml",
+      "mtime": 1759762910.1660805,
+      "size": 357,
+      "sha256": "ad05f3f996349bf1fc04116b464796f8c2d13db4c345b913339959103732d729",
+      "ext": ".toml",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/__init__.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/__init__.py",
+      "mtime": 1759762910.1656141,
+      "size": 35,
+      "sha256": "745bce63a96f24d45209241fee14993e7ddd5afbb021c348807d47414fe98f4d",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/poetry.lock": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/poetry.lock",
+      "mtime": 1759762910.1658719,
+      "size": 10080,
+      "sha256": "8b646778a3fca8236bbe24ebaf8173e57b125ded60544ca869e35e5bc2a08817",
+      "ext": ".lock",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/lang/handlers/assignment_handler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/lang/handlers/assignment_handler.py",
+      "mtime": 1759769492.6812603,
+      "size": 829,
+      "sha256": "695bccc79aa08aaee47e7b9e6db8b8b0c9b0f2d5b0f839cb47b05a5a0a961273",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/lang/handlers/expression_handler.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/lang/handlers/expression_handler.py",
+      "mtime": 1759769492.6822605,
+      "size": 2230,
+      "sha256": "644d37bd015600a560748147da41b2b900392bf4fb159acd337fe28bea5b3241",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/process.py": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/python/nucleoid/process.py",
+      "mtime": 1759769492.6772604,
+      "size": 628,
+      "sha256": "ff319f1ba81022cb6f70cc03266779bd6bc5d24d684c5bbad95a6450a1da1a7e",
+      "ext": ".py",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/event.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/event.ts",
+      "mtime": 1759762910.1662948,
+      "size": 469,
+      "sha256": "24eda8748a7875f8c10892376ee18a509a05b179cf45d670accf6686c3c3fded",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/transaction.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/transaction.ts",
+      "mtime": 1759762910.1704426,
+      "size": 1796,
+      "sha256": "8fb92b7cd49185058d08a59d24c810ac8a6e36502c3b99d9674426630fb434c6",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/state.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/state.ts",
+      "mtime": 1759762910.1700945,
+      "size": 2180,
+      "sha256": "8263b561447d5c071f37220d793bfcb314d5b7235f0514c1f8c5aec8efb52e9e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/Instruction.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/Instruction.ts",
+      "mtime": 1759762910.1662948,
+      "size": 723,
+      "sha256": "a9e831885f7585fa025e2ee6c3d2279969d03cfc8f13d193e194b2606bc6a1c8",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/types.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/types.ts",
+      "mtime": 1759762910.1704426,
+      "size": 686,
+      "sha256": "3d15245e55a8b35622718ba5dbb171b39de7a23ab9ad53c72e03ffa94252c28c",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/Scope.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/Scope.ts",
+      "mtime": 1759762910.1662948,
+      "size": 3704,
+      "sha256": "10b4af8c4416a8961a48c5b9eadfb5391350dfd56a045b6113e60ecd3775d1f6",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/config.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/config.ts",
+      "mtime": 1759762910.1662948,
+      "size": 2734,
+      "sha256": "fa00870ffdc065dbf447331c0a479fc5b95c523e4d857013e5aecfbc39c9cbe5",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/cache.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/cache.ts",
+      "mtime": 1759762910.1662948,
+      "size": 550,
+      "sha256": "fb0ba6c5a78879f58ba179ce82af97979246a83c4a6bfde47145dc209609a41e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/nucleoid.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/nucleoid.ts",
+      "mtime": 1759762910.1694427,
+      "size": 761,
+      "sha256": "d64a370ee9b50f02441b84ab067843edee03b9d4eea55e4cd3541f68ccaba2fc",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/cluster.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/cluster.ts",
+      "mtime": 1759762910.1662948,
+      "size": 1433,
+      "sha256": "8957e1441bba780f4df556cfe374a520d8a8775f5ca677e06ece6fff338e8139",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/express.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/express.ts",
+      "mtime": 1759762910.1662948,
+      "size": 2763,
+      "sha256": "b023957b4addd817fdf26dcdf9094d927cbe38c1e339d618979e473086558dd4",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/config.d.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/config.d.ts",
+      "mtime": 1759762910.1662948,
+      "size": 207,
+      "sha256": "58252e16d1a76e9c6059a38f9b9fdb4ea2420a489ab0d1a3474a4f5128ef1a73",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/datastore.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/datastore.ts",
+      "mtime": 1759762910.1662948,
+      "size": 641,
+      "sha256": "7953bc96c5831aa76ce2280839dcfe6197d740ccfe45b4b3a115b59de24c7550",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/prototype.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/prototype.ts",
+      "mtime": 1759762910.1694427,
+      "size": 247,
+      "sha256": "d76ec26ad99a00fd4acaa6697d480c4b866982e6a5eb8bcfc461fc50c6a59f88",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/runtime.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/runtime.ts",
+      "mtime": 1759762910.1700945,
+      "size": 1404,
+      "sha256": "b2a0715659e51e239e1c3718912f0e06e70d40f3521953c8a1e39c14706657a7",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/process.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/process.ts",
+      "mtime": 1759762910.1694427,
+      "size": 1990,
+      "sha256": "a35877018512db5a00102355507cd34c363997b88258d5408ce2bb60b4d50c7c",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/context.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/context.ts",
+      "mtime": 1759762910.1662948,
+      "size": 491,
+      "sha256": "20c637658d1be45f2a3f0a08474bc094e27048eb3abe91c1c510051f165068a6",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/Evaluation.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/Evaluation.ts",
+      "mtime": 1759762910.166729,
+      "size": 176,
+      "sha256": "83148135a3b7ad84dc0434ad4213d14e6d6fe2ef8e59efa2be08424e8ec9fc6c",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/generator.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/generator.ts",
+      "mtime": 1759762910.1680696,
+      "size": 269,
+      "sha256": "bb3db1b05e48cffd88f152b1027a98e3a9a7cd01becfd926f891037f483e5dcf",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/estree.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/estree.ts",
+      "mtime": 1759762910.1679368,
+      "size": 1802,
+      "sha256": "f4ef9094393c05cde6f42be5ffcabb7d58c71da08d7fd9f62e4bf9ac00317d33",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts.skip": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts.skip",
+      "mtime": 1759762910.1680696,
+      "size": 4457,
+      "sha256": "be7f2dd5fd91aab62140edef4fdfc31277eddea3442d87a809f4ece56edace6e",
+      "ext": ".skip",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/parser.ts",
+      "mtime": 1759762910.1680696,
+      "size": 5307,
+      "sha256": "4feb002adbd3db6e9d5d94610940c0bb5af592cb5fa44bddf662e5f607ec03fa",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/test/estree.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/estree/test/estree.spec.ts",
+      "mtime": 1759762910.1680696,
+      "size": 3258,
+      "sha256": "c07eb3da94fd0571c57ceecff91cd46a2293f6706a87d07067ca5f21801fa0af",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$New.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$New.ts",
+      "mtime": 1759762910.1673753,
+      "size": 80,
+      "sha256": "48473d08c96052fadb33a0e72e062277fdeed39ad7f9f791733b1175abb4b825",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/Identifier.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/Identifier.ts",
+      "mtime": 1759762910.1674426,
+      "size": 5585,
+      "sha256": "9ce3d75779e2ecdaaf2f04af8fa78912b8039859c03eff8c6f3d6f34b7dd04b3",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Array.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Array.ts",
+      "mtime": 1759762910.166729,
+      "size": 288,
+      "sha256": "12da5a94bafb0a3d9e23b0409ae7bff69ccc7f2f758b34f382f9543885eb351e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/Node.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/Node.ts",
+      "mtime": 1759762910.1674426,
+      "size": 2415,
+      "sha256": "751383481caf30aa380d39542d24e2acc01bc8c37f662cdad2600bba4efd401e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/convert.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/convert.ts",
+      "mtime": 1759762910.1674426,
+      "size": 1364,
+      "sha256": "ca96d7648606acf9b94f8ec83999e4536f3a39d26d757a34c59daec553dd6e2e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Node.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Node.ts",
+      "mtime": 1759762910.1674426,
+      "size": 1894,
+      "sha256": "9ee09171c59599fe8844f98a6fa62e7d35c0fe42646c7077a28e106651efe1cd",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Object.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Object.ts",
+      "mtime": 1759762910.1674426,
+      "size": 593,
+      "sha256": "f6d631983d6c4dac26def55bc44dcb32d5547559e472232786d2d4cce57d6846",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Call.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Call.ts",
+      "mtime": 1759762910.1673753,
+      "size": 5338,
+      "sha256": "a8cef25b00e585433549813747662810ceb5fdec21e9993e6a652c5b0b7104c0",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Literal.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Literal.ts",
+      "mtime": 1759762910.1673753,
+      "size": 201,
+      "sha256": "6b2f2479f12a5c65febc9a668069d5a23946716e49a057bc968aecab40e2d84b",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Operator.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Operator.ts",
+      "mtime": 1759762910.1674426,
+      "size": 1843,
+      "sha256": "6009aa703f2223a4d791fe03bbd4eb31a7de94ca34d9e4f00a106b275624e6d1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Template.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Template.ts",
+      "mtime": 1759762910.1674426,
+      "size": 429,
+      "sha256": "7c37377684a6298f58fe58331341ab3ce7bec2c74450271a35ea8f0d7a6aefb8",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Function.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/$Function.ts",
+      "mtime": 1759762910.1673753,
+      "size": 3604,
+      "sha256": "3b81b60c6235ef1213c3ae8e454d7e6768f913f64eeebf3ddad2d9f9151e1d5d",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Identifier.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Identifier.spec.ts",
+      "mtime": 1759762910.1679368,
+      "size": 2641,
+      "sha256": "94b4ab012f02371da11f724d7f1d4d7445c43af082af6be8e39629c450acc2b1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Call.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Call.spec.ts",
+      "mtime": 1759762910.1674426,
+      "size": 3718,
+      "sha256": "07a104f2bef7e91765c091af46b8baed3091e702992b3f0129dd27c1bd8045c2",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Function.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/ast/test/Function.spec.ts",
+      "mtime": 1759762910.1679368,
+      "size": 1425,
+      "sha256": "5307a342911c94853ae92353bcc5e2a045602d4dc9742534994171cfc56295b8",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$IF.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$IF.ts",
+      "mtime": 1759762910.166729,
+      "size": 2148,
+      "sha256": "75cc0027528f3d90da6750f7c8832f12ab18ea0d6b92ed0090b0892341e67fd1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$FUNCTION.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$FUNCTION.ts",
+      "mtime": 1759762910.166729,
+      "size": 727,
+      "sha256": "eafe838dcdf2a4d5cec5a099c981a95a9288138f0edc2e826011a82d87a62e5a",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$ALIAS.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$ALIAS.ts",
+      "mtime": 1759762910.166729,
+      "size": 851,
+      "sha256": "e97d1f18c2b14cdd556f42ca92c2ae8d161d6b1c7616eb8b9eb962b259a2383a",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$BLOCK.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$BLOCK.ts",
+      "mtime": 1759762910.166729,
+      "size": 2657,
+      "sha256": "3132600f0e20bca3ae651024732850e45bf0f47e2d10735f0bd377cf47df7167",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$EXPRESSION.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$EXPRESSION.ts",
+      "mtime": 1759762910.166729,
+      "size": 1533,
+      "sha256": "d8c0e15155ef7e4868d804994dee9f690907c2117727978203c41a8f3fe7a1f8",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$CALL.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$CALL.ts",
+      "mtime": 1759762910.166729,
+      "size": 1566,
+      "sha256": "16054d77b397759e22814c1019cbe7ca81ecf65186316988d94db1d35bf057e3",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$CLASS.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$CLASS.ts",
+      "mtime": 1759762910.166729,
+      "size": 919,
+      "sha256": "ac8208ab0b8f1b8e50e8fc61014432018877b7a6066991750224671f398f190e",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$RETURN.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$RETURN.ts",
+      "mtime": 1759762910.166729,
+      "size": 327,
+      "sha256": "c9bcfbcdb219936bdb13660d3bc5dcefc948d86df80eea6aff74388651f5ea2f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$THROW.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$THROW.ts",
+      "mtime": 1759762910.166729,
+      "size": 453,
+      "sha256": "edac9960a4ce94fc55992ef26cf3745cb51a17601168eae424b08b9d7c79f6f7",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$FOR.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$FOR.ts",
+      "mtime": 1759762910.166729,
+      "size": 775,
+      "sha256": "3e9ed8c607646b761d8457d092ba143d77651f91f842c3fc26977546d9eb354a",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/revive.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/revive.ts",
+      "mtime": 1759762910.166729,
+      "size": 1582,
+      "sha256": "8d2b4cded5df773d3603d7baeac050f1969fbed477ec5f5b6d46c0064b7b360c",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$PROPERTY.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$PROPERTY.ts",
+      "mtime": 1759762910.166729,
+      "size": 2142,
+      "sha256": "1ea9268277b3069dd7d52f9417d3b0ce74d6cd6aec676e63d92bb8251df772ba",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$VARIABLE.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$VARIABLE.ts",
+      "mtime": 1759762910.166729,
+      "size": 834,
+      "sha256": "bae682d88144c863a15c0be3ef719c6ca8c2e341cf6e01ab897dc085483450db",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$ASSIGNMENT.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$ASSIGNMENT.ts",
+      "mtime": 1759762910.166729,
+      "size": 3133,
+      "sha256": "16322fdbb761bf90bb30fa2ee0b305aaf871bad39d9e9e4d99b449dfef9bda36",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$INSTANCE.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lang/$nuc/$INSTANCE.ts",
+      "mtime": 1759762910.166729,
+      "size": 2866,
+      "sha256": "c388d53206a5c8cf3dfe17e70bc91560c28332c493ef0cbb6fed18250c4f3686",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/context.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/context.json",
+      "mtime": 1759762910.1704314,
+      "size": 187,
+      "sha256": "179cc6961ef8ad4f77ad4577d6888ada6de7621d0359f76e5d8e7591f364ee55",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/$nuc.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/$nuc.spec.ts",
+      "mtime": 1759762910.1700945,
+      "size": 1434,
+      "sha256": "3e7a0fadc7d18c0f12d27295367ecb0f50aa6e05e54ea1416beff6872d88bc2b",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/openapi.json": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/openapi.json",
+      "mtime": 1759762910.1704426,
+      "size": 1426,
+      "sha256": "c92d239e39aee53c002d7c124edafd03a2b4cf6e9b894aca44465cbec6969942",
+      "ext": ".json",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/nucleoid.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/nucleoid.spec.ts",
+      "mtime": 1759762910.1704426,
+      "size": 79070,
+      "sha256": "aa3ac5f958e858c605bbbab72e6c64b4dbfbc914cf41bb96335d64e0566cda2f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/api.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/api.spec.ts",
+      "mtime": 1759762910.1704314,
+      "size": 3968,
+      "sha256": "d7e5214ee2f9d257eeddc347eef98e494d6ea450191cd6d4aeffe21e38d09c16",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/scope.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/test/scope.spec.ts",
+      "mtime": 1759762910.1704426,
+      "size": 1393,
+      "sha256": "8552b43a676b768626a9667074c8d719afe7d0cfc2a19523b2abeccbf8c8502d",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/openapi.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/openapi.ts",
+      "mtime": 1759762910.1683238,
+      "size": 3726,
+      "sha256": "cacfd514ac9a3e4a3ae3bae0a4c7ca390d0aa7101e18f4e8c0d1123e433378e4",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test.ts",
+      "mtime": 1759762910.1684186,
+      "size": 206,
+      "sha256": "4f1580c39875348e3cfd2c77eedc4458e01b6f90237b447cb141074076fc1dc1",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/statement.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/statement.ts",
+      "mtime": 1759762910.1684186,
+      "size": 192,
+      "sha256": "080a1136ea9db902e5d7edf23f0f6e3240a60bc8ba295f673f80ae0fa99a00d9",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/random.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/random.ts",
+      "mtime": 1759762910.1683238,
+      "size": 683,
+      "sha256": "bb71b37c7617d3abf69018f746aabf0a663fad321db19c5712bfdd2fbde2e86f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/serialize.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/serialize.ts",
+      "mtime": 1759762910.1684186,
+      "size": 2451,
+      "sha256": "8de150e64bf171fbef77fcea2a1a74e7591fd72f8acc7a47d19dc6de2556282f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/deep.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/deep.spec.ts",
+      "mtime": 1759762910.1684186,
+      "size": 833,
+      "sha256": "eed4688ee004f5ac958b58728616beaf6144ae0e509dc46c5d1ff874151c6e70",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/serialize.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/serialize.spec.ts",
+      "mtime": 1759762910.1685827,
+      "size": 2097,
+      "sha256": "de0faa744f0a8e4d1f51b5f6c90a599bbdaa5e65f74fac5f15050bcd31a23c93",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/random.spec.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/lib/test/random.spec.ts",
+      "mtime": 1759762910.1685827,
+      "size": 355,
+      "sha256": "89195085695626f0d765f5025f355c08d22dc8e22c575e8d708c6031534c2f14",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/routes/logs.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/routes/logs.ts",
+      "mtime": 1759762910.1699107,
+      "size": 334,
+      "sha256": "9b332d84e366f46ec2e6259d4f0218b6a7c9139d7c5f93f6d41f75e146f4b3a4",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    },
+    "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/routes/metrics.ts": {
+      "path": "/home/adra/JustNewsAgent/agents/reasoning/nucleoid_repo/src/routes/metrics.ts",
+      "mtime": 1759762910.1699107,
+      "size": 319,
+      "sha256": "51c5ebd7f274aad9c1fbc7ff8d71e5b3992c2520c5e1595a5ac20d9f16acf63f",
+      "ext": ".ts",
+      "score": 74.83561643835617,
+      "reasons": [
+        "agent-path"
+      ],
+      "last_updated_field": null
+    }
+  }
+}
