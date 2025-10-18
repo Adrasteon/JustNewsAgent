@@ -1,23 +1,81 @@
 """
 JustNews Metrics Library - Prometheus Integration
 Provides standardized metrics collection for all JustNews agents
+
+Preview Mode: Graceful fallbacks for optional dependencies
 """
 
 import time
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
 from functools import wraps
-
-from prometheus_client import (
-    Counter, Gauge, Histogram, Summary,
-    CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
-)
-from prometheus_client.multiprocess import MultiProcessCollector
-import psutil
-import GPUtil
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Graceful fallback for prometheus_client (optional in Preview mode)
+try:
+    from prometheus_client import (
+        Counter, Gauge, Histogram, Summary,
+        CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
+    )
+    from prometheus_client.multiprocess import MultiProcessCollector
+    PROMETHEUS_AVAILABLE = True
+except ImportError:
+    logger.warning("prometheus_client not available - using fallback stubs")
+    PROMETHEUS_AVAILABLE = False
+    
+    # Minimal fallback stubs for Preview mode
+    class _MetricStub:
+        """Stub metric that does nothing"""
+        def __init__(self, *args, **kwargs):
+            pass
+        def inc(self, *args, **kwargs):
+            pass
+        def dec(self, *args, **kwargs):
+            pass
+        def set(self, *args, **kwargs):
+            pass
+        def observe(self, *args, **kwargs):
+            pass
+        def labels(self, **kwargs):
+            return self
+    
+    Counter = Gauge = Histogram = Summary = _MetricStub
+    
+    class CollectorRegistry:
+        """Fallback CollectorRegistry for Preview mode"""
+        def __init__(self):
+            pass
+    
+    def generate_latest(registry=None):
+        """Fallback metrics generation"""
+        return b"# Prometheus client not available in Preview mode\n"
+    
+    CONTENT_TYPE_LATEST = "text/plain; version=0.0.4"
+    
+    class MultiProcessCollector:
+        """Fallback MultiProcessCollector"""
+        def __init__(self, *args, **kwargs):
+            pass
+
+# Graceful fallback for psutil (optional)
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    logger.warning("psutil not available - system metrics disabled")
+    PSUTIL_AVAILABLE = False
+    psutil = None
+
+# Graceful fallback for GPUtil (optional)
+try:
+    import GPUtil
+    GPUTIL_AVAILABLE = True
+except ImportError:
+    logger.warning("GPUtil not available - GPU metrics disabled")
+    GPUTIL_AVAILABLE = False
+    GPUtil = None
 
 class JustNewsMetrics:
     """
@@ -183,25 +241,28 @@ class JustNewsMetrics:
             registry=self.registry
         )
 
-        # GPU metrics (if available)
-        try:
-            gpu_count = len(GPUtil.getGPUs())
-            if gpu_count > 0:
-                self.gpu_memory_used_bytes = Gauge(
-                    'justnews_gpu_memory_used_bytes',
-                    'GPU memory used in bytes',
-                    ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
-                    registry=self.registry
-                )
+        # GPU metrics (if GPUtil is available)
+        if GPUTIL_AVAILABLE:
+            try:
+                gpu_count = len(GPUtil.getGPUs())
+                if gpu_count > 0:
+                    self.gpu_memory_used_bytes = Gauge(
+                        'justnews_gpu_memory_used_bytes',
+                        'GPU memory used in bytes',
+                        ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
+                        registry=self.registry
+                    )
 
-                self.gpu_utilization_percent = Gauge(
-                    'justnews_gpu_utilization_percent',
-                    'GPU utilization percentage',
-                    ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
-                    registry=self.registry
-                )
-        except Exception as e:
-            logger.warning(f"Could not initialize GPU metrics: {e}")
+                    self.gpu_utilization_percent = Gauge(
+                        'justnews_gpu_utilization_percent',
+                        'GPU utilization percentage',
+                        ['agent', 'agent_display_name', 'gpu_id', 'gpu_display_name'],
+                        registry=self.registry
+                    )
+            except Exception as e:
+                logger.warning(f"Could not initialize GPU metrics: {e}")
+        else:
+            logger.debug("GPUtil not available - skipping GPU metric initialization")
 
     def record_request(self, method: str, endpoint: str, status: int, duration: float):
         """Record an HTTP request."""
@@ -274,6 +335,10 @@ class JustNewsMetrics:
 
     def update_system_metrics(self):
         """Update system resource metrics."""
+        if not PSUTIL_AVAILABLE:
+            logger.debug("psutil not available - skipping system metrics")
+            return
+            
         try:
             # Memory metrics
             process = psutil.Process()
@@ -300,27 +365,30 @@ class JustNewsMetrics:
                 agent_display_name=self.display_name
             ).set(cpu_percent)
 
-            # GPU metrics
-            try:
-                gpus = GPUtil.getGPUs()
-                for i, gpu in enumerate(gpus):
-                    gpu_display = f'gpu-{i}'
+            # GPU metrics (only if GPUtil is available)
+            if GPUTIL_AVAILABLE:
+                try:
+                    gpus = GPUtil.getGPUs()
+                    for i, gpu in enumerate(gpus):
+                        gpu_display = f'gpu-{i}'
 
-                    self.gpu_memory_used_bytes.labels(
-                        agent=self.agent_name,
-                        agent_display_name=self.display_name,
-                        gpu_id=str(i),
-                        gpu_display_name=gpu_display
-                    ).set(gpu.memoryUsed * 1024 * 1024)  # Convert MB to bytes
+                        self.gpu_memory_used_bytes.labels(
+                            agent=self.agent_name,
+                            agent_display_name=self.display_name,
+                            gpu_id=str(i),
+                            gpu_display_name=gpu_display
+                        ).set(gpu.memoryUsed * 1024 * 1024)  # Convert MB to bytes
 
-                    self.gpu_utilization_percent.labels(
-                        agent=self.agent_name,
-                        agent_display_name=self.display_name,
-                        gpu_id=str(i),
-                        gpu_display_name=gpu_display
-                    ).set(gpu.load * 100)
-            except Exception as e:
-                logger.debug(f"Could not update GPU metrics: {e}")
+                        self.gpu_utilization_percent.labels(
+                            agent=self.agent_name,
+                            agent_display_name=self.display_name,
+                            gpu_id=str(i),
+                            gpu_display_name=gpu_display
+                        ).set(gpu.load * 100)
+                except Exception as e:
+                    logger.debug(f"Could not update GPU metrics: {e}")
+            else:
+                logger.debug("GPUtil not available - skipping GPU metrics")
 
         except Exception as e:
             logger.warning(f"Could not update system metrics: {e}")
