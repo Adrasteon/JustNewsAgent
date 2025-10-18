@@ -394,3 +394,99 @@ def articles():
         "Sample article two about space.",
         "Third sample article with some content.",
     ]
+
+
+@pytest.fixture
+def mcp_server(monkeypatch):
+    """Start a lightweight MCP stub and patch requests.get/post to target it.
+
+    Tests can use the running stub by reading `mcp_server.url()` or by
+    letting existing code call `requests.post('{MCP_BUS_URL}/call', ...)`
+    provided the test sets the environment variable MCP_BUS_URL to the
+    stub address.
+    """
+    try:
+        from tests.mcp_scaffold import MCPStubServer
+    except Exception:
+        pytest.skip("mcp_scaffold not available")
+
+    server = MCPStubServer()
+    server.start()
+    # Ensure tests use the stub by setting MCP_BUS_URL
+    monkeypatch.setenv('MCP_BUS_URL', server.url())
+
+    # Provide a small requests-like adapter backed by urllib so code under
+    # test that calls `requests.get/post` will reach the stub even when the
+    # test environment injects lightweight fake `requests` modules.
+    import urllib.request
+    import urllib.error
+    import json as _json
+
+    def _wrapped_get(url, *args, **kwargs):
+        timeout = kwargs.get('timeout', 5)
+        try:
+            req = urllib.request.Request(url, headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                raw = resp.read().decode('utf-8')
+                try:
+                    data = _json.loads(raw)
+                except Exception:
+                    data = {}
+                return DummyResponse(status_code=resp.getcode(), json_data=data, text=raw)
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8') if hasattr(e, 'read') else ''
+            return DummyResponse(status_code=e.code, text=body, json_data={})
+        except Exception as e:
+            return DummyResponse(status_code=500, text=str(e), json_data={})
+
+    def _wrapped_post(url, *args, **kwargs):
+        timeout = kwargs.get('timeout', 5)
+        payload = kwargs.get('json')
+        data = None
+        headers = {}
+        if payload is not None:
+            data = _json.dumps(payload).encode('utf-8')
+            headers['Content-Type'] = 'application/json'
+        else:
+            # allow tests to pass raw data
+            data = kwargs.get('data')
+        try:
+            req = urllib.request.Request(url, data=data, headers=headers)
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                raw = resp.read().decode('utf-8')
+                try:
+                    data = _json.loads(raw)
+                except Exception:
+                    data = {}
+                return DummyResponse(status_code=resp.getcode(), json_data=data, text=raw)
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8') if hasattr(e, 'read') else ''
+            return DummyResponse(status_code=e.code, text=body, json_data={})
+        except Exception as e:
+            return DummyResponse(status_code=500, text=str(e), json_data={})
+
+    # Monkeypatch the requests module used by code under test. This will
+    # override any earlier fake implementations for the duration of the
+    # test so that calls reach our local stub.
+    monkeypatch.setattr('requests.get', _wrapped_get, raising=False)
+    monkeypatch.setattr('requests.post', _wrapped_post, raising=False)
+
+    try:
+        yield server
+    finally:
+        server.stop()
+
+
+@pytest.fixture
+def agent_server():
+    """Start a tiny agent HTTP server and yield its address. Caller must
+    stop it when finished (via context manager pattern).
+    """
+    from tests.mcp_scaffold import AgentServer
+
+    srv = AgentServer()
+    srv.start()
+    try:
+        yield srv
+    finally:
+        srv.stop()

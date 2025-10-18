@@ -1,12 +1,61 @@
 ---
-title: JustNews V4 - GitHub Copilot Instructions
 description: Auto-generated description for JustNews V4 - GitHub Copilot Instructions
-tags: [documentation]
-status: current
-last_updated: 2025-09-24
+applyTo: "**/*"
 ---
 
 # JustNews V4 - GitHub Copilot Instructions
+
+## Copilot Quickstart — 1-screen guide for AI coding agents
+
+- Big picture: this repo is a distributed multi-agent system. The central
+  router is the MCP Bus (`agents/mcp_bus/main.py`, default port `8000`).
+  Specialized agents live under `agents/<name>/` and register themselves
+  with the MCP Bus on startup.
+
+- Key patterns to emulate:
+  - Registration and health: each agent implements an `MCPBusClient`
+    and calls `register_agent(...)`. See `agents/synthesizer/main.py` and
+    `agents/memory/main.py` for canonical examples.
+  - MCP payloads use the JSON shape `{agent, tool, args, kwargs}` and
+    most calls flow through `MCP_BUS_URL` (default `http://localhost:8000`).
+  - Agent endpoints are FastAPI apps using typed Pydantic models and a
+    `ToolCall`-style input pattern. Follow `agents/*/main.py` as a template.
+
+- Startup & deployment:
+  - Development: run agents directly (e.g. `python -m agents.mcp_bus.main`)
+    or use `uvicorn agents.dashboard.main:app --port 8013` for the dashboard.
+  - Production: use `deploy/systemd/` (`justnews@.service`) and the
+    startup ordering / orchestration logic in `start_services_daemon.sh`.
+
+- GPU & model conventions:
+  - GPU config is centralized: `agents/common/gpu_config_manager.py` +
+    `config/gpu/*` profiles. Native TensorRT code is in
+    `agents/analyst/native_tensorrt_engine.py` — be conservative: add
+    explicit cleanup and CPU fallbacks when modifying that code.
+
+- Tests & e2e: many tests are MCP-dependent. Use `pytest -q` and run
+  `scripts/mini_e2e_runner.py` or `comprehensive_100_article_test_fixed.py` with
+  `MCP_BUS_URL` set to a local MCP instance. Add mocks when possible.
+  
+  Testing helpers: a lightweight in-process MCP stub is provided at
+  `tests/mcp_scaffold.py`. Use the pytest fixtures `mcp_server` and
+  `agent_server` (in `tests/conftest.py`) to simulate agent registration,
+  custom handlers, or to forward calls to a small local `AgentServer`.
+  - Set `MCP_BUS_URL` via `monkeypatch.setenv('MCP_BUS_URL', mcp_server.url())`
+    before importing modules that read the env at import-time.
+  - Use `mcp_server.add_handler(agent, tool, fn)` to program custom
+    responses, or `mcp_server.forward_calls = True` to forward to a real
+    HTTP-based agent (useful for integration-style tests).
+
+- Conventions checklist (must-follow): PEP8 (88 chars), type hints,
+  Google-style docstrings, structured JSON logging, and `JustNewsMetrics`
+  usage for new metrics. Pre-commit hooks live in `.githooks/`.
+
+- Quick search terms for implementation tasks: `MCP_BUS_URL`, `/call`,
+  `register_agent`, `JustNewsMetrics`, `gpu_config_manager`.
+
+Please review any gaps you want me to expand (examples for a new agent, a
+sample PR checklist, or additional code patterns to follow).
 
 ## Project Overview
 
