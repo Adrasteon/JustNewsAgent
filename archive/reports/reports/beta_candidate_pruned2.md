@@ -1,3 +1,11 @@
+---
+title: Beta release candidate files
+description: Auto-generated description for Beta release candidate files
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Beta release candidate files
 Generated: 2025-10-08T11:53:22.148851+00:00
 

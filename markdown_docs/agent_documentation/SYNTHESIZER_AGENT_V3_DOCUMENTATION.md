@@ -1,3 +1,11 @@
+---
+title: Synthesizer Agent V3 - Production Documentation
+description: Auto-generated description for Synthesizer Agent V3 - Production Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Synthesizer Agent V3 - Production Documentation
 
 **Last Updated**: September 20, 2025

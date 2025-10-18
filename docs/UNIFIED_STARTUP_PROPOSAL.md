@@ -1,3 +1,11 @@
+---
+title: Unified JustNews Startup Service Proposal
+description: Auto-generated description for Unified JustNews Startup Service Proposal
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Unified JustNews Startup Service Proposal
 
 ## Objective

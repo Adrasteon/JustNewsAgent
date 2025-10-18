@@ -1,3 +1,11 @@
+---
+title: JustNews Database Overview (Preliminary)
+description: Auto-generated description for JustNews Database Overview (Preliminary)
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # JustNews Database Overview (Preliminary)
 
 ## Introduction

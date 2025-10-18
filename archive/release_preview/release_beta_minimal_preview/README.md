@@ -1,3 +1,11 @@
+---
+title: Release: Beta Minimal Preview
+description: Auto-generated description for Release: Beta Minimal Preview
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Release: Beta Minimal Preview
 
 This folder contains the new template and helper files required to assemble a minimal native (systemd) preview release of JustNews.

@@ -40,7 +40,7 @@ last_updated: 2025-09-12
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Main Project Documentation](README.md) | Complete system overview, installation, usage, and deployment guide with RTX3090 GPU support... | overview, installation, deployment | production_ready |
+| [Main Project Documentation](archive/release_preview/release_beta_minimal_preview/README.md) | Complete system overview, installation, usage, and deployment guide with RTX3090 GPU support... | overview, installation, deployment | production_ready |
 | [Version History & Changelog](CHANGELOG.md) | Detailed changelog including PyTorch 2.6.0+cu124 upgrade and GPU optimization achievements... | versions, history, releases | current |
 
 ---
@@ -68,7 +68,7 @@ last_updated: 2025-09-12
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Agent Documentation index](markdown_docs/agent_documentation/README.md) | This folder contains agent-specific documentation used by operators and
+| [Agent Documentation index](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains agent-specific documentation used by operators and
 developers. Key documents:..... | multi-agent, agents, models | current |
 | [Agent Model Map](markdown_docs/agent_documentation/AGENT_MODEL_MAP.md) | Complete mapping of agents to models, resources, and performance characteristics... | agents, models, mapping | current |
 | [Balancer Agent V1](markdown_docs/agent_documentation/BALANCER_AGENT_V1.md) | News neutralization and balancing agent with MCP integration and GPU acceleration... | balancer, neutralization, mcp-integration | production_ready |
@@ -90,17 +90,17 @@ per-agent model... | multi-agent, scout, security | current |
 | [Native TensorRT Analyst Agent - Production Ready](agents/analyst/NATIVE_TENSORRT_README.md) | ## 🏆 **Production Status: VALIDATED & DEPLOYED**...... | version-specific, analyst, logging | current |
 | [Native TensorRT Analyst Agent - Quick Start Guide](agents/analyst/NATIVE_AGENT_README.md) | ## 🏆 **Production Status: OPERATIONAL**...... | version-specific, analyst, logging | current |
 | [News Outlets Loader & Backfill Runbook](markdown_docs/agent_documentation/NEWS_OUTLETS_RUNBOOK.md) | This runbook explains how to safely run the canonical sources loader (`scripts/news_outlets.py`) and... | ai-agents, performance, multi-agent | current |
-| [NewsReader Agent - Production-Validated Configuration](agents/newsreader/README.md) | ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025**...... | multi-agent, ai-agents, api | current |
+| [NewsReader Agent - Production-Validated Configuration](archive/release_preview/release_beta_minimal_preview/README.md) | ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025**...... | multi-agent, ai-agents, api | current |
 | [NewsReader V2 Vision-Language Model Fallback Logic](markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md) | ## Overview
 The NewsReader V2 agent now implements robust fallback logic for vision-language model i... | multi-agent, ai-agents, mcp | current |
 | [Potential Development Paths](markdown_docs/agent_documentation/potential_development_paths.md) | This document captures a compact summary of recent analysis and recommendations about the project's ... | version-specific, analyst, multi-agent | current |
 | [Potential News Sources](markdown_docs/agent_documentation/potential_news_sources.md) | Documentation for Potential News Sources... | security | current |
 | [Product Modalities Comparison](markdown_docs/agent_documentation/product_modalities_comparison.md) | This document compares three high-level product modalities the JustNews system can pursue, aligns ea... | training, fact-checker, archive | current |
-| [Reasoning Agent](agents/reasoning/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews....... | multi-agent, mcp, architecture | current |
+| [Reasoning Agent](archive/release_preview/release_beta_minimal_preview/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews....... | multi-agent, mcp, architecture | current |
 | [Reasoning Agent - Nucleoid Integration](markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md) | Complete Nucleoid-based symbolic reasoning agent with GPU memory optimization... | reasoning, nucleoid, symbolic-logic | production_ready |
 | [Scout Agent - Enhanced Deep Crawl Documentation](markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md) | **JustNews V4 Scout Agent with Native Crawl4AI Integration**...... | version-specific, multi-agent, tensorrt | current |
 | [Scout Agent V2 - AI-First Architecture](markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md) | Complete documentation for the 5-model AI-first Scout Agent with RTX3090 GPU acceleration... | scout, ai-first, 5-models | production_ready |
-| [Scout Agent V2 - Next-Generation AI-First Content Analysis System](agents/scout/README.md) | ## 🎯 **Agent Overview**...... | agents, scout, multi-agent | current |
+| [Scout Agent V2 - Next-Generation AI-First Content Analysis System](archive/release_preview/release_beta_minimal_preview/README.md) | ## 🎯 **Agent Overview**...... | agents, scout, multi-agent | current |
 | [Scout → Memory Pipeline Success Summary](markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md) | **Date**: January 29, 2025  
 **Milestone**: Core JustNews V4 pipeline operational with native deploy... | version-specific, multi-agent, tensorrt | current |
 | [Sources Schema and Workflow](markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md) | This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion w... | security, api, performance | current |
@@ -108,8 +108,8 @@ The NewsReader V2 agent now implements robust fallback logic for vision-language
 | [TensorRT Quickstart (safe, no-GPU stub)](agents/analyst/TENSORRT_QUICKSTART.md) | This file explains how to run a safe, developer-friendly stub for the TensorRT engine build process.... | analyst, agents, tensorrt | current |
 | [The Definitive User Guide](markdown_docs/agent_documentation/The_Definitive_User_Guide.md) | Documentation for The Definitive User Guide... |  | current |
 | [Why INT8 Quantization Should Be Implemented Immediately](agents/newsreader/documentation/INT8_QUANTIZATION_RATIONALE.md) | ## You're Absolutely Right! Here's Why:...... | analyst, multi-agent, tensorrt | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/README.md) | Documentation for all-mpnet-base-v2... | version-specific, training, api | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130/README.md) | Documentation for all-mpnet-base-v2... | version-specific, training, api | current |
+| [all-mpnet-base-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-mpnet-base-v2... | version-specific, training, api | current |
+| [all-mpnet-base-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-mpnet-base-v2... | version-specific, training, api | current |
 
 ---
 
@@ -293,7 +293,7 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Build engine scaffold](tools/build_engine/README.md) | This folder contains a host-native scaffold for building TensorRT engines....... | pytorch, cuda, gpu | current |
+| [Build engine scaffold](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains a host-native scaffold for building TensorRT engines....... | pytorch, cuda, gpu | current |
 | [Deprecate Dialogpt Readme](scripts/DEPRECATE_DIALOGPT_README.md) | Documentation for Deprecate Dialogpt Readme... | agents, multi-agent, ai-agents | current |
 | [If you omit --target, the script will use the DATA_DRIVE_TARGET env var or fall back to the](scripts/README_MIRROR.md) | Documentation for If you omit --target, the script will use the DATA_DRIVE_TARGET env var or fall ba... | synthesizer, multi-agent, agents | current |
 | [Readme Bootstrap Models](scripts/README_BOOTSTRAP_MODELS.md) | Documentation for Readme Bootstrap Models... | models | current |
@@ -308,10 +308,10 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Examples for systemd native deployment](../agent_documentation/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units....... | mcp, ai-agents, scout | current |
+| [Examples for systemd native deployment](archive/release_preview/release_beta_minimal_preview/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units....... | mcp, ai-agents, scout | current |
 | [JustNews native deployment (systemd)](../agent_documentation/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
 systemd units and sim... | mcp, models, logging | current |
-| [Systemd scaffold for JustNews](../agent_documentation/systemd/README.md) | This folder contains a native deployment scaffold:...... | mcp, memory, reasoning | current |
+| [Systemd scaffold for JustNews](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains a native deployment scaffold:...... | mcp, memory, reasoning | current |
 
 ---
 
@@ -331,7 +331,7 @@ systemd units and sim... | mcp, models, logging | current |
 | [JustNews Agentic - Development Context](markdown_docs/DEVELOPMENT_CONTEXT.md) | **Last Updated**: September 2, 2025  
 **Branch**: `dev/gpu_implementation`  
 **Status**: Production-... | ai-agents, optimization, production | current |
-| [JustNews V4 Documentation Index](markdown_docs/README.md) | This directory contains organized documentation for the JustNews V4 project. Files are categorized f... | version-specific, memory, models | current |
+| [JustNews V4 Documentation Index](archive/release_preview/release_beta_minimal_preview/README.md) | This directory contains organized documentation for the JustNews V4 project. Files are categorized f... | version-specific, memory, models | current |
 | [JustNews V4 — In‑Use Files Inventory](markdown_docs/IN_USE_FILES.md) | Generated: 2025-08-23...... | analyst, dashboard, version-specific | current |
 | [JustNewsAgent V4 - Technical Architecture](markdown_docs/TECHNICAL_ARCHITECTURE.md) | This document provides comprehensive technical details about the JustNewsAgent V4 system architectur... | logging, ai-agents, scout | current |
 | [Workspace Cleanup Summary - August 8, 2025](markdown_docs/WORKSPACE_CLEANUP_SUMMARY_20250808.md) | ## Housekeeping Actions Completed ✅...... | dashboard, multi-agent, archive | current |

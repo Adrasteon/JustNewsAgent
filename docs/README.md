@@ -156,7 +156,7 @@ python docs/docs_navigator.py search planning
 ## 🗺️ **Navigation Paths**
 
 ### **Getting Started Path**
-1. **[README.md](README.md)** - Project overview and setup
+1. **[README.md](archive/release_preview/release_beta_minimal_preview/README.md)** - Project overview and setup
 2. **[Technical Architecture](markdown_docs/TECHNICAL_ARCHITECTURE.md)** - System understanding
 3. **[GPU Setup Guide](docs/gpu_runner_README.md)** - Environment configuration
 4. **[Project Status](docs/PROJECT_STATUS.md)** - Current development state

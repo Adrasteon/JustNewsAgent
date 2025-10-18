@@ -1,3 +1,11 @@
+---
+title: Release Process
+description: Auto-generated description for Release Process
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Release Process
 
 ## Version Numbering

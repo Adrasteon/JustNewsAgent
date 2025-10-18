@@ -175,7 +175,7 @@ python start_native_tensorrt_agent.py
 
 **Key Endpoints:** `/analyze_screenshot`, `/analyze_dom`
 
-**See also:** [agents/newsreader/README.md](agents/newsreader/README.md)
+**See also:** [agents/newsreader/README.md](archive/release_preview/release_beta_minimal_preview/README.md)
 
 ### Fact Checker, Synthesizer, Critic, Chief Editor
 

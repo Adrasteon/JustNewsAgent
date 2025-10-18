@@ -1,3 +1,11 @@
+---
+title: Chief Editor Agent - Production Documentation
+description: Auto-generated description for Chief Editor Agent - Production Documentation
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Chief Editor Agent - Production Documentation
 
 **Last Updated**: September 20, 2025

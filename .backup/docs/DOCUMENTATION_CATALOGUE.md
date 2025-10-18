@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Documentation Catalogue
+description: Auto-generated description for JustNewsAgent Documentation Catalogue
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # JustNewsAgent Documentation Catalogue
 
 **Version:** 2.0

@@ -1,3 +1,11 @@
+---
+title: JustNewsAgent Documentation Catalogue
+description: Auto-generated description for JustNewsAgent Documentation Catalogue
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # JustNewsAgent Documentation Catalogue
 
 **Version:** 2.0
@@ -46,7 +54,7 @@
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Main Project Documentation](README.md) | Complete system overview, installation, usage, and deployment guide with RTX3090 GPU support This co... | overview, installation, deployment | production_ready |
+| [Main Project Documentation](archive/release_preview/release_beta_minimal_preview/README.md) | Complete system overview, installation, usage, and deployment guide with RTX3090 GPU support This co... | overview, installation, deployment | production_ready |
 | [Version History & Changelog](CHANGELOG.md) | Detailed changelog including PyTorch 2.6.0+cu124 upgrade and GPU optimization achievements This comp... | versions, history, releases | current |
 
 ---
@@ -78,7 +86,7 @@
 | [API Documentation](markdown_docs/agent_documentation/api_documentation.md) | Comprehensive documentation covering api documentation with detailed technical information, implemen... | gpu, version-specific, synthesizer | current |
 | [ARC](agents/reasoning/nucleoid_repo/arc/src/instruct_dataset/arc.md) | Documentation for ARC providing essential information and technical details for the JustNews system.... | agent, architecture, reasoning | current |
 | [Agent Communication Protocols Documentation](markdown_docs/agent_documentation/agent_communication_protocols.md) | Comprehensive documentation covering agent communication protocols documentation with detailed techn... | optimization, deployment, mcp | current |
-| [Agent Documentation index](markdown_docs/agent_documentation/README.md) | This folder contains agent-specific documentation used by operators and
+| [Agent Documentation index](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains agent-specific documentation used by operators and
 developers. Key documents:..... | ai-agents, multi-agent, agents | current |
 | [Balancer Agent V1 - Integration & Debugging Guide](markdown_docs/agent_documentation/BALANCER_AGENT_INTEGRATION_GUIDE.md) | ## Overview
 The Balancer Agent is a production-grade component of the JustNews V4 system, designed t... | compliance, mcp, api | current |
@@ -88,14 +96,14 @@ The Balancer Agent is a production-ready component of the JustNews V4 system, de
 | [Contributing](agents/reasoning/nucleoid_repo/CONTRIBUTING.md) | Thanks to declarative programming, we have a brand-new approach to data and logic. As we are still d... | development, guidelines, contribution | current |
 | [Contributor Covenant Code of Conduct](agents/reasoning/nucleoid_repo/CODE_OF_CONDUCT.md) | Documentation for Contributor Covenant Code of Conduct providing essential information and technical... | security | current |
 | [Crawl4AI vs Playwright — feature-by-feature comparison](markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md) | Documentation for Crawl4AI vs Playwright — feature-by-feature comparison providing essential informa... | compliance, deployment, api | current |
-| [Crawler Agent](agents/crawler/README.md) | The **Crawler Agent** is a specialized JustNewsAgent service that provides unified production crawli... | scout, gpu, memory | current |
+| [Crawler Agent](archive/release_preview/release_beta_minimal_preview/README.md) | The **Crawler Agent** is a specialized JustNewsAgent service that provides unified production crawli... | scout, gpu, memory | current |
 | [Crawler Consolidation Plan — JustNewsAgent](markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md) | Date: 2025-08-27
 Author: Consolidation plan generated from interactive session...... | api, archive, models | current |
 | [Data Pipeline Documentation](markdown_docs/agent_documentation/data_pipeline_documentation.md) | Comprehensive documentation covering data pipeline documentation with detailed technical information... | gpu, version-specific, cuda | current |
 | [Database Schema & Operations Documentation](markdown_docs/agent_documentation/database_schema_operations.md) | Comprehensive documentation covering database schema & operations documentation with detailed techni... | optimization, security, training | current |
 | [Deployment Procedures Documentation](markdown_docs/agent_documentation/deployment_procedures_guide.md) | Comprehensive documentation covering deployment procedures documentation with detailed technical inf... | security, gpu, version-specific | current |
 | [Embedding Helper](markdown_docs/agent_documentation/EMBEDDING_HELPER.md) | Documentation for Embedding Helper providing essential information and technical details for the Jus... | models, gpu, multi-agent | current |
-| [Examples for systemd native deployment](markdown_docs/agent_documentation/systemd/examples/README.md) | Documentation for Examples for systemd native deployment... | deployment, architecture | current |
+| [Examples for systemd native deployment](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for Examples for systemd native deployment... | deployment, architecture | current |
 | [GPU Acceleration Documentation](markdown_docs/agent_documentation/gpu_acceleration_guide.md) | Comprehensive documentation covering gpu acceleration documentation with detailed technical informat... | gpu, version-specific, cuda | current |
 | [GPU Dashboard and Watcher Ingestion — Operations Guide](markdown_docs/agent_documentation/gpu_dashboard_and_watcher_ingestion.md) | Documentation for GPU Dashboard and Watcher Ingestion — Operations Guide... | performance, gpu, dashboard | current |
 | [GPU Orchestrator Operations (Port 8014)](markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md) | Documentation for GPU Orchestrator Operations (Port 8014)... | production, gpu, models | current |
@@ -104,7 +112,7 @@ Author: Consolidation plan generated from interactive session...... | api, archi
 | [Hugging Face model caching and pre-download for Memory Agent](markdown_docs/agent_documentation/HF_MODEL_CACHING.md) | This document explains how to avoid Hugging Face rate limits (HTTP 429) and how to pre-download/cach... | deployment, api, models | current |
 | [Implementation Summary](agents/newsreader/IMPLEMENTATION_SUMMARY.md) | Detailed report documenting implementation summary with analysis, findings, and recommendations for ... | agent, implementation, summary | current |
 | [JustNews Advanced Monitoring - Phase 5 Implementation Plan](markdown_docs/agent_documentation/systemd/phase5_advanced_monitoring_plan.md) | Documentation for JustNews Advanced Monitoring - Phase 5 Implementation Plan... | production, monitoring, version-specific | current |
-| [JustNews Advanced Monitoring System - PHASE 5 COMPLETE ✅](markdown_docs/agent_documentation/monitoring/README.md) | Documentation for JustNews Advanced Monitoring System - PHASE 5 COMPLETE ✅... | production, performance, gpu | current |
+| [JustNews Advanced Monitoring System - PHASE 5 COMPLETE ✅](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for JustNews Advanced Monitoring System - PHASE 5 COMPLETE ✅... | production, performance, gpu | current |
 | [JustNews Agent - API Documentation](markdown_docs/agent_documentation/PHASE3_API_DOCUMENTATION.md) | ## Phase 3 Sprint 3-4: Advanced Knowledge Graph APIs...... | security, gpu, synthesizer | current |
 | [JustNews PostgreSQL Integration Guide](markdown_docs/agent_documentation/systemd/postgresql_integration.md) | Documentation for JustNews PostgreSQL Integration Guide... | production, performance, archive | current |
 | [JustNews Systemd Quick Reference](markdown_docs/agent_documentation/systemd/QUICK_REFERENCE.md) | Documentation for JustNews Systemd Quick Reference... | monitoring, deployment, architecture | current |
@@ -127,7 +135,7 @@ per-agent model... | deployment, training, security | current |
 | [Native TensorRT Analyst Agent - Quick Start Guide](agents/analyst/NATIVE_AGENT_README.md) | Comprehensive documentation covering native tensorrt analyst agent - quick start guide with detailed... | deployment, mcp, api | current |
 | [New Blueprint Agents](markdown_docs/agent_documentation/New_Blueprint_Agents.md) | Complete documentation for New Blueprint Agents including implementation details, configuration, and... | security, knowledge-graph, gpu | current |
 | [News Outlets Loader & Backfill Runbook](markdown_docs/agent_documentation/NEWS_OUTLETS_RUNBOOK.md) | This runbook explains how to safely run the canonical sources loader (`scripts/news_outlets.py`) and... | performance, multi-agent, ai-agents | current |
-| [NewsReader Agent - Production-Validated Configuration](agents/newsreader/README.md) | ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025**...... | optimization, deployment, api | current |
+| [NewsReader Agent - Production-Validated Configuration](archive/release_preview/release_beta_minimal_preview/README.md) | ## 🚨 **CRITICAL UPDATE: GPU Crash Resolution - August 13, 2025**...... | optimization, deployment, api | current |
 | [NewsReader V2 Vision-Language Model Fallback Logic](markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md) | ## Overview
 The NewsReader V2 agent now implements robust fallback logic for vision-language model i... | optimization, mcp, gpu | current |
 | [Next-Generation AI-First Scout Agent V2 Documentation](markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md) | Comprehensive documentation covering next-generation ai-first scout agent v2 documentation with deta... | gpu, cuda, agents | current |
@@ -139,29 +147,29 @@ Nucleoid has two modes; decl... | agent, reasoning, logic | current |
 | [Potential News Sources](markdown_docs/agent_documentation/potential_news_sources.md) | Documentation for Potential News Sources providing essential information and technical details for t... | security | current |
 | [Preflight Runbook: Model Gating and Preload Failures](markdown_docs/agent_documentation/preflight_runbook.md) | Documentation for Preflight Runbook: Model Gating and Preload Failures... | gpu, models, ai-agents | current |
 | [Product Modalities Comparison](markdown_docs/agent_documentation/product_modalities_comparison.md) | This document compares three high-level product modalities the JustNews system can pursue, aligns ea... | gpu, synthesizer, fact-checker | current |
-| [Readme](agents/reasoning/nucleoid_repo/README.md) | Documentation for Readme providing essential information and technical details for the JustNews syst... | reasoning, memory, architecture | current |
-| [Reasoning Agent](agents/reasoning/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews....... | mcp, api, reasoning | current |
+| [Readme](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for Readme providing essential information and technical details for the JustNews syst... | reasoning, memory, architecture | current |
+| [Reasoning Agent](archive/release_preview/release_beta_minimal_preview/README.md) | This package contains the reasoning agent (Nucleoid) for JustNews....... | mcp, api, reasoning | current |
 | [Reasoning Agent Complete Implementation Documentation](markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md) | Comprehensive documentation covering reasoning agent complete implementation documentation with deta... | optimization, deployment, mcp | current |
 | [Scout Agent - Enhanced Deep Crawl Documentation](markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md) | **JustNews V4 Scout Agent with Native Crawl4AI Integration**...... | optimization, analytics, deployment | current |
-| [Scout Agent V2 - Next-Generation AI-First Content Analysis System](agents/scout/README.md) | Complete documentation for Scout Agent V2 - Next-Generation AI-First Content Analysis System includi... | optimization, deployment, training | current |
+| [Scout Agent V2 - Next-Generation AI-First Content Analysis System](archive/release_preview/release_beta_minimal_preview/README.md) | Complete documentation for Scout Agent V2 - Next-Generation AI-First Content Analysis System includi... | optimization, deployment, training | current |
 | [Scout → Memory Pipeline Success Summary](markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md) | **Date**: January 29, 2025  
 **Milestone**: Core JustNews V4 pipeline operational with native deploy... | deployment, training, mcp | current |
 | [Security Implementation Documentation](markdown_docs/agent_documentation/security_implementation_documentation.md) | Comprehensive documentation covering security implementation documentation with detailed technical i... | optimization, compliance, security | current |
 | [Security Implementation Guide](markdown_docs/agent_documentation/security_implementation_guide.md) | Comprehensive documentation covering security implementation guide with detailed technical informati... | compliance, deployment, mcp | current |
 | [Sources Schema and Workflow](markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md) | This document specifies the `sources` schema, provenance mapping (`article_source_map`), ingestion w... | analytics, deployment, security | current |
-| [Systemd scaffold for JustNews](markdown_docs/agent_documentation/systemd/README.md) | Documentation for Systemd scaffold for JustNews... | ai-agents, multi-agent, monitoring | current |
+| [Systemd scaffold for JustNews](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for Systemd scaffold for JustNews... | ai-agents, multi-agent, monitoring | current |
 | [TensorRT Quickstart (safe, no-GPU stub)](agents/analyst/TENSORRT_QUICKSTART.md) | This file explains how to run a safe, developer-friendly stub for the TensorRT engine build process.... | tensorrt, gpu, multi-agent | current |
 | [Training System API Documentation](markdown_docs/agent_documentation/training_system_api.md) | Comprehensive documentation covering training system api documentation with detailed technical infor... | training, api, performance | current |
-| [Unified Production Crawler](agents/scout/production_crawlers/README.md) | ## Overview...... | production, performance, scout | current |
+| [Unified Production Crawler](archive/release_preview/release_beta_minimal_preview/README.md) | ## Overview...... | production, performance, scout | current |
 | [Use the main RAPIDS environment](markdown_docs/agent_documentation/gpu_runner_README.md) | Documentation for Use the main RAPIDS environment providing essential information and technical deta... | pytorch, analytics, api | current |
 | [Why INT8 Quantization Should Be Implemented Immediately](agents/newsreader/documentation/INT8_QUANTIZATION_RATIONALE.md) | Documentation for Why INT8 Quantization Should Be Implemented Immediately providing essential inform... | optimization, deployment, tensorrt | current |
-| [all-MiniLM-L6-v2](agents/memory/models/all-MiniLM-L6-v2/README.md) | Documentation for all-MiniLM-L6-v2 providing essential information and technical details for the Jus... | version-specific, training, models | current |
-| [all-MiniLM-L6-v2](agents/memory/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md) | Documentation for all-MiniLM-L6-v2 providing essential information and technical details for the Jus... | version-specific, training, models | current |
-| [all-MiniLM-L6-v2](agents/memory/agents/memory/models/all-MiniLM-L6-v2/README.md) | Documentation for all-MiniLM-L6-v2... | training, version-specific, models | current |
-| [all-MiniLM-L6-v2](agents/memory/agents/memory/models/all-MiniLM-L6-v2/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md) | Documentation for all-MiniLM-L6-v2... | training, version-specific, models | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/README.md) | Documentation for all-mpnet-base-v2 providing essential information and technical details for the Ju... | training, api, models | current |
-| [all-mpnet-base-v2](agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130/README.md) | Documentation for all-mpnet-base-v2 providing essential information and technical details for the Ju... | training, api, models | current |
-| [nuc-arc](agents/reasoning/nucleoid_repo/arc/README.md) | Documentation for nuc-arc providing essential information and technical details for the JustNews sys... | reasoning, training, performance | current |
+| [all-MiniLM-L6-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-MiniLM-L6-v2 providing essential information and technical details for the Jus... | version-specific, training, models | current |
+| [all-MiniLM-L6-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-MiniLM-L6-v2 providing essential information and technical details for the Jus... | version-specific, training, models | current |
+| [all-MiniLM-L6-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-MiniLM-L6-v2... | training, version-specific, models | current |
+| [all-MiniLM-L6-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-MiniLM-L6-v2... | training, version-specific, models | current |
+| [all-mpnet-base-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-mpnet-base-v2 providing essential information and technical details for the Ju... | training, api, models | current |
+| [all-mpnet-base-v2](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for all-mpnet-base-v2 providing essential information and technical details for the Ju... | training, api, models | current |
+| [nuc-arc](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for nuc-arc providing essential information and technical details for the JustNews sys... | reasoning, training, performance | current |
 
 ---
 
@@ -346,7 +354,7 @@ This document records the dependency-testing work performed and the reason we pa
 
 | Document | Description | Tags | Status |
 |----------|-------------|------|--------|
-| [Build engine scaffold](tools/build_engine/README.md) | This folder contains a host-native scaffold for building TensorRT engines This comprehensive guide p... | pytorch, cuda, gpu | current |
+| [Build engine scaffold](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains a host-native scaffold for building TensorRT engines This comprehensive guide p... | pytorch, cuda, gpu | current |
 | [Deprecate Dialogpt Readme](scripts/DEPRECATE_DIALOGPT_README.md) | Utility scripts and tools documentation covering automation, deployment helpers, model management, a... | agents, multi-agent, ai-agents | current |
 | [If you omit --target, the script will use the DATA_DRIVE_TARGET env var or fall back to the](scripts/README_MIRROR.md) | Documentation for If you omit --target, the script will use the DATA_DRIVE_TARGET env var or fall ba... | synthesizer, multi-agent, agents | current |
 | [Readme Bootstrap Models](scripts/README_BOOTSTRAP_MODELS.md) | Utility scripts and tools documentation covering automation, deployment helpers, model management, a... | models | current |
@@ -364,15 +372,15 @@ This document records the dependency-testing work performed and the reason we pa
 | [Action Systemd Prod](deploy/systemd/action_systemd_prod.md) | Documentation for Action Systemd Prod... |  | current |
 | [Comprehensive systemd guide](deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md) | Documentation for Comprehensive systemd guide... | scout, gpu, cuda | current |
 | [Deployment Status](deploy/systemd/deployment_status.md) | Documentation for Deployment Status... | deployment | current |
-| [Examples for systemd native deployment](deploy/systemd/examples/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units, covering sys... | mcp, ai-agents, scout | current |
+| [Examples for systemd native deployment](archive/release_preview/release_beta_minimal_preview/README.md) | Files in this directory are examples and helpers to install the JustNews systemd units, covering sys... | mcp, ai-agents, scout | current |
 | [JustNews native deployment (systemd)](deploy/systemd/DEPLOYMENT.md) | This scaffold lets you run the MCP Bus and all agents natively on Ubuntu using
 systemd units and sim... | mcp, models, logging | current |
 | [Phase5 Advanced Monitoring Plan](deploy/systemd/phase5_advanced_monitoring_plan.md) | Documentation for Phase5 Advanced Monitoring Plan... | monitoring | current |
 | [PostgreSQL integration](deploy/systemd/postgresql_integration.md) | Documentation for PostgreSQL integration... | memory | current |
 | [Quick Reference – systemd](deploy/systemd/QUICK_REFERENCE.md) | Documentation for Quick Reference – systemd... | reasoning, scout, archive | current |
-| [Readme](deploy/monitoring/README.md) | Documentation for Readme... |  | current |
+| [Readme](archive/release_preview/release_beta_minimal_preview/README.md) | Documentation for Readme... |  | current |
 | [Shortfalls Analysis](deploy/systemd/shortfalls_analysis.md) | Documentation for Shortfalls Analysis... |  | current |
-| [Systemd scaffold for JustNews](deploy/systemd/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
+| [Systemd scaffold for JustNews](archive/release_preview/release_beta_minimal_preview/README.md) | This folder contains a native deployment scaffold:, covering system design, component interactions, ... | mcp, memory, reasoning | current |
 
 ---
 
@@ -392,7 +400,7 @@ systemd units and sim... | mcp, models, logging | current |
 | [JustNews Agentic - Development Context](markdown_docs/DEVELOPMENT_CONTEXT.md) | **Last Updated**: September 2, 2025  
 **Branch**: `dev/gpu_implementation`  
 **Status**: Production-... | ai-agents, optimization, production | current |
-| [JustNews V4 Documentation Index](markdown_docs/README.md) | This directory contains organized documentation for the JustNews V4 project. Files are categorized f... | version-specific, memory, models | current |
+| [JustNews V4 Documentation Index](archive/release_preview/release_beta_minimal_preview/README.md) | This directory contains organized documentation for the JustNews V4 project. Files are categorized f... | version-specific, memory, models | current |
 | [JustNews V4 — In‑Use Files Inventory](markdown_docs/IN_USE_FILES.md) | Comprehensive documentation covering justnews v4 — in‑use files inventory with detailed technical in... | analyst, dashboard, version-specific | current |
 | [JustNewsAgent V4 - Technical Architecture](markdown_docs/TECHNICAL_ARCHITECTURE.md) | This document provides comprehensive technical details about the JustNewsAgent V4 system architectur... | logging, ai-agents, scout | current |
 | [Workspace Cleanup Summary - August 8, 2025](markdown_docs/WORKSPACE_CLEANUP_SUMMARY_20250808.md) | Comprehensive documentation covering workspace cleanup summary - august 8, 2025 with detailed techni... | dashboard, multi-agent, archive | current |

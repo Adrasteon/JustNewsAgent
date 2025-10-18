@@ -3,392 +3,434 @@
     "category": "Agent Documentation",
     "files": [
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/agent_communication_protocols.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/agent_communication_protocols.md",
         "title": "Agent Communication Protocols Documentation",
         "description": "Auto-generated description for Agent Communication Protocols Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/README.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/README.md",
         "title": "Agent Documentation index",
         "description": "Auto-generated description for Agent Documentation index",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/AGENT_MODEL_MAP.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/AGENT_MODEL_MAP.md",
         "title": "AGENT_MODEL_MAP \u2014 definitive mapping",
         "description": "Authoritative agent-to-model mapping and canonical storage paths for production deployments.",
         "last_updated": "2025-09-12",
         "status": "active"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/ANALYST_AGENT_DOCUMENTATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/ANALYST_AGENT_DOCUMENTATION.md",
         "title": "Analyst Agent Documentation",
         "description": "Complete documentation for the JustNews Analyst Agent including GPU acceleration, troubleshooting, and operations",
         "last_updated": "2025-09-25",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/api_documentation.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/api_documentation.md",
         "title": "API Documentation",
         "description": "Auto-generated description for API Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/BALANCER_AGENT_INTEGRATION_GUIDE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/BALANCER_AGENT_INTEGRATION_GUIDE.md",
         "title": "Balancer Agent V1 - Integration & Debugging Guide",
         "description": "Auto-generated description for Balancer Agent V1 - Integration & Debugging Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/BALANCER_AGENT_V1.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/BALANCER_AGENT_V1.md",
         "title": "Balancer Agent V1 Documentation",
         "description": "Auto-generated description for Balancer Agent V1 Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/configuration_management_guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/CANONICAL_DATAFLOW.md",
+        "title": "Canonical Dataflow",
+        "description": "End-to-end dataflow across all JustNews V4 agents from crawl ingestion to synthesis and publication",
+        "last_updated": "2025-09-16",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/CHIEF_EDITOR_AGENT_DOCUMENTATION.md",
+        "title": "CHIEF EDITOR AGENT DOCUMENTATION",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/configuration_management_guide.md",
         "title": "Configuration Management Documentation",
         "description": "Auto-generated description for Configuration Management Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/Crawl4AI_API_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/Crawl4AI_API_SUMMARY.md",
         "title": "Crawl4AI API SUMMARY",
         "description": "Auto-generated description for Crawl4AI API SUMMARY",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/Crawl4AI_vs_Playwright_Comparison.md",
         "title": "Crawl4AI vs Playwright \u2014 feature-by-feature comparison",
         "description": "Auto-generated description for Crawl4AI vs Playwright \u2014 feature-by-feature comparison",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/Crawler_Consolidation_Plan.md",
         "title": "Crawler Consolidation Plan \u2014 JustNewsAgent",
         "description": "Auto-generated description for Crawler Consolidation Plan \u2014 JustNewsAgent",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/data_pipeline_documentation.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/data_pipeline_documentation.md",
         "title": "Data Pipeline Documentation",
         "description": "Auto-generated description for Data Pipeline Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/database_schema_operations.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/database_schema_operations.md",
         "title": "Database Schema & Operations Documentation",
         "description": "Auto-generated description for Database Schema & Operations Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/deployment_procedures_guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/deployment_procedures_guide.md",
         "title": "Deployment Procedures Documentation",
         "description": "Auto-generated description for Deployment Procedures Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/EMBEDDING_HELPER.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/EMBEDDING_HELPER.md",
         "title": "Embedding Helper \u2014 sentence-transformers management",
         "description": "Centralized helper for downloading, caching, and instantiating SentenceTransformer models across agents.",
         "last_updated": "2025-09-12",
         "status": "active"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/examples/README.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/examples/README.md",
         "title": "Examples for systemd native deployment",
         "description": "Auto-generated description for Examples for systemd native deployment",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_acceleration_guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/gpu_acceleration_guide.md",
         "title": "GPU Acceleration Documentation",
         "description": "Auto-generated description for GPU Acceleration Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_dashboard_and_watcher_ingestion.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/gpu_dashboard_and_watcher_ingestion.md",
         "title": "GPU Dashboard and Watcher Ingestion \u2014 Operations Guide",
         "description": "Auto-generated description for GPU Dashboard and Watcher Ingestion \u2014 Operations Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_orchestrator.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/gpu_orchestrator.md",
         "title": "gpu orchestrator",
-        "description": "Auto-generated description for gpu orchestrator",
+        "description": "- Technical Architecture: markdown_docs/TECHNICAL_ARCHITECTURE.md - Documentation Catalogue: docs/DOCUMENTATION_CATALOGUE.md",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_orchestrator_checklist.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/gpu_orchestrator_checklist.md",
         "title": "gpu orchestrator checklist",
-        "description": "Auto-generated description for gpu orchestrator checklist",
+        "description": "--- Authoritative tracking document for GPU Orchestrator readiness.",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/GPU_ORCHESTRATOR_OPERATIONS.md",
         "title": "GPU Orchestrator Operations (Port 8014)",
         "description": "Operating the GPU Orchestrator for model preload/readiness gating and GPU telemetry in production.",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/gpu_runner_README.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/gpu_runner_README.md",
         "title": "gpu runner README",
         "description": "Auto-generated description for gpu runner README",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/HF_MODEL_CACHING.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/HF_MODEL_CACHING.md",
         "title": "Hugging Face model caching and pre-download for Memory Agent",
         "description": "Auto-generated description for Hugging Face model caching and pre-download for Memory Agent",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/phase5_advanced_monitoring_plan.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/phase5_advanced_monitoring_plan.md",
         "title": "JustNews Advanced Monitoring - Phase 5 Implementation Plan",
         "description": "Auto-generated description for JustNews Advanced Monitoring - Phase 5 Implementation Plan",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/monitoring/README.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/monitoring/README.md",
         "title": "JustNews Advanced Monitoring System - PHASE 5 COMPLETE",
         "description": "Auto-generated description for JustNews Advanced Monitoring System - PHASE 5 COMPLETE",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/PHASE3_API_DOCUMENTATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/PHASE3_API_DOCUMENTATION.md",
         "title": "JustNews Agent - API Documentation",
         "description": "Auto-generated description for JustNews Agent - API Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/DEPLOYMENT.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/DEPLOYMENT.md",
         "title": "JustNews native deployment (systemd)",
         "description": "Auto-generated description for JustNews native deployment (systemd)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/postgresql_integration.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/postgresql_integration.md",
         "title": "JustNews PostgreSQL Integration Guide",
         "description": "Auto-generated description for JustNews PostgreSQL Integration Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/QUICK_REFERENCE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/QUICK_REFERENCE.md",
         "title": "JustNews Systemd Quick Reference",
         "description": "Auto-generated description for JustNews Systemd Quick Reference",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/action_plan_2025-09-12.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/action_plan_2025-09-12.md",
         "title": "JustNews V4 - Low-risk Action Plan (2025-09-12)",
         "description": "Auto-generated description for JustNews V4 - Low-risk Action Plan (2025-09-12)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md",
         "title": "JustNews V4 Systemd Implementation Guide",
         "description": "Auto-generated description for JustNews V4 Systemd Implementation Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/canonical_port_mapping.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/canonical_port_mapping.md",
         "title": "JustNewsAgent Canonical Port Mapping",
         "description": "Auto-generated description for JustNewsAgent Canonical Port Mapping",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/mcp_bus_architecture.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/mcp_bus_architecture.md",
         "title": "MCP Bus Architecture Documentation",
         "description": "Auto-generated description for MCP Bus Architecture Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/MCP_BUS_OPERATIONS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MCP_BUS_OPERATIONS.md",
         "title": "MCP Bus Operations Guide (Port 8000)",
         "description": "Operating the MCP Bus for agent registration and tool routing in production.",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/MODEL_STORE_GUIDELINES.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MEMORY_AGENT_DOCUMENTATION.md",
+        "title": "MEMORY AGENT DOCUMENTATION",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MODEL_STORE_GUIDELINES.md",
         "title": "Model store guidelines",
         "description": "Auto-generated description for Model store guidelines",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/MODEL_USAGE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MODEL_USAGE.md",
         "title": "MODEL USAGE",
         "description": "Auto-generated description for MODEL USAGE",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/monitoring_observability_guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/monitoring_observability_guide.md",
         "title": "Monitoring and Observability Documentation",
         "description": "Auto-generated description for Monitoring and Observability Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/New_Blueprint_Agents.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/MPS_RESOURCE_ALLOCATION.md",
+        "title": "MPS Resource Allocation System",
+        "description": "Machine-readable GPU memory allocation configuration for NVIDIA MPS - calculated from agent model requirements",
+        "last_updated": "2025-09-17",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/New_Blueprint_Agents.md",
         "title": "New Blueprint Agents",
         "description": "Auto-generated description for New Blueprint Agents",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/NEWS_OUTLETS_RUNBOOK.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/NEWS_OUTLETS_RUNBOOK.md",
         "title": "News Outlets Loader & Backfill Runbook",
         "description": "Auto-generated description for News Outlets Loader & Backfill Runbook",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/NEWSREADER_V2_MODEL_FALLBACK.md",
         "title": "NewsReader V2 Vision-Language Model Fallback Logic",
         "description": "Auto-generated description for NewsReader V2 Vision-Language Model Fallback Logic",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_AGENT_V2_DOCUMENTATION.md",
         "title": "Next-Generation AI-First Scout Agent V2 Documentation",
         "description": "Auto-generated description for Next-Generation AI-First Scout Agent V2 Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/OPERATIONS_QUICK_REFERENCE.md",
         "title": "Operations Quick Reference",
-        "description": "Fast, copy-pasteable commands for health checks, service management, preflight gating, GPU orchestrator, and MCP bus operations in production.",
+        "description": "See also: Systemd Operations Guide, GPU Orchestrator Operations, MCP Bus Operations, Preflight Runbook",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/OPERATOR_GUIDE_SYSTEMD.md",
         "title": "Operator Guide \u2014 Systemd Deployment and Operations",
         "description": "Production operations for systemd deployment, preflight gating, GPU orchestrator, MCP bus, and common service tasks.",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/performance_optimization_documentation.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/performance_optimization_documentation.md",
         "title": "Performance Optimization Documentation",
         "description": "Auto-generated description for Performance Optimization Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/potential_development_paths.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/potential_development_paths.md",
         "title": "Potential Development Paths",
         "description": "Auto-generated description for Potential Development Paths",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/potential_news_sources.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/potential_news_sources.md",
         "title": "potential news sources",
         "description": "Auto-generated description for potential news sources",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/preflight_runbook.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/preflight_runbook.md",
         "title": "Preflight Runbook \u2014 Model Gating and Preload Failures",
         "description": "How to use the preflight gate to enforce model readiness and troubleshoot preload failures from the GPU Orchestrator.",
-        "last_updated": "2025-09-12",
+        "last_updated": "2025-09-25",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/product_modalities_comparison.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/product_modalities_comparison.md",
         "title": "Product Modalities Comparison",
         "description": "Auto-generated description for Product Modalities Comparison",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/PUBLIC_API_DOCUMENTATION.md",
+        "title": "Public API Documentation",
+        "description": "Comprehensive documentation for the JustNews public API with authentication, security, and data access features",
+        "last_updated": "2025-09-20",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/REASONING_AGENT_COMPLETE_IMPLEMENTATION.md",
         "title": "Reasoning Agent Complete Implementation Documentation",
         "description": "Auto-generated description for Reasoning Agent Complete Implementation Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_ENHANCED_DEEP_CRAWL_DOCUMENTATION.md",
         "title": "Scout Agent - Enhanced Deep Crawl Documentation",
         "description": "Auto-generated description for Scout Agent - Enhanced Deep Crawl Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SCOUT_MEMORY_PIPELINE_SUCCESS.md",
         "title": "Scout \u2192 Memory pipeline \u2014 success summary",
         "description": "Validated end-to-end flow from Scout content extraction to Memory agent storage via MCP Bus, with production service layout.",
         "last_updated": "2025-09-12",
         "status": "archived"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/security_implementation_documentation.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/security_implementation_documentation.md",
         "title": "Security Implementation Documentation",
         "description": "Auto-generated description for Security Implementation Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/security_implementation_guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/security_implementation_guide.md",
         "title": "Security Implementation Guide",
         "description": "Auto-generated description for Security Implementation Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SOURCES_SCHEMA_AND_WORKFLOW.md",
         "title": "Sources Schema and Workflow",
         "description": "Auto-generated description for Sources Schema and Workflow",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/systemd/README.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/SYNTHESIZER_AGENT_V3_DOCUMENTATION.md",
+        "title": "SYNTHESIZER AGENT V3 DOCUMENTATION",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/systemd/README.md",
         "title": "Systemd scaffold for JustNews",
-        "description": "Auto-generated description for Systemd scaffold for JustNews",
+        "description": "This folder contains a native deployment scaffold and links to all systemd docs moved under markdown_docs.",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/agent_documentation/training_system_api.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/agent_documentation/training_system_api.md",
         "title": "Training System API Documentation",
         "description": "Auto-generated description for Training System API Documentation",
         "last_updated": "2025-09-12",
@@ -400,308 +442,553 @@
     "category": "Development Reports",
     "files": [
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/action_plan_implementation_status.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/action_plan_implementation_status.md",
         "title": "Action Plan Implementation Status (Code/Tests Evidence Only)",
         "description": "Auto-generated description for Action Plan Implementation Status (Code/Tests Evidence Only)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/action_plan.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/action_plan.md",
         "title": "Action Plan: JustNews V4 RTX-Accelerated Development",
         "description": "Auto-generated description for Action Plan: JustNews V4 RTX-Accelerated Development",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/agent_assessment_2025-08-18.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/Advanced_Topic_Modeling_Enhancement_Research.md",
+        "title": "Advanced Topic Modeling Enhancement Research",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/agent_assessment_2025-08-18.md",
         "title": "Agent Assessment \u2014 2025-08-18",
         "description": "Auto-generated description for Agent Assessment \u2014 2025-08-18",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/ANALYTICS_DASHBOARD_FIXES_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/analysis_nucleoid_potential.md",
+        "title": "Analysis Nucleoid Potential",
+        "description": "Placeholder README: Analysis Nucleoid Potential. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/ANALYTICS_DASHBOARD_FIXES_SUMMARY.md",
         "title": "Analytics Dashboard Fixes Summary",
         "description": "Auto-generated description for Analytics Dashboard Fixes Summary",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/bbc_crawler_duplicates_complete_resolution.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/ARCHITECTURAL_CHANGES_SUMMARY.md",
+        "title": "Architectural Changes Summary",
+        "description": "Placeholder README: Architectural Changes Summary. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/architectural_review_findings.md",
+        "title": "Architectural Review Findings",
+        "description": "Placeholder README: Architectural Review Findings. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/ARCHITECTURAL_REVIEW_SUMMARY.md",
+        "title": "Architectural Review Summary",
+        "description": "Placeholder README: Architectural Review Summary. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/bbc_crawler_duplicates_complete_resolution.md",
         "title": "BBC Crawler Duplicates - Complete Resolution \u2705",
         "description": "Auto-generated description for BBC Crawler Duplicates - Complete Resolution \u2705",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/LOGGING_MIGRATION.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/LOGGING_MIGRATION.md",
         "title": "Centralized Logging Migration Guide",
         "description": "Auto-generated description for Centralized Logging Migration Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/CROSS_REFERENCE_REPAIR_REPORT.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/COMPLETE_V2_UPGRADE_ASSESSMENT.md",
+        "title": "Complete V2 Upgrade Assessment",
+        "description": "Placeholder README: Complete V2 Upgrade Assessment. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/CORRECTED_SCOUT_ANALYSIS.md",
+        "title": "Corrected Scout Analysis",
+        "description": "Placeholder README: Corrected Scout Analysis. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/CROSS_REFERENCE_REPAIR_REPORT.md",
         "title": "CROSS REFERENCE REPAIR REPORT",
         "description": "Auto-generated description for CROSS REFERENCE REPAIR REPORT",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/DEVELOPMENT_REPORTS_REORGANIZATION_PLAN.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/DEVELOPMENT_REPORTS_REORGANIZATION_PLAN.md",
         "title": "DEVELOPMENT REPORTS REORGANIZATION PLAN",
         "description": "Auto-generated description for DEVELOPMENT REPORTS REORGANIZATION PLAN",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/entrypoints_assessment_2025-08-18.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/DOCKER_DEPRECATION_NOTICE.md",
+        "title": "Docker Deprecation Notice",
+        "description": "Placeholder README: Docker Deprecation Notice. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/enhanced_reasoning_architecture.md",
+        "title": "Enhanced Reasoning Architecture",
+        "description": "Placeholder README: Enhanced Reasoning Architecture. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/entrypoints_assessment_2025-08-18.md",
         "title": "Entrypoints and Orchestration Flows \u2014 2025-08-18",
         "description": "Auto-generated description for Entrypoints and Orchestration Flows \u2014 2025-08-18",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/FACT_CHECKER_FIXES_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/FACT_CHECKER_FIXES_SUCCESS.md",
         "title": "FACT CHECKER FIXES SUCCESS",
         "description": "Auto-generated description for FACT CHECKER FIXES SUCCESS",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/full_gpu_implementation_action_plan.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/full_gpu_implementation_action_plan.md",
         "title": "Full GPU Implementation Action Plan",
         "description": "Auto-generated description for Full GPU Implementation Action Plan",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/COPILOT_INSTRUCTIONS_UPDATE_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/COPILOT_INSTRUCTIONS_UPDATE_SUMMARY.md",
         "title": "GitHub Copilot Instructions Update Summary - August 2, 2025",
         "description": "Auto-generated description for GitHub Copilot Instructions Update Summary - August 2, 2025",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/GPU_ANALYSIS_RESOLUTION_REPORT.md",
+        "title": "GPU Analysis Debugging and Resolution Report",
+        "description": "Comprehensive documentation of the GPU analysis issue resolution",
+        "last_updated": "2025-09-25",
+        "status": "resolved"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/GPU-Crash-Investigation-Final-Report.md",
         "title": "GPU Crash Investigation - Final Report",
         "description": "Auto-generated description for GPU Crash Investigation - Final Report",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU_ModelStore_Assessment.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/GPU_ModelStore_Assessment.md",
         "title": "GPU Model Store Assessment",
         "description": "Auto-generated description for GPU Model Store Assessment",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/gpu_orchestrator_plan.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/gpu_orchestrator_plan.md",
         "title": "GPU Orchestrator Migration Plan (V4)",
         "description": "Auto-generated description for GPU Orchestrator Migration Plan (V4)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU_Audit_Report.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/GPU_Audit_Report.md",
         "title": "GPU Usage Audit Report - JustNewsAgent",
         "description": "Auto-generated description for GPU Usage Audit Report - JustNewsAgent",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/GPU_ANALYSIS_RESOLUTION_REPORT.md",
-        "title": "GPU Analysis Debugging and Resolution Report",
-        "description": "Comprehensive documentation of the GPU analysis issue resolution process, root causes, solutions, and prevention measures",
-        "last_updated": "2025-09-25",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/IMMEDIATE_OVERLAP_ELIMINATION_SUMMARY.md",
+        "title": "Immediate Overlap Elimination Summary",
+        "description": "Placeholder README: Immediate Overlap Elimination Summary. This file",
+        "last_updated": "2025-10-07",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/MAINTENANCE_COMPLETION_REPORT.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/MAINTENANCE_COMPLETION_REPORT.md",
         "title": "JustNews Documentation Maintenance Action Plan - COMPLETED",
         "description": "Auto-generated description for JustNews Documentation Maintenance Action Plan - COMPLETED",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/action_systemd_prod.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/action_systemd_prod.md",
         "title": "JustNews Systemd Deployment - Action Plan & Status",
         "description": "Auto-generated description for JustNews Systemd Deployment - Action Plan & Status",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/shortfalls_analysis.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/shortfalls_analysis.md",
         "title": "JustNews Systemd Deployment - Shortfalls Analysis",
         "description": "Auto-generated description for JustNews Systemd Deployment - Shortfalls Analysis",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/QUALITY_SYSTEM_STATUS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/QUALITY_SYSTEM_STATUS.md",
         "title": "JustNews V4 Quality Management System - Final Status",
         "description": "Auto-generated description for JustNews V4 Quality Management System - Final Status",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/deployment_status.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/deployment_status.md",
         "title": "JustNews V4 Systemd Deployment Status Report",
         "description": "Auto-generated description for JustNews V4 Systemd Deployment Status Report",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/WORKSPACE_ORGANIZATION_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/WORKSPACE_ORGANIZATION_SUMMARY.md",
         "title": "JustNews V4 Workspace Organization Summary",
         "description": "Auto-generated description for JustNews V4 Workspace Organization Summary",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/DOCUMENTATION_CATALOGUE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/Crawler_and_Ingestion_Dev_Plan.md",
+        "title": "JustNewsAgent Crawling and Ingestion System Analysis & Development Plan",
+        "description": "Comprehensive analysis of current crawling and ingestion capabilities with prioritized development roadmap",
+        "last_updated": "2025-09-14",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/DOCUMENTATION_CATALOGUE.md",
         "title": "JustNewsAgent Documentation Catalogue",
         "description": "Auto-generated description for JustNewsAgent Documentation Catalogue",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/PROJECT_STATUS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/PROJECT_STATUS.md",
         "title": "JustNewsAgent Status Report",
         "description": "Auto-generated description for JustNewsAgent Status Report",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/CURRENT_DEVELOPMENT_STATUS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/CURRENT_DEVELOPMENT_STATUS.md",
         "title": "JustNewsAgent V4 - Current Development Status Summary",
         "description": "Auto-generated description for JustNewsAgent V4 - Current Development Status Summary",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/IMPLEMENTATION_PLAN.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/IMPLEMENTATION_PLAN.md",
         "title": "JustNewsAgentic \u2014 Implementation Plan for Evidence, KG, Fact\u2011Checking & Conservative Generation",
         "description": "Auto-generated description for JustNewsAgentic \u2014 Implementation Plan for Evidence, KG, Fact\u2011Checking & Conservative Generation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/mcp_bus_architecture_cleanup.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/kiss_architecture_redesign.md",
+        "title": "Kiss Architecture Redesign",
+        "description": "Placeholder README: Kiss Architecture Redesign. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/LOCAL_MODEL_TRAINING_PLAN.md",
+        "title": "Local Model Training Plan",
+        "description": "Placeholder README: Local Model Training Plan. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/mcp_bus_architecture_cleanup.md",
         "title": "MCP Bus Architecture Cleanup - August 2, 2025",
         "description": "Auto-generated description for MCP Bus Architecture Cleanup - August 2, 2025",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/META_TENSOR_RESOLUTION_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/META_TENSOR_RESOLUTION_SUCCESS.md",
         "title": "META TENSOR RESOLUTION SUCCESS",
         "description": "Auto-generated description for META TENSOR RESOLUTION SUCCESS",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/Needed-for-live-run.md",
+        "title": "Needed For Live Run",
+        "description": "Placeholder README: Needed For Live Run. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/NEURAL_VS_RULES_STRATEGIC_ANALYSIS.md",
+        "title": "Neural Vs Rules Strategic Analysis",
+        "description": "Placeholder README: Neural Vs Rules Strategic Analysis. This file was",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/NEWSREADER_TRAINING_INTEGRATION_SUCCESS.md",
         "title": "NEWSREADER TRAINING INTEGRATION SUCCESS",
         "description": "Auto-generated description for NEWSREADER TRAINING INTEGRATION SUCCESS",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/practical_newsreader_solution_organization.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/NEXT_STEPS_2025-08-10_1436.md",
+        "title": "Next Steps 2025 08 10 1436",
+        "description": "Placeholder README: Next Steps 2025 08 10 1436. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/ONLINE_LEARNING_ARCHITECTURE.md",
+        "title": "Online Learning Architecture",
+        "description": "Placeholder README: Online Learning Architecture. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/ONLINE_TRAINING_INTEGRATION_SUMMARY.md",
+        "title": "Online Training Integration Summary",
+        "description": "Placeholder README: Online Training Integration Summary. This file was",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/optimal_agent_separation.md",
+        "title": "Optimal Agent Separation",
+        "description": "Placeholder README: Optimal Agent Separation. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/practical_newsreader_solution_organization.md",
         "title": "Practical NewsReader Solution - File Organization Complete \u2705",
         "description": "Auto-generated description for Practical NewsReader Solution - File Organization Complete \u2705",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/production_bbc_crawler_duplicate_resolution.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/production_bbc_crawler_duplicate_resolution.md",
         "title": "Production BBC Crawler - Duplicate Resolution Complete \u2705",
         "description": "Auto-generated description for Production BBC Crawler - Duplicate Resolution Complete \u2705",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/scout_production_crawler_integration_complete.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/PRODUCTION_DEPLOYMENT_GUIDE.md",
+        "title": "Production Deployment Guide",
+        "description": "Placeholder README: Production Deployment Guide. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/PRODUCTION_VALIDATION_SUMMARY.md",
+        "title": "Production Validation Summary",
+        "description": "Placeholder README: Production Validation Summary. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/agent_documentation/PUBLIC_API_DOCUMENTATION.md",
+        "title": "Public Api Documentation",
+        "description": "Placeholder README: Public Api Documentation. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/README.md",
+        "title": "Readme",
+        "description": "Placeholder README: Readme. This file was auto-generated to satisfy",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/agents/fact_checker/models/sentence-transformers_all-mpnet-base-v2/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130/README.md",
+        "title": "Readme",
+        "description": "Placeholder README: Readme. This file was auto-generated to satisfy",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/README_LIVE_SMOKE.md",
+        "title": "Readme Live Smoke",
+        "description": "Placeholder README: Readme Live Smoke. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/REFactor_SCOUT_CRAWLER_PLAN.md",
+        "title": "Refactor Plan \u2014 Scout, Crawler, Crawler Control \u2192 Single AI Crawler + Monitoring",
+        "description": "",
+        "last_updated": "2025-10-08",
+        "status": "draft"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/scout_production_crawler_integration_complete.md",
         "title": "Scout Agent Production Crawler Integration - COMPLETED \u2705",
         "description": "Auto-generated description for Scout Agent Production Crawler Integration - COMPLETED \u2705",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/strategic_assessment_and_implementation_plan.md",
+        "title": "strategic assessment and implementation plan",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/SYNTHESIZER_TRAINING_INTEGRATION_SUCCESS.md",
         "title": "Synthesizer V2 Dependencies & Training Integration - SUCCESS REPORT",
         "description": "Auto-generated description for Synthesizer V2 Dependencies & Training Integration - SUCCESS REPORT",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/System_Assessment_2025-08-09.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/SYSTEM_ARCHITECTURE_ASSESSMENT.md",
+        "title": "System Architecture Assessment",
+        "description": "Placeholder README: System Architecture Assessment. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/System_Assessment_2025-08-09.md",
         "title": "System Assessment and Improvement Plan \u2014 2025-08-09",
         "description": "Auto-generated description for System Assessment and Improvement Plan \u2014 2025-08-09",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/system_startup_scripts_restored.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/agent_documentation/system_decisions.md",
+        "title": "System Decisions",
+        "description": "Placeholder README: System Decisions. This file was auto-generated to",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/system_startup_scripts_restored.md",
         "title": "System Startup Scripts - Restored and Enhanced \u2705",
         "description": "Auto-generated description for System Startup Scripts - Restored and Enhanced \u2705",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/TESTING_PAUSED.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/SYSTEM_V2_UPGRADE_PLAN.md",
+        "title": "System V2 Upgrade Plan",
+        "description": "Placeholder README: System V2 Upgrade Plan. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/systemd_operational_incident_report_2025-09-13.md",
+        "title": "Systemd Orchestrator Incident Report \u2014 Sept 13, 2025",
+        "description": "Detailed chronology of startup failures under systemd, root causes, and fixes leading to a clean orchestrator-first boot with full system health.",
+        "last_updated": "2025-09-13",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/TESTING_PAUSED.md",
         "title": "Testing & Dependency Upgrade: Paused (2025-08-24)",
         "description": "Auto-generated description for Testing & Dependency Upgrade: Paused (2025-08-24)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/The_Definitive_User_Guide.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/The_Definitive_User_Guide.md",
         "title": "The Definitive User Guide: JustNews Agentic System (V4)",
         "description": "Auto-generated description for The Definitive User Guide: JustNews Agentic System (V4)",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/Using-The-GPU-Correctly.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/Tomotopy_Online_LDA_Detailed_Analysis.md",
+        "title": "Tomotopy Online LDA Detailed Analysis",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/TRAINING_SYSTEM_DOCUMENTATION.md",
+        "title": "Training System Documentation",
+        "description": "Placeholder README: Training System Documentation. This file was auto-generated",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/TRAINING_SYSTEM_ORGANIZATION_SUMMARY.md",
+        "title": "Training System Organization Summary",
+        "description": "Placeholder README: Training System Organization Summary. This file",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/Using-The-GPU-Correctly.md",
         "title": "Using The GPU Correctly - Complete Configuration Guide",
         "description": "Auto-generated description for Using The GPU Correctly - Complete Configuration Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/IMPLEMENTATION_COMPLETE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/markdown_docs/development_reports/V2_COMPLETE_ECOSYSTEM_ACTION_PLAN.md",
+        "title": "V2 Complete Ecosystem Action Plan",
+        "description": "Placeholder README: V2 Complete Ecosystem Action Plan. This file was",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/IMPLEMENTATION_COMPLETE.md",
         "title": "\ud83c\udf89 JustNews V4 Quality Management System - Implementation Complete",
         "description": "Auto-generated description for \ud83c\udf89 JustNews V4 Quality Management System - Implementation Complete",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/DOCUMENTATION_COVERAGE_ANALYSIS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/DOCUMENTATION_COVERAGE_ANALYSIS.md",
         "title": "\ud83d\udcca **DOCUMENTATION COVERAGE ANALYSIS REPORT**",
         "description": "Auto-generated description for \ud83d\udcca **DOCUMENTATION COVERAGE ANALYSIS REPORT**",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/weekly_report_20250907.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/weekly_report_20250907.md",
         "title": "\ud83d\udcca Documentation Quality Report",
         "description": "Auto-generated description for \ud83d\udcca Documentation Quality Report",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/version_report_20250907.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/version_report_20250907.md",
         "title": "\ud83d\udccb Documentation Change Report",
         "description": "Auto-generated description for \ud83d\udccb Documentation Change Report",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/development_reports/TEAM_TRAINING_GUIDE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/development_reports/TEAM_TRAINING_GUIDE.md",
         "title": "\ud83d\ude80 JustNews V4 Documentation Quality Management - Team Training Guide",
         "description": "Auto-generated description for \ud83d\ude80 JustNews V4 Documentation Quality Management - Team Training Guide",
         "last_updated": "2025-09-12",
@@ -713,21 +1000,21 @@
     "category": "Optimization Reports",
     "files": [
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/optimization_reports/PHASE3_KNOWLEDGE_GRAPH.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/optimization_reports/PHASE3_KNOWLEDGE_GRAPH.md",
         "title": "JustNews Agent - Knowledge Graph Documentation",
         "description": "Auto-generated description for JustNews Agent - Knowledge Graph Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/optimization_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/optimization_reports/NEWSREADER_V2_OPTIMIZATION_COMPLETE.md",
         "title": "NewsReader V2 Optimization Complete - Component Redundancy Analysis",
         "description": "Auto-generated description for NewsReader V2 Optimization Complete - Component Redundancy Analysis",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/optimization_reports/OCR_REDUNDANCY_ANALYSIS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/optimization_reports/OCR_REDUNDANCY_ANALYSIS.md",
         "title": "OCR Redundancy Analysis - NewsReader V2 Engine",
         "description": "Auto-generated description for OCR Redundancy Analysis - NewsReader V2 Engine",
         "last_updated": "2025-09-12",
@@ -739,111 +1026,101 @@
     "category": "Production Status",
     "files": [
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/MEMORY_OPTIMIZATION_SUCCESS_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/deployment_guide.md",
+        "title": "Deployment Guide",
+        "description": "Placeholder README: Deployment Guide. This file was auto-generated to",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/MEMORY_OPTIMIZATION_SUCCESS_SUMMARY.md",
         "title": "JustNews V4 Memory Optimization - Mission Accomplished",
         "description": "Auto-generated description for JustNews V4 Memory Optimization - Mission Accomplished",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/PRODUCTION_DEPLOYMENT_STATUS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/PRODUCTION_DEPLOYMENT_STATUS.md",
         "title": "JustNewsAgent V4 - Production Deployment Status",
         "description": "Auto-generated description for JustNewsAgent V4 - Production Deployment Status",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/SYSTEM_OVERLAP_ANALYSIS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/SYSTEM_OVERLAP_ANALYSIS.md",
         "title": "JustNewsAgentic System Assessment Summary",
         "description": "Auto-generated description for JustNewsAgentic System Assessment Summary",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/LEGAL_COMPLIANCE_FRAMEWORK.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/LEGAL_COMPLIANCE_FRAMEWORK.md",
         "title": "Legal Compliance Framework Documentation",
         "description": "Auto-generated description for Legal Compliance Framework Documentation",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/PACKAGE_MANAGEMENT_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/monitoring_setup.md",
+        "title": "Monitoring Setup",
+        "description": "Placeholder README: Monitoring Setup. This file was auto-generated to",
+        "last_updated": "2025-10-07",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/PACKAGE_MANAGEMENT_SUCCESS.md",
         "title": "Package Management & Environment Optimization - PRODUCTION READY",
         "description": "Auto-generated description for Package Management & Environment Optimization - PRODUCTION READY",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/RAPIDS_USAGE_GUIDE.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/PROMETHEUS_METRICS_INTEGRATION_COMPLETE.md",
+        "title": "Prometheus Metrics Integration - Complete Implementation",
+        "description": "Comprehensive implementation of Prometheus metrics endpoints across all 16 JustNews agents, enabling full Grafana/Prometheus monitoring stack functionality",
+        "last_updated": "2025-09-15",
+        "status": "current"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/PUBLIC_API_SECURITY_IMPLEMENTATION_COMPLETE.md",
+        "title": "Public API Security Implementation Complete",
+        "description": "Comprehensive authentication and security features successfully implemented for the JustNews public API",
+        "last_updated": "2025-09-20",
+        "status": "completed"
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/RAPIDS_USAGE_GUIDE.md",
         "title": "RAPIDS Integration Guide",
         "description": "Auto-generated description for RAPIDS Integration Guide",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/SYNTHESIZER_V3_PRODUCTION_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/SYNTHESIZER_V3_PRODUCTION_SUCCESS.md",
         "title": "Synthesizer V3 Production Success Summary",
         "description": "Auto-generated description for Synthesizer V3 Production Success Summary",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/DEPLOYMENT_SUCCESS_SUMMARY.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/V2_ENGINES_TRAINING_INTEGRATION_COMPLETE.md",
+        "title": "V2 ENGINES TRAINING INTEGRATION COMPLETE",
+        "description": "",
+        "last_updated": "",
+        "status": ""
+      },
+      {
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/DEPLOYMENT_SUCCESS_SUMMARY.md",
         "title": "\ud83c\udf89 JustNews V4 Memory Optimization - DEPLOYMENT SUCCESS",
         "description": "Auto-generated description for \ud83c\udf89 JustNews V4 Memory Optimization - DEPLOYMENT SUCCESS",
         "last_updated": "2025-09-12",
         "status": "current"
       },
       {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/markdown_docs/production_status/USER_INSIGHT_VALIDATION_SUCCESS.md",
+        "path": "/home/adra/JustNewsAgent/markdown_docs/production_status/USER_INSIGHT_VALIDATION_SUCCESS.md",
         "title": "\ud83c\udfaf **USER INSIGHT VALIDATION: COMPLETE SUCCESS**",
         "description": "Auto-generated description for \ud83c\udfaf **USER INSIGHT VALIDATION: COMPLETE SUCCESS**",
         "last_updated": "2025-09-12",
-        "status": "current"
-      }
-    ]
-  },
-  {
-    "category": "Deployment (systemd)",
-    "files": [
-      {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/README.md",
-        "title": "Systemd Deployment - Operator Index",
-        "description": "Operator entry point for orchestrator-first startup, gating, and health checks.",
-        "last_updated": "2025-09-12",
-        "status": "current"
-      },
-      {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/QUICK_REFERENCE.md",
-        "title": "Systemd Quick Reference",
-        "description": "Copy-paste daily ops: start/stop, health, gating, ports, troubleshooting.",
-        "last_updated": "2025-09-12",
-        "status": "current"
-      },
-      {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/COMPREHENSIVE_SYSTEMD_GUIDE.md",
-        "title": "Comprehensive Systemd Guide",
-        "description": "Deep-dive on preflight gating, environment, drop-ins, restart policy, and readiness.",
-        "last_updated": "2025-09-12",
-        "status": "current"
-      },
-      {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/deploy/systemd/postgresql_integration.md",
-        "title": "PostgreSQL Integration (Systemd)",
-        "description": "DB configuration and readiness validation for production.",
-        "last_updated": "2025-09-12",
-        "status": "current"
-      }
-    ]
-  },
-  {
-    "category": "Database Documentation",
-    "files": [
-      {
-        "path": "/home/adra/justnewsagent/JustNewsAgent/docs/database_overview.md",
-        "title": "JustNews Database Overview (Preliminary)",
-        "description": "Comprehensive breakdown of the JustNews database schema, tables, and data flow during system execution phases.",
-        "last_updated": "2025-09-24",
         "status": "current"
       }
     ]

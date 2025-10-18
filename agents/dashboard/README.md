@@ -1,3 +1,11 @@
+---
+title: JustNews Public Dashboard Agent
+description: Auto-generated description for JustNews Public Dashboard Agent
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # JustNews Public Dashboard Agent
 
 The Public Dashboard Agent serves the JustNews public-facing website and API endpoints, providing access to AI-analyzed news articles, credibility scores, and research data.

@@ -1,3 +1,11 @@
+---
+title: Secrets handling (minimal guidance)
+description: Auto-generated description for Secrets handling (minimal guidance)
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Secrets handling (minimal guidance)
 
 This document describes a minimal, practical approach to managing secrets for a native JustNews deployment.

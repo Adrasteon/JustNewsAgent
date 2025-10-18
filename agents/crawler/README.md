@@ -1,3 +1,11 @@
+---
+title: Crawler Agent
+description: Auto-generated description for Crawler Agent
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Crawler Agent
 
 The **Crawler Agent** is a specialized JustNewsAgent service that provides unified production crawling capabilities. It runs as an independent systemd service and communicates bi-directionally with other agents via the MCP Bus.

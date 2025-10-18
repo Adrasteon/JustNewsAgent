@@ -1,3 +1,11 @@
+---
+title: Version Management Standards
+description: Auto-generated description for Version Management Standards
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Version Management Standards
 
 ## Overview

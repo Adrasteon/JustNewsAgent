@@ -1,3 +1,11 @@
+---
+title: Advanced Topic Modeling Enhancement Research Report
+description: Auto-generated description for Advanced Topic Modeling Enhancement Research Report
+tags: [documentation]
+status: current
+last_updated: 2025-10-18
+---
+
 # Advanced Topic Modeling Enhancement Research Report
 ## Dynamic Topic Evolution Options for JustNewsAgent
 
