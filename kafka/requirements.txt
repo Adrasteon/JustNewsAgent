@@ -1,0 +1,6 @@
+# No S3/AWS SDK by default to avoid vendor lock-in. Use SeaweedFS or IPFS
+# for object storage. Add optional dependencies when needed in production.
+requests==2.32.4
+kafka-python==2.0.2
+fastavro==1.7.0
+PyYAML==6.0
