@@ -28,11 +28,43 @@ GPU Management:
 import json
 import os
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-import torch
+# Guard PyTorch import - provide minimal shim when not available to keep import-time safe
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except Exception:
+    # Minimal shim to avoid AttributeError on torch.cuda.* calls when torch is not installed.
+    class _CudaShim:
+        def is_available(self) -> bool:
+            return False
+        def empty_cache(self) -> None:
+            return None
+        def synchronize(self) -> None:
+            return None
+        def memory_allocated(self, *args, **kwargs) -> int:
+            return 0
+        def memory_reserved(self, *args, **kwargs) -> int:
+            return 0
+        def get_device_properties(self, idx):
+            class _Props:
+                total_memory = 0
+            return _Props()
+        def set_device(self, *args, **kwargs):
+            return None
+        def get_device_name(self, *args, **kwargs):
+            return "cpu_shim"
+
+    class _TorchShim:
+        cuda = _CudaShim()
+        def device(self, *args, **kwargs):
+            return "cpu"
+
+    torch = _TorchShim()  # type: ignore
+    TORCH_AVAILABLE = False
 
 from common.observability import get_logger
 
@@ -464,7 +496,7 @@ class NewsReaderV2Engine:
                 'models_cleaned': models_cleaned,
                 'processors_cleaned': processors_cleaned,
                 'gpu_released': gpu_released,
-                'cleanup_timestamp': datetime.now(UTC).isoformat()
+                'cleanup_timestamp': datetime.now(timezone.utc).isoformat()
             })
 
             logger.info(f"✅ NewsReader V2 Engine cleanup completed - {models_cleaned} models, {processors_cleaned} processors cleaned")
@@ -505,14 +537,14 @@ class NewsReaderV2Engine:
                 'min_confidence': self.config.min_confidence_threshold,
                 'batch_size': self.config.batch_size
             },
-            'timestamp': datetime.now(UTC).isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
 
 def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 

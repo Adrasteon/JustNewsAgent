@@ -3,7 +3,7 @@ title: JustNews V4 Documentation Index
 description: Auto-generated description for JustNews V4 Documentation Index
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-10-23
 ---
 
 # JustNews V4 Documentation Index

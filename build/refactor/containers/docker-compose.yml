@@ -1,0 +1,206 @@
+version: '3.8'
+
+services:
+  # MCP Bus - Central communication hub
+  mcp-bus:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://localhost:8000
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - justnews-network
+    command: python -m agents.mcp_bus.main
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: justnews_dev
+      POSTGRES_USER: justnews
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - justnews-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U justnews"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - justnews-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Scout Agent - Content Discovery
+  scout:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://mcp-bus:8000
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://justnews:dev_password@postgres:5432/justnews_dev
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    depends_on:
+      mcp-bus:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - justnews-network
+    command: python -m agents.scout.main
+
+  # Analyst Agent - GPU-accelerated Analysis
+  analyst:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://mcp-bus:8000
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://justnews:dev_password@postgres:5432/justnews_dev
+      - CUDA_VISIBLE_DEVICES=0
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    depends_on:
+      mcp-bus:
+        condition: service_healthy
+    networks:
+      - justnews-network
+    command: python -m agents.analyst.main
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Synthesizer Agent - Content Synthesis
+  synthesizer:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://mcp-bus:8000
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://justnews:dev_password@postgres:5432/justnews_dev
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    depends_on:
+      mcp-bus:
+        condition: service_healthy
+    networks:
+      - justnews-network
+    command: python -m agents.synthesizer.main
+
+  # Memory Agent - Data Persistence
+  memory:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://mcp-bus:8000
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://justnews:dev_password@postgres:5432/justnews_dev
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+      - memory_data:/app/data
+    depends_on:
+      mcp-bus:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - justnews-network
+    command: python -m agents.memory.main
+
+  # Dashboard - Web Interface
+  dashboard:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    ports:
+      - "8013:8013"
+    environment:
+      - ENV=development
+      - LOG_LEVEL=DEBUG
+      - MCP_BUS_URL=http://mcp-bus:8000
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://justnews:dev_password@postgres:5432/justnews_dev
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    depends_on:
+      mcp-bus:
+        condition: service_healthy
+    networks:
+      - justnews-network
+    command: python -m agents.dashboard.main
+
+  # Jupyter Notebook for development
+  jupyter:
+    build:
+      context: ../../..
+      dockerfile: build/refactor/containers/Dockerfile.dev
+    ports:
+      - "8888:8888"
+    environment:
+      - ENV=development
+      - JUPYTER_TOKEN=justnews-dev
+    volumes:
+      - ../../../:/app
+      - /app/__pycache__
+    networks:
+      - justnews-network
+    command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+
+volumes:
+  postgres_data:
+  redis_data:
+  memory_data:
+
+networks:
+  justnews-network:
+    driver: bridge

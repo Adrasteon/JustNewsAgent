@@ -93,8 +93,8 @@ app.add_middleware(
 app.middleware("http")(metrics.request_middleware)
 
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 @app.post("/unified_production_crawl")
 async def unified_production_crawl_endpoint(call: ToolCall, background_tasks: BackgroundTasks):

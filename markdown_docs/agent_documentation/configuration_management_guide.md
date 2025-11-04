@@ -182,8 +182,7 @@ The master configuration file (`config/system_config.json`) contains all system 
     "chief_editor": 8001,
     "memory": 8007,
     "reasoning": 8008,
-    "dashboard": 8011,
-    "db_worker": 8010
+    "dashboard": 8011
   },
   "timeouts": {
     "agent_response_timeout_seconds": 300,

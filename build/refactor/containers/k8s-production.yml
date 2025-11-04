@@ -1,0 +1,277 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: justnews-app
+  namespace: justnews-production
+  labels:
+    app: justnews
+    environment: production
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: justnews
+      environment: production
+  template:
+    metadata:
+      labels:
+        app: justnews
+        environment: production
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - justnews
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: justnews-app
+        image: ghcr.io/your-org/justnews-agent:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: ENV
+          value: "production"
+        - name: LOG_LEVEL
+          value: "WARNING"
+        - name: MCP_BUS_URL
+          value: "http://localhost:8000"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: justnews-secrets
+              key: redis-url
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: justnews-secrets
+              key: database-url
+        - name: GPU_CONFIG
+          valueFrom:
+            configMapKeyRef:
+              name: justnews-config
+              key: gpu_config.json
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: cache-volume
+          mountPath: /app/cache
+        - name: config-volume
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: logs-volume
+        persistentVolumeClaim:
+          claimName: justnews-logs-pvc
+      - name: cache-volume
+        persistentVolumeClaim:
+          claimName: justnews-cache-pvc
+      - name: config-volume
+        configMap:
+          name: justnews-config
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+          - ALL
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: justnews-service
+  namespace: justnews-production
+  labels:
+    app: justnews
+    environment: production
+spec:
+  selector:
+    app: justnews
+    environment: production
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: justnews-ingress
+  namespace: justnews-production
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - api.justnews.example.com
+    secretName: justnews-tls
+  rules:
+  - host: api.justnews.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: justnews-service
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: justnews-config
+  namespace: justnews-production
+data:
+  system_config.json: |
+    {
+      "environment": "production",
+      "log_level": "WARNING",
+      "mcp_bus_url": "http://localhost:8000",
+      "agents": {
+        "scout": {"enabled": true, "replicas": 2},
+        "analyst": {"enabled": true, "gpu_enabled": true},
+        "synthesizer": {"enabled": true, "replicas": 2},
+        "memory": {"enabled": true},
+        "fact_checker": {"enabled": true},
+        "critic": {"enabled": true}
+      },
+      "monitoring": {
+        "enabled": true,
+        "metrics_port": 9090
+      }
+    }
+  gpu_config.json: |
+    {
+      "gpu_memory_fraction": 0.8,
+      "gpu_allow_growth": true,
+      "gpu_per_process_memory_fraction": 0.8
+    }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: justnews-secrets
+  namespace: justnews-production
+type: Opaque
+data:
+  # Base64 encoded production values - replace with actual secrets
+  redis-url: cmVkaXM6Ly91c2VyOnBhc3NAcmVkaXMtcHJvZDoyNjM3OQ==
+  database-url: cG9zdGdyZXM6Ly91c2VyOnBhc3NAZGItcHJvZDoyNTQzL2p1c3RuZXdzX3Byb2Q=
+  api-keys: <base64-encoded-json-with-api-keys>
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: justnews-logs-pvc
+  namespace: justnews-production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: gp3
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: justnews-cache-pvc
+  namespace: justnews-production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: gp3
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: justnews-pdb
+  namespace: justnews-production
+spec:
+  minAvailable: 3
+  selector:
+    matchLabels:
+      app: justnews
+      environment: production
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: justnews-hpa
+  namespace: justnews-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: justnews-app
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

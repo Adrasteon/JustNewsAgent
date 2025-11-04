@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -57,7 +57,7 @@ def get_db_connection():
 def log_feedback(event: str, details: dict):
     """Logs feedback to a file."""
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def get_embedding_model():
     """Return a SentenceTransformer instance, using the shared helper when available."""

@@ -1,0 +1,325 @@
+name: CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      version:
+        description: 'Version to deploy (leave empty for latest tag)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Pre-deployment validation
+  pre-deploy-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run deployment validation
+      run: |
+        python build/refactor/scripts/deployment_validator.py
+
+    - name: Validate configuration
+      run: |
+        python -c "
+        import json
+        import os
+        config_path = 'config/system_config.json'
+        if os.path.exists(config_path):
+            with open(config_path) as f:
+                config = json.load(f)
+            print('Configuration validation passed')
+        else:
+            print('Configuration file missing')
+            exit(1)
+        "
+
+  # Build and push production images
+  build-production-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [pre-deploy-validation]
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-digest: ${{ steps.push.outputs.digest }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=tag
+          type=raw,value=latest
+          type=sha,prefix={{branch}}-
+
+    - name: Build and push production image
+      id: push
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./build/refactor/containers/Dockerfile.production
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+
+    - name: Generate artifact attestation
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true
+
+  # Deploy to staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-production-images]
+    if: github.event.inputs.environment == 'staging' || github.ref_type == 'tag'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy to EKS staging
+      run: |
+        # Update kubeconfig for staging cluster
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name justnews-staging
+
+        # Deploy using kubectl
+        kubectl apply -f build/refactor/containers/k8s-staging.yml
+        kubectl set image deployment/justnews-app justnews-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+        # Wait for rollout to complete
+        kubectl rollout status deployment/justnews-app --timeout=600s
+
+    - name: Run post-deployment tests
+      run: |
+        # Run smoke tests against staging
+        python build/refactor/scripts/smoke_tests.py --environment staging
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        # Send notification to Slack/Teams
+        python build/refactor/scripts/deployment_notification.py \
+          --environment staging \
+          --status ${{ job.status }} \
+          --version ${{ github.sha }}
+
+  # Deploy to production
+  deploy-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [deploy-staging]
+    if: github.event.inputs.environment == 'production' && github.ref_type == 'tag'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy to EKS production
+      run: |
+        # Update kubeconfig for production cluster
+        aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name justnews-production
+
+        # Deploy using kubectl with canary deployment
+        kubectl apply -f build/refactor/containers/k8s-production.yml
+        kubectl set image deployment/justnews-app justnews-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+        # Canary deployment: route 10% traffic to new version
+        kubectl apply -f build/refactor/containers/k8s-canary.yml
+
+        # Wait for canary rollout
+        kubectl rollout status deployment/justnews-app-canary --timeout=300s
+
+        # Run canary tests
+        python build/refactor/scripts/canary_tests.py --environment production
+
+        # If canary tests pass, complete rollout
+        kubectl apply -f build/refactor/containers/k8s-production-full.yml
+        kubectl rollout status deployment/justnews-app --timeout=600s
+
+    - name: Run production validation
+      run: |
+        # Comprehensive production tests
+        python build/refactor/scripts/production_validation.py
+
+    - name: Update production status
+      run: |
+        # Update deployment status in monitoring system
+        python build/refactor/scripts/update_deployment_status.py \
+          --environment production \
+          --version ${{ github.ref_name }} \
+          --status completed
+
+    - name: Notify production deployment
+      if: always()
+      run: |
+        # Send production deployment notification
+        python build/refactor/scripts/deployment_notification.py \
+          --environment production \
+          --status ${{ job.status }} \
+          --version ${{ github.ref_name }}
+
+  # Rollback preparation
+  prepare-rollback:
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: failure() && github.event.inputs.environment == 'production'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Prepare rollback plan
+      run: |
+        echo "Preparing rollback to previous stable version..."
+        # Get previous stable version
+        PREVIOUS_VERSION=$(git describe --tags --abbrev=0 HEAD~1)
+        echo "Rollback version: $PREVIOUS_VERSION"
+
+        # Create rollback manifest
+        sed "s|{{IMAGE_TAG}}|$PREVIOUS_VERSION|g" \
+          build/refactor/containers/k8s-production-rollback.yml > rollback.yml
+
+    - name: Store rollback manifest
+      uses: actions/upload-artifact@v3
+      with:
+        name: rollback-manifest
+        path: rollback.yml
+
+    - name: Notify rollback readiness
+      run: |
+        python build/refactor/scripts/deployment_notification.py \
+          --environment production \
+          --status rollback-ready \
+          --version ${{ github.sha }}
+
+  # Post-deployment monitoring
+  post-deploy-monitoring:
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: success()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up monitoring
+      run: |
+        python -m pip install --upgrade pip
+        pip install prometheus-client requests
+
+    - name: Monitor deployment health
+      run: |
+        # Check application health endpoints
+        python build/refactor/scripts/health_monitor.py \
+          --environment ${{ github.event.inputs.environment || 'staging' }} \
+          --duration 300
+
+    - name: Generate deployment report
+      run: |
+        python scripts/ci/deployment_report.py \
+          --environment ${{ github.event.inputs.environment || 'staging' }} \
+          --version ${{ github.sha }} \
+          --output deployment-report.json
+
+    - name: Upload deployment report
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-report
+        path: deployment-report.json
+
+  # Final deployment status
+  deployment-status:
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production, post-deploy-monitoring]
+    if: always()
+
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Environment**: ${{ github.event.inputs.environment || 'staging' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Staging**: ${{ needs.deploy-staging.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Production**: ${{ needs.deploy-production.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Monitoring**: ${{ needs.post-deploy-monitoring.result }}" >> $GITHUB_STEP_SUMMARY
+
+        # Determine overall status
+        if [[ "${{ needs.deploy-production.result }}" == "success" ]] || \
+           [[ "${{ needs.deploy-staging.result }}" == "success" && "${{ github.event.inputs.environment }}" != "production" ]]; then
+          echo "- **Overall Status**: ✅ Success" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Overall Status**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi

@@ -16,7 +16,7 @@ resolve_root() {
 }
 
 ROOT="$(resolve_root)"
-SCRIPT="$ROOT/deploy/systemd/health_check.sh"
+SCRIPT="$ROOT/deploy/systemd/scripts/health_check.sh"
 if [[ -x "$SCRIPT" ]]; then
   exec "$SCRIPT" "$@"
 else

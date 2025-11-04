@@ -5,7 +5,7 @@ it can be used from unit tests and from the FastAPI endpoint.
 """
 import json
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from agents.common.notifications import notify_email, notify_slack
@@ -27,7 +27,7 @@ def handle_review_request(kwargs: dict[str, Any]) -> dict[str, Any]:
     record = {
         'manifest': manifest,
         'reason': reason,
-        'received_at': datetime.now(UTC).isoformat()
+        'received_at': datetime.now(timezone.utc).isoformat()
     }
 
     try:

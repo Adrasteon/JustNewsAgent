@@ -2,7 +2,7 @@
 # Phase 1 Memory Optimization: Context and batch size optimization for orchestration
 
 import os
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -49,7 +49,7 @@ def get_llama_model():
 
 def log_feedback(event: str, details: dict):
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def request_story_brief(topic: str, scope: str):
     """Generate a story brief based on the given topic and scope."""

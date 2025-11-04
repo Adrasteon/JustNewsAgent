@@ -6,6 +6,7 @@ import atexit
 import time
 import os
 from contextlib import asynccontextmanager
+from typing import Any
 
 # Make 'requests' optional so MCP Bus can start in constrained environments.
 try:
@@ -58,8 +59,8 @@ class Agent(BaseModel):
 class ToolCall(BaseModel):
     agent: str
     tool: str
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 @app.post("/register")
 def register_agent(agent: Agent):

@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: justnews-app
+  namespace: justnews-staging
+  labels:
+    app: justnews
+    environment: staging
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: justnews
+      environment: staging
+  template:
+    metadata:
+      labels:
+        app: justnews
+        environment: staging
+    spec:
+      containers:
+      - name: justnews-app
+        image: ghcr.io/your-org/justnews-agent:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: ENV
+          value: "staging"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: MCP_BUS_URL
+          value: "http://localhost:8000"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: justnews-secrets
+              key: redis-url
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: justnews-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: logs-volume
+          mountPath: /app/logs
+        - name: cache-volume
+          mountPath: /app/cache
+      volumes:
+      - name: logs-volume
+        emptyDir: {}
+      - name: cache-volume
+        emptyDir: {}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 2000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: justnews-service
+  namespace: justnews-staging
+  labels:
+    app: justnews
+    environment: staging
+spec:
+  selector:
+    app: justnews
+    environment: staging
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: justnews-ingress
+  namespace: justnews-staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - staging.justnews.example.com
+    secretName: justnews-tls
+  rules:
+  - host: staging.justnews.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: justnews-service
+            port:
+              number: 80
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: justnews-config
+  namespace: justnews-staging
+data:
+  system_config.json: |
+    {
+      "environment": "staging",
+      "log_level": "INFO",
+      "mcp_bus_url": "http://localhost:8000",
+      "agents": {
+        "scout": {"enabled": true},
+        "analyst": {"enabled": true},
+        "synthesizer": {"enabled": true},
+        "memory": {"enabled": true}
+      }
+    }
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: justnews-secrets
+  namespace: justnews-staging
+type: Opaque
+data:
+  # Base64 encoded values - replace with actual secrets
+  redis-url: cmVkaXM6Ly91c2VyOnBhc3NAcmVkaXMtc3RhZ2luZzoyNjM3OQ==
+  database-url: cG9zdGdyZXM6Ly91c2VyOnBhc3NAZGItc3RhZ2luZzoyNTQzL2p1c3RuZXdzX3N0YWdpbmc=

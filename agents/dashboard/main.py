@@ -497,7 +497,7 @@ app.middleware("http")(metrics.request_middleware)
 
 class ToolCall(BaseModel):
     args: list
-    kwargs: dict
+    kwargs: dict[str, Any]
 
 
 @app.get("/get_status")

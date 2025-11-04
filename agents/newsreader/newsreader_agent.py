@@ -15,17 +15,35 @@ from contextlib import asynccontextmanager
 from typing import Any, cast
 
 import requests
-import torch
+
+# Guard heavy ML imports so module can be imported in CI/CPU-only environments
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except Exception:
+    torch = None  # type: ignore
+    TORCH_AVAILABLE = False
+
+try:
+    from transformers import (
+        BitsAndBytesConfig,
+        Blip2ForConditionalGeneration,
+        Blip2Processor,
+        LlavaForConditionalGeneration,
+        LlavaProcessor,
+    )
+    TRANSFORMERS_AVAILABLE = True
+except Exception:
+    BitsAndBytesConfig = None
+    Blip2ForConditionalGeneration = None
+    Blip2Processor = None
+    LlavaForConditionalGeneration = None
+    LlavaProcessor = None
+    TRANSFORMERS_AVAILABLE = False
+
 from fastapi import FastAPI
 from PIL import Image
 from pydantic import BaseModel
-from transformers import (
-    BitsAndBytesConfig,
-    Blip2ForConditionalGeneration,
-    Blip2Processor,
-    LlavaForConditionalGeneration,
-    LlavaProcessor,
-)
 
 # Configure logging
 

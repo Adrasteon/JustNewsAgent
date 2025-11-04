@@ -134,7 +134,8 @@ class OnTheFlyTrainingCoordinator:
     def _get_db_connection(self):
         """Get database connection for training data storage using connection pooling"""
         try:
-            # Use the new connection pooling system
+            # Use the new advanced database layer
+            from agents.common.database import get_db_connection
             return get_db_connection()
         except Exception as e:
             logger.warning(f"Database connection failed: {e}")
@@ -352,285 +353,308 @@ class OnTheFlyTrainingCoordinator:
             return False
 
     def _update_scout_models(self, examples: list[TrainingExample]) -> bool:
-        """Update Scout V2 models with new training data"""
+        """Update Scout V2 models with new training data via MCP Bus"""
         try:
-            from agents.scout.tools import get_scout_engine
+            # Use MCP Bus to call Scout agent for model updates
+            from training_system.mcp_integration import mcp_client
 
-            scout_engine = get_scout_engine()
-            if not scout_engine:
-                return False
+            # Prepare training data for Scout
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
 
-            # Group examples by task type
-            task_groups = {}
-            for example in examples:
-                task_type = example.task_type
-                if task_type not in task_groups:
-                    task_groups[task_type] = []
-                task_groups[task_type].append(example)
+            # Call Scout's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="scout",
+                tool="update_models",
+                kwargs=training_data
+            )
 
-            # Update each model
-            update_success = True
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Scout models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Scout model update failed: {response.get('message', 'Unknown error')}")
 
-            # News classification examples
-            if 'news_classification' in task_groups:
-                success = self._incremental_update_classifier(
-                    scout_engine.models.get('news_classification'),
-                    task_groups['news_classification']
-                )
-                update_success &= success
-
-            # Quality assessment examples
-            if 'quality_assessment' in task_groups:
-                success = self._incremental_update_classifier(
-                    scout_engine.models.get('quality_assessment'),
-                    task_groups['quality_assessment']
-                )
-                update_success &= success
-
-            # Sentiment analysis examples
-            if 'sentiment' in task_groups:
-                success = self._incremental_update_classifier(
-                    scout_engine.pipelines.get('sentiment_analysis'),
-                    task_groups['sentiment']
-                )
-                update_success &= success
-
-            return update_success
+            return success
 
         except Exception as e:
             logger.error(f"Scout model update error: {e}")
             return False
 
     def _update_fact_checker_models(self, examples: list[TrainingExample]) -> bool:
-        """Update Fact Checker V2 models with new training data"""
+        """Update Fact Checker V2 models with new training data via MCP Bus"""
         try:
-            from agents.fact_checker.tools import get_fact_checker_engine
+            # Use MCP Bus to call Fact Checker agent for model updates
+            from training_system.mcp_integration import mcp_client
 
-            fact_checker_engine = get_fact_checker_engine()
-            if not fact_checker_engine:
-                return False
+            # Prepare training data for Fact Checker
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
 
-            # Group examples by task type
-            task_groups = {}
-            for example in examples:
-                task_type = example.task_type
-                if task_type not in task_groups:
-                    task_groups[task_type] = []
-                task_groups[task_type].append(example)
+            # Call Fact Checker's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="fact_checker",
+                tool="update_models",
+                kwargs=training_data
+            )
 
-            update_success = True
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Fact Checker models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Fact Checker model update failed: {response.get('message', 'Unknown error')}")
 
-            # Fact verification examples
-            if 'fact_verification' in task_groups:
-                success = self._incremental_update_classifier(
-                    fact_checker_engine.pipelines.get('fact_verification'),
-                    task_groups['fact_verification']
-                )
-                update_success &= success
-
-            # Credibility assessment examples
-            if 'credibility_assessment' in task_groups:
-                success = self._incremental_update_classifier(
-                    fact_checker_engine.pipelines.get('credibility_assessment'),
-                    task_groups['credibility_assessment']
-                )
-                update_success &= success
-
-            return update_success
+            return success
 
         except Exception as e:
             logger.error(f"Fact Checker model update error: {e}")
             return False
 
     def _update_newsreader_models(self, examples: list[TrainingExample]) -> bool:
-        """Update NewsReader V2 models with new training data"""
+        """Update NewsReader V2 models with new training data via MCP Bus"""
         try:
-            from agents.newsreader.tools import get_engine
+            # Use MCP Bus to call NewsReader agent for model updates
+            from training_system.mcp_integration import mcp_client
 
-            newsreader_engine = get_engine()
-            if not newsreader_engine:
-                return False
+            # Prepare training data for NewsReader
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
 
-            # Group examples by task type for NewsReader V2
-            task_groups = {}
+            # Call NewsReader's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="newsreader",
+                tool="update_models",
+                kwargs=training_data
+            )
+
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ NewsReader models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ NewsReader model update failed: {response.get('message', 'Unknown error')}")
+
+            # Also log examples for future LLaVA fine-tuning (maintaining existing behavior)
             for example in examples:
-                task_type = example.task_type
-                if task_type not in task_groups:
-                    task_groups[task_type] = []
-                task_groups[task_type].append(example)
+                log_feedback(
+                    "newsreader_training_example",
+                    {
+                        "task_type": example.task_type,
+                        "input": example.input_text,
+                        "expected_output": example.expected_output,
+                        "timestamp": datetime.now(UTC).isoformat()
+                    }
+                )
 
-            update_success = True
-
-            # Screenshot analysis examples (primary NewsReader V2 capability)
-            if 'screenshot_analysis' in task_groups:
-                logger.info(f"Processing {len(task_groups['screenshot_analysis'])} screenshot analysis examples")
-                # Note: NewsReader V2 uses LLaVA for vision-language processing
-                # Training data would be used to fine-tune screenshot interpretation
-                for example in task_groups['screenshot_analysis']:
-                    # Log training example for future LLaVA fine-tuning
-                    log_feedback(
-                        "newsreader_training_example",
-                        {
-                            "task_type": "screenshot_analysis",
-                            "input": example.input_text,
-                            "expected_output": example.expected_output,
-                            "timestamp": datetime.now(UTC).isoformat()
-                        }
-                    )
-
-            # Content extraction examples
-            if 'content_extraction' in task_groups:
-                logger.info(f"Processing {len(task_groups['content_extraction'])} content extraction examples")
-                for example in task_groups['content_extraction']:
-                    log_feedback(
-                        "newsreader_training_example",
-                        {
-                            "task_type": "content_extraction",
-                            "input": example.input_text,
-                            "expected_output": example.expected_output,
-                            "timestamp": datetime.now(UTC).isoformat()
-                        }
-                    )
-
-            # Layout analysis examples
-            if 'layout_analysis' in task_groups:
-                logger.info(f"Processing {len(task_groups['layout_analysis'])} layout analysis examples")
-                for example in task_groups['layout_analysis']:
-                    log_feedback(
-                        "newsreader_training_example",
-                        {
-                            "task_type": "layout_analysis",
-                            "input": example.input_text,
-                            "expected_output": example.expected_output,
-                            "timestamp": datetime.now(UTC).isoformat()
-                        }
-                    )
-
-            logger.info("✅ NewsReader V2 training examples processed successfully")
-            return update_success
+            return success
 
         except Exception as e:
             logger.error(f"NewsReader model update error: {e}")
             return False
 
     def _update_analyst_models(self, examples: list[TrainingExample]) -> bool:
-        """Update Analyst V2 models with new training data"""
+        """Update Analyst V2 models with new training data via MCP Bus"""
         try:
-            # For spaCy models, we'll use update training
-            import spacy
+            # Use MCP Bus to call Analyst agent for model updates
+            from training_system.mcp_integration import mcp_client
 
-            # Group NER examples
-            ner_examples = [ex for ex in examples if ex.task_type == 'entity_extraction']
+            # Prepare training data for Analyst
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
 
-            if ner_examples:
-                # Load spaCy model
-                nlp = spacy.load("en_core_web_sm")
+            # Call Analyst's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="analyst",
+                tool="update_models",
+                kwargs=training_data
+            )
 
-                # Prepare training data
-                train_data = []
-                for example in ner_examples:
-                    # Expected output should be in spaCy format: (text, {"entities": [(start, end, label)]})
-                    train_data.append((example.input_text, example.expected_output))
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Analyst models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Analyst model update failed: {response.get('message', 'Unknown error')}")
 
-                # Incremental training
-                nlp.update(train_data[:20])  # Update with batch
-
-                # Save updated model
-                model_path = "/tmp/updated_spacy_model"
-                nlp.to_disk(model_path)
-                logger.info(f"Updated spaCy NER model with {len(train_data)} examples")
-
-                return True
-
-            return True
+            return success
 
         except Exception as e:
             logger.error(f"Analyst model update error: {e}")
             return False
 
     def _update_critic_models(self, examples: list[TrainingExample]) -> bool:
-        """Update Critic V2 models (pattern-based, less training needed)"""
+        """Update Critic V2 models with new training data via MCP Bus"""
         try:
-            # Critic uses NLTK + patterns, so we can update pattern rules
-            pattern_examples = [ex for ex in examples if ex.task_type in ['logical_fallacy', 'argument_structure']]
+            # Use MCP Bus to call Critic agent for model updates
+            from training_system.mcp_integration import mcp_client
 
-            if pattern_examples:
-                # Update pattern rules based on examples
-                # This would involve analyzing common patterns in the examples
-                # and updating the pattern matching rules
-                logger.info(f"Updated Critic patterns with {len(pattern_examples)} examples")
+            # Prepare training data for Critic
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
 
-            return True
+            # Call Critic's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="critic",
+                tool="update_models",
+                kwargs=training_data
+            )
+
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Critic models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Critic model update failed: {response.get('message', 'Unknown error')}")
+
+            return success
 
         except Exception as e:
             logger.error(f"Critic model update error: {e}")
             return False
     def _update_synthesizer_models(self, examples: List[TrainingExample]) -> bool:
-        """Update Synthesizer V3 models (BERTopic, BART, FLAN-T5, SentenceTransformers)"""
+        """Update Synthesizer V3 models via MCP Bus"""
         try:
-            # Synthesizer handles multiple tasks: clustering, neutralization, aggregation
-            synthesis_examples = [ex for ex in examples if ex.task_type in [
-                'article_clustering', 'text_neutralization', 'cluster_aggregation'
-            ]]
-            
-            if synthesis_examples:
-                # Update synthesis models based on examples
-                # This would involve fine-tuning the BART and FLAN-T5 models
-                # and updating SentenceTransformers embeddings
-                logger.info(f"Updated Synthesizer models with {len(synthesis_examples)} examples")
-                
-                # For now, log the update - in production this would trigger actual model training
-                for example in synthesis_examples:
-                    logger.debug(f"Synthesis training: {example.task_type} - {len(example.input_text)} chars")
-                
-            return True
-            
+            # Use MCP Bus to call Synthesizer agent for model updates
+            from training_system.mcp_integration import mcp_client
+
+            # Prepare training data for Synthesizer
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
+
+            # Call Synthesizer's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="synthesizer",
+                tool="update_models",
+                kwargs=training_data
+            )
+
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Synthesizer models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Synthesizer model update failed: {response.get('message', 'Unknown error')}")
+
+            return success
+
         except Exception as e:
             logger.error(f"Synthesizer model update error: {e}")
             return False
     
     def _update_chief_editor_models(self, examples: List[TrainingExample]) -> bool:
-        """Update Chief Editor models (task classification, workflow orchestration)"""
+        """Update Chief Editor models via MCP Bus"""
         try:
-            # Chief Editor handles editorial tasks: brief generation, publishing, evidence review
-            editorial_examples = [ex for ex in examples if ex.task_type in [
-                'story_brief_generation', 'story_publishing', 'evidence_review_queuing'
-            ]]
-            
-            if editorial_examples:
-                # Update editorial decision models based on examples
-                # This would involve fine-tuning classification models for editorial tasks
-                logger.info(f"Updated Chief Editor models with {len(editorial_examples)} examples")
-                
-                # For now, log the update - in production this would trigger actual model training
-                for example in editorial_examples:
-                    logger.debug(f"Editorial training: {example.task_type} - {len(example.input_text)} chars")
-                
-            return True
-            
+            # Use MCP Bus to call Chief Editor agent for model updates
+            from training_system.mcp_integration import mcp_client
+
+            # Prepare training data for Chief Editor
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
+
+            # Call Chief Editor's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="chief_editor",
+                tool="update_models",
+                kwargs=training_data
+            )
+
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Chief Editor models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Chief Editor model update failed: {response.get('message', 'Unknown error')}")
+
+            return success
+
         except Exception as e:
             logger.error(f"Chief Editor model update error: {e}")
             return False
     
     def _update_memory_models(self, examples: List[TrainingExample]) -> bool:
-        """Update Memory models (embedding models, vector search optimization)"""
+        """Update Memory models via MCP Bus"""
         try:
-            # Memory handles storage and retrieval tasks
-            memory_examples = [ex for ex in examples if ex.task_type in [
-                'article_storage', 'vector_search', 'training_example_logging'
-            ]]
-            
-            if memory_examples:
-                # Update embedding models and search optimization based on examples
-                # This would involve fine-tuning SentenceTransformers models
-                logger.info(f"Updated Memory models with {len(memory_examples)} examples")
-                
-                # For now, log the update - in production this would trigger actual model training
-                for example in memory_examples:
-                    logger.debug(f"Memory training: {example.task_type} - {len(example.input_text)} chars")
-                
-            return True
-            
+            # Use MCP Bus to call Memory agent for model updates
+            from training_system.mcp_integration import mcp_client
+
+            # Prepare training data for Memory
+            training_data = {
+                "examples": [
+                    {
+                        "task_type": ex.task_type,
+                        "input_text": ex.input_text,
+                        "expected_output": ex.expected_output,
+                        "importance_score": ex.importance_score
+                    } for ex in examples
+                ]
+            }
+
+            # Call Memory's training endpoint via MCP Bus
+            response = mcp_client.call_agent_tool(
+                agent="memory",
+                tool="update_models",
+                kwargs=training_data
+            )
+
+            success = response.get("status") == "success"
+            if success:
+                logger.info(f"✅ Memory models updated via MCP Bus with {len(examples)} examples")
+            else:
+                logger.warning(f"❌ Memory model update failed: {response.get('message', 'Unknown error')}")
+
+            return success
+
         except Exception as e:
             logger.error(f"Memory model update error: {e}")
             return False
@@ -785,15 +809,14 @@ class OnTheFlyTrainingCoordinator:
             logger.error(f"Model rollback failed for {agent_name}: {e}")
 
     def _persist_training_example(self, example: TrainingExample):
-        """Store training example in database for persistence using connection pooling"""
-        if not self.db_connection:
-            return
-
+        """Store training example in database for persistence using new database layer"""
         try:
-            # Use the new connection pooling execute_query function
+            from agents.common.database import execute_query
+
+            # Use the new execute_query function
             execute_query("""
-                INSERT INTO training_examples 
-                (agent_name, task_type, input_text, expected_output, uncertainty_score, 
+                INSERT INTO training_examples
+                (agent_name, task_type, input_text, expected_output, uncertainty_score,
                  importance_score, source_url, timestamp, user_feedback, correction_priority)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (

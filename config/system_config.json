@@ -2,7 +2,7 @@
   "system": {
     "name": "JustNewsAgent",
     "version": "4.0",
-    "environment": "justnews-v2-py312",
+    "environment": "development",
     "conda_environment": "justnews-v2-py312",
     "log_level": "INFO",
     "debug_mode": false
@@ -96,8 +96,7 @@
       "chief_editor": 8001,
       "memory": 8007,
       "reasoning": 8008,
-      "dashboard": 8013,
-      "db_worker": 8010
+      "dashboard": 8013
     },
     "timeouts": {
       "agent_response_timeout_seconds": 300,

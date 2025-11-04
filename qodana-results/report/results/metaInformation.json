@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "total": 3366,
+  "tools inspection": {
+    "Code Inspection": 3366
+  },
+  "linter": "QDPYC",
+  "attributes": {
+    "deviceId": "200820300000000-ddeb-fce1-6b2e-f0abc0511fc1",
+    "jobUrl": "",
+    "vcs": {
+      "sarifIdea": {
+        "repositoryUri": "https://github.com/Adrasteon/JustNewsAgent.git",
+        "revisionId": "b00bc9c1b6e54f740850c58890f7b6359528a948",
+        "branch": "maint/cleanup"
+      }
+    },
+    "repoUrl": "https://github.com/Adrasteon/JustNewsAgent.git"
+  },
+  "linterVersion": "252.25523"
+}

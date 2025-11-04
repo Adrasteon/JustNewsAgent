@@ -1,0 +1,31 @@
+{
+  "modules": [
+    {
+      "name": "JustNewsAgent",
+      "contentEntries": [
+        {
+          "path": "file://$PROJECT_DIR$",
+          "excludePatterns": [],
+          "excludeFolders": [
+            {
+              "path": "file://$PROJECT_DIR$/.venv",
+              "type": "Exclude",
+              "packagePrefix": ""
+            }
+          ],
+          "sourceFolders": []
+        }
+      ],
+      "orderEntries": [
+        {
+          "name": "justnews-v2-py312",
+          "type": "SDK"
+        },
+        {
+          "name": "<Module source>",
+          "type": "Own sources"
+        }
+      ]
+    }
+  ]
+}

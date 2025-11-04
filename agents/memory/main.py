@@ -77,8 +77,8 @@ class VectorSearch(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

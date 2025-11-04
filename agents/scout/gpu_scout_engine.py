@@ -1,4 +1,4 @@
-"""
+ """
 GPU-Accelerated Scout Agent Engine with LLaMA-3-8B Intelligence
 Production-ready content pre-filtering and classification system
 """
@@ -6,7 +6,7 @@ Production-ready content pre-filtering and classification system
 import json
 import os
 import re
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import torch
 from transformers import (
@@ -356,7 +356,7 @@ Respond with JSON format:
             "reasoning": "; ".join(reasoning_parts) if reasoning_parts else "Heuristic analysis",
             "content_type": "news" if is_news else "non-news",
             "url": url,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "content_length": len(content),
             "method": "heuristic_classification"
         }
@@ -380,7 +380,7 @@ Respond with JSON format:
 
             # Add metadata
             quality_assessment["url"] = url
-            quality_assessment["timestamp"] = datetime.now(UTC).isoformat()
+            quality_assessment["timestamp"] = datetime.now(timezone.utc).isoformat()
             quality_assessment["content_length"] = len(content)
 
             return quality_assessment
@@ -395,7 +395,7 @@ Respond with JSON format:
                 "completeness": 0.0,
                 "reasoning": f"Assessment error: {str(e)}",
                 "url": url,
-                "timestamp": datetime.now(UTC).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
 
     def detect_bias(self, content: str, url: str | None = None) -> dict:
@@ -417,7 +417,7 @@ Respond with JSON format:
 
             # Add metadata
             bias_analysis["url"] = url
-            bias_analysis["timestamp"] = datetime.now(UTC).isoformat()
+            bias_analysis["timestamp"] = datetime.now(timezone.utc).isoformat()
             bias_analysis["content_length"] = len(content)
 
             return bias_analysis
@@ -431,7 +431,7 @@ Respond with JSON format:
                 "bias_indicators": [],
                 "confidence": 0.0,
                 "url": url,
-                "timestamp": datetime.now(UTC).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
 
     def comprehensive_content_analysis(self, content: str, url: str | None = None) -> dict:
@@ -461,7 +461,7 @@ Respond with JSON format:
                 ),
                 "url": url,
                 "content_preview": content[:200] + "..." if len(content) > 200 else content,
-                "analysis_timestamp": datetime.now(UTC).isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
 
             logger.info(f"✅ Analysis complete. Scout Score: {overall_score:.2f}")
@@ -473,7 +473,7 @@ Respond with JSON format:
                 "scout_score": 0.0,
                 "error": str(e),
                 "url": url,
-                "analysis_timestamp": datetime.now(UTC).isoformat()
+                "analysis_timestamp": datetime.now(timezone.utc).isoformat()
             }
 
     def batch_analyze_content(self, content_list: list[tuple[str, str]]) -> list[dict]:
@@ -498,7 +498,7 @@ Respond with JSON format:
                         "scout_score": 0.0,
                         "error": str(e),
                         "url": url,
-                        "analysis_timestamp": datetime.now(UTC).isoformat()
+                        "analysis_timestamp": datetime.now(timezone.utc).isoformat()
                     })
 
         logger.info(f"✅ Batch analysis complete. {len(results)} items processed")

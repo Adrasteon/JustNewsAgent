@@ -3,7 +3,7 @@ title: GPU Audit Report
 description: Auto-generated description for GPU Audit Report
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-10-23
 ---
 
 ## See also

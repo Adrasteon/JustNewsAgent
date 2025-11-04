@@ -3,7 +3,7 @@ title: Legal Compliance Framework Documentation
 description: Auto-generated description for Legal Compliance Framework Documentation
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-10-23
 ---
 
 # Legal Compliance Framework Documentation

@@ -134,10 +134,10 @@ backup_file() {
 stop_disable_services() {
   log_info "Stopping and disabling all JustNews services..."
   if [[ "$DRY_RUN" == true ]]; then
-    echo "DRY-RUN: $SCRIPT_DIR/enable_all.sh stop/disable"; return 0
+    echo "DRY-RUN: $SCRIPT_DIR/scripts/enable_all.sh stop/disable"; return 0
   fi
-  "$SCRIPT_DIR/enable_all.sh" stop || true
-  "$SCRIPT_DIR/enable_all.sh" disable || true
+  "$SCRIPT_DIR/scripts/enable_all.sh" stop || true
+  "$SCRIPT_DIR/scripts/enable_all.sh" disable || true
 }
 
 kill_ports() {
@@ -262,20 +262,20 @@ daemon_reload() {
 fresh_start() {
   log_info "Starting all services fresh..."
   if [[ "$DRY_RUN" == true ]]; then
-    echo "DRY-RUN: $SCRIPT_DIR/enable_all.sh fresh"; return 0
+    echo "DRY-RUN: $SCRIPT_DIR/scripts/enable_all.sh fresh"; return 0
   fi
-  "$SCRIPT_DIR/enable_all.sh" fresh
+  "$SCRIPT_DIR/scripts/enable_all.sh" fresh
 }
 
 health_check() {
   [[ "$HEALTH_CHECK" == true ]] || return 0
   if [[ "$DRY_RUN" == true ]]; then
-    echo "DRY-RUN: $SCRIPT_DIR/health_check.sh"; return 0
+    echo "DRY-RUN: $SCRIPT_DIR/scripts/enable_all.sh status"; return 0
   fi
-  if [[ -x "$SCRIPT_DIR/health_check.sh" ]]; then
-    "$SCRIPT_DIR/health_check.sh" || log_warn "Health check reported issues"
+  if [[ -x "$SCRIPT_DIR/scripts/enable_all.sh" ]]; then
+    "$SCRIPT_DIR/scripts/enable_all.sh" status || log_warn "Health check reported issues"
   else
-    log_warn "health_check.sh not found/executable"
+    log_warn "enable_all.sh not found/executable"
   fi
 }
 

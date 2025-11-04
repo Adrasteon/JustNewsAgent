@@ -3,7 +3,7 @@ title: JustNewsAgent Documentation Catalogue System
 description: Auto-generated description for JustNewsAgent Documentation Catalogue System
 tags: [documentation]
 status: current
-last_updated: 2025-09-12
+last_updated: 2025-10-23
 ---
 
 # JustNewsAgent Documentation Catalogue System

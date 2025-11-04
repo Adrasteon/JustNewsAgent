@@ -22,7 +22,7 @@ import os
 import pickle
 import sqlite3
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -140,7 +140,7 @@ class MemoryItem:
 
     def __post_init__(self):
         if self.timestamp is None:
-            self.timestamp = datetime.now(UTC)
+            self.timestamp = datetime.now(timezone.utc)
         if self.tags is None:
             self.tags = []
         if self.id is None:
@@ -536,7 +536,7 @@ class MemoryV2Engine:
         """Log feedback for memory performance tracking"""
         try:
             with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-                f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{details}\n")
+                f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
         except Exception as e:
             logger.error(f"Error logging feedback: {e}")
 
@@ -926,7 +926,7 @@ class MemoryV2Engine:
             results = self._semantic_search(query, content_type, limit * 2)  # Get more results
 
             # Rerank with temporal boost
-            now = datetime.now(UTC)
+            now = datetime.now(timezone.utc)
             for result in results:
                 time_delta = now - result.item.timestamp
                 days_old = time_delta.total_seconds() / (24 * 3600)
@@ -1039,7 +1039,7 @@ class MemoryV2Engine:
         """Clean up old memory items"""
         try:
             older_than_days = older_than_days or self.config.cleanup_older_than_days
-            cutoff_date = datetime.now(UTC) - timedelta(days=older_than_days)
+            cutoff_date = datetime.now(timezone.utc) - timedelta(days=older_than_days)
 
             deleted_count = 0
 

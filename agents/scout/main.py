@@ -6,6 +6,7 @@ Main file for the Scout Agent.
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import Any
 
 import requests
 from fastapi import FastAPI, HTTPException, Request
@@ -37,7 +38,7 @@ class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
 
-    def register_agent(self, agent_name: str, agent_address: str, tools: list):
+    def register_agent(self, agent_name: str, agent_address: str, tools: list[str]):
         registration_data = {
             "name": agent_name,
             "address": agent_address,
@@ -139,8 +140,8 @@ except Exception:
     logger.debug("reload endpoint not registered for scout")
 
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 @app.post("/discover_sources")
 def discover_sources(call: ToolCall):

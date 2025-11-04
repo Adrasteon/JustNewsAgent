@@ -5,6 +5,7 @@ Main file for the Chief Editor Agent.
 
 import os
 from contextlib import asynccontextmanager
+from typing import Any
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -103,8 +104,8 @@ def get_metrics():
 
 # Pydantic models
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 class StoryBrief(BaseModel):
     topic: str

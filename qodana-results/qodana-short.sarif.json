@@ -1,0 +1,80 @@
+{
+  "$schema": "https://raw.githubusercontent.com/schemastore/schemastore/master/src/schemas/json/sarif-2.1.0-rtm.5.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "QDPYC",
+          "fullName": "Qodana Community for Python",
+          "version": "252.25523",
+          "rules": [],
+          "taxa": [],
+          "language": "en-US",
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "isComprehensive": false
+        },
+        "extensions": []
+      },
+      "invocations": [
+        {
+          "startTimeUtc": "2025-10-19T19:14:00.833614777Z",
+          "exitCode": 0,
+          "toolExecutionNotifications": [
+            {
+              "message": {
+                "text": "Analysis by sanity inspection \"An invalid interpreter\" was suspended due to high number of problems."
+              },
+              "level": "error",
+              "timeUtc": "2025-10-19T19:14:37.136642393Z",
+              "properties": {
+                "qodanaKind": "sanityFailure"
+              }
+            }
+          ],
+          "executionSuccessful": true
+        }
+      ],
+      "language": "en-US",
+      "versionControlProvenance": [
+        {
+          "repositoryUri": "https://github.com/Adrasteon/JustNewsAgent.git",
+          "revisionId": "b00bc9c1b6e54f740850c58890f7b6359528a948",
+          "branch": "maint/cleanup",
+          "properties": {
+            "repoUrl": "https://github.com/Adrasteon/JustNewsAgent.git",
+            "lastAuthorName": "Adrasteon",
+            "vcsType": "Git",
+            "lastAuthorEmail": "adrasteon@gmail.com"
+          }
+        }
+      ],
+      "results": [],
+      "automationDetails": {
+        "id": "project/qodana/2025-10-19",
+        "guid": "f2f63161-3dc1-4883-b59e-9fd0853aa6fe",
+        "properties": {
+          "jobUrl": "",
+          "analysisKind": "regular"
+        }
+      },
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ],
+      "properties": {
+        "qodana.coverage.files.provided": false,
+        "configProfile": "starter",
+        "deviceId": "200820300000000-ddeb-fce1-6b2e-f0abc0511fc1",
+        "qodanaNewResultSummary": {
+          "moderate": 2318,
+          "high": 1048,
+          "total": 3366
+        }
+      }
+    }
+  ]
+}

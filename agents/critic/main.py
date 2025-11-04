@@ -18,6 +18,7 @@ For bias detection, use Scout V2 Agent endpoints:
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import Any
 
 import requests
 from fastapi import FastAPI, HTTPException
@@ -112,8 +113,8 @@ def get_metrics():
     return Response(metrics.get_metrics(), media_type="text/plain")
 
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 @app.post("/critique_synthesis")
 def critique_synthesis(call: ToolCall):

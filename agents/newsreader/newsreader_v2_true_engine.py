@@ -1,18 +1,40 @@
+from __future__ import annotations
+
 import asyncio
 import json
 import os
 import time
 import warnings
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum
+from types import SimpleNamespace
 from typing import Any
 
-import torch
+try:
+    import torch  # type: ignore
+    TORCH_AVAILABLE = True
+except Exception:
+    torch = None  # type: ignore
+    TORCH_AVAILABLE = False
+
 from PIL import Image
-from playwright.async_api import async_playwright
+
+try:
+    from playwright.async_api import async_playwright  # type: ignore
+    PLAYWRIGHT_AVAILABLE = True
+except Exception:
+    async_playwright = None  # type: ignore
+    PLAYWRIGHT_AVAILABLE = False
 
 from common.observability import get_logger
+
+# Predefine transformer-related symbols so static analyzers know they exist even if import fails
+BitsAndBytesConfig: Any = None
+CLIPModel: Any = None
+CLIPProcessor: Any = None
+LlavaOnevisionForConditionalGeneration: Any = None
+LlavaOnevisionProcessor: Any = None
 
 """
 NewsReader V2 Engine - TRUE Multi-Modal Vision Processing
@@ -51,7 +73,13 @@ try:
     )
     LLAVA_AVAILABLE = True
 except ImportError:
+    # Define placeholders to keep static analyzers and runtime checks safe
     logger.warning("LLaVA models not available - using fallback processing")
+    BitsAndBytesConfig = None  # type: ignore[assignment]
+    CLIPModel = None  # type: ignore[assignment]
+    CLIPProcessor = None  # type: ignore[assignment]
+    LlavaOnevisionForConditionalGeneration = None  # type: ignore[assignment]
+    LlavaOnevisionProcessor = None  # type: ignore[assignment]
     LLAVA_AVAILABLE = False
 
 # OCR and Layout Parser DEPRECATED - LLaVA provides superior vision-language understanding
@@ -181,21 +209,21 @@ class NewsReaderV2Engine:
             self.processors.clear()
 
         # Step 3: Aggressive CUDA cleanup
-        if torch.cuda.is_available():
+        if TORCH_AVAILABLE and torch.cuda.is_available():  # type: ignore[union-attr]
             # Force garbage collection
             import gc
             gc.collect()
 
             # Clear CUDA cache multiple times for stubborn memory
             for _ in range(3):
-                torch.cuda.empty_cache()
+                torch.cuda.empty_cache()  # type: ignore[union-attr]
 
             # Synchronize CUDA operations
-            torch.cuda.synchronize()
+            torch.cuda.synchronize()  # type: ignore[union-attr]
 
             # Log memory status
-            allocated_mb = torch.cuda.memory_allocated() / 1e6
-            cached_mb = torch.cuda.memory_reserved() / 1e6
+            allocated_mb = torch.cuda.memory_allocated() / 1e6  # type: ignore[union-attr]
+            cached_mb = torch.cuda.memory_reserved() / 1e6  # type: ignore[union-attr]
             logger.info(f"🧹 GPU Memory after cleanup: {allocated_mb:.1f}MB allocated, {cached_mb:.1f}MB cached")
 
         logger.info("🧹 Aggressive GPU memory cleanup completed")
@@ -238,6 +266,19 @@ class NewsReaderV2Engine:
             logger.info("NewsReader V2 Engine cleanly exited")
         return False  # Don't suppress exceptions
 
+    async def __aenter__(self):
+        """Async context manager entry - mirrors sync behavior"""
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit - ensure cleanup"""
+        self.cleanup_gpu_memory()
+        if exc_type is not None:
+            logger.error(f"NewsReader V2 Engine async exit due to exception: {exc_type.__name__}: {exc_val}")
+        else:
+            logger.info("NewsReader V2 Engine cleanly exited (async)")
+        return False
+
     def is_llava_available(self) -> bool:
         """Check if LLaVA model is loaded and ready for use"""
         return (self.models.get('llava') is not None and
@@ -246,11 +287,11 @@ class NewsReaderV2Engine:
 
     def cleanup_memory(self):
         """Clean up GPU memory to prevent accumulation"""
-        if self.device.type == 'cuda':
+        if TORCH_AVAILABLE and self.device.type == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
             import gc
             gc.collect()
-            torch.cuda.empty_cache()
-            torch.cuda.synchronize()
+            torch.cuda.empty_cache()  # type: ignore[union-attr]
+            torch.cuda.synchronize()  # type: ignore[union-attr]
 
     def __del__(self):
         """Proper cleanup when engine is destroyed"""
@@ -259,25 +300,30 @@ class NewsReaderV2Engine:
         except Exception:
             pass  # Ignore errors during cleanup
 
-    def _setup_device(self) -> torch.device:
+    def _setup_device(self):
         """Setup optimal device configuration"""
-        if self.config.use_gpu_acceleration and torch.cuda.is_available():
-            device = torch.device("cuda:0")
-            gpu_name = torch.cuda.get_device_name(0)
-            gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
+        if (
+            getattr(self.config, "use_gpu_acceleration", False)
+            and TORCH_AVAILABLE
+            and torch.cuda.is_available()  # type: ignore[union-attr]
+        ):
+            device = torch.device("cuda:0")  # type: ignore[attr-defined]
+            gpu_name = torch.cuda.get_device_name(0)  # type: ignore[union-attr]
+            gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9  # type: ignore[union-attr]
             logger.info(f"✅ GPU acceleration enabled: {gpu_name} ({gpu_memory:.1f}GB)")
         else:
-            device = torch.device("cpu")
+            # Fallback lightweight device descriptor when torch is unavailable
+            device = torch.device("cpu") if TORCH_AVAILABLE else SimpleNamespace(type="cpu")
             logger.info("✅ CPU processing mode")
         return device
 
     def _enable_cuda_optimizations(self):
         """Enable CUDA optimizations for maximum performance"""
-        if self.device.type == 'cuda':
-            torch.backends.cudnn.benchmark = True
-            torch.backends.cudnn.deterministic = False
-            torch.backends.cuda.matmul.allow_tf32 = True
-            torch.backends.cudnn.allow_tf32 = True
+        if TORCH_AVAILABLE and getattr(self.device, 'type', None) == 'cuda':
+            torch.backends.cudnn.benchmark = True  # type: ignore[union-attr]
+            torch.backends.cudnn.deterministic = False  # type: ignore[union-attr]
+            torch.backends.cuda.matmul.allow_tf32 = True  # type: ignore[attr-defined]
+            torch.backends.cudnn.allow_tf32 = True  # type: ignore[union-attr]
             logger.info("✅ CUDA optimizations enabled")
 
     def _initialize_models(self):
@@ -307,29 +353,34 @@ class NewsReaderV2Engine:
                 logger.warning("LLaVA not available - core functionality limited")
                 return
 
+            if not TORCH_AVAILABLE:
+                logger.warning("PyTorch not available - skipping LLaVA model load")
+                self.models['llava'] = None
+                return
+
             # Clear GPU memory aggressively before loading
-            if self.device.type == 'cuda':
-                torch.cuda.empty_cache()
+            if getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                torch.cuda.empty_cache()  # type: ignore[union-attr]
                 # Get available memory and set conservative limit
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9  # GB
+                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9  # type: ignore[union-attr]
                 available_memory = gpu_memory * 0.7  # Use only 70% of total
                 logger.info(f"🔧 GPU Memory: {gpu_memory:.1f}GB total, limiting to {available_memory:.1f}GB")
 
             # Setup quantization configuration for memory optimization
-            quantization_config = None
+            quantization_config: Any = None
             if self.config.use_quantization and self.config.quantization_type != "none":
                 logger.info(f"🔧 Setting up {self.config.quantization_type.upper()} quantization for LLaVA...")
 
                 if self.config.quantization_type == "int8":
                     quantization_config = BitsAndBytesConfig(
                         load_in_8bit=True,
-                        bnb_8bit_compute_dtype=getattr(torch, self.config.quantization_compute_dtype),
+                        bnb_8bit_compute_dtype=getattr(torch, self.config.quantization_compute_dtype),  # type: ignore[arg-type]
                         bnb_8bit_use_double_quant=True,  # Double quantization for better compression
                     )
                 elif self.config.quantization_type == "int4":
                     quantization_config = BitsAndBytesConfig(
                         load_in_4bit=True,
-                        bnb_4bit_compute_dtype=getattr(torch, self.config.quantization_compute_dtype),
+                        bnb_4bit_compute_dtype=getattr(torch, self.config.quantization_compute_dtype),  # type: ignore[arg-type]
                         bnb_4bit_use_double_quant=True,
                         bnb_4bit_quant_type="nf4"  # NormalFloat4 quantization
                     )
@@ -347,18 +398,16 @@ class NewsReaderV2Engine:
                 cache_dir=self.config.cache_dir
             )
 
-            # OPTIMIZED for LLaVA-OneVision-0.5B (87% smaller than previous 7B model)
-            # Expected usage: ~1.2GB (vs 7.6GB with old model) - allows for much better memory allocation
-            max_gpu_memory = "2GB"  # Conservative for 0.9B parameter model (was 8GB for 7B model)
-            if self.device.type == 'cuda':
-                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
-                # With smaller model, can use standard memory allocation
-                safe_memory = gpu_memory * 0.1  # Only 10% needed for this tiny model
-                max_gpu_memory = f"{min(2, safe_memory):.1f}GB"
-                logger.info(f"🎯 OPTIMIZED MODE: LLaVA-OneVision-0.5B using {max_gpu_memory} of {gpu_memory:.1f}GB GPU memory")
+            # Memory cap
+            max_gpu_memory = "2GB"
+            if getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9  # type: ignore[union-attr]
+                safe_memory = gpu_memory * 0.1  # Only 10% needed for small models
+                max_gpu_memory = f"{min(2.0, safe_memory):.1f}GB"
+                logger.info(f"🎯 OPTIMIZED MODE: LLaVA using {max_gpu_memory} of {gpu_memory:.1f}GB GPU memory")
 
-            model_kwargs = {
-                "torch_dtype": torch.float16 if self.device.type == 'cuda' else torch.float32,
+            model_kwargs: dict[str, Any] = {
+                "torch_dtype": torch.float16 if (self.device.type == 'cuda') else torch.float32,  # type: ignore[attr-defined]
                 "device_map": "auto",
                 "low_cpu_mem_usage": True,
                 "max_memory": {0: max_gpu_memory},  # Conservative GPU memory limit
@@ -376,35 +425,22 @@ class NewsReaderV2Engine:
             )
 
             # Move to device carefully (quantized models may already be placed)
-            if self.device.type == 'cuda' and quantization_config is None:
+            if getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available() and quantization_config is None:  # type: ignore[union-attr]
                 # Only move if not quantized (quantized models are auto-placed)
                 if not any('cuda' in str(param.device) for param in self.models['llava'].parameters()):
                     self.models['llava'] = self.models['llava'].to(self.device)  # type: ignore
 
-            # TORCH.COMPILE DISABLED - Causes memory pressure with 16 compile workers
-            # Apply torch.compile optimization if available and model is on GPU
-            # DISABLED: Causes system instability due to memory pressure
-            # if (hasattr(torch, 'compile') and self.device.type == 'cuda' and
-            #     any('cuda' in str(param.device) for param in self.models['llava'].parameters())):
-            #     try:
-            #         logger.info("Applying torch.compile optimization to LLaVA...")
-            #         self.models['llava'] = torch.compile(
-            #             self.models['llava'],
-            #             mode="reduce-overhead"
-            #         )
-            #     except Exception as compile_error:
-            #         logger.warning(f"Could not compile LLaVA model: {compile_error}")
             logger.info("🛡️ torch.compile DISABLED to prevent memory pressure (16 workers @ 280MB each)")
 
             # Log model info
             total_params = sum(p.numel() for p in self.models['llava'].parameters())
             memory_info = ""
-            if self.device.type == 'cuda':
-                allocated_gb = torch.cuda.memory_allocated() / 1e9
+            if getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                allocated_gb = torch.cuda.memory_allocated() / 1e9  # type: ignore[union-attr]
                 memory_info = f" (GPU: {allocated_gb:.1f}GB)"
 
             quant_info = f" [{self.config.quantization_type.upper()}]" if quantization_config else ""
-            logger.info(f"✅ LLaVA model loaded{quant_info}: {total_params:,} parameters (~7B){memory_info}")
+            logger.info(f"✅ LLaVA model loaded{quant_info}: {total_params:,} parameters{memory_info}")
 
         except Exception as e:
             logger.error(f"Error loading LLaVA model: {e}")
@@ -454,7 +490,11 @@ class NewsReaderV2Engine:
     def _initialize_screenshot_system(self):
         """Initialize Playwright screenshot capture system"""
         try:
-            # Verify playwright is available
+            if not PLAYWRIGHT_AVAILABLE:
+                logger.warning("Playwright is not available - screenshot capture disabled")
+                self.models['screenshot_system'] = None
+                return
+
             self.models['screenshot_system'] = {
                 'headless': self.config.headless,
                 'timeout': self.config.screenshot_timeout,
@@ -483,8 +523,21 @@ class NewsReaderV2Engine:
         logger.info(f"📸 Capturing screenshot for URL: {url}")
         start_time = time.time()
 
+        if not PLAYWRIGHT_AVAILABLE:
+            raise RuntimeError("Playwright is not available - cannot capture screenshots")
+
+        if not isinstance(url, str) or not url.lower().startswith(("http://", "https://")):
+            raise ValueError(f"Invalid URL: {url}")
+
+        # Ensure output directory exists
+        out_dir = os.path.dirname(screenshot_path) or "."
+        os.makedirs(out_dir, exist_ok=True)
+
+        browser = None
+        page = None
+
         try:
-            async with async_playwright() as p:
+            async with async_playwright() as p:  # type: ignore[misc]
                 browser = await p.chromium.launch(
                     headless=self.config.headless,
                     args=self.models['screenshot_system']['browser_args']
@@ -499,7 +552,7 @@ class NewsReaderV2Engine:
                     timeout=self.config.screenshot_timeout
                 )
 
-                # Wait for content to load
+                # Wait for content to load briefly
                 await page.wait_for_timeout(2000)
 
                 # Capture screenshot
@@ -508,16 +561,24 @@ class NewsReaderV2Engine:
                     full_page=False  # Viewport only for faster processing
                 )
 
-                await browser.close()
-
             elapsed_time = time.time() - start_time
             logger.info(f"✅ Screenshot saved: {screenshot_path} ({elapsed_time:.2f}s)")
-
             return screenshot_path
 
         except Exception as e:
             logger.error(f"❌ Screenshot capture failed for {url}: {e}")
             raise
+        finally:
+            try:
+                if page:
+                    await page.close()
+            except Exception:
+                pass
+            try:
+                if browser:
+                    await browser.close()
+            except Exception:
+                pass
 
     def analyze_screenshot_with_llava(self, screenshot_path: str, custom_prompt: str | None = None) -> dict[str, Any]:
         """
@@ -529,32 +590,33 @@ class NewsReaderV2Engine:
         if not self.is_llava_available():
             raise RuntimeError("LLaVA model not loaded - cannot analyze screenshots")
 
-        # Log memory usage before analysis
-        if self.device.type == 'cuda':
-            pre_allocated_mb = torch.cuda.memory_allocated() / 1e6
-            pre_reserved_mb = torch.cuda.memory_reserved() / 1e6
+        # Log memory usage before analysis (guarded)
+        if TORCH_AVAILABLE and getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+            pre_allocated_mb = torch.cuda.memory_allocated() / 1e6  # type: ignore[union-attr]
+            pre_reserved_mb = torch.cuda.memory_reserved() / 1e6  # type: ignore[union-attr]
             logger.info(f"🔍 Pre-LLaVA analysis GPU memory: {pre_allocated_mb:.1f}MB allocated, {pre_reserved_mb:.1f}MB reserved")
 
         # Default news extraction prompt
         if not custom_prompt:
             custom_prompt = """
             Analyze this webpage screenshot for news content. 
-            
+
             Please extract:
             1. The main headline (if visible)
             2. The main news article content (if visible)
             3. Any other relevant news text
-            
+
             Format your response as:
             HEADLINE: [extracted headline]
             ARTICLE: [extracted article content]
-            
+
             If no clear news content is visible, describe what you see.
             """
 
         try:
             # Load and process image
-            image = Image.open(screenshot_path).convert("RGB")
+            with Image.open(screenshot_path) as img:
+                image = img.convert("RGB")
 
             # Format prompt for LLaVA-Next
             conversation = [
@@ -587,16 +649,20 @@ class NewsReaderV2Engine:
                 return_tensors="pt",
                 padding=True  # Enable fast processing optimizations
                 # Remove truncation for LLaVA - it handles sequence length internally
-            ).to(self.device)
+            )
+
+            # Move to device if available
+            if TORCH_AVAILABLE and hasattr(inputs, "to"):
+                inputs = inputs.to(self.device)  # type: ignore[assignment]
 
             # Log memory after input processing
-            if self.device.type == 'cuda':
-                input_allocated_mb = torch.cuda.memory_allocated() / 1e6
-                input_reserved_mb = torch.cuda.memory_reserved() / 1e6
+            if TORCH_AVAILABLE and getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                input_allocated_mb = torch.cuda.memory_allocated() / 1e6  # type: ignore[union-attr]
+                input_reserved_mb = torch.cuda.memory_reserved() / 1e6  # type: ignore[union-attr]
                 logger.info(f"📊 Post-input processing GPU memory: {input_allocated_mb:.1f}MB allocated, {input_reserved_mb:.1f}MB reserved")
 
             # Generate response with optimized parameters
-            with torch.no_grad():
+            with torch.no_grad():  # type: ignore[union-attr]
                 output = self.models['llava'].generate(
                     **inputs,
                     max_new_tokens=self.config.max_new_tokens,  # Use configured max tokens
@@ -607,14 +673,17 @@ class NewsReaderV2Engine:
                 )
 
             # Log memory after generation
-            if self.device.type == 'cuda':
-                gen_allocated_mb = torch.cuda.memory_allocated() / 1e6
-                gen_reserved_mb = torch.cuda.memory_reserved() / 1e6
+            if TORCH_AVAILABLE and getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                gen_allocated_mb = torch.cuda.memory_allocated() / 1e6  # type: ignore[union-attr]
+                gen_reserved_mb = torch.cuda.memory_reserved() / 1e6  # type: ignore[union-attr]
                 logger.info(f"🤖 Post-generation GPU memory: {gen_allocated_mb:.1f}MB allocated, {gen_reserved_mb:.1f}MB reserved")
 
-            # Decode response (only new tokens)
-            generated_text = self.processors['llava'].decode(
-                output[0][len(inputs.input_ids[0]):],
+            # Decode response (only new tokens) using tokenizer
+            new_token_ids = output[0][len(inputs.input_ids[0]):]  # type: ignore[index]
+            if TORCH_AVAILABLE and hasattr(new_token_ids, "detach"):
+                new_token_ids = new_token_ids.detach().cpu().tolist()  # type: ignore[assignment]
+            generated_text = self.processors['llava'].tokenizer.decode(  # type: ignore[union-attr]
+                new_token_ids,
                 skip_special_tokens=True
             )
 
@@ -622,12 +691,12 @@ class NewsReaderV2Engine:
             parsed_content = self._parse_llava_response(generated_text)
 
             # Cleanup GPU memory after processing
-            if self.device.type == 'cuda':
-                torch.cuda.empty_cache()
+            if TORCH_AVAILABLE and getattr(self.device, 'type', None) == 'cuda' and torch.cuda.is_available():  # type: ignore[union-attr]
+                torch.cuda.empty_cache()  # type: ignore[union-attr]
 
                 # Log memory after cleanup
-                post_allocated_mb = torch.cuda.memory_allocated() / 1e6
-                post_reserved_mb = torch.cuda.memory_reserved() / 1e6
+                post_allocated_mb = torch.cuda.memory_allocated() / 1e6  # type: ignore[union-attr]
+                post_reserved_mb = torch.cuda.memory_reserved() / 1e6  # type: ignore[union-attr]
                 logger.info(f"🧹 Post-cleanup GPU memory: {post_allocated_mb:.1f}MB allocated, {post_reserved_mb:.1f}MB reserved")
 
             return {
@@ -635,7 +704,7 @@ class NewsReaderV2Engine:
                 "raw_analysis": generated_text.strip(),
                 "parsed_content": parsed_content,
                 "screenshot_path": screenshot_path,
-                "model_used": "llava-v1.6-mistral-7b"
+                "model_used": self.config.llava_model
             }
 
         except Exception as e:
@@ -705,6 +774,9 @@ class NewsReaderV2Engine:
         logger.info(f"🔍 Processing news URL: {url}")
 
         try:
+            if not isinstance(url, str) or not url.lower().startswith(("http://", "https://")):
+                raise ValueError(f"Invalid URL: {url}")
+
             # Step 1: Capture screenshot (CORE)
             if not screenshot_path:
                 screenshot_path = await self.capture_webpage_screenshot(url)
@@ -713,7 +785,7 @@ class NewsReaderV2Engine:
             llava_result = self.analyze_screenshot_with_llava(screenshot_path)
 
             if not llava_result['success']:
-                raise Exception(f"LLaVA analysis failed: {llava_result.get('error', 'Unknown error')}")
+                raise RuntimeError(f"LLaVA analysis failed: {llava_result.get('error', 'Unknown error')}")
 
             # Step 3: Enhanced processing - STREAMLINED for LLaVA-first approach
             enhanced_results = {}
@@ -904,7 +976,7 @@ def log_feedback(event: str, details: dict):
     """Log feedback for monitoring and improvement"""
     try:
         with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-            f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{json.dumps(details)}\n")
+            f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.error(f"Failed to log feedback: {e}")
 
@@ -924,9 +996,11 @@ if __name__ == "__main__":
         print("🔍 Testing NewsReader V2 Engine - REAL Screenshot Processing")
         print("="*70)
 
+        # Safe check for CUDA availability guarded by TORCH_AVAILABLE
+        cuda_available = TORCH_AVAILABLE and getattr(torch, 'cuda', SimpleNamespace(is_available=lambda: False)).is_available()
         config = NewsReaderV2Config(
             default_mode=ProcessingMode.COMPREHENSIVE,
-            use_gpu_acceleration=torch.cuda.is_available()
+            use_gpu_acceleration=bool(cuda_available)
         )
 
         engine = NewsReaderV2Engine(config)

@@ -3,7 +3,7 @@ import os
 import re
 import time
 import traceback
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -174,7 +174,7 @@ def extract_article_content(html_content: str) -> str:
 
 def log_feedback(event: str, details: dict):
     with open(FEEDBACK_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now(UTC).isoformat()}\t{event}\t{details}\n")
+        f.write(f"{datetime.now(timezone.utc).isoformat()}\t{event}\t{details}\n")
 
 def intelligent_source_discovery(*args, **kwargs):
     """

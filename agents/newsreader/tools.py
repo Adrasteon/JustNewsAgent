@@ -18,7 +18,13 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
-import torch
+# Guard PyTorch import so importing this module doesn't fail in CPU-only/CI environments
+try:
+    import torch  # type: ignore
+    TORCH_AVAILABLE = True
+except Exception:
+    torch = None  # type: ignore
+    TORCH_AVAILABLE = False
 
 from common.observability import get_logger
 
@@ -64,7 +70,7 @@ def _memory_monitor_loop():
 
 def _check_and_cleanup_memory():
     """Check GPU memory usage and cleanup if necessary"""
-    if not torch.cuda.is_available():
+    if not TORCH_AVAILABLE or not torch.cuda.is_available():
         return
 
     try:
@@ -104,13 +110,14 @@ def _force_memory_cleanup():
         gc.collect()
 
         # Aggressive CUDA cleanup
-        for _ in range(5):  # Multiple attempts
-            torch.cuda.empty_cache()
-            torch.cuda.synchronize()
-            time.sleep(0.1)
+        if TORCH_AVAILABLE:
+            for _ in range(5):  # Multiple attempts
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+                time.sleep(0.1)
 
         # Log results
-        allocated_gb = torch.cuda.memory_allocated() / 1e9
+        allocated_gb = torch.cuda.memory_allocated() / 1e9 if TORCH_AVAILABLE else 0
         logger.info(f"✅ FORCE CLEANUP: Memory reduced to {allocated_gb:.1f}GB")
 
     except Exception as e:
@@ -122,24 +129,25 @@ def _attempt_memory_cleanup():
 
     try:
         # Gentle cleanup
-        torch.cuda.empty_cache()
-
-        # Clear any cached models if possible
-        if hasattr(torch.cuda, 'empty_cache'):
+        if TORCH_AVAILABLE:
             torch.cuda.empty_cache()
 
-        allocated_gb = torch.cuda.memory_allocated() / 1e9
+        # Clear any cached models if possible
+        if TORCH_AVAILABLE and hasattr(torch.cuda, 'empty_cache'):
+            torch.cuda.empty_cache()
+
+        allocated_gb = torch.cuda.memory_allocated() / 1e9 if TORCH_AVAILABLE else 0
         logger.info(f"🧹 Cleanup completed: {allocated_gb:.1f}GB allocated")
 
     except Exception as e:
         logger.warning(f"Gentle cleanup failed: {e}")
 
 # Start memory monitor on import (guarded by env flag; default OFF for safety)
-if (os.environ.get("GPU_MONITOR_ENABLED", "0").lower() in ("1", "true", "yes", "on")):
+if (os.environ.get("GPU_MONITOR_ENABLED", "0").lower() in ("1", "true", "yes", "on")) and TORCH_AVAILABLE:
     start_memory_monitor()
     logger.info("GPU_MONITOR_ENABLED is set; background memory monitor active")
 else:
-    logger.info("GPU memory monitor disabled by default (set GPU_MONITOR_ENABLED=1 to enable)")
+    logger.info("GPU memory monitor disabled by default (set GPU_MONITOR_ENABLED=1 to enable) or PyTorch not available")
 
 try:
     from .newsreader_v2_true_engine import (

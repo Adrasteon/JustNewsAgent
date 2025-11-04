@@ -15,7 +15,7 @@ import os
 import subprocess
 import sys
 from contextlib import asynccontextmanager
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -60,7 +60,7 @@ class SimpleNucleoidImplementation:
         self.facts = {}  # Store as key-value pairs
         self.rules = []
 
-    def execute(self, statement):
+    def execute(self, statement: str) -> dict[str, Any]:
         """Execute a Nucleoid statement."""
         statement = statement.strip()
 
@@ -118,7 +118,7 @@ class SimpleNucleoidImplementation:
 
         return {"success": False, "message": "Unknown statement type"}
 
-    def _evaluate_expression(self, expression):
+    def _evaluate_expression(self, expression: str) -> Any:
         """Evaluate a simple mathematical expression."""
         try:
             # Replace variables with their values
@@ -131,7 +131,7 @@ class SimpleNucleoidImplementation:
         except Exception:
             return None
 
-    def _evaluate_boolean(self, statement):
+    def _evaluate_boolean(self, statement: str) -> bool:
         """Evaluate a boolean statement."""
         try:
             # Replace variables with their values
@@ -147,16 +147,15 @@ class SimpleNucleoidImplementation:
         except Exception:
             return False
 
-    def run(self, statement):
+    def run(self, statement: str) -> dict[str, Any]:
         """Alias for execute method to match expected interface."""
         return self.execute(statement)
 
-    def clear(self):
+    def clear(self) -> dict[str, Any]:
         """Clear all facts and rules."""
         self.facts = {}
         self.rules = []
         return {"success": True, "message": "Knowledge base cleared"}
-
 # Define the lifespan context manager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -247,7 +246,7 @@ async def lifespan(app: FastAPI):
             state_data = {
                 "facts": engine.get_facts() if engine else {},
                 "rules": engine.get_rules() if engine else [],
-                "timestamp": datetime.now(UTC).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             with open(state_file, "w") as f:
                 json.dump(state_data, f, indent=2)
@@ -287,7 +286,7 @@ class NucleoidEngine:
         self.session_id = "reasoning"
         self._setup_nucleoid()
 
-    def _setup_nucleoid(self):
+    def _setup_nucleoid(self) -> None:
         """Setup Nucleoid Python implementation from our local implementation."""
         try:
             # Try to use our complete local implementation first
@@ -506,7 +505,8 @@ class NucleoidEngine:
                 "total_statements": len(statements)
             }
 
-    def _are_contradictory_booleans(self, stmt1: str, stmt2: str) -> bool:
+    @staticmethod
+    def _are_contradictory_booleans(stmt1: str, stmt2: str) -> bool:
         """Check if two boolean statements are contradictory."""
         # Simple check for directly contradictory statements
         # e.g., "temperature == 25" vs "temperature == 30"
@@ -619,7 +619,7 @@ def log_feedback(event: str, details: dict[str, Any]):
     feedback_log = Path(__file__).parent / "feedback_reasoning.log"
     try:
         with open(feedback_log, "a", encoding="utf-8") as f:
-            timestamp = datetime.now(UTC).isoformat()
+            timestamp = datetime.now(timezone.utc).isoformat()
             f.write(f"{timestamp}\t{event}\t{json.dumps(details)}\n")
     except Exception as e:
         logger.warning(f"Failed to log feedback: {e}")
@@ -931,7 +931,7 @@ def evaluate_endpoint(call: ToolCall):
         raise HTTPException(status_code=500, detail=error_msg)
 
 @app.get("/facts")
-def get_facts():
+def get_facts() -> dict[str, Any]:
     """Retrieve all stored facts."""
     eng = get_engine()
     if not eng:
@@ -940,7 +940,7 @@ def get_facts():
     return {"facts": eng.get_facts(), "count": len(eng.facts_store)}
 
 @app.get("/rules")
-def get_rules():
+def get_rules() -> dict[str, Any]:
     """Retrieve all stored rules."""
     eng = get_engine()
     if not eng:
@@ -949,7 +949,7 @@ def get_rules():
     return {"rules": eng.get_rules(), "count": len(eng.rules_store)}
 
 @app.get("/status")
-def get_status():
+def get_status() -> dict[str, Any]:
     """Get reasoning engine status."""
     eng = get_engine()
     if not eng:
@@ -969,14 +969,14 @@ def get_status():
     }
 
 @app.get("/health")
-def health():
+def health() -> dict[str, Any]:
     """Health check endpoint."""
     eng = get_engine()
     status = "ok" if eng else "unavailable"
     return {"status": status, "nucleoid_available": eng is not None}
 
 @app.get("/ready")
-def ready_endpoint():
+def ready_endpoint() -> dict[str, Any]:
     """Readiness endpoint."""
     return {"ready": ready}
 

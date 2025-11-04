@@ -29,7 +29,7 @@ Performance: Production-ready with GPU acceleration
 import importlib
 import os
 import warnings
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -428,8 +428,7 @@ class FactCheckerV2Engine:
 
                     # Simple heuristics for factual claims
                     if any(indicator in sent_text.lower() for indicator in [
-                        'according to', 'reported that', 'announced', 'confirmed',
-                        'statistics show', 'data indicates', 'study found'
+                        'according to', 'reported that', 'announced', 'confirmed'
                     ]):
                         claims.append(sent_text)
 
@@ -516,7 +515,7 @@ class FactCheckerV2Engine:
                 "source_credibility": credibility,
                 "contradictions": contradictions,
                 "entities": claims_result['entities'],
-                "timestamp": datetime.now(UTC).isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "models_used": ["distilbert", "roberta", "bert-large", "sentence-transformers", "spacy"]
             }
 

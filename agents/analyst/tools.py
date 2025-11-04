@@ -18,7 +18,7 @@ import re
 import statistics
 import warnings
 from collections import Counter, defaultdict
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from common.observability import get_logger
@@ -164,7 +164,7 @@ def log_feedback(event_or_details, details=None) -> None:
             event = event_or_details
             details = details or {}
 
-        timestamp = datetime.now(UTC).isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         log_entry = {
             "timestamp": timestamp,
             "event": event,

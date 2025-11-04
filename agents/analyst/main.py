@@ -39,7 +39,7 @@ except ImportError:
         return len(content) < 1000000  # 1MB limit
     def sanitize_content(content: str) -> str:
         return content
-    def log_security_event(event: str, details: dict):
+    def log_security_event(event: str, details: dict[str, Any]):
         pass
 
 # Configure centralized logging
@@ -55,8 +55,8 @@ MCP_BUS_URL = os.environ.get("MCP_BUS_URL", "http://localhost:8000")
 
 # Pydantic models
 class ToolCall(BaseModel):
-    args: list
-    kwargs: dict
+    args: list[Any]
+    kwargs: dict[str, Any]
 
 import time
 
@@ -64,7 +64,7 @@ class MCPBusClient:
     def __init__(self, base_url: str = MCP_BUS_URL):
         self.base_url = base_url
 
-    def register_agent(self, agent_name: str, agent_address: str, tools: list):
+    def register_agent(self, agent_name: str, agent_address: str, tools: list[str]):
         registration_data = {
             "name": agent_name,
             "address": agent_address,

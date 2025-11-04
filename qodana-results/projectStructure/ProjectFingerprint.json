@@ -1,0 +1,18 @@
+{
+  "languages": [
+    "YAML",
+    "JSON",
+    "Python",
+    "Shell Script",
+    "textmate",
+    "Plain text",
+    "XML",
+    ".gitignore (GitIgnore)",
+    "Requirements",
+    "HTML",
+    "PythonStub",
+    "SVG",
+    "TOML",
+    "JSON Lines"
+  ]
+}
